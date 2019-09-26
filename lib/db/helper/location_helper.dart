@@ -6,6 +6,7 @@ import 'package:misstory/models/mslocation.dart';
 class LocationHelper extends BaseHelper {
   final String tableName = "Location";
   final String columnId = "id";
+  final String columnTime = "time";
 
   static final LocationHelper _instance = new LocationHelper._internal();
 
@@ -17,7 +18,11 @@ class LocationHelper extends BaseHelper {
   Future createLocation(Mslocation location) async {
     if (location != null && location.lat != 0 && location.lon != 0) {
       Database db = await getDataBase();
-      return await db.insert(tableName, location.toJson());
+      List results = await db.query(tableName,
+          where: "$columnTime = ?", whereArgs: [location.time]);
+      if (results == null || results.isEmpty) {
+        return await db.insert(tableName, location.toJson());
+      }
     }
     return -1;
   }
