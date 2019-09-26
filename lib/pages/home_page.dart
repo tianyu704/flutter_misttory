@@ -26,6 +26,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   List<Mslocation> _locations = List<Mslocation>();
   AMapLocation _aMapLocation;
   StreamSubscription _subscription;
+  String time = DateFormat("MM-dd HH:mm").format(DateTime.now());
 
   @override
   void initState() {
@@ -92,7 +93,8 @@ class _HomePageState extends LifecycleState<HomePage> {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        title: Text("今天"),
+        title: Text("今天,open:$time"),
+        centerTitle: true,
       ),
       body: ListView.separated(
         itemBuilder: _buildItem,
