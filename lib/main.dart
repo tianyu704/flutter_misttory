@@ -1,5 +1,5 @@
-import 'package:amap_base_location/amap_base_location.dart';
 import 'package:flutter/material.dart';
+import 'package:misstory/pages/home_page.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: HomePage(),
     );
   }
 }
@@ -26,20 +26,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  AMapLocation _aMapLocation;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _aMapLocation = AMapLocation();
-    LocationClientOptions options = LocationClientOptions(
-      locationMode: LocationMode.Battery_Saving,
-      interval: 5000,
-    );
-    _aMapLocation.startLocate(options).listen((Location location) {
-      print(location.toJson());
-    });
   }
 
   void _incrementCounter() {
