@@ -1,0 +1,61 @@
+PODS:
+  - AMapFoundation (1.5.7)
+  - AMapLocation (2.6.3):
+    - AMapFoundation (~> 1.4)
+  - audioplayers (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_amap_location_plugin (0.0.1):
+    - AMapLocation (~> 2.6.3)
+    - Flutter
+    - MJExtension
+  - FMDB (2.7.5):
+    - FMDB/standard (= 2.7.5)
+  - FMDB/standard (2.7.5)
+  - MJExtension (3.1.2)
+  - path_provider (0.0.1):
+    - Flutter
+  - sqflite (0.0.1):
+    - Flutter
+    - FMDB (~> 2.7.2)
+
+DEPENDENCIES:
+  - audioplayers (from `.symlinks/plugins/audioplayers/ios`)
+  - Flutter (from `.symlinks/flutter/ios`)
+  - flutter_amap_location_plugin (from `.symlinks/plugins/flutter_amap_location_plugin/ios`)
+  - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - sqflite (from `.symlinks/plugins/sqflite/ios`)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - AMapFoundation
+    - AMapLocation
+    - FMDB
+    - MJExtension
+
+EXTERNAL SOURCES:
+  audioplayers:
+    :path: ".symlinks/plugins/audioplayers/ios"
+  Flutter:
+    :path: ".symlinks/flutter/ios"
+  flutter_amap_location_plugin:
+    :path: ".symlinks/plugins/flutter_amap_location_plugin/ios"
+  path_provider:
+    :path: ".symlinks/plugins/path_provider/ios"
+  sqflite:
+    :path: ".symlinks/plugins/sqflite/ios"
+
+SPEC CHECKSUMS:
+  AMapFoundation: 216d58448c80356434ac4332250a8fdb2f5c4d1e
+  AMapLocation: dc2c4fde95d72087d73934338160fadc72104bb7
+  audioplayers: 84f968cea3f2deab00ec4f8ff53358b3c0b3992c
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  flutter_amap_location_plugin: f46c35452fd1c14b2deee046393dbbb03de73009
+  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  MJExtension: 81e8e411ced318561dd09334b0c83d8227cef79c
+  path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
+  sqflite: ff1d9da63c06588cc8d1faf7256d741f16989d5a
+
+PODFILE CHECKSUM: 64b2109b760ac9073c864e2a8278e6464efaa219
+
+COCOAPODS: 1.6.0

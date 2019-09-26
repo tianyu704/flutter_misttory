@@ -1,7 +1,14 @@
-import 'package:amap_base_location/amap_base_location.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_amap_location_plugin/amap_location_lib.dart';
+import 'package:misstory/db/db_manager.dart';
+void main() async {
 
-void main() => runApp(MyApp());
+  /// 初始化数据库
+  await DBManager.init();
+
+
+  return runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -37,9 +44,9 @@ class _MyHomePageState extends State<MyHomePage> {
       locationMode: LocationMode.Battery_Saving,
       interval: 5000,
     );
-    _aMapLocation.startLocate(options).listen((Location location) {
-      print(location.toJson());
-    });
+//    //_aMapLocation.startLocate(options).listen((Location location) {
+//      print(location.toJson());
+//    });
   }
 
   void _incrementCounter() {
