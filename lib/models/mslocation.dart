@@ -6,6 +6,8 @@ part 'mslocation.g.dart';
 class Mslocation {
   Mslocation();
 
+  num id;
+
   num altitude;
 
   num speed;
@@ -60,9 +62,9 @@ class Mslocation {
 
   num accuracy;
 
-  bool isOffset;
+  num isOffset;
 
-  bool isFixLastLocation;
+  num isFixLastLocation;
 
   String coordType;
 

@@ -8,6 +8,7 @@ part of 'mslocation.dart';
 
 Mslocation _$MslocationFromJson(Map<String, dynamic> json) {
   return Mslocation()
+    ..id = json['id'] as num
     ..altitude = json['altitude'] as num
     ..speed = json['speed'] as num
     ..bearing = json['bearing'] as num
@@ -35,13 +36,14 @@ Mslocation _$MslocationFromJson(Map<String, dynamic> json) {
     ..lon = json['lon'] as num
     ..lat = json['lat'] as num
     ..accuracy = json['accuracy'] as num
-    ..isOffset = json['isOffset'] as bool
-    ..isFixLastLocation = json['isFixLastLocation'] as bool
+    ..isOffset = json['isOffset'] as num
+    ..isFixLastLocation = json['isFixLastLocation'] as num
     ..coordType = json['coordType'] as String;
 }
 
 Map<String, dynamic> _$MslocationToJson(Mslocation instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'altitude': instance.altitude,
       'speed': instance.speed,
       'bearing': instance.bearing,

@@ -1,7 +1,14 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_amap_location_plugin/amap_location_lib.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:intl/intl.dart';
+import 'package:misstory/db/helper/location_helper.dart';
+import 'package:misstory/models/mslocation.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -16,21 +23,68 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends LifecycleState<HomePage> {
-  List<Location> locations = List<Location>();
+  List<Mslocation> _locations = List<Mslocation>();
+  AMapLocation _aMapLocation;
+  StreamSubscription _subscription;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    for (int i = 0; i < 20; i++) {
-      locations.add(Location()
-        ..address = "北京市朝阳区百子湾路78-1号靠近中国建设银行(北京百子湾路支行)$i"
-        ..aoiname = "金隅·大成国际中心"
-        ..poiname = "中国建设银行(北京百子湾路支行)"
-        ..lat = 39.90011388226134
-        ..lon = 116.4927898889652
-        ..time = 1569313349242);
+    checkPermission();
+    initData();
+  }
+
+  void checkPermission() async {
+    await PermissionHandler().requestPermissions(
+        [PermissionGroup.locationAlways, PermissionGroup.storage]);
+    PermissionStatus permissionLocation = await PermissionHandler()
+        .checkPermissionStatus(PermissionGroup.locationAlways);
+    PermissionStatus permissionStorage = await PermissionHandler()
+        .checkPermissionStatus(PermissionGroup.storage);
+    if (Platform.isAndroid &&
+        permissionLocation == PermissionStatus.granted &&
+        permissionStorage == PermissionStatus.granted) {
+      initLocation();
+    } else if (Platform.isAndroid &&
+        permissionLocation == PermissionStatus.granted) {
+      initLocation();
     }
+  }
+
+  void initLocation() async {
+    _aMapLocation = AMapLocation();
+    await _aMapLocation.init(
+        "77419f4f5b07ffcc0a41cafd2fe763af", "11bcf7a88c8b1a9befeefbaa2ceaef71");
+    _subscription = _aMapLocation.onLocationChanged.listen((location) async {
+      location = location.replaceAll("true", "1");
+      location = location.replaceAll("false", "0");
+      print(location);
+      if (location != null && location.isNotEmpty) {
+        try {
+          Mslocation mslocation = Mslocation.fromJson(jsonDecode(location));
+          if (mslocation != null) {
+            int result = await LocationHelper().createLocation(mslocation);
+            if (result != -1) {
+              initData();
+            }
+          }
+        } catch (e) {
+          print(e.toString());
+        }
+      }
+    });
+    LocationClientOptions options = LocationClientOptions(
+      locationMode: LocationMode.Battery_Saving,
+      interval: 60 * 1000,
+      distanceFilter: 100,
+    );
+    await _aMapLocation.start(options);
+  }
+
+  initData() async {
+    _locations = await LocationHelper().findAllLocations();
+    setState(() {});
   }
 
   @override
@@ -43,7 +97,7 @@ class _HomePageState extends LifecycleState<HomePage> {
       body: ListView.separated(
         itemBuilder: _buildItem,
         separatorBuilder: _buildSeparator,
-        itemCount: locations?.length ?? 0,
+        itemCount: _locations?.length ?? 0,
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       ),
     );
@@ -56,10 +110,11 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   Widget _buildItem(context, index) {
-    Location location = locations[index];
+    Mslocation location = _locations[index];
     String date = "";
     if (location?.time != null && location?.time != 0) {
-      DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(location.time);
+      DateTime dateTime =
+          DateTime.fromMillisecondsSinceEpoch(location.time.toInt());
       date = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
     }
     return Card(
@@ -77,5 +132,13 @@ class _HomePageState extends LifecycleState<HomePage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _subscription.cancel();
+    _aMapLocation.dispose();
+    super.dispose();
   }
 }

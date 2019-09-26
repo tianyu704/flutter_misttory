@@ -27,8 +27,8 @@
   "lon": 116.492711,
   "lat": 39.900209,
   "accuracy": 29,
-  "isOffset": true,
-  "isFixLastLocation": false,
+  "isOffset": 1,
+  "isFixLastLocation": 1,
   "coordType": "GCJ02"
 }
 
