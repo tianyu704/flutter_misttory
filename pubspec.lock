@@ -179,7 +179,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: cf08fec93266791bfc7f20a8c99755485e6f7506
+      resolved-ref: a51b55c41e1fd64abf69d7e09b22e8f6abb72a9c
       url: "https://github.com/FIRHQ/flutter_amap_location_plugin.git"
     source: git
     version: "0.0.1"
