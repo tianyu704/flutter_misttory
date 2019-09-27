@@ -51,7 +51,7 @@ class _HomePageState extends LifecycleState<HomePage> {
         permissionLocation == PermissionStatus.granted &&
         permissionStorage == PermissionStatus.granted) {
       initLocation();
-    } else if (Platform.isAndroid &&
+    } else if (Platform.isIOS &&
         permissionLocation == PermissionStatus.granted) {
       initLocation();
     }
