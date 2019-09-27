@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:amap_base_map/amap_base_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_amap_location_plugin/amap_location_lib.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
@@ -27,6 +28,9 @@ class _HomePageState extends LifecycleState<HomePage> {
   AMapLocation _aMapLocation;
   StreamSubscription _subscription;
   String time = DateFormat("MM-dd HH:mm").format(DateTime.now());
+  AMapController _controller;
+  StreamSubscription _subscriptionMap;
+  LatLng _currentLatLng;
 
   @override
   void initState() {
@@ -67,6 +71,11 @@ class _HomePageState extends LifecycleState<HomePage> {
           if (mslocation != null) {
             int result = await LocationHelper().createLocation(mslocation);
             if (result != -1) {
+//              _controller.addMarker(MarkerOptions(
+//                position: LatLng(mslocation.lat, mslocation.lon),
+//              ));
+              _currentLatLng = LatLng(mslocation.lat, mslocation.lon);
+              _controller.changeLatLng(_currentLatLng);
               initData();
             }
           }
@@ -96,11 +105,35 @@ class _HomePageState extends LifecycleState<HomePage> {
         title: Text("今天,open:$time"),
         centerTitle: true,
       ),
-      body: ListView.separated(
-        itemBuilder: _buildItem,
-        separatorBuilder: _buildSeparator,
-        itemCount: _locations?.length ?? 0,
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      body: Column(
+        children: <Widget>[
+          Flexible(
+            child: AMapView(
+              onAMapViewCreated: (controller) {
+                _controller = controller;
+                _subscriptionMap = _controller.mapClickedEvent
+                    .listen((it) => print('地图点击: 坐标: $it'));
+              },
+              amapOptions: AMapOptions(
+                compassEnabled: false,
+                zoomControlsEnabled: true,
+                logoPosition: LOGO_POSITION_BOTTOM_CENTER,
+                camera: CameraPosition(
+                  target: LatLng(39.900234, 116.492712),
+                  zoom: 15,
+                ),
+              ),
+            ),
+          ),
+          Flexible(
+            child: ListView.separated(
+              itemBuilder: _buildItem,
+              separatorBuilder: _buildSeparator,
+              itemCount: _locations?.length ?? 0,
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+            ),
+          ),
+        ],
       ),
     );
   }
