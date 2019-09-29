@@ -5,8 +5,14 @@ PODS:
     - AMap3DMap
     - Flutter
     - MJExtension
+  - amap_base_search (0.1.8):
+    - AMapSearch
+    - Flutter
+    - MJExtension
   - AMapFoundation (1.5.7)
   - AMapLocation (2.6.3):
+    - AMapFoundation (~> 1.4)
+  - AMapSearch (6.9.0):
     - AMapFoundation (~> 1.4)
   - audioplayers (0.0.1):
     - Flutter
@@ -18,7 +24,7 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - MJExtension (3.1.2)
+  - MJExtension (3.2.0)
   - path_provider (0.0.1):
     - Flutter
   - permission_handler (3.2.2):
@@ -29,6 +35,7 @@ PODS:
 
 DEPENDENCIES:
   - amap_base_map (from `.symlinks/plugins/amap_base_map/ios`)
+  - amap_base_search (from `.symlinks/plugins/amap_base_search/ios`)
   - audioplayers (from `.symlinks/plugins/audioplayers/ios`)
   - Flutter (from `.symlinks/flutter/ios`)
   - flutter_amap_location_plugin (from `.symlinks/plugins/flutter_amap_location_plugin/ios`)
@@ -41,12 +48,15 @@ SPEC REPOS:
     - AMap3DMap
     - AMapFoundation
     - AMapLocation
+    - AMapSearch
     - FMDB
     - MJExtension
 
 EXTERNAL SOURCES:
   amap_base_map:
     :path: ".symlinks/plugins/amap_base_map/ios"
+  amap_base_search:
+    :path: ".symlinks/plugins/amap_base_search/ios"
   audioplayers:
     :path: ".symlinks/plugins/audioplayers/ios"
   Flutter:
@@ -63,17 +73,19 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AMap3DMap: c80b264f08f179d9b0949b84c65fc1a51dec9d6f
   amap_base_map: 7b44c2fc12751ae31181ebaee693880696ce0926
+  amap_base_search: 887860f2ead7083f538078352519ee2403b816c4
   AMapFoundation: 216d58448c80356434ac4332250a8fdb2f5c4d1e
   AMapLocation: dc2c4fde95d72087d73934338160fadc72104bb7
+  AMapSearch: af02822537e55b85a4752e9df5c19e4b9da82031
   audioplayers: 84f968cea3f2deab00ec4f8ff53358b3c0b3992c
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_amap_location_plugin: f46c35452fd1c14b2deee046393dbbb03de73009
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  MJExtension: 81e8e411ced318561dd09334b0c83d8227cef79c
+  MJExtension: e22bed65fdcd38e957242982b7384f2984c9088e
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
   permission_handler: d59f41439f5bc6c4d1005f3355e98f05ddc68ece
   sqflite: ff1d9da63c06588cc8d1faf7256d741f16989d5a
 
-PODFILE CHECKSUM: 64b2109b760ac9073c864e2a8278e6464efaa219
+PODFILE CHECKSUM: f49f6685c37f93de1e6ecd4a1c9b7d66e5817e52
 
 COCOAPODS: 1.6.0

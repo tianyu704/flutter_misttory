@@ -17,6 +17,15 @@ packages:
       url: "https://github.com/tianyu704/amap_base_flutter.git"
     source: git
     version: "0.4.4+1"
+  amap_base_search:
+    dependency: "direct main"
+    description:
+      path: search
+      ref: HEAD
+      resolved-ref: "42a6c2d216771d4be0967a50ea7dfb6f2906ee57"
+      url: "https://github.com/tianyu704/amap_base_flutter.git"
+    source: git
+    version: "0.4.1+1"
   analyzer:
     dependency: transitive
     description:
