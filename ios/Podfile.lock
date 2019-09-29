@@ -1,17 +1,18 @@
 PODS:
   - AMap3DMap (6.9.0):
     - AMapFoundation (~> 1.5)
-  - amap_base_map (0.1.8):
-    - AMap3DMap
-    - Flutter
-    - MJExtension
-  - amap_base_search (0.1.8):
+  - amap_base (0.1.8):
+    - AMapLocation
+    - AMapNavi
     - AMapSearch
     - Flutter
     - MJExtension
   - AMapFoundation (1.5.7)
   - AMapLocation (2.6.3):
     - AMapFoundation (~> 1.4)
+  - AMapNavi (6.9.1):
+    - AMap3DMap (~> 6.7)
+    - AMapFoundation (~> 1.5)
   - AMapSearch (6.9.0):
     - AMapFoundation (~> 1.4)
   - audioplayers (0.0.1):
@@ -34,8 +35,7 @@ PODS:
     - FMDB (~> 2.7.2)
 
 DEPENDENCIES:
-  - amap_base_map (from `.symlinks/plugins/amap_base_map/ios`)
-  - amap_base_search (from `.symlinks/plugins/amap_base_search/ios`)
+  - amap_base (from `.symlinks/plugins/amap_base/ios`)
   - audioplayers (from `.symlinks/plugins/audioplayers/ios`)
   - Flutter (from `.symlinks/flutter/ios`)
   - flutter_amap_location_plugin (from `.symlinks/plugins/flutter_amap_location_plugin/ios`)
@@ -48,15 +48,14 @@ SPEC REPOS:
     - AMap3DMap
     - AMapFoundation
     - AMapLocation
+    - AMapNavi
     - AMapSearch
     - FMDB
     - MJExtension
 
 EXTERNAL SOURCES:
-  amap_base_map:
-    :path: ".symlinks/plugins/amap_base_map/ios"
-  amap_base_search:
-    :path: ".symlinks/plugins/amap_base_search/ios"
+  amap_base:
+    :path: ".symlinks/plugins/amap_base/ios"
   audioplayers:
     :path: ".symlinks/plugins/audioplayers/ios"
   Flutter:
@@ -72,10 +71,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AMap3DMap: c80b264f08f179d9b0949b84c65fc1a51dec9d6f
-  amap_base_map: 7b44c2fc12751ae31181ebaee693880696ce0926
-  amap_base_search: 887860f2ead7083f538078352519ee2403b816c4
+  amap_base: 0d205973fa29a6e232ffc4b48c1e3d8a7f20a3a3
   AMapFoundation: 216d58448c80356434ac4332250a8fdb2f5c4d1e
   AMapLocation: dc2c4fde95d72087d73934338160fadc72104bb7
+  AMapNavi: 7e7c6ab0b9ad45ddba19297901d63236ff4be710
   AMapSearch: af02822537e55b85a4752e9df5c19e4b9da82031
   audioplayers: 84f968cea3f2deab00ec4f8ff53358b3c0b3992c
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec

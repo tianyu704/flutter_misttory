@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/models/mslocation.dart';
-import 'package:amap_base_map/src/map/calculate_tool.dart';
-import 'package:amap_base_map/amap_base_map.dart';
+import 'package:amap_base/amap_base.dart';
+
 ///
 /// Create by Hugo.Guo
 /// Date: 2019-09-29
@@ -47,43 +46,48 @@ class StoryHelper{
     //TODO:
   }
 
+  ///坐标点更新故事或创建故事
+  Future<void> judgeLocation(Mslocation location) async {
+    Story story = storyStamp;
+    bool isNew = false;
+    if (story == null) {
+      isNew = true;
+    } else if (location.aoiname == null) {
+      if (location.poiname == story.poiName) {
+      } else {
+        isNew = true;
+      }
+    } else if (location.aoiname == story.aoiName){
+    } else {
+      isNew = true;
+    }
+    //
+    if (isNew) {
+      storyStamp = await StoryHelper().createStoryWithLocation(location);
+    } else {
+      if (await getDistanceBetween(location, story) > judgeDistanceNum) {
+        storyStamp = await StoryHelper().createStoryWithLocation(location);
+      } else {
+        story.updateTime = location.time;
+        storyStamp = story;
+        await StoryHelper().updateStory(story);
+      }
+    }
+  }
+
+
+
+  ///求值：两个坐标点的距离
+  Future<double> getDistanceBetween(Mslocation location,Story story) async {
+    LatLng latLng1 = LatLng(location.lat,location.lon);
+    LatLng latLng2 = LatLng(story.lat,story.lon);
+    return await CalculateTools().calcDistance(latLng1, latLng2);
+  }
+
 }
 
 ///参数
 Story storyStamp;                  ///每次用来比较的当前故事
 final num judgeDistanceNum = 5000; ///5000m 计算距离比较的阈值
 
-Future<void> judgeLocation(Mslocation location) async {
-  Story story = storyStamp;
-  bool isNew = false;
-  if (story == null) {
-    isNew = true;
-  } else if (location.aoiname == null) {
-       if (location.poiname == story.poiName) {
-       } else {
-          isNew = true;
-       }
-  } else if (location.aoiname == story.aoiName){
-  } else {
-       isNew = true;
-  }
-  //
-  if (isNew) {
-    storyStamp = await StoryHelper().createStoryWithLocation(location);
-  } else {
-     if (await getDistanceBetween(location, story) > judgeDistanceNum) {
-      storyStamp = await StoryHelper().createStoryWithLocation(location);
-     } else {
-       story.updateTime = location.time;
-       storyStamp = story;
-       await StoryHelper().updateStory(story);
-     }
-  }
-}
 
-///求值：两个坐标点的距离
-Future<double> getDistanceBetween(Mslocation location,Story story) async {
-  LatLng latLng1 = LatLng(location.lat,location.lon);
-  LatLng latLng2 = LatLng(story.lat,story.lon);
-  return await CalculateTools().calcDistance(latLng1, latLng2);
-}
