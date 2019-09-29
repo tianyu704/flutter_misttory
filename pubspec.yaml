@@ -36,6 +36,11 @@ dependencies:
     git:
       url: https://github.com/tianyu704/amap_base_flutter.git
       path: 'map'
+  amap_base_search:
+    git:
+      url: https://github.com/tianyu704/amap_base_flutter.git
+      path: 'search'
+  flutter_orm_plugin: ^1.0.4
 
 dev_dependencies:
   flutter_test:

@@ -13,10 +13,19 @@ packages:
     description:
       path: map
       ref: HEAD
-      resolved-ref: "5595c02418f5a98a3d6af9682f918b6390bab4b3"
+      resolved-ref: "42a6c2d216771d4be0967a50ea7dfb6f2906ee57"
       url: "https://github.com/tianyu704/amap_base_flutter.git"
     source: git
     version: "0.4.4+1"
+  amap_base_search:
+    dependency: "direct main"
+    description:
+      path: search
+      ref: HEAD
+      resolved-ref: "42a6c2d216771d4be0967a50ea7dfb6f2906ee57"
+      url: "https://github.com/tianyu704/amap_base_flutter.git"
+    source: git
+    version: "0.4.1+1"
   analyzer:
     dependency: transitive
     description:
@@ -79,7 +88,7 @@ packages:
       name: build_resolvers
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.0.8"
+    version: "1.1.1"
   build_runner:
     dependency: "direct dev"
     description:
@@ -195,10 +204,24 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: a51b55c41e1fd64abf69d7e09b22e8f6abb72a9c
+      resolved-ref: "14075ea4d386c9d1c9c7520803ffd6198be38992"
       url: "https://github.com/FIRHQ/flutter_amap_location_plugin.git"
     source: git
     version: "0.0.1"
+  flutter_luakit_plugin:
+    dependency: transitive
+    description:
+      name: flutter_luakit_plugin
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.15"
+  flutter_orm_plugin:
+    dependency: "direct main"
+    description:
+      name: flutter_orm_plugin
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.4"
   flutter_test:
     dependency: "direct dev"
     description: flutter
