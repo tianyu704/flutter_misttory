@@ -1,4 +1,4 @@
-import 'package:amap_base_map/amap_base_map.dart';
+import 'package:amap_base/amap_base.dart';
 import 'package:flutter/material.dart';
 import 'package:misstory/pages/home_page.dart';
 import 'package:flutter_amap_location_plugin/amap_location_lib.dart';

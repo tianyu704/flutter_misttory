@@ -32,15 +32,22 @@ dependencies:
   lifecycle_state: ^0.0.1
   intl: ^0.15.8
   permission_handler: ^3.2.2
-  amap_base_map:
+  #  amap_base_map:
+  #    git:
+  #      url: https://github.com/tianyu704/amap_base_flutter.git
+  #      path: 'map'
+  #  amap_base_search:
+  #    git:
+  #      url: https://github.com/tianyu704/amap_base_flutter.git
+  #      path: 'search'
+
+  amap_base:
     git:
       url: https://github.com/tianyu704/amap_base_flutter.git
-      path: 'map'
-  amap_base_search:
-    git:
-      url: https://github.com/tianyu704/amap_base_flutter.git
-      path: 'search'
+      path: 'base'
+
   flutter_orm_plugin: ^1.0.4
+
 
 dev_dependencies:
   flutter_test:

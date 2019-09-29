@@ -2,11 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:amap_base_map/amap_base_map.dart';
-import 'package:amap_base_search/amap_base_search.dart';
+import 'package:amap_base/amap_base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_amap_location_plugin/amap_location_lib.dart';
+import 'package:flutter_amap_location_plugin/amap_location_lib.dart' as amap;
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/db/helper/location_helper.dart';
@@ -28,7 +27,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends LifecycleState<HomePage> {
   List<Mslocation> _locations = List<Mslocation>();
-  AMapLocation _aMapLocation;
+  amap.AMapLocation _aMapLocation;
   StreamSubscription _subscription;
   String time = DateFormat("MM-dd HH:mm").format(DateTime.now());
   AMapController _controller;
@@ -64,7 +63,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   void initLocation() async {
-    _aMapLocation = AMapLocation();
+    _aMapLocation = amap.AMapLocation();
     _aMapSearch = AMapSearch();
     await _aMapLocation.init(
         "77419f4f5b07ffcc0a41cafd2fe763af", "11bcf7a88c8b1a9befeefbaa2ceaef71");
@@ -104,9 +103,9 @@ class _HomePageState extends LifecycleState<HomePage> {
         }
       }
     });
-    LocationClientOptions options = LocationClientOptions(
-      locationMode: LocationMode.Battery_Saving,
-      interval: 60 * 1000 * 5,
+    amap.LocationClientOptions options = amap.LocationClientOptions(
+      locationMode: amap.LocationMode.Battery_Saving,
+      interval: 60 * 1000,
       distanceFilter: 100,
     );
     await _aMapLocation.start(options);
@@ -133,8 +132,8 @@ class _HomePageState extends LifecycleState<HomePage> {
             child: AMapView(
               onAMapViewCreated: (controller) {
                 _controller = controller;
-                _subscriptionMap = _controller.mapClickedEvent
-                    .listen((it) => print('地图点击: 坐标: $it'));
+//                _subscriptionMap = _controller.mapClickedEvent
+//                    .listen((it) => print('地图点击: 坐标: $it'));
                 _myLocationStyle = MyLocationStyle(
                   strokeColor: Color(0x662196F3),
                   radiusFillColor: Color(0x662196F3),
