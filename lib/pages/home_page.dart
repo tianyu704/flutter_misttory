@@ -71,10 +71,10 @@ class _HomePageState extends LifecycleState<HomePage> {
     _subscription = _aMapLocation.onLocationChanged.listen((location) async {
       location = location.replaceAll("true", "1");
       location = location.replaceAll("false", "0");
-      print(location);
+//      print(location);
       if (location != null && location.isNotEmpty) {
         try {
-          Mslocation mslocation = Mslocation.fromJson(jsonDecode(location));
+          Mslocation mslocation = Mslocation.fromJson(json.decode(location));
           if (mslocation != null) {
             int result = await LocationHelper().createLocation(mslocation);
             if (result != -1) {
@@ -106,7 +106,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     });
     LocationClientOptions options = LocationClientOptions(
       locationMode: LocationMode.Battery_Saving,
-      interval: 60 * 1000,
+      interval: 60 * 1000 * 5,
       distanceFilter: 100,
     );
     await _aMapLocation.start(options);

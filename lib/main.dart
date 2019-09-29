@@ -6,7 +6,7 @@ import 'package:misstory/db/db_manager.dart';
 
 void main() async {
   /// 初始化数据库
-  await DBManager.init();
+  await DBManager.initDB();
   await AMap.init('11bcf7a88c8b1a9befeefbaa2ceaef71');
   return runApp(MyApp());
 }

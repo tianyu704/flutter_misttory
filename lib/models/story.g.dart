@@ -26,11 +26,16 @@ Story _$StoryFromJson(Map<String, dynamic> json) {
     ..aoiName = json['aoi_name'] as String
     ..address = json['address'] as String
     ..description = json['description'] as String
-    ..createTime = json['create_time'] as String
-    ..updateTime = json['update_time'] as String
+    ..createTime = json['create_time'] as num
+    ..updateTime = json['update_time'] as num
     ..customAddress = json['custom_address'] as String
-    ..tags = json['tags'] as String
-    ..persons = json['persons'] as String;
+    ..tags = (json['tags'] as List)
+        ?.map((e) => e == null ? null : Tag.fromJson(e as Map<String, dynamic>))
+        ?.toList()
+    ..persons = (json['persons'] as List)
+        ?.map((e) =>
+            e == null ? null : Person.fromJson(e as Map<String, dynamic>))
+        ?.toList();
 }
 
 Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{

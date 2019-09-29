@@ -28,7 +28,7 @@
   "lat": 39.900209,
   "accuracy": 29,
   "isOffset": 1,
-  "isFixLastLocation": 1,
+  "isFixLastLocation": 0,
   "coordType": "GCJ02"
 }
 

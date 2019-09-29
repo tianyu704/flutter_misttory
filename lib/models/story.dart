@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-
+import "tag.dart";
+import "person.dart";
 part 'story.g.dart';
 
 @JsonSerializable()
@@ -48,17 +49,17 @@ class Story {
   String description;
 
   @JsonKey(name: "create_time")
-  String createTime;
+  num createTime;
 
   @JsonKey(name: "update_time")
-  String updateTime;
+  num updateTime;
 
   @JsonKey(name: "custom_address")
   String customAddress;
 
-  String tags;
+  List<Tag> tags;
 
-  String persons;
+  List<Person> persons;
 
   factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
 

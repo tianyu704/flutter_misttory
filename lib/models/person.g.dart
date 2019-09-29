@@ -9,8 +9,12 @@ part of 'person.dart';
 Person _$PersonFromJson(Map<String, dynamic> json) {
   return Person()
     ..id = json['id'] as num
-    ..name = json['name'] as String;
+    ..name = json['name'] as String
+    ..storyId = json['story_id'] as num;
 }
 
-Map<String, dynamic> _$PersonToJson(Person instance) =>
-    <String, dynamic>{'id': instance.id, 'name': instance.name};
+Map<String, dynamic> _$PersonToJson(Person instance) => <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'story_id': instance.storyId
+    };
