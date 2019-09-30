@@ -9,7 +9,9 @@ import 'package:flutter_amap_location_plugin/amap_location_lib.dart' as amap;
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/db/helper/location_helper.dart';
+import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/models/mslocation.dart';
+import 'package:misstory/models/story.dart';
 import 'package:misstory/pages/pois_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -26,7 +28,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends LifecycleState<HomePage> {
-  List<Mslocation> _locations = List<Mslocation>();
+  List<Story> _stories = List<Story>();
   amap.AMapLocation _aMapLocation;
   StreamSubscription _subscription;
   String time = DateFormat("MM-dd HH:mm").format(DateTime.now());
@@ -77,25 +79,26 @@ class _HomePageState extends LifecycleState<HomePage> {
           if (mslocation != null) {
             int result = await LocationHelper().createLocation(mslocation);
             if (result != -1) {
+              await StoryHelper().judgeLocation(mslocation);
               initData();
               _currentLatLng = LatLng(mslocation.lat, mslocation.lon);
               _controller.changeLatLng(_currentLatLng);
               _controller.addMarker(MarkerOptions(
                 position: _currentLatLng,
               ));
-              _aMapSearch
-                  .searchPoi(PoiSearchQuery(
-                      query: mslocation.poiname,
-//                      location: _currentLatLng,
-                      city: mslocation.citycode,
-                      searchBound:
-                          SearchBound(range: 1000, center: _currentLatLng)))
-                  .then((result) {
-                _poisString = result.toJson().toString();
-                print("=============$_poisString");
-              }, onError: () {
-                print("=============ERROR");
-              });
+//              _aMapSearch
+//                  .searchPoi(PoiSearchQuery(
+//                      query: mslocation.poiname,
+////                      location: _currentLatLng,
+//                      city: mslocation.citycode,
+//                      searchBound:
+//                          SearchBound(range: 1000, center: _currentLatLng)))
+//                  .then((result) {
+//                _poisString = result.toJson().toString();
+//                print("=============$_poisString");
+//              }, onError: () {
+//                print("=============ERROR");
+//              });
             }
           }
         } catch (e) {
@@ -105,14 +108,14 @@ class _HomePageState extends LifecycleState<HomePage> {
     });
     amap.LocationClientOptions options = amap.LocationClientOptions(
       locationMode: amap.LocationMode.Battery_Saving,
-      interval: 60 * 1000,
-      distanceFilter: 100,
+      interval: 60 * 1000 * 2,
+      distanceFilter: 1000,
     );
     await _aMapLocation.start(options);
   }
 
   initData() async {
-    _locations = await LocationHelper().findAllLocations();
+    _stories = await StoryHelper().findAllStories();
     setState(() {});
   }
 
@@ -162,7 +165,7 @@ class _HomePageState extends LifecycleState<HomePage> {
             child: ListView.separated(
               itemBuilder: _buildItem,
               separatorBuilder: _buildSeparator,
-              itemCount: _locations?.length ?? 0,
+              itemCount: _stories?.length ?? 0,
               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
             ),
           ),
@@ -185,24 +188,31 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   Widget _buildItem(context, index) {
-    Mslocation location = _locations[index];
+    Story story = _stories[index];
     String date = "";
-    if (location?.time != null && location?.time != 0) {
-      DateTime dateTime =
-          DateTime.fromMillisecondsSinceEpoch(location.time.toInt());
+    if (story?.createTime != null && story.createTime != 0) {
+      DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
       date = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
     }
+    String upate = "";
+    if (story?.updateTime != null && story.updateTime != 0) {
+      DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
+      upate = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
+    }
+
     return Card(
       child: Padding(
         padding: EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text("aoi:${location.aoiname}"),
-            Text("poi:${location.poiname}"),
-            Text("地址：${location.address}"),
-            Text("经纬度:(${location.lon},${location.lat})"),
+            Text("aoi:${story.aoiName}"),
+            Text("poi:${story.poiName}"),
+            Text("地址：${story.address}"),
+            Text("经纬度:(${story.lon},${story.lat})"),
             Text("日期:$date"),
+            Text("更新日期:$upate"),
+            Text("停留时间:${(story.intervalTime / 1000 / 60).toInt()}分"),
           ],
         ),
       ),

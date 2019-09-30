@@ -38,7 +38,8 @@ Mslocation _$MslocationFromJson(Map<String, dynamic> json) {
     ..accuracy = json['accuracy'] as num
     ..isOffset = json['isOffset'] as num
     ..isFixLastLocation = json['isFixLastLocation'] as num
-    ..coordType = json['coordType'] as String;
+    ..coordType = json['coordType'] as String
+    ..isDelete = json['is_delete'] as bool;
 }
 
 Map<String, dynamic> _$MslocationToJson(Mslocation instance) =>
@@ -73,5 +74,6 @@ Map<String, dynamic> _$MslocationToJson(Mslocation instance) =>
       'accuracy': instance.accuracy,
       'isOffset': instance.isOffset,
       'isFixLastLocation': instance.isFixLastLocation,
-      'coordType': instance.coordType
+      'coordType': instance.coordType,
+      'is_delete': instance.isDelete
     };

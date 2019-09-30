@@ -54,8 +54,14 @@ class Story {
   @JsonKey(name: "update_time")
   num updateTime;
 
+  @JsonKey(name: "interval_time")
+  num intervalTime;
+
   @JsonKey(name: "custom_address")
   String customAddress;
+
+  @JsonKey(name: "is_delete")
+  bool isDelete;
 
   List<Tag> tags;
 

@@ -44,9 +44,10 @@ class DBManager {
     locationFields["lon"] = Field(FieldType.Real);
     locationFields["lat"] = Field(FieldType.Real);
     locationFields["accuracy"] = Field(FieldType.Real);
-    locationFields["isOffset"] = Field(FieldType.Integer);
-    locationFields["isFixLastLocation"] = Field(FieldType.Integer);
+    locationFields["isOffset"] = Field(FieldType.Boolean);
+    locationFields["isFixLastLocation"] = Field(FieldType.Boolean);
     locationFields["coordType"] = Field(FieldType.Text);
+    locationFields["is_delete"] = Field(FieldType.Boolean);
 
     ///故事表
     Map<String, Field> storyFields = new Map<String, Field>();
@@ -69,9 +70,11 @@ class DBManager {
     storyFields["aoi_name"] = Field(FieldType.Text);
     storyFields["address"] = Field(FieldType.Text);
     storyFields["description"] = Field(FieldType.Text);
-    storyFields["create_time"] = Field(FieldType.Text);
-    storyFields["update_time"] = Field(FieldType.Text);
+    storyFields["create_time"] = Field(FieldType.Real);
+    storyFields["update_time"] = Field(FieldType.Real);
     storyFields["custom_address"] = Field(FieldType.Text);
+    storyFields["interval_time"] = Field(FieldType.Real);
+    storyFields["is_delete"] = Field(FieldType.Boolean);
 
     ///tag表
     Map<String, Field> tagFields = new Map<String, Field>();

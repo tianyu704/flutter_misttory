@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/string_util.dart';
@@ -28,17 +29,30 @@ class StoryHelper {
   }
 
   /// 更新story时间
-  Future updateStoryTime(num storyId, num time) async {
-    await Query(DBManager.tableStory)
-        .primaryKey([storyId]).update({"update_time": time});
+  Future updateStoryTime(num storyId, num time, num interval) async {
+    await Query(DBManager.tableStory).primaryKey([storyId]).update(
+        {"update_time": time, "interval_time": interval});
   }
 
+  /// 读取库中的全部数据
+  Future<List> findAllStories() async {
+    List result = await Query(DBManager.tableStory).all();
+    if (result != null && result.length > 0) {
+      List<Story> list = [];
+      result.reversed.forEach(
+          (item) => list.add(Story.fromJson(Map<String, dynamic>.from(item))));
+      return list;
+    }
+    return null;
+  }
+
+  /// 查询最后一条story
   Future<Story> queryLastStory() async {
-    Map result = await Query(DBManager.tableStory).orderBy([
+    List result = await Query(DBManager.tableStory).orderBy([
       "id desc",
-    ]).first();
-    if (result != null) {
-      return Story.fromJson(Map<String, dynamic>.from(result));
+    ]).all();
+    if (result != null && result.length > 0) {
+      return Story.fromJson(Map<String, dynamic>.from(result[0]));
     }
     return null;
   }
@@ -47,6 +61,7 @@ class StoryHelper {
     Story story = Story();
     story.lat = location.lat;
     story.lon = location.lon;
+    story.altitude = location.altitude;
     story.poiId = location.poiid;
     story.aoiName = location.aoiname;
     story.poiName = location.poiname;
@@ -55,20 +70,18 @@ class StoryHelper {
     story.city = location.city;
     story.cityCode = location.citycode;
     story.adCode = location.adcode;
+    story.district = location.district;
     story.address = location.address;
     story.road = location.road;
     story.street = location.street;
     story.number = location.number;
     story.description = location.description;
-
     story.createTime = location.time;
     story.updateTime = location.time;
+    story.intervalTime = 0;
+    story.isDelete = false;
     //TODO:
     return story;
-  }
-
-  Future updateStory(Story story) async {
-    //TODO:
   }
 
   ///坐标点更新故事或创建故事
@@ -99,7 +112,8 @@ class StoryHelper {
         if (await getDistanceBetween(location, story) > judgeDistanceNum) {
           await createStory(createStoryWithLocation(location));
         } else {
-          await updateStoryTime(story.id, location.time);
+          num interval = location.time - story.createTime;
+          await updateStoryTime(story.id, location.time, interval);
         }
       }
     }

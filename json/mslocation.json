@@ -29,6 +29,7 @@
   "accuracy": 29,
   "isOffset": 1,
   "isFixLastLocation": 0,
-  "coordType": "GCJ02"
+  "coordType": "GCJ02",
+  "is_delete": true
 }
 
