@@ -40,11 +40,11 @@ class StoryHelper {
       WhereCondiction(
           "interval_time", WhereCondictionType.EQ_OR_MORE_THEN, 60000)
     ]).all();
+    List<Story> list = [];
+    Story lastStory = await queryLastStory();
     if (result != null && result.length > 0) {
-      List<Story> list = [];
       result.reversed.forEach(
           (item) => list.add(Story.fromJson(Map<String, dynamic>.from(item))));
-      Story lastStory = await queryLastStory();
       if (lastStory == null || lastStory.id == list[0].id) {
         return list;
       } else {
@@ -52,7 +52,8 @@ class StoryHelper {
         return list;
       }
     }
-    return null;
+    list.add(lastStory);
+    return list;
   }
 
   /// 查询最后一条story
