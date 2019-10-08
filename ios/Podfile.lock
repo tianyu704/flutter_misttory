@@ -17,6 +17,7 @@ PODS:
     - AMapFoundation (~> 1.4)
   - audioplayers (0.0.1):
     - Flutter
+  - curl (1.0.0)
   - Flutter (1.0.0)
   - flutter_amap_location_plugin (0.0.1):
     - AMapLocation (~> 2.6.3)
@@ -37,6 +38,7 @@ PODS:
 DEPENDENCIES:
   - amap_base (from `.symlinks/plugins/amap_base/ios`)
   - audioplayers (from `.symlinks/plugins/audioplayers/ios`)
+  - curl (~> 1.0.0)
   - Flutter (from `.symlinks/flutter/ios`)
   - flutter_amap_location_plugin (from `.symlinks/plugins/flutter_amap_location_plugin/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
@@ -44,7 +46,9 @@ DEPENDENCIES:
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/williamwen1986/curl.git:
+    - curl
+  trunk:
     - AMap3DMap
     - AMapFoundation
     - AMapLocation
@@ -77,6 +81,7 @@ SPEC CHECKSUMS:
   AMapNavi: 7e7c6ab0b9ad45ddba19297901d63236ff4be710
   AMapSearch: af02822537e55b85a4752e9df5c19e4b9da82031
   audioplayers: 84f968cea3f2deab00ec4f8ff53358b3c0b3992c
+  curl: ec0615c2f1046f5751549e6e714f845c9b609805
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_amap_location_plugin: f46c35452fd1c14b2deee046393dbbb03de73009
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
@@ -85,6 +90,6 @@ SPEC CHECKSUMS:
   permission_handler: d59f41439f5bc6c4d1005f3355e98f05ddc68ece
   sqflite: ff1d9da63c06588cc8d1faf7256d741f16989d5a
 
-PODFILE CHECKSUM: f49f6685c37f93de1e6ecd4a1c9b7d66e5817e52
+PODFILE CHECKSUM: f8a83a0c3e30bc287c9dd0a9e9fb00bd13936264
 
-COCOAPODS: 1.6.0
+COCOAPODS: 1.8.1
