@@ -52,7 +52,9 @@ class StoryHelper {
         return list;
       }
     }
-    list.add(lastStory);
+    if (lastStory != null) {
+      list.add(lastStory);
+    }
     return list;
   }
 
