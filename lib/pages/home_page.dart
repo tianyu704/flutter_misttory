@@ -108,7 +108,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     });
     amap.LocationClientOptions options = amap.LocationClientOptions(
       locationMode: amap.LocationMode.Battery_Saving,
-      interval: 60 * 1000 * 2,
+      interval: 60 * 1000 * 5,
       distanceFilter: 1000,
     );
     await _aMapLocation.start(options);
@@ -148,17 +148,17 @@ class _HomePageState extends LifecycleState<HomePage> {
                   isZoomControlsEnabled: false,
                 ));
                 _controller.setMyLocationStyle(_myLocationStyle);
-                _controller.setZoomLevel(17);
+                _controller.setZoomLevel(16);
               },
-              amapOptions: AMapOptions(
-                compassEnabled: false,
-                zoomControlsEnabled: true,
-                logoPosition: LOGO_POSITION_BOTTOM_CENTER,
-                camera: CameraPosition(
-                  target: LatLng(39.900234, 116.492712),
-                  zoom: 15,
-                ),
-              ),
+//              amapOptions: AMapOptions(
+//                compassEnabled: false,
+//                zoomControlsEnabled: true,
+//                logoPosition: LOGO_POSITION_BOTTOM_CENTER,
+//                camera: CameraPosition(
+//                  target: LatLng(39.900234, 116.492712),
+//                  zoom: 10,
+//                ),
+//              ),
             ),
           ),
           Flexible(
