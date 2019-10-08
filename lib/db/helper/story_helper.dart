@@ -36,7 +36,9 @@ class StoryHelper {
 
   /// 读取库中的全部数据
   Future<List> findAllStories() async {
-    List result = await Query(DBManager.tableStory).all();
+    List result = await Query(DBManager.tableStory).whereByColumFilters([
+      WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN, 60000)
+    ]).all();
     if (result != null && result.length > 0) {
       List<Story> list = [];
       result.reversed.forEach(
