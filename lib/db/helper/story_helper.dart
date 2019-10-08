@@ -37,13 +37,20 @@ class StoryHelper {
   /// 读取库中的全部数据
   Future<List> findAllStories() async {
     List result = await Query(DBManager.tableStory).whereByColumFilters([
-      WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN, 60000)
+      WhereCondiction(
+          "interval_time", WhereCondictionType.EQ_OR_MORE_THEN, 60000)
     ]).all();
     if (result != null && result.length > 0) {
       List<Story> list = [];
       result.reversed.forEach(
           (item) => list.add(Story.fromJson(Map<String, dynamic>.from(item))));
-      return list;
+      Story lastStory = await queryLastStory();
+      if (lastStory == null || lastStory.id == list[0].id) {
+        return list;
+      } else {
+        list.insert(0, lastStory);
+        return list;
+      }
     }
     return null;
   }
