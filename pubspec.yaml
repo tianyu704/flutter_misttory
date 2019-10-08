@@ -28,7 +28,7 @@ dependencies:
   flutter_amap_location_plugin:    #定位插件包
     git:
       url: https://github.com/FIRHQ/flutter_amap_location_plugin.git
-  audioplayers: ^0.13.1
+
   lifecycle_state: ^0.0.1
   intl: ^0.15.8
   permission_handler: ^3.2.2

@@ -15,63 +15,59 @@ PODS:
     - AMapFoundation (~> 1.5)
   - AMapSearch (6.9.0):
     - AMapFoundation (~> 1.4)
-  - audioplayers (0.0.1):
-    - Flutter
   - curl (1.0.0)
   - Flutter (1.0.0)
   - flutter_amap_location_plugin (0.0.1):
     - AMapLocation (~> 2.6.3)
     - Flutter
     - MJExtension
-  - FMDB (2.7.5):
-    - FMDB/standard (= 2.7.5)
-  - FMDB/standard (2.7.5)
-  - MJExtension (3.2.0)
-  - path_provider (0.0.1):
+  - flutter_luakit_plugin (0.0.1):
+    - curl (>= 1.0.0)
     - Flutter
+    - LuakitPod (>= 1.0.23)
+  - flutter_orm_plugin (0.0.1):
+    - Flutter
+  - LuakitPod (1.0.23)
+  - MJExtension (3.2.0)
   - permission_handler (3.2.2):
     - Flutter
-  - sqflite (0.0.1):
-    - Flutter
-    - FMDB (~> 2.7.2)
 
 DEPENDENCIES:
   - amap_base (from `.symlinks/plugins/amap_base/ios`)
-  - audioplayers (from `.symlinks/plugins/audioplayers/ios`)
   - curl (~> 1.0.0)
   - Flutter (from `.symlinks/flutter/ios`)
   - flutter_amap_location_plugin (from `.symlinks/plugins/flutter_amap_location_plugin/ios`)
-  - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - flutter_luakit_plugin (from `.symlinks/plugins/flutter_luakit_plugin/ios`)
+  - flutter_orm_plugin (from `.symlinks/plugins/flutter_orm_plugin/ios`)
+  - LuakitPod (~> 1.0.23)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
-  - sqflite (from `.symlinks/plugins/sqflite/ios`)
 
 SPEC REPOS:
   https://github.com/williamwen1986/curl.git:
     - curl
+  https://github.com/williamwen1986/LuakitPod.git:
+    - LuakitPod
   trunk:
     - AMap3DMap
     - AMapFoundation
     - AMapLocation
     - AMapNavi
     - AMapSearch
-    - FMDB
     - MJExtension
 
 EXTERNAL SOURCES:
   amap_base:
     :path: ".symlinks/plugins/amap_base/ios"
-  audioplayers:
-    :path: ".symlinks/plugins/audioplayers/ios"
   Flutter:
     :path: ".symlinks/flutter/ios"
   flutter_amap_location_plugin:
     :path: ".symlinks/plugins/flutter_amap_location_plugin/ios"
-  path_provider:
-    :path: ".symlinks/plugins/path_provider/ios"
+  flutter_luakit_plugin:
+    :path: ".symlinks/plugins/flutter_luakit_plugin/ios"
+  flutter_orm_plugin:
+    :path: ".symlinks/plugins/flutter_orm_plugin/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
-  sqflite:
-    :path: ".symlinks/plugins/sqflite/ios"
 
 SPEC CHECKSUMS:
   AMap3DMap: c80b264f08f179d9b0949b84c65fc1a51dec9d6f
@@ -80,16 +76,15 @@ SPEC CHECKSUMS:
   AMapLocation: dc2c4fde95d72087d73934338160fadc72104bb7
   AMapNavi: 7e7c6ab0b9ad45ddba19297901d63236ff4be710
   AMapSearch: af02822537e55b85a4752e9df5c19e4b9da82031
-  audioplayers: 84f968cea3f2deab00ec4f8ff53358b3c0b3992c
   curl: ec0615c2f1046f5751549e6e714f845c9b609805
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_amap_location_plugin: f46c35452fd1c14b2deee046393dbbb03de73009
-  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  flutter_luakit_plugin: 081f678c0e6634924c4a33680a53455c514dba9a
+  flutter_orm_plugin: f62fd453ff96deb4962cde4a00294a9bd684c974
+  LuakitPod: 9b368deeb047c373d34525e0be47f26f68d83af9
   MJExtension: e22bed65fdcd38e957242982b7384f2984c9088e
-  path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
   permission_handler: d59f41439f5bc6c4d1005f3355e98f05ddc68ece
-  sqflite: ff1d9da63c06588cc8d1faf7256d741f16989d5a
 
-PODFILE CHECKSUM: f8a83a0c3e30bc287c9dd0a9e9fb00bd13936264
+PODFILE CHECKSUM: 5acc3fcb64cd14b08402a74bf64008a1584a6d68
 
 COCOAPODS: 1.8.1
