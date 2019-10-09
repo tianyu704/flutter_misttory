@@ -242,6 +242,7 @@ class _HomePageState extends LifecycleState<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Text("$date "),
+            Icon(Icons.location_on,size: 17),
             Expanded(
               flex: 1,
               child: Padding(
@@ -255,15 +256,19 @@ class _HomePageState extends LifecycleState<HomePage> {
             ),
           ],
         ),
+
       ),
     );
   }
   ///分组的UI卡片
   Widget groupSectionWidget(BuildContext context, String groupName) {
-
-    return Text(groupName);
+    return SizedBox(
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: Text("$groupName"),
+        )
+    );
   }
-
   ///分组设置卡片布局
   Widget groupWidget(BuildContext context) {
     return GroupedListView<Story, String>(
