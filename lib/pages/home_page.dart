@@ -14,6 +14,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/pages/pois_page.dart';
+import 'package:misstory/utils/string_util.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 ///
@@ -245,7 +246,7 @@ class _HomePageState extends LifecycleState<HomePage> {
               flex: 1,
               child: Padding(
                 padding: EdgeInsets.only(left: 0, right: 0),
-                child:  Text(story.aoiName.isEmpty ? story.poiName : story.aoiName),
+                child:  Text( StringUtil.isEmpty(story.aoiName) ? story.poiName : story.aoiName),
               ),
             ),
             Padding(
@@ -259,9 +260,9 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
   ///分组的UI卡片
   Widget groupSectionWidget(BuildContext context, String groupName) {
+
     return Text(groupName);
   }
-
 
   ///分组设置卡片布局
   Widget groupWidget(BuildContext context) {
