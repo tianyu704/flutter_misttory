@@ -13,7 +13,6 @@ import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
-import 'package:misstory/pages/pois_page.dart';
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -88,19 +87,6 @@ class _HomePageState extends LifecycleState<HomePage> {
               _controller.addMarker(MarkerOptions(
                 position: _currentLatLng,
               ));
-//              _aMapSearch
-//                  .searchPoi(PoiSearchQuery(
-//                      query: mslocation.poiname,
-////                      location: _currentLatLng,
-//                      city: mslocation.citycode,
-//                      searchBound:
-//                          SearchBound(range: 1000, center: _currentLatLng)))
-//                  .then((result) {
-//                _poisString = result.toJson().toString();
-//                print("=============$_poisString");
-//              }, onError: () {
-//                print("=============ERROR");
-//              });
             }
           }
         } catch (e) {
@@ -166,62 +152,16 @@ class _HomePageState extends LifecycleState<HomePage> {
           ),
           Flexible(
             child: groupWidget(context),
-//            child: ListView.separated(
-//              itemBuilder: _buildItem,
-//              separatorBuilder: _buildSeparator,
-//              itemCount: _stories?.length ?? 0,
-//              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-//            ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(CupertinoPageRoute(builder: (context) {
-            return PoisPage(_poisString);
-          }));
-        },
-      ),
-    );
-  }
-
-  Widget _buildSeparator(context, index) {
-    return SizedBox(
-      height: 10,
-    );
-  }
-
-  Widget _buildItem(context, index) {
-    Story story = _stories[index];
-    String date = "";
-    if (story?.createTime != null && story.createTime != 0) {
-      DateTime dateTime =
-          DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
-      date = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
-    }
-    String upate = "";
-    if (story?.updateTime != null && story.updateTime != 0) {
-      DateTime dateTime =
-          DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
-      upate = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
-    }
-
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text("aoi:${story.aoiName}"),
-            Text("poi:${story.poiName}"),
-            Text("地址：${story.address}"),
-            Text("经纬度:(${story.lon},${story.lat})"),
-            Text("日期:$date"),
-            Text("更新日期:$upate"),
-            Text("停留时间:${(story.intervalTime / 1000 / 60).toInt()}分"),
-          ],
-        ),
-      ),
+//      floatingActionButton: FloatingActionButton(
+//        onPressed: () {
+//          Navigator.of(context).push(CupertinoPageRoute(builder: (context) {
+//            return PoisPage(_poisString);
+//          }));
+//        },
+//      ),
     );
   }
 
