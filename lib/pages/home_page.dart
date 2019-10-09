@@ -14,6 +14,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/pages/pois_page.dart';
+import 'package:misstory/utils/string_util.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 ///
@@ -163,7 +164,7 @@ class _HomePageState extends LifecycleState<HomePage> {
             ),
           ),
           Flexible(
-            child: groupWiget(context),
+            child: groupWidget(context),
 //            child: ListView.separated(
 //              itemBuilder: _buildItem,
 //              separatorBuilder: _buildSeparator,
@@ -223,46 +224,61 @@ class _HomePageState extends LifecycleState<HomePage> {
     );
   }
 
+  ///展示定位的卡片
   Widget _buildCardItem(context, Story story) {
     String date = "";
     if (story?.createTime != null && story.createTime != 0) {
       DateTime dateTime =
           DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
-      date = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
-    }
-    String upate = "";
-    if (story?.updateTime != null && story.updateTime != 0) {
-      DateTime dateTime =
-          DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
-      upate = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
+      date = DateFormat("HH:mm").format(dateTime);
     }
 
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(10),
-        child: Column(
+        padding: EdgeInsets.all(15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text("aoi:${story.aoiName}"),
-            Text("poi:${story.poiName}"),
-            Text("地址：${story.address}"),
-            Text("经纬度:(${story.lon},${story.lat})"),
-            Text("日期:$date"),
-            Text("更新日期:$upate"),
-            Text("停留时间:${(story.intervalTime / 1000 / 60).toInt()}分"),
+            Text("$date "),
+            Icon(Icons.location_on, size: 17),
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: EdgeInsets.only(left: 0, right: 0),
+                child: Text(StringUtil.isEmpty(story.aoiName)
+                    ? story.poiName
+                    : story.aoiName),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: 0),
+              child: Text("停留:${(story.intervalTime / 1000 / 60).toInt()} min"),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget groupWiget(BuildContext context) {
+  ///分组的UI卡片
+  Widget groupSectionWidget(BuildContext context, String groupName) {
+    return SizedBox(
+        child: Padding(
+      padding: EdgeInsets.all(10),
+      child: Text("$groupName"),
+    ));
+  }
+
+  ///分组设置卡片布局
+  Widget groupWidget(BuildContext context) {
     return GroupedListView<Story, String>(
       collection: _stories,
       groupBy: (Story g) => g.date,
       listBuilder: (BuildContext context, Story g) =>
           _buildCardItem(context, g),
-      groupBuilder: (BuildContext context, String name) => Text(name),
+      groupBuilder: (BuildContext context, String name) =>
+          groupSectionWidget(context, name),
     );
   }
 
