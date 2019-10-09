@@ -44,7 +44,7 @@ class StoryHelper {
     Story lastStory = await queryLastStory();
     if (result != null && result.length > 0) {
       result.reversed.forEach(
-          (item) => list.add(Story.fromJson(Map<String, dynamic>.from(item))));
+          (item) => list.add(Story.fromJson(Map<String, dynamic>.from(item))..date = getShowTime(item["createTime"])));
       if (lastStory == null || lastStory.id == list[0].id) {
         return list;
       } else {
@@ -57,6 +57,14 @@ class StoryHelper {
     }
     return list;
   }
+
+  //获取展示的时间 2019.09.23
+  String getShowTime(String timeStr) {
+
+    DateTime time = DateTime.fromMicrosecondsSinceEpoch(int.parse(timeStr));
+    return time.year.toString() + "." + time.month.toString() + "." + time.day.toString();
+  }
+
 
   /// 查询最后一条story
   Future<Story> queryLastStory() async {
@@ -137,4 +145,12 @@ class StoryHelper {
     LatLng latLng2 = LatLng(story.lat, story.lon);
     return await CalculateTools().calcDistance(latLng1, latLng2);
   }
+
+  Future<double> getDistanceBetween1( ) async {
+    LatLng latLng1 = LatLng(116.4464662000868, 39.95498128255208);
+    LatLng latLng2 = LatLng(116.44648111979167,39.95497856987847);
+    return await CalculateTools().calcDistance(latLng1, latLng2);
+  }
+
+
 }

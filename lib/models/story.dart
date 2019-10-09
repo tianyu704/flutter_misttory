@@ -67,6 +67,8 @@ class Story {
 
   List<Person> persons;
 
+  String date;
+
   factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
 
   Map<String, dynamic> toJson() => _$StoryToJson(this);

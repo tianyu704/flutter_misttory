@@ -7,6 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:misstory/db/helper/story_helper.dart';
 
 import 'package:misstory/main.dart';
 
@@ -23,8 +24,15 @@ void main() {
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
 
+
+
     // Verify that our counter has incremented.
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
+  });
+
+  test("testa",()async{
+    print("===");
+    print(await  StoryHelper().getDistanceBetween1());
   });
 }
