@@ -6,6 +6,8 @@ import android.os.IBinder;
 import android.os.Messenger;
 import android.util.Log;
 
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
 import com.shihoo.daemon.work.AbsWorkService;
 
 import java.util.concurrent.TimeUnit;
@@ -20,6 +22,7 @@ public class MainWorkService extends AbsWorkService {
 
     private Disposable mDisposable;
     private long mSaveDataStamp;
+    AMapLocationClient mLocationClient;
 
     /**
      * 是否 任务完成, 不再需要服务运行?
@@ -65,28 +68,43 @@ public class MainWorkService extends AbsWorkService {
 
     @Override
     public void startWork() {
-        Log.d("wsh-daemon", "检查磁盘中是否有上次销毁时保存的数据");
-        mDisposable = Observable
-                .interval(60, TimeUnit.SECONDS)
-                //取消任务时取消定时唤醒
-                .doOnDispose(new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        Log.d("wsh-daemon", " -- doOnDispose ---  取消订阅 .... ");
-                        saveData();
-                    }
-                })
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(Long aLong) throws Exception {
-                        Log.d("wsh-daemon", "每 60 秒采集一次数据... count = " + aLong);
-//                        if (aLong > 0 && aLong % 18 == 0) {
-                            saveData();
-                            Log.d("wsh-daemon", "   采集数据  saveCount = " + (aLong - 1));
-//                        }
-                        //Toast.makeText(MainWorkService.this, aLong + "", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        if (mLocationClient == null) {
+            mLocationClient = new AMapLocationClient(this);
+            //设置定位回调监听
+            mLocationClient.setLocationListener(aMapLocation -> {
+                Log.e("android", aMapLocation.toStr());
+                saveData();
+            });
+        }
+        if (!mLocationClient.isStarted()) {
+            AMapLocationClientOption option = new AMapLocationClientOption();
+            option.setInterval(1000 * 60 * 5);
+            option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Battery_Saving);
+            mLocationClient.setLocationOption(option);
+//            mLocationClient.startLocation();
+        }
+//        Log.d("wsh-daemon", "检查磁盘中是否有上次销毁时保存的数据");
+//        mDisposable = Observable
+//                .interval(60, TimeUnit.SECONDS)
+//                //取消任务时取消定时唤醒
+//                .doOnDispose(new Action() {
+//                    @Override
+//                    public void run() throws Exception {
+//                        Log.d("wsh-daemon", " -- doOnDispose ---  取消订阅 .... ");
+//                        saveData();
+//                    }
+//                })
+//                .subscribe(new Consumer<Long>() {
+//                    @Override
+//                    public void accept(Long aLong) throws Exception {
+//                        Log.d("wsh-daemon", "每 60 秒采集一次数据... count = " + aLong);
+////                        if (aLong > 0 && aLong % 18 == 0) {
+//                        saveData();
+//                        Log.d("wsh-daemon", "   采集数据  saveCount = " + (aLong - 1));
+////                        }
+//                        //Toast.makeText(MainWorkService.this, aLong + "", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
     }
 
 

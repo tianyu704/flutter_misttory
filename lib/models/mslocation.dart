@@ -62,9 +62,9 @@ class Mslocation {
 
   num accuracy;
 
-  num isOffset;
+  bool isOffset;
 
-  num isFixLastLocation;
+  bool isFixLastLocation;
 
   String coordType;
 

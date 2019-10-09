@@ -70,8 +70,6 @@ class _HomePageState extends LifecycleState<HomePage> {
     await _aMapLocation.init(
         "77419f4f5b07ffcc0a41cafd2fe763af", "11bcf7a88c8b1a9befeefbaa2ceaef71");
     _subscription = _aMapLocation.onLocationChanged.listen((location) async {
-      location = location.replaceAll("true", "1");
-      location = location.replaceAll("false", "0");
 //      print(location);
       if (location != null && location.isNotEmpty) {
         try {
@@ -79,7 +77,8 @@ class _HomePageState extends LifecycleState<HomePage> {
           if (mslocation != null) {
             int result = await LocationHelper().createLocation(mslocation);
             if (result != -1) {
-              await StoryHelper().judgeLocation(mslocation);
+              await LocationHelper().createStoryByLocation();
+//              await StoryHelper().judgeLocation(mslocation);
               initData();
               _currentLatLng = LatLng(mslocation.lat, mslocation.lon);
               _controller.changeLatLng(_currentLatLng);
@@ -191,12 +190,14 @@ class _HomePageState extends LifecycleState<HomePage> {
     Story story = _stories[index];
     String date = "";
     if (story?.createTime != null && story.createTime != 0) {
-      DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
+      DateTime dateTime =
+          DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
       date = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
     }
     String upate = "";
     if (story?.updateTime != null && story.updateTime != 0) {
-      DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
+      DateTime dateTime =
+          DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
       upate = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
     }
 

@@ -36,8 +36,8 @@ Mslocation _$MslocationFromJson(Map<String, dynamic> json) {
     ..lon = json['lon'] as num
     ..lat = json['lat'] as num
     ..accuracy = json['accuracy'] as num
-    ..isOffset = json['isOffset'] as num
-    ..isFixLastLocation = json['isFixLastLocation'] as num
+    ..isOffset = json['isOffset'] as bool
+    ..isFixLastLocation = json['isFixLastLocation'] as bool
     ..coordType = json['coordType'] as String
     ..isDelete = json['is_delete'] as bool;
 }
