@@ -236,6 +236,7 @@ class _HomePageState extends LifecycleState<HomePage> {
 
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         child: Padding(
           padding: EdgeInsets.all(15),
