@@ -45,10 +45,17 @@ class StoryHelper {
     Story lastStory = await queryLastStory();
     if (result != null && result.length > 0) {
       result.reversed.forEach(
-          (item) => list.add(Story.fromJson(Map<String, dynamic>.from(item))..date = getShowTime(item["createTime"])));
+          (item){
+            Story story = Story.fromJson(Map<String, dynamic>.from(item));
+            String time =  getShowTime(story.createTime);
+            story.date = time;
+            list.add(story);
+          }
+      );
       if (lastStory == null || lastStory.id == list[0].id) {
         return list;
       } else {
+        lastStory.date = getShowTime(lastStory.createTime);
         list.insert(0, lastStory);
         return list;
       }
@@ -59,13 +66,12 @@ class StoryHelper {
     return list;
   }
 
-  //获取展示的时间 2019.09.23
-  String getShowTime(String timeStr) {
-
-    DateTime time = DateTime.fromMicrosecondsSinceEpoch(int.parse(timeStr));
-    return DateFormat("yyyy.MM.dd").format(time);//time.year.toString() + "." + time.month.toString() + "." + time.day.toString();
+  ///获取展示的时间 2019.09.23
+  String getShowTime(num timeStr) {
+    DateTime time = DateTime.fromMillisecondsSinceEpoch(timeStr.toInt());
+    String newTime =  DateFormat("yyyy.MM.dd").format(time);
+    return  newTime;
   }
-
 
   /// 查询最后一条story
   Future<Story> queryLastStory() async {
