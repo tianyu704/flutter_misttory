@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
+import 'package:intl/intl.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/string_util.dart';
 import '../db_manager.dart';
@@ -44,10 +45,17 @@ class StoryHelper {
     Story lastStory = await queryLastStory();
     if (result != null && result.length > 0) {
       result.reversed.forEach(
-          (item) => list.add(Story.fromJson(Map<String, dynamic>.from(item))));
+          (item){
+            Story story = Story.fromJson(Map<String, dynamic>.from(item));
+            String time =  getShowTime(story.createTime);
+            story.date = time;
+            list.add(story);
+          }
+      );
       if (lastStory == null || lastStory.id == list[0].id) {
         return list;
       } else {
+        lastStory.date = getShowTime(lastStory.createTime);
         list.insert(0, lastStory);
         return list;
       }
@@ -56,6 +64,13 @@ class StoryHelper {
       list.add(lastStory);
     }
     return list;
+  }
+
+  ///获取展示的时间 2019.09.23
+  String getShowTime(num timeStr) {
+    DateTime time = DateTime.fromMillisecondsSinceEpoch(timeStr.toInt());
+    String newTime =  DateFormat("yyyy.MM.dd").format(time);
+    return  newTime;
   }
 
   /// 查询最后一条story
@@ -137,4 +152,12 @@ class StoryHelper {
     LatLng latLng2 = LatLng(story.lat, story.lon);
     return await CalculateTools().calcDistance(latLng1, latLng2);
   }
+
+  Future<double> getDistanceBetween1( ) async {
+    LatLng latLng1 = LatLng(116.4464662000868, 39.95498128255208);
+    LatLng latLng2 = LatLng(116.44648111979167,39.95497856987847);
+    return await CalculateTools().calcDistance(latLng1, latLng2);
+  }
+
+
 }

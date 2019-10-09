@@ -47,6 +47,7 @@ dependencies:
       path: 'base'
 
   flutter_orm_plugin: ^1.0.6
+  grouped_listview: ^0.0.2 #分组包
 
 
 dev_dependencies:

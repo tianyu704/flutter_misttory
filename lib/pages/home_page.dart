@@ -6,6 +6,7 @@ import 'package:amap_base/amap_base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_amap_location_plugin/amap_location_lib.dart' as amap;
+import 'package:grouped_listview/grouped_listview.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/db/helper/location_helper.dart';
@@ -119,6 +120,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   @override
+
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
@@ -161,12 +163,13 @@ class _HomePageState extends LifecycleState<HomePage> {
             ),
           ),
           Flexible(
-            child: ListView.separated(
-              itemBuilder: _buildItem,
-              separatorBuilder: _buildSeparator,
-              itemCount: _stories?.length ?? 0,
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            ),
+            child: groupWiget(context),
+//            child: ListView.separated(
+//              itemBuilder: _buildItem,
+//              separatorBuilder: _buildSeparator,
+//              itemCount: _stories?.length ?? 0,
+//              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+//            ),
           ),
         ],
       ),
@@ -220,6 +223,48 @@ class _HomePageState extends LifecycleState<HomePage> {
     );
   }
 
+  Widget _buildCardItem(context, Story story) {
+    String date = "";
+    if (story?.createTime != null && story.createTime != 0) {
+      DateTime dateTime =
+      DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
+      date = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
+    }
+    String upate = "";
+    if (story?.updateTime != null && story.updateTime != 0) {
+      DateTime dateTime =
+      DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
+      upate = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
+    }
+
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text("aoi:${story.aoiName}"),
+            Text("poi:${story.poiName}"),
+            Text("地址：${story.address}"),
+            Text("经纬度:(${story.lon},${story.lat})"),
+            Text("日期:$date"),
+            Text("更新日期:$upate"),
+            Text("停留时间:${(story.intervalTime / 1000 / 60).toInt()}分"),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget groupWiget(BuildContext context) {
+    return GroupedListView<Story, String>(
+      collection: _stories,
+      groupBy: (Story g) => g.date,
+      listBuilder: (BuildContext context, Story g) =>  _buildCardItem(context, g),
+      groupBuilder: (BuildContext context, String name) => Text(name),
+    );
+  }
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -228,4 +273,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     _controller.dispose();
     super.dispose();
   }
+}
+
+class Group {
 }

@@ -23,5 +23,6 @@
   "custom_address": "",
   "is_delete": true,
   "tags": "$[]tag",
-  "persons": "$[]person"
+  "persons": "$[]person",
+  "date": ""
 }
