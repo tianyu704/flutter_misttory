@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
+import 'package:intl/intl.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/string_util.dart';
 import '../db_manager.dart';
@@ -62,7 +63,7 @@ class StoryHelper {
   String getShowTime(String timeStr) {
 
     DateTime time = DateTime.fromMicrosecondsSinceEpoch(int.parse(timeStr));
-    return time.year.toString() + "." + time.month.toString() + "." + time.day.toString();
+    return DateFormat("yyyy.MM.dd").format(time);//time.year.toString() + "." + time.month.toString() + "." + time.day.toString();
   }
 
 
