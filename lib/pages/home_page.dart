@@ -235,8 +235,8 @@ class _HomePageState extends LifecycleState<HomePage> {
     }
 
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: InkWell(
         child: Padding(
           padding: EdgeInsets.all(15),
@@ -252,6 +252,10 @@ class _HomePageState extends LifecycleState<HomePage> {
                       ? story.poiName
                       : story.aoiName)),
               Text(DateUtil.getStayShowTime(story.intervalTime)),
+              Padding(
+                padding: EdgeInsets.only(left: 10),
+                child: Icon(Icons.mode_edit, size: 17),
+              ),
             ],
           ),
         ),
@@ -267,7 +271,8 @@ class _HomePageState extends LifecycleState<HomePage> {
     return SizedBox(
         child: Padding(
       padding: EdgeInsets.all(10),
-      child: Text("$groupName"),
+      child:
+          Text("•   $groupName", style: TextStyle(fontWeight: FontWeight.bold)),
     ));
   }
 
