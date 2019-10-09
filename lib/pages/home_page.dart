@@ -236,10 +236,10 @@ class _HomePageState extends LifecycleState<HomePage> {
 
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.all(15),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text("$date "),
             Icon(Icons.location_on,size: 17),
