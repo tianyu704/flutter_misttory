@@ -110,6 +110,7 @@ class _HomePageState extends LifecycleState<HomePage> {
       locationMode: amap.LocationMode.Battery_Saving,
       interval: 60 * 1000 * 5,
       distanceFilter: 1000,
+      isOnceLocation: true,
     );
     await _aMapLocation.start(options);
   }
@@ -120,7 +121,6 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   @override
-
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
@@ -227,13 +227,13 @@ class _HomePageState extends LifecycleState<HomePage> {
     String date = "";
     if (story?.createTime != null && story.createTime != 0) {
       DateTime dateTime =
-      DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
+          DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
       date = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
     }
     String upate = "";
     if (story?.updateTime != null && story.updateTime != 0) {
       DateTime dateTime =
-      DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
+          DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
       upate = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
     }
 
@@ -260,7 +260,8 @@ class _HomePageState extends LifecycleState<HomePage> {
     return GroupedListView<Story, String>(
       collection: _stories,
       groupBy: (Story g) => g.date,
-      listBuilder: (BuildContext context, Story g) =>  _buildCardItem(context, g),
+      listBuilder: (BuildContext context, Story g) =>
+          _buildCardItem(context, g),
       groupBuilder: (BuildContext context, String name) => Text(name),
     );
   }
@@ -275,5 +276,4 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 }
 
-class Group {
-}
+class Group {}
