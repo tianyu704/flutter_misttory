@@ -14,6 +14,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/pages/pois_page.dart';
+import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -121,7 +122,6 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   @override
-
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
@@ -229,53 +229,54 @@ class _HomePageState extends LifecycleState<HomePage> {
     String date = "";
     if (story?.createTime != null && story.createTime != 0) {
       DateTime dateTime =
-      DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
+          DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
       date = DateFormat("HH:mm").format(dateTime);
     }
 
-
     return Card(
-      child: Padding(
-        padding: EdgeInsets.all(15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text("$date "),
-            Icon(Icons.location_on,size: 17),
-            Expanded(
-              flex: 1,
-              child: Padding(
-                padding: EdgeInsets.only(left: 0, right: 0),
-                child:  Text( StringUtil.isEmpty(story.aoiName) ? story.poiName : story.aoiName),
-              ),
+        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        child: InkWell(
+          child: Padding(
+            padding: EdgeInsets.all(15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text("$date "),
+                Icon(Icons.location_on, size: 17),
+                Expanded(
+                    flex: 1,
+                    child: Text(StringUtil.isEmpty(story.aoiName)
+                        ? story.poiName
+                        : story.aoiName)),
+                Text(DateUtil.getStayShowTime(story.intervalTime)),
+              ],
             ),
-            Padding(
-              padding: EdgeInsets.only(right: 0),
-              child: Text("停留:${(story.intervalTime / 1000 / 60).toInt()} min"),
-            ),
-          ],
-        ),
-
-      ),
-    );
+          ),
+          onTap: () {
+            //TODO:
+          },
+        ));
   }
+
   ///分组的UI卡片
   Widget groupSectionWidget(BuildContext context, String groupName) {
     return SizedBox(
         child: Padding(
-          padding: EdgeInsets.all(10),
-          child: Text("$groupName"),
-        )
-    );
+      padding: EdgeInsets.all(10),
+      child: Text("$groupName"),
+    ));
   }
+
   ///分组设置卡片布局
   Widget groupWidget(BuildContext context) {
     return GroupedListView<Story, String>(
       collection: _stories,
       groupBy: (Story g) => g.date,
-      listBuilder: (BuildContext context, Story g) =>  _buildCardItem(context, g),
-      groupBuilder: (BuildContext context, String name) => groupSectionWidget(context, name),
+      listBuilder: (BuildContext context, Story g) =>
+          _buildCardItem(context, g),
+      groupBuilder: (BuildContext context, String name) =>
+          groupSectionWidget(context, name),
     );
   }
 
@@ -289,5 +290,4 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 }
 
-class Group {
-}
+class Group {}
