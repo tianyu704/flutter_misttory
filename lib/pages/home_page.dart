@@ -261,7 +261,7 @@ class _HomePageState extends LifecycleState<HomePage> {
       collection: _stories,
       groupBy: (Story g) => g.date,
       listBuilder: (BuildContext context, Story g) =>  _buildCardItem(context, g),
-      groupBuilder: (BuildContext context, String name) => Text("=====$name"),
+      groupBuilder: (BuildContext context, String name) => Text(name),
     );
   }
 
