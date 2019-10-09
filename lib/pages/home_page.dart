@@ -14,6 +14,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/pages/pois_page.dart';
+import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -234,29 +235,28 @@ class _HomePageState extends LifecycleState<HomePage> {
     }
 
     return Card(
-      child: Padding(
-        padding: EdgeInsets.all(15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text("$date "),
-            Icon(Icons.location_on, size: 17),
-            Expanded(
-              flex: 1,
-              child: Padding(
-                padding: EdgeInsets.only(left: 0, right: 0),
-                child: Text(StringUtil.isEmpty(story.aoiName)
-                    ? story.poiName
-                    : story.aoiName),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(right: 0),
-              child: Text("停留:${(story.intervalTime / 1000 / 60).toInt()} min"),
-            ),
-          ],
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: InkWell(
+        child: Padding(
+          padding: EdgeInsets.all(15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text("$date "),
+              Icon(Icons.location_on, size: 17),
+              Expanded(
+                  flex: 1,
+                  child: Text(StringUtil.isEmpty(story.aoiName)
+                      ? story.poiName
+                      : story.aoiName)),
+              Text(DateUtil.getStayShowTime(story.intervalTime)),
+            ],
+          ),
         ),
+        onTap: () {
+          //TODO:
+        },
       ),
     );
   }
