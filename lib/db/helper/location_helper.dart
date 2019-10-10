@@ -55,7 +55,7 @@ class LocationHelper {
     }
     return -1;
   }
-
+  /// 更新Location时间
   Future<int> updateLocationTime(num id, Mslocation location) async {
     if (location != null) {
       await Query(DBManager.tableLocation)
