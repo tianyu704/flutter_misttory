@@ -39,7 +39,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   LatLng _currentLatLng;
   MyLocationStyle _myLocationStyle;
 
-  var peopleList = ["测试", "测试1", "测试2", "测试4", "测试5"];
+  var peopleList = [];//["测试", "测试1", "测试2", "测试4", "测试5"];
 
   ///
 
@@ -107,6 +107,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     );
   }
 
+  ///标签编辑
   Widget tagTextField(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(15),
@@ -123,42 +124,6 @@ class _EditPageState extends LifecycleState<EditPage> {
         ],
       ),
     );
-  }
-
-  ///标签编辑
-  Widget tagTextField1(BuildContext context) {
-    return SizedBox(
-        //width: MediaQuery.of(context).size.width,
-
-        child: Stack(
-      //alignment: Alignment.center,
-      children: <Widget>[
-        Text("标签", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        peopleTags(context, peopleList),
-        Container(
-          child: Padding(
-            padding: EdgeInsets.all(10),
-            child: TextField(
-              controller: _tagTextFieldVC,
-              focusNode: _tagFocusNode,
-              enabled: true,
-              minLines: 1,
-              textInputAction: TextInputAction.done,
-              decoration: InputDecoration(
-                hintText: "输入标签",
-                contentPadding: EdgeInsets.fromLTRB(50, 10, 10, 10),
-              ),
-              onEditingComplete: () {
-                //TODO:
-                _tagFocusNode.unfocus();
-                //debugPrint("===${_tagTextFieldVC.text}");
-              },
-            ),
-//
-          ),
-        ),
-      ],
-    ));
   }
 
   ///人物编辑
@@ -282,9 +247,16 @@ class _EditPageState extends LifecycleState<EditPage> {
         contentPadding: EdgeInsets.fromLTRB(50, 10, 10, 10),
       ),
       onEditingComplete: () {
-        //TODO:
-        _tagFocusNode.unfocus();
-        //debugPrint("===${_tagTextFieldVC.text}");
+        String str = _tagTextFieldVC.text;
+        if (str.length > 0) {
+          peopleList.add(str);
+          _tagTextFieldVC.text = "";
+          setState(() {
+
+          });
+        } else {
+          _tagFocusNode.unfocus();
+        }
       },
     ));
 
@@ -310,7 +282,10 @@ class _EditPageState extends LifecycleState<EditPage> {
       textPadding: EdgeInsets.only(right: 10),
       highlightColor: Colors.lightBlue,elevation: 0,highlightElevation: 0,
       onPressed: (){
+        peopleList.remove(name);
+        setState(() {
 
+        });
       },
     );
   }
