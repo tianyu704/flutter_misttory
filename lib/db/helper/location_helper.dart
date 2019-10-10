@@ -1,7 +1,9 @@
+import 'package:amap_base/amap_base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/db/db_manager.dart';
 import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
 
@@ -12,11 +14,52 @@ class LocationHelper {
 
   LocationHelper._internal();
 
+  /// 根据最新定位的Location创建或更新最后一条Location
+  Future<int> createOrUpdateLocation(Mslocation location) async {
+    if (location != null && location.errorCode == 0) {
+      Mslocation lastLocation = await queryLastLocation();
+      if (lastLocation == null) {
+        return await createLocation(location);
+      } else if (lastLocation.lon == location.lon &&
+          lastLocation.lat == location.lat) {
+        return await updateLocationTime(lastLocation.id, location);
+      } else {
+        if (lastLocation.aoiname == location.aoiname) {
+          if (await getDistanceBetween(location, lastLocation) >
+              LocationConfig.judgeDistanceNum) {
+            return await createLocation(location);
+          } else {
+            return await updateLocationTime(lastLocation.id, location);
+          }
+        } else if (lastLocation.poiname == location.poiname) {
+          if (await getDistanceBetween(location, lastLocation) >
+              LocationConfig.judgeDistanceNum) {
+            return await createLocation(location);
+          } else {
+            return await updateLocationTime(lastLocation.id, location);
+          }
+        } else {
+          return await createLocation(location);
+        }
+      }
+    }
+    return -1;
+  }
+
   /// 创建Location一条记录
-  Future createLocation(Mslocation location) async {
+  Future<int> createLocation(Mslocation location) async {
     if (location != null && location.lat != 0 && location.lon != 0) {
       await FlutterOrmPlugin.saveOrm(
           DBManager.tableLocation, location.toJson());
+      return 0;
+    }
+    return -1;
+  }
+
+  Future<int> updateLocationTime(num id, Mslocation location) async {
+    if (location != null) {
+      await Query(DBManager.tableLocation)
+          .primaryKey([id]).update({"updatetime": location.time});
       return 0;
     }
     return -1;
@@ -34,6 +77,17 @@ class LocationHelper {
     return null;
   }
 
+  /// 查询最后一条Location
+  Future<Mslocation> queryLastLocation() async {
+    List result = await Query(DBManager.tableLocation).orderBy([
+      "id desc",
+    ]).all();
+    if (result != null && result.length > 0) {
+      return Mslocation.fromJson(Map<String, dynamic>.from(result[0]));
+    }
+    return null;
+  }
+
   ///把库中的数据生成story，根据最后一条story的updateTime以后的数据生成
   Future<void> createStoryByLocation() async {
     num time = 0;
@@ -46,11 +100,24 @@ class LocationHelper {
       WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, time)
     ]).all();
     if (result != null && result.length > 0) {
-//      debugPrint("=================${result.length}");
-      for(num i = 0;i<result.length;i++){
-        await StoryHelper().judgeLocation(Mslocation.fromJson(Map<String, dynamic>.from(result[i])));
+//      debugPrint("=================${result.toString()}");
+      Mslocation mslocation;
+      for (num i = 0; i < result.length; i++) {
+        mslocation = Mslocation.fromJson(Map<String, dynamic>.from(result[i]));
+        if (mslocation?.updatetime == null) {
+          mslocation.updatetime = mslocation.time;
+        }
+        await StoryHelper().judgeLocation(mslocation);
       }
 //      debugPrint("=================createStoryByLocation finish");
     }
+  }
+
+  ///求值：两个坐标点的距离
+  Future<double> getDistanceBetween(
+      Mslocation location1, Mslocation location2) async {
+    LatLng latLng1 = LatLng(location1.lat, location1.lon);
+    LatLng latLng2 = LatLng(location2.lat, location2.lon);
+    return await CalculateTools().calcDistance(latLng1, latLng2);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:intl/intl.dart';
+import 'package:misstory/location_config.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/string_util.dart';
 import '../db_manager.dart';
@@ -15,7 +16,6 @@ class StoryHelper {
   final String tableName = "Story";
   final String columnId = "id";
   final String columnTime = "time";
-  final num judgeDistanceNum = 5000;
   static final StoryHelper _instance = new StoryHelper._internal();
 
   factory StoryHelper() => _instance;
@@ -30,9 +30,12 @@ class StoryHelper {
   }
 
   /// 更新story时间
-  Future updateStoryTime(num storyId, num time, num interval) async {
-    await Query(DBManager.tableStory).primaryKey([storyId]).update(
-        {"update_time": time, "interval_time": interval});
+  Future updateStoryTime(Mslocation location, Story story) async {
+    if (location != null && story != null) {
+      num interval = location.updatetime - story.createTime;
+      await Query(DBManager.tableStory).primaryKey([story.id]).update(
+          {"update_time": location.updatetime, "interval_time": interval});
+    }
   }
 
   /// 读取库中的全部数据
@@ -44,14 +47,12 @@ class StoryHelper {
     List<Story> list = [];
     Story lastStory = await queryLastStory();
     if (result != null && result.length > 0) {
-      result.reversed.forEach(
-          (item){
-            Story story = Story.fromJson(Map<String, dynamic>.from(item));
-            String time =  getShowTime(story.createTime);
-            story.date = time;
-            list.add(story);
-          }
-      );
+      result.reversed.forEach((item) {
+        Story story = Story.fromJson(Map<String, dynamic>.from(item));
+        String time = getShowTime(story.createTime);
+        story.date = time;
+        list.add(story);
+      });
       if (lastStory == null || lastStory.id == list[0].id) {
         return list;
       } else {
@@ -69,8 +70,8 @@ class StoryHelper {
   ///获取展示的时间 2019.09.23
   String getShowTime(num timeStr) {
     DateTime time = DateTime.fromMillisecondsSinceEpoch(timeStr.toInt());
-    String newTime =  DateFormat("yyyy.MM.dd").format(time);
-    return  newTime;
+    String newTime = DateFormat("yyyy.MM.dd").format(time);
+    return newTime;
   }
 
   /// 查询最后一条story
@@ -104,8 +105,8 @@ class StoryHelper {
     story.number = location.number;
     story.description = location.description;
     story.createTime = location.time;
-    story.updateTime = location.time;
-    story.intervalTime = 0;
+    story.updateTime = location.updatetime;
+    story.intervalTime = location.updatetime - location.time;
     story.isDelete = false;
     //TODO:
     return story;
@@ -114,36 +115,41 @@ class StoryHelper {
   ///坐标点更新故事或创建故事
   Future<void> judgeLocation(Mslocation location) async {
     if (location != null &&
-        location.lon != 0 &&
-        location.lat != 0 &&
-        (StringUtil.isNotEmpty(location.aoiname) ||
-            StringUtil.isNotEmpty(location.poiname)) &&
+        location.errorCode == 0 &&
         StringUtil.isNotEmpty(location.address)) {
       Story story = await queryLastStory();
-      bool isNew = false;
-      if (story == null) {
-        isNew = true;
-      } else if (StringUtil.isEmpty(location.aoiname)) {
-        if (location.poiname == story.poiName) {
+      if (story != null) {
+        if (location.aoiname == story.aoiName) {
+          if (location.poiname == story.poiName) {
+            if (location.address == story.address) {
+              await updateStoryTime(location, story);
+            } else {
+              if (await getDistanceBetween(location, story) >
+                  LocationConfig.judgeDistanceNum) {
+                await createStory(createStoryWithLocation(location));
+              } else {
+                await updateStoryTime(location, story);
+              }
+            }
+          } else {
+            if (await getDistanceBetween(location, story) >
+                LocationConfig.judgeDistanceNum) {
+              await createStory(createStoryWithLocation(location));
+            } else {
+              await updateStoryTime(location, story);
+            }
+          }
         } else {
-          isNew = true;
-        }
-      } else if (location.aoiname == story.aoiName) {
-      } else {
-        isNew = true;
-      }
-      //
-      if (isNew) {
-        await createStory(createStoryWithLocation(location));
-      } else {
-        if (await getDistanceBetween(location, story) > judgeDistanceNum) {
           await createStory(createStoryWithLocation(location));
-        } else {
-          num interval = location.time - story.createTime;
-          await updateStoryTime(story.id, location.time, interval);
         }
+      } else {
+        await createStory(createStoryWithLocation(location));
       }
     }
+  }
+
+  Future<void> deleteMisstory() async {
+    await Query(DBManager.tableStory).delete();
   }
 
   ///求值：两个坐标点的距离
@@ -153,11 +159,9 @@ class StoryHelper {
     return await CalculateTools().calcDistance(latLng1, latLng2);
   }
 
-  Future<double> getDistanceBetween1( ) async {
+  Future<double> getDistanceBetween1() async {
     LatLng latLng1 = LatLng(116.4464662000868, 39.95498128255208);
-    LatLng latLng2 = LatLng(116.44648111979167,39.95497856987847);
+    LatLng latLng2 = LatLng(116.44648111979167, 39.95497856987847);
     return await CalculateTools().calcDistance(latLng1, latLng2);
   }
-
-
 }

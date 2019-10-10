@@ -32,6 +32,7 @@ Mslocation _$MslocationFromJson(Map<String, dynamic> json) {
     ..floor = json['floor'] as String
     ..description = json['description'] as String
     ..time = json['time'] as num
+    ..updatetime = json['updatetime'] as num
     ..provider = json['provider'] as String
     ..lon = json['lon'] as num
     ..lat = json['lat'] as num
@@ -68,6 +69,7 @@ Map<String, dynamic> _$MslocationToJson(Mslocation instance) =>
       'floor': instance.floor,
       'description': instance.description,
       'time': instance.time,
+      'updatetime': instance.updatetime,
       'provider': instance.provider,
       'lon': instance.lon,
       'lat': instance.lat,

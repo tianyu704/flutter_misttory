@@ -87,7 +87,7 @@ public class MainWorkService extends AbsWorkService {
             option.setDeviceModeDistanceFilter(1000);
             option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Battery_Saving);
             mLocationClient.setLocationOption(option);
-            mLocationClient.startLocation();
+//            mLocationClient.startLocation();
         }
 //        Log.d("wsh-daemon", "检查磁盘中是否有上次销毁时保存的数据");
 //        mDisposable = Observable

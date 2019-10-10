@@ -40,6 +40,7 @@ class DBManager {
     locationFields["floor"] = Field(FieldType.Text);
     locationFields["description"] = Field(FieldType.Text);
     locationFields["time"] = Field(FieldType.Real);
+    locationFields["updatetime"] = Field(FieldType.Real);
     locationFields["provider"] = Field(FieldType.Text);
     locationFields["lon"] = Field(FieldType.Real);
     locationFields["lat"] = Field(FieldType.Real);
