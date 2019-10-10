@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:amap_base/amap_base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:full_icon_button/full_icon_button.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/string_util.dart';
@@ -38,6 +39,8 @@ class _EditPageState extends LifecycleState<EditPage> {
   LatLng _currentLatLng;
   MyLocationStyle _myLocationStyle;
 
+  var peopleList = ["测试", "测试1", "测试2", "测试4", "测试5"];
+
   ///
 
   @override
@@ -61,17 +64,19 @@ class _EditPageState extends LifecycleState<EditPage> {
         title: Text("编辑"),
       ),
       backgroundColor: Colors.white,
-      body: Column(children: <Widget>[
-        descTextField(context),
-        tagTextField(context),
-        peopleTextField(context),
-        locationWidget(context),
-        locationMapView(context),
-      ]),
+      body: ListView(
+        children: <Widget>[
+          descTextField(context),
+          tagTextField(context),
+          peopleTextField(context),
+          locationWidget(context),
+          locationMapView(context),
+        ],
+      )
     );
   }
 
-  ///地点
+  ///地点编辑
   Widget locationWidget(BuildContext context) {
     return InkWell(
       child: Padding(
@@ -102,45 +107,59 @@ class _EditPageState extends LifecycleState<EditPage> {
     );
   }
 
-  ///标签编辑
   Widget tagTextField(BuildContext context) {
-    return SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Container(
-              child: Padding(
-                padding: EdgeInsets.all(10),
-                child: TextField(
-                  controller: _tagTextFieldVC,
-                  focusNode: _tagFocusNode,
-                  enabled: true,
-                  minLines: 1,
-                  textInputAction: TextInputAction.done,
-                  decoration: InputDecoration(
-                    hintText: "输入标签",
-                    contentPadding: EdgeInsets.fromLTRB(50, 10, 10, 10),
-                  ),
-                  onEditingComplete: () {
-                    //TODO:
-                    _tagFocusNode.unfocus();
-                    //debugPrint("===${_tagTextFieldVC.text}");
-                  },
-                ),
-//
-              ),
-            ),
-            Positioned(
-              left: 10,
-              child: Text("标签",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            )
-          ],
-        ));
+    return Padding(
+      padding: EdgeInsets.all(15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text("标签",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          Expanded(
+            flex: 1,
+            child: peopleTags(context, peopleList),
+          ),
+        ],
+      ),
+    );
   }
 
-  ///地点编辑
+  ///标签编辑
+  Widget tagTextField1(BuildContext context) {
+    return SizedBox(
+        //width: MediaQuery.of(context).size.width,
+
+        child: Stack(
+      //alignment: Alignment.center,
+      children: <Widget>[
+        Text("标签", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        peopleTags(context, peopleList),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.all(10),
+            child: TextField(
+              controller: _tagTextFieldVC,
+              focusNode: _tagFocusNode,
+              enabled: true,
+              minLines: 1,
+              textInputAction: TextInputAction.done,
+              decoration: InputDecoration(
+                hintText: "输入标签",
+                contentPadding: EdgeInsets.fromLTRB(50, 10, 10, 10),
+              ),
+              onEditingComplete: () {
+                //TODO:
+                _tagFocusNode.unfocus();
+                //debugPrint("===${_tagTextFieldVC.text}");
+              },
+            ),
+//
+          ),
+        ),
+      ],
+    ));
+  }
 
   ///人物编辑
   Widget peopleTextField(BuildContext context) {
@@ -208,7 +227,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   Widget locationMapView(BuildContext context) {
     return SizedBox(
-      height: 180,
+      height: 130,
       width: double.infinity,
       child: AMapView(
         onAMapViewCreated: (controller) {
@@ -218,12 +237,12 @@ class _EditPageState extends LifecycleState<EditPage> {
           _controller.addMarker(MarkerOptions(
             position: _currentLatLng,
           ));
-//                _subscriptionMap = _controller.mapClickedEvent
-//                    .listen((it) => print('地图点击: 坐标: $it'));
           _myLocationStyle = MyLocationStyle(
             strokeColor: Color(0x662196F3),
             radiusFillColor: Color(0x662196F3),
-            showMyLocation: false,///false 否则不能显示目标地点为中心点
+            showMyLocation: false,
+
+            ///false 否则不能显示目标地点为中心点
           );
           _controller.setUiSettings(UiSettings(
             isMyLocationButtonEnabled: false,
@@ -239,11 +258,60 @@ class _EditPageState extends LifecycleState<EditPage> {
           logoPosition: LOGO_POSITION_BOTTOM_CENTER,
           camera: CameraPosition(
             target: _currentLatLng,
-
             zoom: 10,
           ),
         ),
       ),
+    );
+  }
+
+  Widget peopleTags(BuildContext context, List list) {
+    List<Widget> peopleLists = [];
+    for (String name in list) {
+      peopleLists.add(tagItem(name));
+    }
+    peopleLists.add(TextField(
+      controller: _tagTextFieldVC,
+      focusNode: _tagFocusNode,
+      enabled: true,
+      minLines: 1,
+
+      textInputAction: TextInputAction.done,
+      decoration: InputDecoration(
+        hintText: "输入标签",
+        contentPadding: EdgeInsets.fromLTRB(50, 10, 10, 10),
+      ),
+      onEditingComplete: () {
+        //TODO:
+        _tagFocusNode.unfocus();
+        //debugPrint("===${_tagTextFieldVC.text}");
+      },
+    ));
+
+    Widget content = Wrap(
+        spacing: 8.0, // gap between adjacent chips
+        runSpacing: 4.0, // gap between lines
+        direction: Axis.horizontal, //方向
+        children: peopleLists);
+    return content;
+  }
+
+  //一个标签
+  Widget tagItem(String name) {
+    return FullIconButton(
+      label: Text(
+        name,
+        style: TextStyle(color: Colors.white),
+      ),
+      height: 40,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      rightIcon: Icon(Icons.close),
+      color: Colors.blue,
+      textPadding: EdgeInsets.only(right: 10),
+      highlightColor: Colors.lightBlue,elevation: 0,highlightElevation: 0,
+      onPressed: (){
+
+      },
     );
   }
 
