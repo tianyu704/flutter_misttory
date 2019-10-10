@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:full_icon_button/full_icon_button.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/widgets/tag_item_widget.dart';
 import 'package:misstory/utils/string_util.dart';
+import 'package:misstory/widgets/tag_items_widget.dart';
 
 class EditPage extends StatefulWidget {
   final Story story;
@@ -40,7 +42,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   MyLocationStyle _myLocationStyle;
 
   var peopleList = [];//["测试", "测试1", "测试2", "测试4", "测试5"];
-
+  var tagList = [];
   ///
 
   @override
@@ -119,7 +121,7 @@ class _EditPageState extends LifecycleState<EditPage> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           Expanded(
             flex: 1,
-            child: peopleTags(context, peopleList),
+            child: buildTagsList(context, tagList),
           ),
         ],
       ),
@@ -128,6 +130,28 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   ///人物编辑
   Widget peopleTextField(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text("人物",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          Expanded(
+            flex: 1,
+            child: TagItemsWidget(
+              placeholder: "输入好友",
+              list: peopleList,
+            ),
+          ),
+        ],
+      ),
+    );
+
+  }
+
+  Widget peopleTextField1(BuildContext context) {
     return SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Stack(
@@ -230,7 +254,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     );
   }
 
-  Widget peopleTags(BuildContext context, List list) {
+  Widget buildTagsList(BuildContext context, List list) {
     List<Widget> peopleLists = [];
     for (String name in list) {
       peopleLists.add(tagItem(name));
@@ -244,12 +268,12 @@ class _EditPageState extends LifecycleState<EditPage> {
       textInputAction: TextInputAction.done,
       decoration: InputDecoration(
         hintText: "输入标签",
-        contentPadding: EdgeInsets.fromLTRB(50, 10, 10, 10),
+        contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 10),
       ),
       onEditingComplete: () {
         String str = _tagTextFieldVC.text;
         if (str.length > 0) {
-          peopleList.add(str);
+          tagList.add(str);
           _tagTextFieldVC.text = "";
           setState(() {
 
@@ -270,6 +294,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   //一个标签
   Widget tagItem(String name) {
+    //return TagItemWidget(name: name);
     return FullIconButton(
       label: Text(
         name,
@@ -282,7 +307,7 @@ class _EditPageState extends LifecycleState<EditPage> {
       textPadding: EdgeInsets.only(right: 10),
       highlightColor: Colors.lightBlue,elevation: 0,highlightElevation: 0,
       onPressed: (){
-        peopleList.remove(name);
+        tagList.remove(name);
         setState(() {
 
         });
