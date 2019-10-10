@@ -31,6 +31,8 @@ PODS:
   - MJExtension (3.2.0)
   - permission_handler (3.2.2):
     - Flutter
+  - shared_preferences (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - amap_base (from `.symlinks/plugins/amap_base/ios`)
@@ -41,6 +43,7 @@ DEPENDENCIES:
   - flutter_orm_plugin (from `.symlinks/plugins/flutter_orm_plugin/ios`)
   - LuakitPod (~> 1.0.23)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
+  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
 SPEC REPOS:
   https://github.com/williamwen1986/curl.git:
@@ -68,6 +71,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_orm_plugin/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
+  shared_preferences:
+    :path: ".symlinks/plugins/shared_preferences/ios"
 
 SPEC CHECKSUMS:
   AMap3DMap: c80b264f08f179d9b0949b84c65fc1a51dec9d6f
@@ -84,6 +89,7 @@ SPEC CHECKSUMS:
   LuakitPod: 9b368deeb047c373d34525e0be47f26f68d83af9
   MJExtension: e22bed65fdcd38e957242982b7384f2984c9088e
   permission_handler: d59f41439f5bc6c4d1005f3355e98f05ddc68ece
+  shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
 
 PODFILE CHECKSUM: 5acc3fcb64cd14b08402a74bf64008a1584a6d68
 

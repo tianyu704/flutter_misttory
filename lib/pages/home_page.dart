@@ -17,6 +17,8 @@ import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'edit_page.dart';
+
 ///
 /// Create by Hugo.Guo
 /// Date: 2019-09-26
@@ -188,9 +190,7 @@ class _HomePageState extends LifecycleState<HomePage> {
               Icon(Icons.location_on, size: 17),
               Expanded(
                   flex: 1,
-                  child: Text(StringUtil.isEmpty(story.aoiName)
-                      ? story.poiName
-                      : story.aoiName)),
+                  child: Text(getShowAddress(story))),
               Text(DateUtil.getStayShowTime(story.intervalTime)),
               Padding(
                 padding: EdgeInsets.only(left: 10),
@@ -201,10 +201,24 @@ class _HomePageState extends LifecycleState<HomePage> {
         ),
         onTap: () {
           //TODO:
+
+
+
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context)=> EditPage(story))
+          );
         },
       ),
     );
   }
+
+  getShowAddress (Story story) {
+     if (StringUtil.isEmpty(story.aoiName)) {
+        return StringUtil.isEmpty(story.poiName) ? story.address : story.poiName;
+     }
+     return story.aoiName;
+  }
+
 
   ///分组的UI卡片
   Widget groupSectionWidget(BuildContext context, String groupName) {

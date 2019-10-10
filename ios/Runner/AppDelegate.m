@@ -14,7 +14,13 @@
       //  [alert show];
               // do something，这里就可以再次调用startUpdatingLocation，开启精确定位啦
     }
+  //NSLog(@"%@",[self documentsDir]);
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
+
+
+- (NSString *)documentsDir {
+    return [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
 }
 
 @end
