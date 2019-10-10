@@ -124,7 +124,7 @@ public class MainWorkService extends AbsWorkService {
                     MSLocation lastLocation = queryLastLocation(db);
                     if (lastLocation == null) {
                         createLocation(db, location);
-                        Log.d(Tag, "1111111111");
+//                        Log.d(Tag, "1111111111");
                     } else if (lastLocation.getLon() == location.getLongitude() &&
                             lastLocation.getLat() == location.getLatitude()) {
                         updateLocationTime(db, lastLocation.getId(), location);
@@ -133,7 +133,7 @@ public class MainWorkService extends AbsWorkService {
                             if (getDistanceBetween(location, lastLocation) >
                                     5000) {
                                 createLocation(db, location);
-                                Log.d(Tag, "2222222222");
+//                                Log.d(Tag, "2222222222");
                             } else {
                                 updateLocationTime(db, lastLocation.getId(), location);
                             }
@@ -141,13 +141,13 @@ public class MainWorkService extends AbsWorkService {
                             if (getDistanceBetween(location, lastLocation) >
                                     5000) {
                                 createLocation(db, location);
-                                Log.d(Tag, "333333333333");
+//                                Log.d(Tag, "333333333333");
                             } else {
                                 updateLocationTime(db, lastLocation.getId(), location);
                             }
                         } else {
                             createLocation(db, location);
-                            Log.d(Tag, "44444444444");
+//                            Log.d(Tag, "44444444444");
                         }
                     }
                 }
