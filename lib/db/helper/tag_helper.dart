@@ -15,6 +15,14 @@ class TagHelper {
 
   TagHelper._internal();
 
+
+  Tag createTagWithName(String name, num storyId) {
+    Tag tag = Tag();
+    tag.tagName = name;
+    tag.storyId = storyId;
+    return tag;
+  }
+
   /// 创建Tag
   Future<bool> createTag(Tag tag) async {
     if (tag != null) {

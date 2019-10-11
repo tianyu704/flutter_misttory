@@ -84,7 +84,7 @@ class DBManager {
         Field(FieldType.Integer, primaryKey: true, autoIncrement: true);
     tagFields["tag_name"] = Field(FieldType.Text);
     tagFields["story_id"] =
-        Field(FieldType.Text, foreignKey: true, to: "${dbName}_$tableStory");
+        Field(FieldType.Real, foreignKey: true, to: "${dbName}_$tableStory");
 
     ///person表
     Map<String, Field> personFields = new Map<String, Field>();
@@ -92,7 +92,7 @@ class DBManager {
         Field(FieldType.Integer, primaryKey: true, autoIncrement: true);
     personFields["name"] = Field(FieldType.Text);
     personFields["story_id"] =
-        Field(FieldType.Text, foreignKey: true, to: "${dbName}_$tableStory");
+        Field(FieldType.Real, foreignKey: true, to: "${dbName}_$tableStory");
 
     FlutterOrmPlugin.createTable(dbName, tableLocation, locationFields);
     FlutterOrmPlugin.createTable(dbName, tableStory, storyFields);

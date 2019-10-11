@@ -4,11 +4,15 @@ import 'package:amap_base/amap_base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
+import 'package:misstory/db/helper/person_helper.dart';
+import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/db/helper/tag_helper.dart';
+import 'package:misstory/models/person.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/models/tag.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/tag_items_widget.dart';
-
-
+import 'package:fluttertoast/fluttertoast.dart';
 
 class EditPage extends StatefulWidget {
   final Story story;
@@ -26,19 +30,22 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///备注
   TextEditingController _descTextFieldVC = TextEditingController();
   FocusNode _descFocusNode = new FocusNode();
-
-  ///标签
-  TextEditingController _tagTextFieldVC = TextEditingController();
-  FocusNode _tagFocusNode = new FocusNode();
-
   ///
   AMapController _controller;
-  StreamSubscription _subscriptionMap;
   LatLng _currentLatLng;
   MyLocationStyle _myLocationStyle;
 
-  var peopleList = [];//["测试", "测试1", "测试2", "测试4", "测试5"];
-  var tagList = [];
+  List personCacheList = [];
+  List peoplePreList = [];
+  List showPeopleList = [];
+  List addPeopleList = [];
+  List deletePeopleList = [];
+
+  List tagCacheList = [];
+  List tagPreList = [];
+  List showTagList = [];
+  List addTagList = [];
+  List deleteTagList = [];
   ///
 
   @override
@@ -47,6 +54,34 @@ class _EditPageState extends LifecycleState<EditPage> {
 
     ///数据初始化
     _currentLatLng = LatLng(widget.story.lat, widget.story.lon);
+    _descTextFieldVC.text =
+        StringUtil.isNotEmpty(widget.story.desc) ? widget.story.desc : "";
+    ///
+    initData();
+  }
+
+  initData () async {
+    ///
+    num storyId = widget.story.id;
+    personCacheList = await PersonHelper()
+        .queryPersonsByStoryId(storyId);
+    if (personCacheList != null && personCacheList.length > 0 ) {
+      for (Person person in personCacheList) {
+        if (StringUtil.isNotEmpty(person.name)) {
+          showPeopleList.add(person.name);
+          peoplePreList.add(person.name);
+        }
+      }
+    }
+    tagCacheList = await TagHelper().queryTagsByStoryId(storyId);
+    if (tagCacheList != null && tagCacheList.length > 0) {
+      for (Tag tag in tagCacheList) {
+        if (StringUtil.isNotEmpty(tag.tagName)) {
+          showTagList.add(tag.tagName);
+          tagPreList.add(tag.tagName);
+        }
+      }
+    }
   }
 
   @override
@@ -58,20 +93,22 @@ class _EditPageState extends LifecycleState<EditPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("编辑"),
-      ),
-      backgroundColor: Colors.white,
-      body: ListView(
-        children: <Widget>[
-          descTextField(context),
-          tagTextField(context),
-          peopleTextField(context),
-          locationWidget(context),
-          locationMapView(context),
-        ],
-      )
-    );
+        appBar: AppBar(
+          title: Text("编辑"),
+          actions: <Widget>[
+            IconButton(icon: Icon(Icons.save), onPressed: clickSave)
+          ],
+        ),
+        backgroundColor: Colors.white,
+        body: ListView(
+          children: <Widget>[
+            descTextField(context),
+            tagTextField(context),
+            peopleTextField(context),
+            locationWidget(context),
+            locationMapView(context),
+          ],
+        ));
   }
 
   ///地点编辑
@@ -119,7 +156,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             flex: 1,
             child: TagItemsWidget(
               placeholder: "输入标签",
-              list: tagList,
+              list: showTagList,
               finishedAction: addTargetTag,
               clickTagItemCallAction: deleteTargetTag,
             ),
@@ -143,7 +180,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             flex: 1,
             child: TagItemsWidget(
               placeholder: "输入好友",
-              list: peopleList,
+              list: showPeopleList,
               finishedAction: addTargetPeople,
               clickTagItemCallAction: deleteTargetPeople,
             ),
@@ -220,30 +257,87 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   deleteTargetPeople(String name) {
-    peopleList.remove(name);
-    setState(() {
-
-    });
+    deletePeopleList.add(name);
+    showPeopleList.remove(name);
+    setState(() {});
   }
+
   addTargetPeople(String name) {
-    peopleList.add(name);
-    setState(() {
-    });
+    if (showPeopleList.contains(name)) {
+      Fluttertoast.showToast(msg: "好友已添加");
+    } else {
+      addPeopleList.add(name);
+      showPeopleList.add(name);
+      setState(() {});
+    }
   }
+
   deleteTargetTag(String name) {
-    tagList.remove(name);
-    setState(() {
-
-    });
+    deleteTagList.add(name);
+    showTagList.remove(name);
+    setState(() {});
   }
+
   addTargetTag(String name) {
-    tagList.add(name);
-    setState(() {
-
-    });
+    if (showTagList.contains(name)) {
+      Fluttertoast.showToast(msg: "标签已添加");
+    } else {
+      addTagList.add(name);
+      showTagList.add(name);
+      setState(() {});
+    }
   }
 
+  ///保存编辑页面数据
+  clickSave() {
+    //TODO:
+    bool isFlag = false;
+    Story story = widget.story;
 
+    ///备注保存
+    if (StringUtil.isNotEmpty(_descTextFieldVC.text)) {
+      story.desc = _descTextFieldVC.text;
+      StoryHelper().updateCustomAddress(story);
+      isFlag = true;
+    }
+    ///标签保存
+    for (String name in addTagList) {
+      if (!tagPreList.contains(name)) {
+        TagHelper().createTag(TagHelper().createTagWithName(name,story.id));
+        isFlag = true;
+      }
+    }
+    for (String name in deleteTagList) {
+      if (tagPreList.contains(name)) {
+        int index = tagPreList.indexOf(name);
+        Tag deleteObj = tagCacheList[index];
+        TagHelper().deleteTag(deleteObj);
+        isFlag = true;
+      }
+    }
+    ///人物保存
+    for (String name in addPeopleList) {
+      if (!peoplePreList.contains(name)) {
+          PersonHelper().createPerson(PersonHelper().createPersonWithName(name,story.id));
+          isFlag = true;
+      }
+    }
+    for (String name in deletePeopleList) {
+      if (peoplePreList.contains(name)) {
+        int index = peoplePreList.indexOf(name);
+        Person deleteObj = personCacheList[index];
+        PersonHelper().deletePerson(deleteObj);
+        isFlag = true;
+      }
+    }
+
+
+    ///地点保存
+    ///返回
+    if (isFlag) {
+      Navigator.pop(context);
+    }
+  }
 
   getShowAddress(Story story) {
     if (StringUtil.isEmpty(story.aoiName)) {

@@ -16,10 +16,19 @@ class PersonHelper {
 
   PersonHelper._internal();
 
+  Person createPersonWithName(String name, num storyId) {
+    Person person = Person();
+    person.name = name;
+    person.storyId = storyId;
+    print("json ：${person.toJson()}");
+    return person;
+  }
+
   /// 创建Person
   Future<bool> createPerson(Person person) async {
     if (person != null) {
       await FlutterOrmPlugin.saveOrm(DBManager.tablePerson, person.toJson());
+      print("xsave ${person.storyId}");
       return true;
     }
     return false;
