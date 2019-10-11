@@ -30,6 +30,7 @@ Story _$StoryFromJson(Map<String, dynamic> json) {
     ..updateTime = json['update_time'] as num
     ..intervalTime = json['interval_time'] as num
     ..customAddress = json['custom_address'] as String
+    ..desc = json['desc'] as String
     ..isDelete = json['is_delete'] as bool
     ..tags = (json['tags'] as List)
         ?.map((e) => e == null ? null : Tag.fromJson(e as Map<String, dynamic>))
@@ -64,6 +65,7 @@ Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
       'update_time': instance.updateTime,
       'interval_time': instance.intervalTime,
       'custom_address': instance.customAddress,
+      'desc': instance.desc,
       'is_delete': instance.isDelete,
       'tags': instance.tags,
       'persons': instance.persons,

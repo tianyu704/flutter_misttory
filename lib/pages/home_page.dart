@@ -11,6 +11,7 @@ import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/date_util.dart';
@@ -79,9 +80,11 @@ class _HomePageState extends LifecycleState<HomePage> {
         try {
           Mslocation mslocation = Mslocation.fromJson(json.decode(location));
           if (mslocation != null) {
-            int result = await LocationHelper().createLocation(mslocation);
+            mslocation.updatetime = mslocation.time;
+            int result =
+                await LocationHelper().createOrUpdateLocation(mslocation);
+//            debugPrint("===============$result");
             if (result != -1) {
-              await LocationHelper().createStoryByLocation();
 //              await StoryHelper().judgeLocation(mslocation);
               initData();
               _currentLatLng = LatLng(mslocation.lat, mslocation.lon);
@@ -98,14 +101,15 @@ class _HomePageState extends LifecycleState<HomePage> {
     });
     amap.LocationClientOptions options = amap.LocationClientOptions(
       locationMode: amap.LocationMode.Battery_Saving,
-      interval: 60 * 1000 * 5,
-      distanceFilter: 1000,
+      interval: LocationConfig.interval,
+      distanceFilter: LocationConfig.distanceFilter,
       isOnceLocation: true,
     );
     await _aMapLocation.start(options);
   }
 
   initData() async {
+    await LocationHelper().createStoryByLocation();
     _stories = await StoryHelper().findAllStories();
     setState(() {});
   }

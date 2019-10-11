@@ -54,6 +54,8 @@ class Mslocation {
 
   num time;
 
+  num updatetime;
+
   String provider;
 
   num lon;

@@ -40,6 +40,7 @@ class DBManager {
     locationFields["floor"] = Field(FieldType.Text);
     locationFields["description"] = Field(FieldType.Text);
     locationFields["time"] = Field(FieldType.Real);
+    locationFields["updatetime"] = Field(FieldType.Real);
     locationFields["provider"] = Field(FieldType.Text);
     locationFields["lon"] = Field(FieldType.Real);
     locationFields["lat"] = Field(FieldType.Real);
@@ -73,6 +74,7 @@ class DBManager {
     storyFields["create_time"] = Field(FieldType.Real);
     storyFields["update_time"] = Field(FieldType.Real);
     storyFields["custom_address"] = Field(FieldType.Text);
+    storyFields["desc"] = Field(FieldType.Text);
     storyFields["interval_time"] = Field(FieldType.Real);
     storyFields["is_delete"] = Field(FieldType.Boolean);
 
