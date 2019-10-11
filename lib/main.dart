@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:amap_base/amap_base.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -8,6 +9,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/pages/home_page.dart';
 import 'package:misstory/db/db_manager.dart';
 import 'package:misstory/provider/theme_provider.dart';
+import 'package:misstory/style/common_localization_delegate.dart';
 import 'package:provider/provider.dart';
 
 import 'db/local_storage.dart';
@@ -43,6 +45,8 @@ class MyApp extends StatelessWidget {
       ),
       localizationsDelegates: const [
         S.delegate,
+        ChineseCupertinoLocalizations.delegate, // 这里加上这个,是自定义的delegate
+        DefaultCupertinoLocalizations.delegate, // 这个截止目前只包含英文
         // You need to add them if you are using the material library.
         // The material components usses this delegates to provide default
         // localization
