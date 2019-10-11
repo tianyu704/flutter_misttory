@@ -70,8 +70,7 @@ class StoryHelper {
     if (result != null && result.length > 0) {
       result.reversed.forEach((item) {
         Story story = Story.fromJson(Map<String, dynamic>.from(item));
-        story.date = getShowTime(story.createTime);
-        list.add(story);
+        list.addAll(separateStory(story));
       });
       if (lastStory == null || lastStory.id == list[0].id) {
         return list;
@@ -85,6 +84,47 @@ class StoryHelper {
       list.add(lastStory);
     }
     return list;
+  }
+
+  /// 判断story是否在同一天，不在同一天就分割成多天
+  List<Story> separateStory(Story story) {
+    List<Story> list = [];
+    DateTime dateTime1 =
+        DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
+    DateTime dateTime2 =
+        DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
+    DateTime day1 = DateTime(dateTime1.year, dateTime1.month, dateTime1.day);
+    DateTime day2 = DateTime(dateTime2.year, dateTime2.month, dateTime2.day);
+    print("day1=$day1,day2=$day2");
+    if (day1.isAtSameMomentAs(day2)) {
+      story.date = getShowTime(story.createTime);
+      list.add(story);
+      return list;
+    } else {
+      Map<String, dynamic> map = story.toJson();
+      Story story1;
+      int intervalDay = day2.difference(day1).inDays;
+      print(intervalDay);
+      DateTime day;
+      for (num i = 0; i <= intervalDay; i++) {
+        story1 = Story.fromJson(map);
+        day = DateTime.fromMillisecondsSinceEpoch(day1.millisecondsSinceEpoch);
+        print(day.toIso8601String());
+        if (i == 0) {
+          story1.updateTime = day.add(Duration(days: 1)).millisecondsSinceEpoch;
+        } else if (i == intervalDay) {
+          story1.createTime = day2.millisecondsSinceEpoch;
+        } else {
+          story1.createTime = day.add(Duration(days: i)).millisecondsSinceEpoch;
+          story1.updateTime =
+              day.add(Duration(days: i + 1)).millisecondsSinceEpoch;
+        }
+        story1.date = getShowTime(story1.createTime);
+        story1.intervalTime = story1.updateTime - story1.createTime;
+        list.add(story1);
+      }
+      return list.reversed.toList();
+    }
   }
 
   ///获取展示的时间 2019.09.23

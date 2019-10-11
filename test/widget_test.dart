@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 
 import 'package:misstory/main.dart';
+import 'package:misstory/models/story.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
@@ -24,15 +25,26 @@ void main() {
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
 
-
-
     // Verify that our counter has incremented.
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
   });
 
-  test("testa",()async{
+  test("testa", () async {
     print("===");
-    print(await  StoryHelper().getDistanceBetween1());
+    print(await StoryHelper().getDistanceBetween1());
+  });
+
+  test("separate", () {
+    Story story = Story()
+      ..createTime = 1570630867160
+      ..updateTime = 1570668978351;
+
+//    Story story = Story()
+//      ..createTime = 1570758432968
+//      ..updateTime = 1570759933269;
+    List<Story> list = StoryHelper().separateStory(story);
+    list.forEach((item){print(item.toJson());});
+
   });
 }
