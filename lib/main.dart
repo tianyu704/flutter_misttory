@@ -9,7 +9,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/pages/home_page.dart';
 import 'package:misstory/db/db_manager.dart';
 import 'package:misstory/provider/theme_provider.dart';
-import 'package:misstory/style/common_localization_delegate.dart';
+import 'package:misstory/utils/common_localization_delegate.dart';
 import 'package:provider/provider.dart';
 
 import 'db/local_storage.dart';
