@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:amap_base/amap_base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:full_icon_button/full_icon_button.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/models/story.dart';
-import 'package:misstory/widgets/tag_item_widget.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/tag_items_widget.dart';
+
+
 
 class EditPage extends StatefulWidget {
   final Story story;
@@ -26,10 +26,6 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///备注
   TextEditingController _descTextFieldVC = TextEditingController();
   FocusNode _descFocusNode = new FocusNode();
-
-  ///人物
-  TextEditingController _peopleTextFieldVC = TextEditingController();
-  FocusNode _peopleFocusNode = new FocusNode();
 
   ///标签
   TextEditingController _tagTextFieldVC = TextEditingController();
@@ -121,7 +117,12 @@ class _EditPageState extends LifecycleState<EditPage> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           Expanded(
             flex: 1,
-            child: buildTagsList(context, tagList),
+            child: TagItemsWidget(
+              placeholder: "输入标签",
+              list: tagList,
+              finishedAction: addTargetTag,
+              clickTagItemCallAction: deleteTargetTag,
+            ),
           ),
         ],
       ),
@@ -143,49 +144,13 @@ class _EditPageState extends LifecycleState<EditPage> {
             child: TagItemsWidget(
               placeholder: "输入好友",
               list: peopleList,
+              finishedAction: addTargetPeople,
+              clickTagItemCallAction: deleteTargetPeople,
             ),
           ),
         ],
       ),
     );
-
-  }
-
-  Widget peopleTextField1(BuildContext context) {
-    return SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Container(
-              child: Padding(
-                padding: EdgeInsets.all(10),
-                child: TextField(
-                  controller: _peopleTextFieldVC,
-                  focusNode: _peopleFocusNode,
-                  enabled: true,
-                  minLines: 1,
-                  textInputAction: TextInputAction.done,
-                  decoration: InputDecoration(
-                    hintText: "输入好友",
-                    contentPadding: EdgeInsets.fromLTRB(50, 10, 10, 10),
-                  ),
-                  onEditingComplete: () {
-                    //TODO:监听点击该行第一响应触发
-                    _peopleFocusNode.unfocus();
-                    //debugPrint("===${_peopleTextFieldVC.text}");
-                  },
-                ),
-//
-              ),
-            ),
-            Positioned(
-              left: 10,
-              child: Text("人物",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            )
-          ],
-        ));
   }
 
   //描述编辑
@@ -254,66 +219,31 @@ class _EditPageState extends LifecycleState<EditPage> {
     );
   }
 
-  Widget buildTagsList(BuildContext context, List list) {
-    List<Widget> peopleLists = [];
-    for (String name in list) {
-      peopleLists.add(tagItem(name));
-    }
-    peopleLists.add(TextField(
-      controller: _tagTextFieldVC,
-      focusNode: _tagFocusNode,
-      enabled: true,
-      minLines: 1,
+  deleteTargetPeople(String name) {
+    peopleList.remove(name);
+    setState(() {
 
-      textInputAction: TextInputAction.done,
-      decoration: InputDecoration(
-        hintText: "输入标签",
-        contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-      ),
-      onEditingComplete: () {
-        String str = _tagTextFieldVC.text;
-        if (str.length > 0) {
-          tagList.add(str);
-          _tagTextFieldVC.text = "";
-          setState(() {
+    });
+  }
+  addTargetPeople(String name) {
+    peopleList.add(name);
+    setState(() {
+    });
+  }
+  deleteTargetTag(String name) {
+    tagList.remove(name);
+    setState(() {
 
-          });
-        } else {
-          _tagFocusNode.unfocus();
-        }
-      },
-    ));
+    });
+  }
+  addTargetTag(String name) {
+    tagList.add(name);
+    setState(() {
 
-    Widget content = Wrap(
-        spacing: 8.0, // gap between adjacent chips
-        runSpacing: 4.0, // gap between lines
-        direction: Axis.horizontal, //方向
-        children: peopleLists);
-    return content;
+    });
   }
 
-  //一个标签
-  Widget tagItem(String name) {
-    //return TagItemWidget(name: name);
-    return FullIconButton(
-      label: Text(
-        name,
-        style: TextStyle(color: Colors.white),
-      ),
-      height: 40,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      rightIcon: Icon(Icons.close),
-      color: Colors.blue,
-      textPadding: EdgeInsets.only(right: 10),
-      highlightColor: Colors.lightBlue,elevation: 0,highlightElevation: 0,
-      onPressed: (){
-        tagList.remove(name);
-        setState(() {
 
-        });
-      },
-    );
-  }
 
   getShowAddress(Story story) {
     if (StringUtil.isEmpty(story.aoiName)) {
