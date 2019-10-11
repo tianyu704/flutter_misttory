@@ -95,7 +95,6 @@ class StoryHelper {
         DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
     DateTime day1 = DateTime(dateTime1.year, dateTime1.month, dateTime1.day);
     DateTime day2 = DateTime(dateTime2.year, dateTime2.month, dateTime2.day);
-    print("day1=$day1,day2=$day2");
     if (day1.isAtSameMomentAs(day2)) {
       story.date = getShowTime(story.createTime);
       list.add(story);
@@ -104,12 +103,10 @@ class StoryHelper {
       Map<String, dynamic> map = story.toJson();
       Story story1;
       int intervalDay = day2.difference(day1).inDays;
-      print(intervalDay);
       DateTime day;
       for (num i = 0; i <= intervalDay; i++) {
         story1 = Story.fromJson(map);
         day = DateTime.fromMillisecondsSinceEpoch(day1.millisecondsSinceEpoch);
-        print(day.toIso8601String());
         if (i == 0) {
           story1.updateTime = day.add(Duration(days: 1)).millisecondsSinceEpoch;
         } else if (i == intervalDay) {

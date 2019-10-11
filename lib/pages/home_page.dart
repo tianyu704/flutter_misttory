@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:amap_base/amap_base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_amap_location_plugin/amap_location_lib.dart' as amap;
@@ -17,7 +15,7 @@ import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import '../constant.dart';
 import 'edit_page.dart';
 
 ///
@@ -37,12 +35,6 @@ class _HomePageState extends LifecycleState<HomePage> {
   amap.AMapLocation _aMapLocation;
   StreamSubscription _subscription;
   String time = DateFormat("MM-dd HH:mm").format(DateTime.now());
-  AMapController _controller;
-  StreamSubscription _subscriptionMap;
-  LatLng _currentLatLng;
-  MyLocationStyle _myLocationStyle;
-  AMapSearch _aMapSearch;
-  String _poisString = "暂无poi信息";
 
   @override
   void initState() {
@@ -52,6 +44,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     initData();
   }
 
+  /// 检查权限
   void checkPermission() async {
     await PermissionHandler().requestPermissions(
         [PermissionGroup.locationAlways, PermissionGroup.storage]);
@@ -71,27 +64,19 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   void initLocation() async {
     _aMapLocation = amap.AMapLocation();
-    _aMapSearch = AMapSearch();
-    await _aMapLocation.init(
-        "77419f4f5b07ffcc0a41cafd2fe763af", "11bcf7a88c8b1a9befeefbaa2ceaef71");
+    await _aMapLocation.init(Constant.androidMapKey, Constant.iosMapKey);
     _subscription = _aMapLocation.onLocationChanged.listen((location) async {
-//      print(location);
       if (location != null && location.isNotEmpty) {
         try {
           Mslocation mslocation = Mslocation.fromJson(json.decode(location));
           if (mslocation != null) {
             mslocation.updatetime = mslocation.time;
+            debugPrint("===========接收到新定位：${mslocation.lon},${mslocation.lat}");
             int result =
                 await LocationHelper().createOrUpdateLocation(mslocation);
 //            debugPrint("===============$result");
             if (result != -1) {
-//              await StoryHelper().judgeLocation(mslocation);
               initData();
-              _currentLatLng = LatLng(mslocation.lat, mslocation.lon);
-              _controller.changeLatLng(_currentLatLng);
-              _controller.addMarker(MarkerOptions(
-                position: _currentLatLng,
-              ));
             }
           }
         } catch (e) {
@@ -122,52 +107,7 @@ class _HomePageState extends LifecycleState<HomePage> {
         title: Text("今天,open:$time"),
         centerTitle: true,
       ),
-      body: Column(
-        children: <Widget>[
-          SizedBox(
-            height: 250,
-            width: double.infinity,
-            child: AMapView(
-              onAMapViewCreated: (controller) {
-                _controller = controller;
-//                _subscriptionMap = _controller.mapClickedEvent
-//                    .listen((it) => print('地图点击: 坐标: $it'));
-                _myLocationStyle = MyLocationStyle(
-                  strokeColor: Color(0x662196F3),
-                  radiusFillColor: Color(0x662196F3),
-                  showMyLocation: true,
-                );
-                _controller.setUiSettings(UiSettings(
-                  isMyLocationButtonEnabled: true,
-                  logoPosition: LOGO_POSITION_BOTTOM_LEFT,
-                  isZoomControlsEnabled: false,
-                ));
-                _controller.setMyLocationStyle(_myLocationStyle);
-                _controller.setZoomLevel(16);
-              },
-//              amapOptions: AMapOptions(
-//                compassEnabled: false,
-//                zoomControlsEnabled: true,
-//                logoPosition: LOGO_POSITION_BOTTOM_CENTER,
-//                camera: CameraPosition(
-//                  target: LatLng(39.900234, 116.492712),
-//                  zoom: 10,
-//                ),
-//              ),
-            ),
-          ),
-          Flexible(
-            child: groupWidget(context),
-          ),
-        ],
-      ),
-//      floatingActionButton: FloatingActionButton(
-//        onPressed: () {
-//          Navigator.of(context).push(CupertinoPageRoute(builder: (context) {
-//            return PoisPage(_poisString);
-//          }));
-//        },
-//      ),
+      body: storyListWidget(context),
     );
   }
 
@@ -179,7 +119,6 @@ class _HomePageState extends LifecycleState<HomePage> {
           DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
       date = DateFormat("HH:mm").format(dateTime);
     }
-
     return Card(
       clipBehavior: Clip.antiAlias,
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -192,9 +131,7 @@ class _HomePageState extends LifecycleState<HomePage> {
             children: <Widget>[
               Text("$date "),
               Icon(Icons.location_on, size: 17),
-              Expanded(
-                  flex: 1,
-                  child: Text(getShowAddress(story))),
+              Expanded(flex: 1, child: Text(getShowAddress(story))),
               Text(DateUtil.getStayShowTime(story.intervalTime)),
               Padding(
                 padding: EdgeInsets.only(left: 10),
@@ -204,25 +141,20 @@ class _HomePageState extends LifecycleState<HomePage> {
           ),
         ),
         onTap: () {
-          //TODO:
-
-
-
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (context)=> EditPage(story))
-          );
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => EditPage(story)));
         },
       ),
     );
   }
 
-  getShowAddress (Story story) {
-     if (StringUtil.isEmpty(story.aoiName)) {
-        return StringUtil.isEmpty(story.poiName) ? story.address : story.poiName;
-     }
-     return story.aoiName;
+  ///显示的地址
+  getShowAddress(Story story) {
+    if (StringUtil.isEmpty(story.aoiName)) {
+      return StringUtil.isEmpty(story.poiName) ? story.address : story.poiName;
+    }
+    return story.aoiName;
   }
-
 
   ///分组的UI卡片
   Widget groupSectionWidget(BuildContext context, String groupName) {
@@ -235,7 +167,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   ///分组设置卡片布局
-  Widget groupWidget(BuildContext context) {
+  Widget storyListWidget(BuildContext context) {
     return GroupedListView<Story, String>(
       collection: _stories,
       groupBy: (Story g) => g.date,
@@ -251,9 +183,6 @@ class _HomePageState extends LifecycleState<HomePage> {
     // TODO: implement dispose
     _subscription.cancel();
     _aMapLocation.dispose();
-    _controller.dispose();
     super.dispose();
   }
 }
-
-class Group {}

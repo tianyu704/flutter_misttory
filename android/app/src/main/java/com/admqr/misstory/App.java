@@ -1,7 +1,8 @@
 package com.admqr.misstory;
 
-import android.support.multidex.MultiDex;
 import android.util.Log;
+
+import androidx.multidex.MultiDex;
 
 import com.shihoo.daemon.ForegroundNotificationUtils;
 import com.shihoo.daemon.watch.WatchProcessPrefHelper;

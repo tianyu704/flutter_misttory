@@ -80,7 +80,11 @@ public class MainWorkService extends AbsWorkService {
             //设置定位回调监听
             mLocationClient.setLocationListener(aMapLocation -> {
                 //Log.d("android", aMapLocation.toStr());
-                saveData(aMapLocation);
+                try {
+                    saveData(aMapLocation);
+                } catch (Exception e) {
+                    Log.d(Tag, e.getLocalizedMessage());
+                }
             });
         }
         if (!mLocationClient.isStarted()) {

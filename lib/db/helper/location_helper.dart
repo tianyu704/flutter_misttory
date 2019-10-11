@@ -25,11 +25,15 @@ class LocationHelper {
         return await updateLocationTime(lastLocation.id, location);
       } else {
         if (lastLocation.aoiname == location.aoiname) {
-          if (await getDistanceBetween(location, lastLocation) >
-              LocationConfig.judgeDistanceNum) {
+          if(location.aoiname == null && lastLocation.poiname != location.poiname){
             return await createLocation(location);
-          } else {
-            return await updateLocationTime(lastLocation.id, location);
+          }else{
+            if (await getDistanceBetween(location, lastLocation) >
+                LocationConfig.judgeDistanceNum) {
+              return await createLocation(location);
+            } else {
+              return await updateLocationTime(lastLocation.id, location);
+            }
           }
         } else if (lastLocation.poiname == location.poiname) {
           if (await getDistanceBetween(location, lastLocation) >
@@ -94,14 +98,16 @@ class LocationHelper {
     num time = 0;
     Story lastStory = await StoryHelper().queryLastStory();
     if (lastStory != null) {
-      time = lastStory.updateTime;
+      time = lastStory.createTime;
     }
+    Mslocation lo = await queryLastLocation();
+    print(lo.time);
     List result = await Query(DBManager.tableLocation)
         .orderBy(["time"]).whereByColumFilters([
       WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, time)
     ]).all();
     if (result != null && result.length > 0) {
-//      debugPrint("=================${result.toString()}");
+      debugPrint("===========待更新条数${result.length}");
       Mslocation mslocation;
       for (num i = 0; i < result.length; i++) {
         mslocation = Mslocation.fromJson(Map<String, dynamic>.from(result[i]));
@@ -110,7 +116,7 @@ class LocationHelper {
         }
         await StoryHelper().judgeLocation(mslocation);
       }
-//      debugPrint("=================createStoryByLocation finish");
+      debugPrint("=================Create Story By Location Finish");
     }
   }
 
