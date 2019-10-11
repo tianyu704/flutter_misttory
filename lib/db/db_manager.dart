@@ -74,6 +74,7 @@ class DBManager {
     storyFields["create_time"] = Field(FieldType.Real);
     storyFields["update_time"] = Field(FieldType.Real);
     storyFields["custom_address"] = Field(FieldType.Text);
+    storyFields["desc"] = Field(FieldType.Text);
     storyFields["interval_time"] = Field(FieldType.Real);
     storyFields["is_delete"] = Field(FieldType.Boolean);
 

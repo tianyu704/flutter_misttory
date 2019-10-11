@@ -17,8 +17,11 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.shihoo.daemon.work.AbsWorkService;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import me.yohom.amapbase.search.LatLng;
 
 
@@ -86,7 +89,12 @@ public class MainWorkService extends AbsWorkService {
             option.setDeviceModeDistanceFilter(1000);
             option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Battery_Saving);
             mLocationClient.setLocationOption(option);
-            mLocationClient.startLocation();
+            Observable.timer(30, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
+                @Override
+                public void accept(Long aLong) throws Exception {
+                    mLocationClient.startLocation();
+                }
+            });
         }
 //        Log.d("wsh-daemon", "检查磁盘中是否有上次销毁时保存的数据");
 //        mDisposable = Observable
@@ -129,7 +137,7 @@ public class MainWorkService extends AbsWorkService {
                             lastLocation.getLat() == location.getLatitude()) {
                         updateLocationTime(db, lastLocation.getId(), location);
                     } else {
-                        if (TextUtils.equals(lastLocation.getAoiname(),location.getAoiName())) {
+                        if (TextUtils.equals(lastLocation.getAoiname(), location.getAoiName())) {
                             if (getDistanceBetween(location, lastLocation) >
                                     5000) {
                                 createLocation(db, location);
@@ -137,7 +145,7 @@ public class MainWorkService extends AbsWorkService {
                             } else {
                                 updateLocationTime(db, lastLocation.getId(), location);
                             }
-                        } else if (TextUtils.equals(lastLocation.getPoiname(),location.getPoiName())) {
+                        } else if (TextUtils.equals(lastLocation.getPoiname(), location.getPoiName())) {
                             if (getDistanceBetween(location, lastLocation) >
                                     5000) {
                                 createLocation(db, location);

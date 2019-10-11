@@ -83,7 +83,6 @@ class _HomePageState extends LifecycleState<HomePage> {
                 await LocationHelper().createOrUpdateLocation(mslocation);
 //            debugPrint("===============$result");
             if (result != -1) {
-              await LocationHelper().createStoryByLocation();
 //              await StoryHelper().judgeLocation(mslocation);
               initData();
               _currentLatLng = LatLng(mslocation.lat, mslocation.lon);
@@ -108,6 +107,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   initData() async {
+    await LocationHelper().createStoryByLocation();
     _stories = await StoryHelper().findAllStories();
     setState(() {});
   }

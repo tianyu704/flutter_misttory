@@ -3,6 +3,7 @@ import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/utils/calculate_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import '../db_manager.dart';
 import 'package:misstory/models/mslocation.dart';
@@ -38,6 +39,26 @@ class StoryHelper {
     }
   }
 
+  /// 更新story地点
+  Future<bool> updateCustomAddress(Story story) async {
+    if (story != null) {
+      await Query(DBManager.tableStory).primaryKey([story.id]).update(
+          {"custom_address": story.customAddress});
+      return true;
+    }
+    return false;
+  }
+
+  /// 更新事件描述
+  Future<bool> updateStoryDesc(Story story) async {
+    if (story != null) {
+      await Query(DBManager.tableStory)
+          .primaryKey([story.id]).update({"desc": story.desc});
+      return true;
+    }
+    return false;
+  }
+
   /// 读取库中的全部数据
   Future<List> findAllStories() async {
     List result = await Query(DBManager.tableStory).whereByColumFilters([
@@ -49,8 +70,7 @@ class StoryHelper {
     if (result != null && result.length > 0) {
       result.reversed.forEach((item) {
         Story story = Story.fromJson(Map<String, dynamic>.from(item));
-        String time = getShowTime(story.createTime);
-        story.date = time;
+        story.date = getShowTime(story.createTime);
         list.add(story);
       });
       if (lastStory == null || lastStory.id == list[0].id) {
@@ -76,11 +96,11 @@ class StoryHelper {
 
   /// 查询最后一条story
   Future<Story> queryLastStory() async {
-    List result = await Query(DBManager.tableStory).orderBy([
+    Map result = await Query(DBManager.tableStory).orderBy([
       "id desc",
-    ]).all();
+    ]).first();
     if (result != null && result.length > 0) {
-      return Story.fromJson(Map<String, dynamic>.from(result[0]));
+      return Story.fromJson(Map<String, dynamic>.from(result));
     }
     return null;
   }
@@ -149,7 +169,9 @@ class StoryHelper {
   }
 
   Future<void> deleteMisstory() async {
-    await Query(DBManager.tableStory).delete();
+//    Story story = await queryLastStory();
+//    await Query(DBManager.tableStory).primaryKey([story.id]).delete();
+//    await Query(DBManager.tableStory).delete();
   }
 
   ///求值：两个坐标点的距离
@@ -160,8 +182,9 @@ class StoryHelper {
   }
 
   Future<double> getDistanceBetween1() async {
-    LatLng latLng1 = LatLng(116.4464662000868, 39.95498128255208);
-    LatLng latLng2 = LatLng(116.44648111979167, 39.95497856987847);
+    LatLng latLng1 = LatLng(116.492896, 39.899667);
+    LatLng latLng2 = LatLng(116.4929, 39.900061);
     return await CalculateTools().calcDistance(latLng1, latLng2);
+//    return await CalculateUtil.calculateLineDistance(latLng1, latLng2);
   }
 }

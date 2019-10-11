@@ -55,6 +55,7 @@ class LocationHelper {
     }
     return -1;
   }
+
   /// 更新Location时间
   Future<int> updateLocationTime(num id, Mslocation location) async {
     if (location != null) {
@@ -79,11 +80,11 @@ class LocationHelper {
 
   /// 查询最后一条Location
   Future<Mslocation> queryLastLocation() async {
-    List result = await Query(DBManager.tableLocation).orderBy([
+    Map result = await Query(DBManager.tableLocation).orderBy([
       "id desc",
-    ]).all();
+    ]).first();
     if (result != null && result.length > 0) {
-      return Mslocation.fromJson(Map<String, dynamic>.from(result[0]));
+      return Mslocation.fromJson(Map<String, dynamic>.from(result));
     }
     return null;
   }

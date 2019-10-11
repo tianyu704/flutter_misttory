@@ -73,8 +73,7 @@ class Mslocation {
   @JsonKey(name: "is_delete")
   bool isDelete;
 
-  factory Mslocation.fromJson(Map<String, dynamic> json) =>
-      _$MslocationFromJson(json);
+  factory Mslocation.fromJson(Map<String, dynamic> json) => _$MslocationFromJson(json);
 
   Map<String, dynamic> toJson() => _$MslocationToJson(this);
 }
