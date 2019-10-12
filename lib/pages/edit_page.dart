@@ -319,7 +319,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   Widget poiListWidget(BuildContext context) {
     List<Widget> widgets = [];
     for (Poilocation p in poiList) {
-      if (StringUtil.isNotEmpty(p.snippet)) widgets.add(poiCell(p));
+      if (StringUtil.isNotEmpty(p.title)) widgets.add(poiCell(p));
     }
 
     Widget content = Wrap(
@@ -336,7 +336,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   Widget poiCell(Poilocation p) {
-    String poiName = p.snippet;
+    String poiName = p.title;
     final size = MediaQuery.of(context).size;
     return InkWell(
       child: SizedBox(
@@ -371,6 +371,7 @@ class _EditPageState extends LifecycleState<EditPage> {
         /// Android必须
       ),
     );
+    print("${poiResult.toString()}");
     poiResult.pois.reversed
         .forEach((item) => poiList.add(Poilocation.fromJson(item.toJson())));
     if (poiList != null && poiList.length > 0) {
@@ -464,10 +465,10 @@ class _EditPageState extends LifecycleState<EditPage> {
 
     ///自定义地点保存
     if (pickPoiLocation != null &&
-        StringUtil.isNotEmpty(pickPoiLocation.snippet)) {
-      story.customAddress = pickPoiLocation.snippet;
+        StringUtil.isNotEmpty(pickPoiLocation.title)) {
+      story.customAddress = pickPoiLocation.title;
       StoryHelper().updateCustomAddress(story);
-
+      isFlag = true;
       ///存储该pick 点 如果没存过的话
 
     }
@@ -480,8 +481,8 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   getShowAddress(Story story) {
     if (pickPoiLocation != null &&
-        StringUtil.isNotEmpty(pickPoiLocation.snippet)) {
-      return pickPoiLocation.snippet;
+        StringUtil.isNotEmpty(pickPoiLocation.title)) {
+      return pickPoiLocation.title;
     }
     if (StringUtil.isNotEmpty(story.customAddress)) {
       return story.customAddress;
