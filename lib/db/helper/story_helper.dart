@@ -44,6 +44,7 @@ class StoryHelper {
     if (story != null) {
       await Query(DBManager.tableStory).primaryKey([story.id]).update(
           {"custom_address": story.customAddress});
+      print("XXX");
       return true;
     }
     return false;
