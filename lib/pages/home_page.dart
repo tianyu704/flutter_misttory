@@ -195,26 +195,32 @@ class _HomePageState extends LifecycleState<HomePage> {
                 ),
               ),
               Expanded(
-                flex: 1,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        SvgPicture.asset(
-                          StringUtil.isEmpty(story.customAddress)
-                              ? "assets/images/icon_location_empty.svg"
-                              : "assets/images/icon_location_fill.svg",
-                          width: 14,
-                          height: 14,
-                        ),
                         Padding(
-                          padding: EdgeInsets.only(left: 10),
-                          child: Text(
+                          padding: EdgeInsets.only(top: 3),
+                          child: SvgPicture.asset(
                             StringUtil.isEmpty(story.customAddress)
-                                ? story.defaultAddress
-                                : story.customAddress,
-                            style: AppStyle.locationText14(context),
+                                ? "assets/images/icon_location_empty.svg"
+                                : "assets/images/icon_location_fill.svg",
+                            width: 14,
+                            height: 14,
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Text(
+                              StringUtil.isEmpty(story.customAddress)
+                                  ? story.defaultAddress
+                                  : story.customAddress,
+                              maxLines: 2,
+                              style: AppStyle.locationText14(context),
+                            ),
                           ),
                         ),
                       ],
