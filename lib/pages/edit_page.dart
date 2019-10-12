@@ -54,8 +54,10 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   ///推荐的地点
   List poiList = [];
+
   ///选择了推荐的点
   Poilocation pickPoiLocation;
+
   ///
 
   @override
@@ -286,13 +288,24 @@ class _EditPageState extends LifecycleState<EditPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          child: Row(
-      children: <Widget>[
-        Text("可能是下面的地点？",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        IconButton(icon: Icon(Icons.search), onPressed: clickSave)
-      ],
-    ),
+          child: Stack(
+            alignment: Alignment.center, //指定未定位或部分定位widget的对齐方式
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 10),
+              ),
+              Positioned(
+                left: 0.0,
+                child: Text("可能是下面的地点？",
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              ),
+              Positioned(
+                  right: 0.0,
+                  child: IconButton(
+                      icon: Icon(Icons.search), onPressed: clickSave))
+            ],
+          ),
           padding: EdgeInsets.all(15),
         ),
         Container(
@@ -366,11 +379,9 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   clickPOI(Poilocation location) {
-      pickPoiLocation = location;
-      //_currentLatLng = LatLng(location.latLonPoint.latitude, location.latLonPoint.longitude);
-      setState(() {
-
-      });
+    pickPoiLocation = location;
+    //_currentLatLng = LatLng(location.latLonPoint.latitude, location.latLonPoint.longitude);
+    setState(() {});
   }
 
   deleteTargetPeople(String name) {
@@ -452,12 +463,15 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
 
     ///自定义地点保存
-    if (pickPoiLocation != null && StringUtil.isNotEmpty(pickPoiLocation.snippet)) {
-        story.customAddress = pickPoiLocation.snippet;
-        StoryHelper().updateCustomAddress(story);
-        ///存储该pick 点 如果没存过的话
+    if (pickPoiLocation != null &&
+        StringUtil.isNotEmpty(pickPoiLocation.snippet)) {
+      story.customAddress = pickPoiLocation.snippet;
+      StoryHelper().updateCustomAddress(story);
+
+      ///存储该pick 点 如果没存过的话
 
     }
+
     ///返回
     if (isFlag) {
       Navigator.pop(context);
@@ -465,7 +479,8 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   getShowAddress(Story story) {
-    if (pickPoiLocation != null && StringUtil.isNotEmpty(pickPoiLocation.snippet)) {
+    if (pickPoiLocation != null &&
+        StringUtil.isNotEmpty(pickPoiLocation.snippet)) {
       return pickPoiLocation.snippet;
     }
     if (StringUtil.isNotEmpty(story.customAddress)) {
