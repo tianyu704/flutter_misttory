@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:amap_base/amap_base.dart';
+import 'package:amap_base/src/search/model/poi_result.dart';
+import 'package:amap_base/src/search/model/poi_search_query.dart';
+import 'package:amap_base/src/search/model/poi_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
@@ -8,6 +11,7 @@ import 'package:misstory/db/helper/person_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/helper/tag_helper.dart';
 import 'package:misstory/models/person.dart';
+import 'package:misstory/models/poilocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/models/tag.dart';
 import 'package:misstory/utils/string_util.dart';
@@ -30,6 +34,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///备注
   TextEditingController _descTextFieldVC = TextEditingController();
   FocusNode _descFocusNode = new FocusNode();
+
   ///
   AMapController _controller;
   LatLng _currentLatLng;
@@ -46,6 +51,11 @@ class _EditPageState extends LifecycleState<EditPage> {
   List showTagList = [];
   List addTagList = [];
   List deleteTagList = [];
+
+  ///推荐的地点
+  List poiList = [];
+  ///选择了推荐的点
+  Poilocation pickPoiLocation;
   ///
 
   @override
@@ -56,16 +66,16 @@ class _EditPageState extends LifecycleState<EditPage> {
     _currentLatLng = LatLng(widget.story.lat, widget.story.lon);
     _descTextFieldVC.text =
         StringUtil.isNotEmpty(widget.story.desc) ? widget.story.desc : "";
+
     ///
     initData();
   }
 
-  initData () async {
+  initData() async {
     ///
     num storyId = widget.story.id;
-    personCacheList = await PersonHelper()
-        .queryPersonsByStoryId(storyId);
-    if (personCacheList != null && personCacheList.length > 0 ) {
+    personCacheList = await PersonHelper().queryPersonsByStoryId(storyId);
+    if (personCacheList != null && personCacheList.length > 0) {
       for (Person person in personCacheList) {
         if (StringUtil.isNotEmpty(person.name)) {
           showPeopleList.add(person.name);
@@ -82,6 +92,7 @@ class _EditPageState extends LifecycleState<EditPage> {
         }
       }
     }
+    getPoi();
   }
 
   @override
@@ -107,6 +118,14 @@ class _EditPageState extends LifecycleState<EditPage> {
             peopleTextField(context),
             locationWidget(context),
             locationMapView(context),
+            Offstage(
+              offstage: poiList == null || poiList.length == 0,
+              child: poiSectionWidget(context),
+            ),
+            Offstage(
+              offstage: poiList == null || poiList.length == 0,
+              child: poiListWidget(context),
+            ),
           ],
         ));
   }
@@ -150,10 +169,13 @@ class _EditPageState extends LifecycleState<EditPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text("标签",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 10, 10, 0),
+            child: Text("标签",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ),
           Expanded(
-            flex: 1,
+            flex: 3,
             child: TagItemsWidget(
               placeholder: "输入标签",
               list: showTagList,
@@ -174,8 +196,11 @@ class _EditPageState extends LifecycleState<EditPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text("人物",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 10, 10, 0),
+            child: Text("人物",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ),
           Expanded(
             flex: 1,
             child: TagItemsWidget(
@@ -256,6 +281,98 @@ class _EditPageState extends LifecycleState<EditPage> {
     );
   }
 
+  Widget poiSectionWidget(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          child: Row(
+      children: <Widget>[
+        Text("可能是下面的地点？",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        IconButton(icon: Icon(Icons.search), onPressed: clickSave)
+      ],
+    ),
+          padding: EdgeInsets.all(15),
+        ),
+        Container(
+          color: Colors.black12,
+          padding: EdgeInsets.all(1),
+        ),
+      ],
+    );
+  }
+
+  Widget poiListWidget(BuildContext context) {
+    List<Widget> widgets = [];
+    for (Poilocation p in poiList) {
+      if (StringUtil.isNotEmpty(p.snippet)) widgets.add(poiCell(p));
+    }
+
+    Widget content = Wrap(
+        verticalDirection: VerticalDirection.down,
+        alignment: WrapAlignment.start,
+        spacing: 8.0,
+        // gap between adjacent chips
+        runSpacing: 4.0,
+        // gap between lines
+        direction: Axis.horizontal,
+        //方向
+        children: widgets);
+    return content;
+  }
+
+  Widget poiCell(Poilocation p) {
+    String poiName = p.snippet;
+    final size = MediaQuery.of(context).size;
+    return InkWell(
+      child: SizedBox(
+          width: size.width,
+          height: 50.0,
+          child: Padding(
+            child: Text(poiName),
+            padding: EdgeInsets.all(15),
+          )),
+      onTap: () {
+        clickPOI(p);
+      },
+    );
+  }
+
+  getPoi() async {
+    LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
+
+    PoiResult poiResult = await AMapSearch().searchPoiBound(
+      PoiSearchQuery(
+        query: "",
+        location: latLng,
+
+        /// iOS必须
+        searchBound: SearchBound(
+          center: latLng,
+          range: 100,
+
+          ///兴趣点范围阈值📌TODO：暂定1000m
+        ),
+
+        /// Android必须
+      ),
+    );
+    poiResult.pois.reversed
+        .forEach((item) => poiList.add(Poilocation.fromJson(item.toJson())));
+    if (poiList != null && poiList.length > 0) {
+      setState(() {});
+    }
+  }
+
+  clickPOI(Poilocation location) {
+      pickPoiLocation = location;
+      //_currentLatLng = LatLng(location.latLonPoint.latitude, location.latLonPoint.longitude);
+      setState(() {
+
+      });
+  }
+
   deleteTargetPeople(String name) {
     deletePeopleList.add(name);
     showPeopleList.remove(name);
@@ -297,13 +414,14 @@ class _EditPageState extends LifecycleState<EditPage> {
     ///备注保存
     if (StringUtil.isNotEmpty(_descTextFieldVC.text)) {
       story.desc = _descTextFieldVC.text;
-      StoryHelper().updateCustomAddress(story);
+      StoryHelper().updateStoryDesc(story);
       isFlag = true;
     }
+
     ///标签保存
     for (String name in addTagList) {
       if (!tagPreList.contains(name)) {
-        TagHelper().createTag(TagHelper().createTagWithName(name,story.id));
+        TagHelper().createTag(TagHelper().createTagWithName(name, story.id));
         isFlag = true;
       }
     }
@@ -315,11 +433,13 @@ class _EditPageState extends LifecycleState<EditPage> {
         isFlag = true;
       }
     }
+
     ///人物保存
     for (String name in addPeopleList) {
       if (!peoplePreList.contains(name)) {
-          PersonHelper().createPerson(PersonHelper().createPersonWithName(name,story.id));
-          isFlag = true;
+        PersonHelper()
+            .createPerson(PersonHelper().createPersonWithName(name, story.id));
+        isFlag = true;
       }
     }
     for (String name in deletePeopleList) {
@@ -331,8 +451,13 @@ class _EditPageState extends LifecycleState<EditPage> {
       }
     }
 
+    ///自定义地点保存
+    if (pickPoiLocation != null && StringUtil.isNotEmpty(pickPoiLocation.snippet)) {
+        story.customAddress = pickPoiLocation.snippet;
+        StoryHelper().updateCustomAddress(story);
+        ///存储该pick 点 如果没存过的话
 
-    ///地点保存
+    }
     ///返回
     if (isFlag) {
       Navigator.pop(context);
@@ -340,6 +465,12 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   getShowAddress(Story story) {
+    if (pickPoiLocation != null && StringUtil.isNotEmpty(pickPoiLocation.snippet)) {
+      return pickPoiLocation.snippet;
+    }
+    if (StringUtil.isNotEmpty(story.customAddress)) {
+      return story.customAddress;
+    }
     if (StringUtil.isEmpty(story.aoiName)) {
       return StringUtil.isEmpty(story.poiName) ? story.address : story.poiName;
     }

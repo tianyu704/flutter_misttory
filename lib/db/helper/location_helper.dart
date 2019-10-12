@@ -101,8 +101,6 @@ class LocationHelper {
     if (lastStory != null) {
       time = lastStory.createTime;
     }
-    Mslocation lo = await queryLastLocation();
-    print(lo.time);
     List result = await Query(DBManager.tableLocation)
         .orderBy(["time"]).whereByColumFilters([
       WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, time)
