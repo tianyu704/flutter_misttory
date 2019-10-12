@@ -12,6 +12,7 @@ abstract class ThemeBase {
   Color colorMainText;
   Color colorContentText;
   Color colorDescText;
+  Color colorLocationText;
   Color colorHomeBg;
   Color colorDialog;
   Color colorConfirm;
@@ -21,6 +22,7 @@ abstract class ThemeBase {
   Color colorUnLike;
   Color colorLikeBorder;
   Color colorDiscBg;
+  Color colorBgCard;
   Color colorCardShadow;
   Color colorArrowRight;
   Color colorSwitch;

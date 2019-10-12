@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_amap_location_plugin/amap_location_lib.dart' as amap;
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:full_icon_button/full_icon_text.dart';
 import 'package:grouped_listview/grouped_listview.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +14,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -34,7 +37,8 @@ class _HomePageState extends LifecycleState<HomePage> {
   List<Story> _stories = List<Story>();
   amap.AMapLocation _aMapLocation;
   StreamSubscription _subscription;
-  String time = DateFormat("MM-dd HH:mm").format(DateTime.now());
+  int _day = 0, _footprint = 0;
+  Timer _timer;
 
   @override
   void initState() {
@@ -42,6 +46,18 @@ class _HomePageState extends LifecycleState<HomePage> {
     super.initState();
     checkPermission();
     initData();
+    _startTimerRefresh();
+  }
+
+  /// 开始每隔1分钟刷新逻辑
+  _startTimerRefresh() {
+    Future.delayed(Duration(seconds: 60 - DateTime.now().second), () {
+      _timer = Timer.periodic(Duration(seconds: LocationConfig.refreshTime),
+          (timer) async {
+        _stories = await StoryHelper().checkLatestStory(_stories);
+        setState(() {});
+      });
+    });
   }
 
   /// 检查权限
@@ -95,6 +111,8 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   initData() async {
     await LocationHelper().createStoryByLocation();
+    _day = await StoryHelper().getStoryDays();
+    _footprint = await StoryHelper().getFootprint();
     _stories = await StoryHelper().findAllStories();
     setState(() {});
   }
@@ -103,11 +121,44 @@ class _HomePageState extends LifecycleState<HomePage> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
+      backgroundColor: AppStyle.colors(context).colorBgPage,
       appBar: AppBar(
-        title: Text("今天,open:$time"),
-        centerTitle: true,
+        centerTitle: false,
+        title: _buildHeader(),
+        backgroundColor: AppStyle.colors(context).colorBgPage,
+        elevation: 0,
       ),
-      body: storyListWidget(context),
+      body: Column(
+        children: <Widget>[
+//          _buildHeader(),
+          Expanded(
+            flex: 1,
+            child: _storyListWidget(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return SizedBox(
+      width: double.infinity,
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+                text: " ${_day == 0 ? "--" : _day}",
+                style: AppStyle.primaryText28(context)),
+            TextSpan(text: " 天 ", style: AppStyle.contentText16(context)),
+            TextSpan(
+                text: "${_footprint == 0 ? "--" : _footprint}",
+                style: AppStyle.primaryText28(context)),
+            TextSpan(text: " 个足迹", style: AppStyle.contentText16(context)),
+          ],
+        ),
+        style: TextStyle(fontWeight: FontWeight.normal),
+        textAlign: TextAlign.start,
+      ),
     );
   }
 
@@ -121,21 +172,82 @@ class _HomePageState extends LifecycleState<HomePage> {
     }
     return Card(
       clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      margin: EdgeInsets.only(left: 40, top: 8, bottom: 8, right: 16),
+      color: AppStyle.colors(context).colorBgCard,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10))),
+      elevation: 0,
       child: InkWell(
         child: Padding(
-          padding: EdgeInsets.all(15),
+          padding: EdgeInsets.all(16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text("$date "),
-              Icon(Icons.location_on, size: 17),
-              Expanded(flex: 1, child: Text(getShowAddress(story))),
-              Text(DateUtil.getStayShowTime(story.intervalTime)),
-              Padding(
-                padding: EdgeInsets.only(left: 10),
-                child: Icon(Icons.mode_edit, size: 17),
+              SizedBox(
+                width: 56,
+                child: Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Text(
+                    "$date",
+                    style: AppStyle.locationText14(context),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        SvgPicture.asset(
+                          StringUtil.isEmpty(story.customAddress)
+                              ? "assets/images/icon_location_empty.svg"
+                              : "assets/images/icon_location_fill.svg",
+                          width: 14,
+                          height: 14,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 10),
+                          child: Text(
+                            StringUtil.isEmpty(story.customAddress)
+                                ? story.defaultAddress
+                                : story.customAddress,
+                            style: AppStyle.locationText14(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    Row(
+                      children: <Widget>[
+                        SvgPicture.asset(
+                          "assets/images/icon_remain_time.svg",
+                          width: 12,
+                          height: 12,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 11),
+                          child: Text(
+                            DateUtil.getStayShowTime(story.intervalTime),
+                            style: AppStyle.descText12(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Offstage(
+                      offstage: StringUtil.isEmpty(story.desc),
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 16),
+                        child: Text(
+                          story?.desc ?? "",
+                          style: AppStyle.contentText12(context),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -148,33 +260,28 @@ class _HomePageState extends LifecycleState<HomePage> {
     );
   }
 
-  ///显示的地址
-  getShowAddress(Story story) {
-    if (StringUtil.isEmpty(story.aoiName)) {
-      return StringUtil.isEmpty(story.poiName) ? story.address : story.poiName;
-    }
-    return story.aoiName;
-  }
-
   ///分组的UI卡片
-  Widget groupSectionWidget(BuildContext context, String groupName) {
+  Widget _groupSectionWidget(BuildContext context, String groupName) {
     return SizedBox(
-        child: Padding(
-      padding: EdgeInsets.all(10),
-      child:
-          Text("•   $groupName", style: TextStyle(fontWeight: FontWeight.bold)),
-    ));
+      child: Padding(
+        padding: EdgeInsets.only(left: 24, top: 8, bottom: 8),
+        child: Text(
+          DateUtil.getMonthDayWeek(context, groupName),
+          style: AppStyle.mainText16(context, fontWeight: FontWeight.w500),
+        ),
+      ),
+    );
   }
 
   ///分组设置卡片布局
-  Widget storyListWidget(BuildContext context) {
+  Widget _storyListWidget(BuildContext context) {
     return GroupedListView<Story, String>(
       collection: _stories,
       groupBy: (Story g) => g.date,
       listBuilder: (BuildContext context, Story g) =>
           _buildCardItem(context, g),
       groupBuilder: (BuildContext context, String name) =>
-          groupSectionWidget(context, name),
+          _groupSectionWidget(context, name),
     );
   }
 
@@ -183,6 +290,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     // TODO: implement dispose
     _subscription.cancel();
     _aMapLocation.dispose();
+    _timer.cancel();
     super.dispose();
   }
 }
