@@ -150,10 +150,13 @@ class _EditPageState extends LifecycleState<EditPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text("标签",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 10, 10, 0),
+            child:  Text("标签",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ),
           Expanded(
-            flex: 1,
+            flex: 3,
             child: TagItemsWidget(
               placeholder: "输入标签",
               list: showTagList,
@@ -174,8 +177,11 @@ class _EditPageState extends LifecycleState<EditPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text("人物",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 10, 10, 0),
+            child:  Text("人物",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ),
           Expanded(
             flex: 1,
             child: TagItemsWidget(

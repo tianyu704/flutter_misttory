@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:misstory/utils/string_util.dart';
 
-
 typedef ClickTagItemCallback = void Function(String name);
 typedef ClickKeyboardCallback = void Function(String name);
 
@@ -16,30 +15,74 @@ class TagItemsWidget extends StatelessWidget {
   FocusNode _tagFocusNode = new FocusNode();
 
   ///
-  TagItemsWidget({
-    Key key,
-    this.list,
-    this.placeholder,
-    this.clickTagItemCallAction,
-    this.finishedAction
-  }) : super(key: key);
+  TagItemsWidget(
+      {Key key,
+      this.list,
+      this.placeholder,
+      this.clickTagItemCallAction,
+      this.finishedAction})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     List<Widget> peopleLists = [];
     for (String name in list) {
-      peopleLists.add(
-          TagItemWidget(
-            name: name,
-            clickAction: clickTagItemCallAction,
-          ));
+      peopleLists.add(TagItemWidget(
+        name: name,
+        clickAction: clickTagItemCallAction,
+      ));
     }
-    peopleLists.add(TextField(
+    peopleLists.add(_editText(context));
+
+    Widget content = Wrap(
+        verticalDirection : VerticalDirection.down,
+        alignment : WrapAlignment.start,
+        spacing: 8.0, // gap between adjacent chips
+        runSpacing: 4.0, // gap between lines
+        direction: Axis.horizontal, //方向
+        children: peopleLists);
+    return content;
+  }
+  ///编辑
+  Widget _editText(BuildContext context) {
+
+
+    return Container(
+      constraints: BoxConstraints(
+         minWidth: 80,
+        maxWidth: 300
+
+      ),
+
+      child: TextField(
+        controller: _tagTextFieldVC,
+        focusNode: _tagFocusNode,
+        enabled: true,
+        minLines: 1,
+        textInputAction: TextInputAction.done,
+        decoration: InputDecoration(
+          hintText: StringUtil.isEmpty(placeholder) ? "" : placeholder,
+          contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+        ),
+        onEditingComplete: () {
+          String str = _tagTextFieldVC.text;
+          if (str.length > 0) {
+            finishedAction(_tagTextFieldVC.text);
+            _tagTextFieldVC.text = "";
+          } else {
+            _tagFocusNode.unfocus();
+          }
+        },
+      ),
+
+    );
+
+
+    return TextField(
       controller: _tagTextFieldVC,
       focusNode: _tagFocusNode,
       enabled: true,
       minLines: 1,
-
       textInputAction: TextInputAction.done,
       decoration: InputDecoration(
         hintText: StringUtil.isEmpty(placeholder) ? "" : placeholder,
@@ -54,16 +97,11 @@ class TagItemsWidget extends StatelessWidget {
           _tagFocusNode.unfocus();
         }
       },
-    ));
-
-    Widget content = Wrap(
-        spacing: 8.0, // gap between adjacent chips
-        runSpacing: 0.0, // gap between lines
-        direction: Axis.horizontal, //方向
-        children: peopleLists);
-    return content;
+    );
   }
 }
+
+
 
 ///单个标签🏷
 class TagItemWidget extends StatelessWidget {
@@ -71,19 +109,21 @@ class TagItemWidget extends StatelessWidget {
   final String name;
   final ClickTagItemCallback clickAction;
 
-  TagItemWidget({
-    Key key,
-    this.size = 40,
-    @required this.name,
-    @required this.clickAction
-  }) : super(key: key);
+  TagItemWidget(
+      {Key key,
+      this.size = 40,
+      @required this.name,
+      @required this.clickAction})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
     return InputChip(
         clipBehavior: Clip.antiAlias,
-        label: Text(name, style: TextStyle(fontSize: 16),),
+        label: Text(
+          name,
+          style: TextStyle(fontSize: 16),
+        ),
         deleteIcon: Icon(
           Icons.close,
           color: Colors.white,
@@ -98,7 +138,6 @@ class TagItemWidget extends StatelessWidget {
         },
         onPressed: () {
           clickAction(name);
-        }
-    );
+        });
   }
 }
