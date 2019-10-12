@@ -25,9 +25,10 @@ class LocationHelper {
         return await updateLocationTime(lastLocation.id, location);
       } else {
         if (lastLocation.aoiname == location.aoiname) {
-          if(location.aoiname == null && lastLocation.poiname != location.poiname){
+          if (location.aoiname == null &&
+              lastLocation.poiname != location.poiname) {
             return await createLocation(location);
-          }else{
+          } else {
             if (await getDistanceBetween(location, lastLocation) >
                 LocationConfig.judgeDistanceNum) {
               return await createLocation(location);
@@ -112,7 +113,10 @@ class LocationHelper {
         if (mslocation?.updatetime == null) {
           mslocation.updatetime = mslocation.time;
         }
-        await StoryHelper().judgeLocation(mslocation);
+        if (mslocation.updatetime - mslocation.time >=
+            LocationConfig.judgeUsefulLocation) {
+          await StoryHelper().judgeLocation(mslocation);
+        }
       }
       debugPrint("=================Create Story By Location Finish");
     }

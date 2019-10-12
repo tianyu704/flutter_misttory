@@ -14,12 +14,16 @@ import 'package:provider/provider.dart';
 
 import 'db/local_storage.dart';
 import 'generated/i18n.dart';
+import 'style/app_style.dart';
 
 void main() async {
   /// 初始化数据库
   await DBManager.initDB();
   await AMap.init('11bcf7a88c8b1a9befeefbaa2ceaef71');
   await StoryHelper().deleteMisstory();
+  await StoryHelper().updateAllDefaultAddress();
+  await StoryHelper().deleteUnUsefulStory();
+
   /// 主题
   bool isNight = (await LocalStorage.get(LocalStorage.isNight)) ?? false;
   if (Platform.isAndroid) {
@@ -40,8 +44,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Misstory",
       onGenerateTitle: (context) => S.of(context).appName,
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        backgroundColor: AppStyle.colors(context).colorBgPage,
+        accentColor: AppStyle.colors(context).colorAccent,
+        primaryColor: AppStyle.colors(context).colorPrimary,
+        appBarTheme: AppBarTheme(
+          brightness: ThemeProvider.getAppTheme(context) == AppTheme.light
+              ? Brightness.light
+              : Brightness.dark,
+        ),
       ),
       localizationsDelegates: const [
         S.delegate,

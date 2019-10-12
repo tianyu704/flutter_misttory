@@ -1,3 +1,6 @@
+import 'package:flutter/widgets.dart';
+import 'package:misstory/generated/i18n.dart';
+
 class DateUtil {
   static String getStayShowTime(num time) {
     int day = time ~/ (60 * 60 * 1000 * 24);
@@ -7,14 +10,43 @@ class DateUtil {
     String hourStr = "";
     String minStr = "";
     if (day > 0) {
-      dayStr = "${day}d";
+      dayStr = "${day}d ";
     }
     if (hour > 0) {
-      hourStr = "${hour}h";
+      hourStr = "${hour}h ";
     }
     if (min > 0) {
       minStr = "${min}min";
     }
-    return "停留 $dayStr$hourStr$minStr";
+    return "$dayStr$hourStr$minStr";
+  }
+
+  /// 2019.7.12转换成7月12日星期三
+  static String getMonthDayWeek(BuildContext context, String date) {
+    if (date.isEmpty) {
+      return "";
+    }
+    List<String> dateList = date.split(".");
+    DateTime dateTime = DateTime(
+        int.parse(dateList[0]), int.parse(dateList[1]), int.parse(dateList[2]));
+    List<String> weekList = getWeekList(context);
+    DateTime current = DateTime.now();
+    if (dateTime.year == current.year) {
+      return "${dateTime.month}月${dateTime.day} ${weekList[dateTime.weekday]}";
+    } else {
+      return "${dateTime.year}年${dateTime.month}月${dateTime.day} ${weekList[dateTime.weekday]}";
+    }
+  }
+
+  static List<String> getWeekList(BuildContext context) {
+    return [
+      S.of(context).sunday,
+      S.of(context).monday,
+      S.of(context).tuesday,
+      S.of(context).wednesday,
+      S.of(context).thursday,
+      S.of(context).friday,
+      S.of(context).saturday,
+    ];
   }
 }

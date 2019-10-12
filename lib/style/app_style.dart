@@ -38,10 +38,9 @@ class AppStyle {
       Provider.of<ThemeProvider>(context).themeBase;
 
   static TextStyle mainText12(BuildContext context,
-          {bold = false, weight = FontWeight.normal,color = null}
-          ) =>
+          {bold = false, weight = FontWeight.normal, color = null}) =>
       TextStyle(
-          color: color == null ? colors(context).colorMainText : color ,
+          color: color == null ? colors(context).colorMainText : color,
           fontSize: 12,
           fontWeight: bold ? FontWeight.bold : weight);
 
@@ -52,11 +51,12 @@ class AppStyle {
           fontSize: 14,
           fontWeight: bold ? FontWeight.bold : weight);
 
-  static TextStyle mainText16(BuildContext context, {bold = false}) =>
+  static TextStyle mainText16(BuildContext context,
+          {fontWeight = FontWeight.normal}) =>
       TextStyle(
           color: colors(context).colorMainText,
           fontSize: 16,
-          fontWeight: bold ? FontWeight.bold : FontWeight.normal);
+          fontWeight: fontWeight);
 
   static TextStyle mainText18(BuildContext context, {bold = false}) =>
       TextStyle(
@@ -90,4 +90,12 @@ class AppStyle {
 
   static TextStyle descText12(BuildContext context) =>
       TextStyle(color: colors(context).colorDescText, fontSize: 12);
+
+  static TextStyle primaryText28(BuildContext context) =>
+      TextStyle(color: colors(context).colorPrimary, fontSize: 28);
+
+  static TextStyle locationText14(BuildContext context) =>
+      TextStyle(color: colors(context).colorLocationText, fontSize: 14);
+  static TextStyle locationText16(BuildContext context) =>
+      TextStyle(color: colors(context).colorLocationText, fontSize: 16);
 }

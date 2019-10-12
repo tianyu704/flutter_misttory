@@ -60,6 +60,9 @@ class Story {
   @JsonKey(name: "custom_address")
   String customAddress;
 
+  @JsonKey(name: "default_address")
+  String defaultAddress;
+
   String desc;
 
   @JsonKey(name: "is_delete")

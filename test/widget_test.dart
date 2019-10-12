@@ -47,4 +47,11 @@ void main() {
     list.forEach((item){print(item.toJson());});
 
   });
+
+  test("insert",(){
+    List list =[1,2,3,4];
+    List list1 =[5,6,7,8];
+    list1.insertAll(0, list);
+    print(list1);
+  });
 }

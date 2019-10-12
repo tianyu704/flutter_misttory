@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:intl/intl.dart';
+import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/calculate_util.dart';
@@ -61,30 +62,59 @@ class StoryHelper {
   }
 
   /// 读取库中的全部数据
-  Future<List> findAllStories() async {
+  Future<List<Story>> findAllStories() async {
     List result = await Query(DBManager.tableStory).whereByColumFilters([
-      WhereCondiction(
-          "interval_time", WhereCondictionType.EQ_OR_MORE_THEN, 60000)
+      WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
+          LocationConfig.judgeUsefulLocation)
     ]).all();
     List<Story> list = [];
-    Story lastStory = await queryLastStory();
+
     if (result != null && result.length > 0) {
       result.reversed.forEach((item) {
         Story story = Story.fromJson(Map<String, dynamic>.from(item));
         list.addAll(separateStory(story));
       });
-      if (lastStory == null || lastStory.id == list[0].id) {
-        return list;
-      } else {
-        lastStory.date = getShowTime(lastStory.createTime);
-        list.insert(0, lastStory);
-        return list;
+    }
+    return await checkLatestStory(list);
+  }
+
+  /// 检查当前story位置之后最新的story和Location，并放入story中
+  Future<List<Story>> checkLatestStory(List<Story> stories) async {
+    if (stories == null) {
+      stories = List<Story>();
+    }
+
+    /// 检测给的stories集合之后的story并放入集合中
+    if (stories != null && stories.length > 0) {
+      List result = await Query(DBManager.tableStory).whereByColumFilters([
+        WhereCondiction(
+            "create_time", WhereCondictionType.MORE_THEN, stories[0].createTime)
+      ]).all();
+      if (result != null && result.length > 0) {
+        result.reversed.forEach((item) {
+          Story story = Story.fromJson(Map<String, dynamic>.from(item));
+          stories.addAll(separateStory(story));
+        });
       }
     }
-    if (lastStory != null) {
-      list.add(lastStory);
+
+    /// 检测定位中最新的一条是否在story中，不在就添加上
+    Mslocation mslocation = await LocationHelper().queryLastLocation();
+    Story lastStory;
+    if (mslocation != null) {
+      lastStory = createStoryWithLocation(mslocation);
+      lastStory.date = getShowTime(lastStory.createTime);
     }
-    return list;
+    if (lastStory != null &&
+        (stories.length == 0 ||
+            stories[0].createTime != lastStory.createTime)) {
+      stories.insert(0, lastStory);
+    }
+    if (stories.length > 0) {
+      stories[0].updateTime = DateTime.now().millisecondsSinceEpoch;
+      stories[0].intervalTime = stories[0].updateTime - stories[0].createTime;
+    }
+    return stories;
   }
 
   /// 判断story是否在同一天，不在同一天就分割成多天
@@ -143,6 +173,40 @@ class StoryHelper {
     return null;
   }
 
+  /// 查询记录的天数
+  Future<int> getStoryDays() async {
+    Map story1 =
+        await Query(DBManager.tableStory).orderBy(["create_time desc"]).first();
+    Map story2 =
+        await Query(DBManager.tableStory).orderBy(["create_time asc"]).first();
+    if (story1 != null && story2 != null) {
+      num time1 = story1["create_time"] as num;
+      num time2 = story2["create_time"] as num;
+      DateTime dateTime1 = DateTime.fromMillisecondsSinceEpoch(time1.toInt());
+      DateTime dateTime2 = DateTime.fromMillisecondsSinceEpoch(time2.toInt());
+      return DateTime(dateTime1.year, dateTime1.month, dateTime1.day)
+              .difference(
+                  DateTime(dateTime2.year, dateTime2.month, dateTime2.day))
+              .inDays +
+          1;
+    }
+    return 0;
+  }
+
+  /// 查询足迹，相同的story算一个点
+  Future<int> getFootprint() async {
+    List list1 = await Query(DBManager.tableStory).needColums(
+        ["default_address"]).groupBy(["default_address"]).whereByColumFilters([
+      WhereCondiction("custom_address", WhereCondictionType.IS_NULL, true)
+    ]).all();
+    List list2 = await Query(DBManager.tableStory).needColums(
+        ["custom_address"]).groupBy(["custom_address"]).whereByColumFilters([
+      WhereCondiction("custom_address", WhereCondictionType.IS_NULL, false)
+    ]).all();
+    return (list1?.length ?? 0) + (list2?.length ?? 0);
+  }
+
+  /// 根据Location创建story
   Story createStoryWithLocation(Mslocation location) {
     Story story = Story();
     story.lat = location.lat;
@@ -165,9 +229,17 @@ class StoryHelper {
     story.createTime = location.time;
     story.updateTime = location.updatetime;
     story.intervalTime = location.updatetime - location.time;
+    story.defaultAddress = getDefaultAddress(story);
     story.isDelete = false;
     //TODO:
     return story;
+  }
+
+  /// 获取默认address
+  String getDefaultAddress(Story story) {
+    return StringUtil.isEmpty(story.aoiName)
+        ? (StringUtil.isEmpty(story.poiName) ? story.address : story.poiName)
+        : story.aoiName;
   }
 
   ///坐标点更新故事或创建故事
@@ -224,5 +296,38 @@ class StoryHelper {
     LatLng latLng2 = LatLng(116.4929, 39.900061);
     return await CalculateTools().calcDistance(latLng1, latLng2);
 //    return await CalculateUtil.calculateLineDistance(latLng1, latLng2);
+  }
+
+  /// 给库中数据默认上default_address
+  Future updateAllDefaultAddress() async {
+    List list = await Query(DBManager.tableStory).whereByColumFilters([
+      WhereCondiction("default_address", WhereCondictionType.IS_NULL, true)
+    ]).all();
+    if (list != null && list.length > 0) {
+      Map<String, dynamic> map;
+      num id;
+      String aoiname, poiname, address;
+      String defaultAddress;
+      for (int i = 0; i < list.length; i++) {
+        map = Map<String, dynamic>.from(list[i]);
+        id = map["id"] as num;
+        aoiname = map["aoi_name"] as String;
+        poiname = map["poi_name"] as String;
+        address = map["address"] as String;
+        defaultAddress = StringUtil.isEmpty(aoiname)
+            ? (StringUtil.isEmpty(poiname) ? address : poiname)
+            : aoiname;
+        await Query(DBManager.tableStory)
+            .primaryKey([id]).update({"default_address": defaultAddress});
+      }
+    }
+  }
+
+  /// 删除无用的story
+  Future deleteUnUsefulStory() async {
+    await Query(DBManager.tableStory).whereByColumFilters([
+      WhereCondiction("interval_time", WhereCondictionType.LESS_THEN,
+          LocationConfig.judgeUsefulLocation)
+    ]).delete();
   }
 }
