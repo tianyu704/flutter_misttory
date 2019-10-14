@@ -32,21 +32,21 @@ class DateUtil {
     List<String> weekList = getWeekList(context);
     DateTime current = DateTime.now();
     if (dateTime.year == current.year) {
-      return "${dateTime.month}月${dateTime.day} ${weekList[dateTime.weekday]}";
+      return "${dateTime.month}月${dateTime.day} ${weekList[dateTime.weekday-1]}";
     } else {
-      return "${dateTime.year}年${dateTime.month}月${dateTime.day} ${weekList[dateTime.weekday]}";
+      return "${dateTime.year}年${dateTime.month}月${dateTime.day} ${weekList[dateTime.weekday-1]}";
     }
   }
 
   static List<String> getWeekList(BuildContext context) {
     return [
-      S.of(context).sunday,
       S.of(context).monday,
       S.of(context).tuesday,
       S.of(context).wednesday,
       S.of(context).thursday,
       S.of(context).friday,
       S.of(context).saturday,
+      S.of(context).sunday,
     ];
   }
 }
