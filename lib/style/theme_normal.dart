@@ -25,6 +25,14 @@ class ThemeNormal extends ThemeBase {
   @override
   Color colorLocationText = Color(0xFF273963);
   @override
+  Color colorCancelText = Color(0xFF999999);
+  @override
+  Color colorSaveText = Color(0xFF607CFF);
+  @override
+  Color colorPlaceholderText = Color(0xFFB2B7C2);
+  @override
+  Color colorTextFieldLine = Color(0xFFEEEEEE);
+  @override
   Color colorHomeBg = Color(0xFFFAFAFA);
   @override
   Color colorDialog = Color(0xFFFFFFFF);

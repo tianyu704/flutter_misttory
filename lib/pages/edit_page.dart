@@ -6,6 +6,7 @@ import 'package:amap_base/src/search/model/poi_search_query.dart';
 import 'package:amap_base/src/search/model/poi_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/person_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
@@ -14,6 +15,7 @@ import 'package:misstory/models/person.dart';
 import 'package:misstory/models/poilocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/models/tag.dart';
+import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/tag_items_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -59,6 +61,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   Poilocation pickPoiLocation;
 
   ///
+  String _showTimeStr = "";
 
   @override
   void initState() {
@@ -68,6 +71,8 @@ class _EditPageState extends LifecycleState<EditPage> {
     _currentLatLng = LatLng(widget.story.lat, widget.story.lon);
     _descTextFieldVC.text =
         StringUtil.isNotEmpty(widget.story.desc) ? widget.story.desc : "";
+    _showTimeStr = DateFormat("MM月dd日 HH:mm").format(
+        DateTime.fromMillisecondsSinceEpoch(widget.story.createTime.toInt()));
 
     ///
     initData();
@@ -106,18 +111,49 @@ class _EditPageState extends LifecycleState<EditPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("编辑"),
+        appBar:
+//        AppBar(
+//          title: Text("编辑"),
+//          actions: <Widget>[
+//            IconButton(icon: Icon(Icons.save), onPressed: clickSave)
+//          ],
+//        ),
+
+            AppBar(
+          leading: RawMaterialButton(
+            shape: CircleBorder(
+                side: BorderSide(
+              color: Colors.white,
+            )),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              '取消',
+              style: AppStyle.navCancelText(context),
+            ),
+          ),
+          title: Text(_showTimeStr, style: AppStyle.mainText17(context)),
+          centerTitle: true,
+          backgroundColor: AppStyle.colors(context).colorBgPage,
+          elevation: 0,
           actions: <Widget>[
-            IconButton(icon: Icon(Icons.save), onPressed: clickSave)
+            RawMaterialButton(
+              onPressed: clickSave,
+              child: Text('保存', style: AppStyle.navSaveText(context)),
+              shape: CircleBorder(
+                  side: BorderSide(
+                color: Colors.white,
+              )),
+            ),
           ],
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppStyle.colors(context).colorBgPage,
         body: ListView(
           children: <Widget>[
             descTextField(context),
-            tagTextField(context),
-            peopleTextField(context),
+//            tagTextField(context),
+//            peopleTextField(context),
             locationWidget(context),
             locationMapView(context),
             Offstage(
@@ -220,18 +256,25 @@ class _EditPageState extends LifecycleState<EditPage> {
   //描述编辑
   Widget descTextField(BuildContext context) {
     return SizedBox(
-        height: 140,
+        height: 154,
         width: MediaQuery.of(context).size.width,
         child: Padding(
-          padding: EdgeInsets.all(10),
+          padding: EdgeInsets.only(left: 24,right: 24),
           child: TextField(
             controller: _descTextFieldVC,
             focusNode: _descFocusNode,
             enabled: true,
             maxLines: 5,
+            style: AppStyle.mainText14(context),
             textInputAction: TextInputAction.done,
             decoration: InputDecoration(
-              hintText: "备注",
+              hintText: "此刻我想说…",
+              hintStyle: AppStyle.placeholderText(context),
+              border: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  color:AppStyle.colors(context).colorTextFieldLine
+                )
+              )
             ),
             onEditingComplete: () {
               //TODO:监听输入完成触发
@@ -469,6 +512,7 @@ class _EditPageState extends LifecycleState<EditPage> {
       story.customAddress = pickPoiLocation.title;
       StoryHelper().updateCustomAddress(story);
       isFlag = true;
+
       ///存储该pick 点 如果没存过的话
 
     }

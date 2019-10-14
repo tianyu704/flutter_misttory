@@ -57,6 +57,11 @@ class AppStyle {
           color: colors(context).colorMainText,
           fontSize: 16,
           fontWeight: fontWeight);
+  static TextStyle mainText17(BuildContext context, {bold = false}) =>
+      TextStyle(
+          color: colors(context).colorMainText,
+          fontSize: 17,
+          fontWeight: bold ? FontWeight.w500 : FontWeight.normal);
 
   static TextStyle mainText18(BuildContext context, {bold = false}) =>
       TextStyle(
@@ -98,4 +103,12 @@ class AppStyle {
       TextStyle(color: colors(context).colorLocationText, fontSize: 14);
   static TextStyle locationText16(BuildContext context) =>
       TextStyle(color: colors(context).colorLocationText, fontSize: 16);
+
+  static TextStyle navCancelText(BuildContext context) =>
+      TextStyle(color: colors(context).colorCancelText, fontSize: 17);
+  static TextStyle navSaveText(BuildContext context) =>
+      TextStyle(color: colors(context).colorSaveText, fontSize: 17,fontWeight: FontWeight.bold);
+  static TextStyle placeholderText(BuildContext context) =>
+      TextStyle(color: colors(context).colorPlaceholderText, fontSize: 14,fontWeight: FontWeight.normal);
+
 }
