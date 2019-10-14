@@ -171,11 +171,11 @@ class _HomePageState extends LifecycleState<HomePage> {
         TextSpan(
           children: [
             TextSpan(
-                text: " ${_day == 0 ? "--" : _day}",
+                text: " ${_day == 0 ? "1" : _day}",
                 style: AppStyle.primaryText28(context)),
             TextSpan(text: " 天 ", style: AppStyle.contentText16(context)),
             TextSpan(
-                text: "${_footprint == 0 ? "--" : _footprint}",
+                text: "${_footprint == 0 ? "1" : _footprint}",
                 style: AppStyle.primaryText28(context)),
             TextSpan(text: " 个足迹", style: AppStyle.contentText16(context)),
           ],

@@ -15,7 +15,6 @@ class TagHelper {
 
   TagHelper._internal();
 
-
   Tag createTagWithName(String name, num storyId) {
     Tag tag = Tag();
     tag.tagName = name;
@@ -51,6 +50,9 @@ class TagHelper {
 
   /// 根据storyId查询tags
   Future<List<Tag>> queryTagsByStoryId(num storyId) async {
+    if (storyId == null) {
+      return null;
+    }
     List result = await Query(DBManager.tableTag).whereByColumFilters([
       WhereCondiction("story_id", WhereCondictionType.IN, [storyId])
     ]).all();

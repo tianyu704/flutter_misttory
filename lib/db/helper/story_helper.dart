@@ -218,7 +218,7 @@ class StoryHelper {
               .inDays +
           1;
     }
-    return 0;
+    return 1;
   }
 
   /// 查询足迹，相同的story算一个点
