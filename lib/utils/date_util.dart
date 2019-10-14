@@ -3,6 +3,9 @@ import 'package:misstory/generated/i18n.dart';
 
 class DateUtil {
   static String getStayShowTime(num time) {
+    if (time < 1000 * 60) {
+      return "<1min";
+    }
     int day = time ~/ (60 * 60 * 1000 * 24);
     int hour = (time - day * 24 * 60 * 60 * 1000) ~/ (60 * 60 * 1000);
     int min = (time ~/ (60 * 1000) - hour * 60 - day * 24 * 60).toInt();
@@ -32,9 +35,9 @@ class DateUtil {
     List<String> weekList = getWeekList(context);
     DateTime current = DateTime.now();
     if (dateTime.year == current.year) {
-      return "${dateTime.month}月${dateTime.day} ${weekList[dateTime.weekday-1]}";
+      return "${dateTime.month}月${dateTime.day}日 ${weekList[dateTime.weekday - 1]}";
     } else {
-      return "${dateTime.year}年${dateTime.month}月${dateTime.day} ${weekList[dateTime.weekday-1]}";
+      return "${dateTime.year}年${dateTime.month}月${dateTime.day}日 ${weekList[dateTime.weekday - 1]}";
     }
   }
 
