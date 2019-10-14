@@ -13,6 +13,10 @@ abstract class ThemeBase {
   Color colorContentText;
   Color colorDescText;
   Color colorLocationText;
+  Color colorCancelText; //导航取消按钮
+  Color colorSaveText;   //导航保存按钮
+  Color colorPlaceholderText;//placeholder
+  Color colorTextFieldLine;  //TextField
   Color colorHomeBg;
   Color colorDialog;
   Color colorConfirm;
