@@ -6,6 +6,7 @@ import 'package:amap_base/src/search/model/poi_search_query.dart';
 import 'package:amap_base/src/search/model/poi_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/person_helper.dart';
@@ -177,19 +178,23 @@ class _EditPageState extends LifecycleState<EditPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text("地点",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             Padding(
-              padding: EdgeInsets.only(left: 10),
-            ),
-            Icon(Icons.location_on, size: 17),
-            Padding(
-              padding: EdgeInsets.only(left: 5),
+              padding: EdgeInsets.only(top: 3),
+              child: SvgPicture.asset(
+                StringUtil.isEmpty(widget.story.customAddress)
+                    ? "assets/images/icon_location_empty.svg"
+                    : "assets/images/icon_location_fill.svg",
+                width: 14,
+                height: 14,
+              ),
             ),
             Expanded(
-                flex: 1,
+              child: Padding(
+                padding: EdgeInsets.only(left: 10),
                 child: Text(getShowAddress(widget.story),
-                    style: TextStyle(fontSize: 17))),
+                    style: AppStyle.locationText14(context)),
+              ),
+            ),
           ],
         ),
       ),
@@ -259,7 +264,7 @@ class _EditPageState extends LifecycleState<EditPage> {
         height: 154,
         width: MediaQuery.of(context).size.width,
         child: Padding(
-          padding: EdgeInsets.only(left: 24,right: 24),
+          padding: EdgeInsets.only(left: 24, right: 24),
           child: TextField(
             controller: _descTextFieldVC,
             focusNode: _descFocusNode,
@@ -268,14 +273,23 @@ class _EditPageState extends LifecycleState<EditPage> {
             style: AppStyle.mainText14(context),
             textInputAction: TextInputAction.done,
             decoration: InputDecoration(
-              hintText: "此刻我想说…",
-              hintStyle: AppStyle.placeholderText(context),
-              border: UnderlineInputBorder(
-                borderSide: BorderSide(style: BorderStyle.none,
-                  color: Colors.green
-                )
-              )
-            ),
+                hintText: "此刻我想说…",
+                hintStyle: AppStyle.placeholderText(context),
+                border: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                  style: BorderStyle.solid,
+                  color: AppStyle.colors(context).colorTextFieldLine,
+                )),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                  style: BorderStyle.solid,
+                  color: AppStyle.colors(context).colorPrimary,
+                )),
+                enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                  style: BorderStyle.solid,
+                  color: AppStyle.colors(context).colorTextFieldLine,
+                ))),
             onEditingComplete: () {
               //TODO:监听输入完成触发
               _descFocusNode.unfocus();
@@ -531,9 +545,6 @@ class _EditPageState extends LifecycleState<EditPage> {
     if (StringUtil.isNotEmpty(story.customAddress)) {
       return story.customAddress;
     }
-    if (StringUtil.isEmpty(story.aoiName)) {
-      return StringUtil.isEmpty(story.poiName) ? story.address : story.poiName;
-    }
-    return story.aoiName;
+    return story.defaultAddress;
   }
 }
