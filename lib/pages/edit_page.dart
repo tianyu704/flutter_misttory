@@ -271,8 +271,8 @@ class _EditPageState extends LifecycleState<EditPage> {
               hintText: "此刻我想说…",
               hintStyle: AppStyle.placeholderText(context),
               border: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color:AppStyle.colors(context).colorTextFieldLine
+                borderSide: BorderSide(style: BorderStyle.none,
+                  color: Colors.green
                 )
               )
             ),
