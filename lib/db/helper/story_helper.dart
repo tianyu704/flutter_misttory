@@ -78,6 +78,34 @@ class StoryHelper {
     return await checkLatestStory(list);
   }
 
+  /// 根据给定time查询time-day到time之间的story
+  Future<List<Story>> queryMoreHistories({num time, num day = 2}) async {
+    bool isFirst = false;
+    if (time == null) {
+      isFirst = true;
+      time = DateTime.now().millisecondsSinceEpoch;
+    }
+    List result = await Query(DBManager.tableStory)
+        .orderBy(["create_time desc"])
+        .whereByColumFilters([
+          WhereCondiction("create_time", WhereCondictionType.LESS_THEN, time)
+        ])
+        .limit(20)
+        .all();
+    List<Story> list = [];
+    if (result != null && result.length > 0) {
+      result.forEach((item) {
+        Story story = Story.fromJson(Map<String, dynamic>.from(item));
+        list.addAll(separateStory(story));
+      });
+    }
+    if (isFirst) {
+      return await checkLatestStory(list);
+    } else {
+      return list;
+    }
+  }
+
   /// 检查当前story位置之后最新的story和Location，并放入story中
   Future<List<Story>> checkLatestStory(List<Story> stories) async {
     if (stories == null) {

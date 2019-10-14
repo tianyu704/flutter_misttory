@@ -5,8 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_amap_location_plugin/amap_location_lib.dart' as amap;
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:full_icon_button/full_icon_text.dart';
-import 'package:grouped_listview/grouped_listview.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/db/helper/location_helper.dart';
@@ -17,7 +15,9 @@ import 'package:misstory/models/story.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
+import 'package:misstory/widgets/refresh_grouped_listview.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../constant.dart';
 import 'edit_page.dart';
 
@@ -37,6 +37,8 @@ class _HomePageState extends LifecycleState<HomePage> {
   List<Story> _stories = List<Story>();
   amap.AMapLocation _aMapLocation;
   StreamSubscription _subscription;
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
   int _day = 0, _footprint = 0;
   Timer _timer;
 
@@ -78,6 +80,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     }
   }
 
+  ///初始化并开始定位
   void initLocation() async {
     _aMapLocation = amap.AMapLocation();
     await _aMapLocation.init(Constant.androidMapKey, Constant.iosMapKey);
@@ -92,7 +95,7 @@ class _HomePageState extends LifecycleState<HomePage> {
                 await LocationHelper().createOrUpdateLocation(mslocation);
 //            debugPrint("===============$result");
             if (result != -1) {
-              initData();
+              await initData();
             }
           }
         } catch (e) {
@@ -113,7 +116,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     await LocationHelper().createStoryByLocation();
     _day = await StoryHelper().getStoryDays();
     _footprint = await StoryHelper().getFootprint();
-    _stories = await StoryHelper().findAllStories();
+    _stories = await StoryHelper().queryMoreHistories();
     setState(() {});
   }
 
@@ -128,18 +131,39 @@ class _HomePageState extends LifecycleState<HomePage> {
         backgroundColor: AppStyle.colors(context).colorBgPage,
         elevation: 0,
       ),
-      body: Column(
-        children: <Widget>[
-//          _buildHeader(),
-          Expanded(
-            flex: 1,
-            child: _storyListWidget(context),
-          ),
-        ],
-      ),
+      body: _storyListWidget(context),
     );
   }
 
+  ///分组设置卡片布局
+  Widget _storyListWidget(BuildContext context) {
+    return RefreshGroupedListView<Story, String>(
+      _refreshController,
+      collection: _stories,
+      groupBy: (Story g) => g.date,
+      listBuilder: (BuildContext context, Story g) =>
+          _buildCardItem(context, g),
+      groupBuilder: (BuildContext context, String name) =>
+          _groupSectionWidget(context, name),
+      onLoading: () async {
+        if (_stories != null && _stories.length > 0) {
+          List<Story> list = await StoryHelper().queryMoreHistories(
+              time: _stories[_stories.length - 1].createTime);
+          if (list != null && list.length > 0) {
+            _stories.addAll(list);
+            _refreshController.loadComplete();
+          } else {
+            _refreshController.loadNoData();
+          }
+          if (mounted) {
+            setState(() {});
+          }
+        }
+      },
+    );
+  }
+
+  /// 头部导航栏
   Widget _buildHeader() {
     return SizedBox(
       width: double.infinity,
@@ -279,23 +303,12 @@ class _HomePageState extends LifecycleState<HomePage> {
     );
   }
 
-  ///分组设置卡片布局
-  Widget _storyListWidget(BuildContext context) {
-    return GroupedListView<Story, String>(
-      collection: _stories,
-      groupBy: (Story g) => g.date,
-      listBuilder: (BuildContext context, Story g) =>
-          _buildCardItem(context, g),
-      groupBuilder: (BuildContext context, String name) =>
-          _groupSectionWidget(context, name),
-    );
-  }
-
   @override
   void dispose() {
     // TODO: implement dispose
     _subscription.cancel();
     _aMapLocation.dispose();
+    _refreshController.dispose();
     _timer.cancel();
     super.dispose();
   }
