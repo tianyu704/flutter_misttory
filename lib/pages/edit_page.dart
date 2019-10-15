@@ -61,6 +61,10 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   ///推荐的地点
   List poiList = [];
+  List poiPreList = [];
+  bool isSearching = false;
+  bool isPoiNone = false;
+  bool isPoiSearchNone = false;
 
   ///选择了推荐的点
   Poilocation pickPoiLocation;
@@ -78,6 +82,10 @@ class _EditPageState extends LifecycleState<EditPage> {
         StringUtil.isNotEmpty(widget.story.desc) ? widget.story.desc : "";
     _showTimeStr = DateFormat("MM月dd日 HH:mm").format(
         DateTime.fromMillisecondsSinceEpoch(widget.story.createTime.toInt()));
+    _searchVC.addListener(() {
+      print(_searchVC.text);
+      handleSearchAction();
+    });
 
     ///
     initData();
@@ -115,7 +123,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool isShowPoiList = poiList == null || poiList.length == 0;
+    bool isNonePoiList = poiList == null || poiList.length == 0;
     return Scaffold(
       appBar:
 //        AppBar(
@@ -167,22 +175,31 @@ class _EditPageState extends LifecycleState<EditPage> {
           locationWidget(context),
           locationMapView(context),
           Offstage(
-            offstage: isShowPoiList,
+            offstage: isSearching,
             child: poiSectionWidget(context),
           ),
           Offstage(
-            offstage: false,
+            offstage: !isSearching,
             child: searchWidget(context),
           ),
           SizedBox(height: 8),
+          getListTargetWidget(context, isNonePoiList),
           Offstage(
-            offstage: isShowPoiList,
-            child: poiListWidget(context),
+            offstage: isNonePoiList,
+            child: poiListWidget(context) ,
           ),
           SizedBox(height: 50),
         ],
       ),
     );
+  }
+  //组织显示的列表部分
+  Widget getListTargetWidget(BuildContext context,bool isNonePoiList) {
+    if (isNonePoiList) {
+      return isSearching ? showEmptyWidget(context, "抱歉未找到相关地点", false) : showEmptyWidget(context, "你好像处在离线状态", true);
+    } else {
+      return poiListWidget(context);
+    }
   }
 
   /// 地点搜索
@@ -195,7 +212,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             height: 48,
             width: MediaQuery.of(context).size.width,
             child: Padding(
-              padding: EdgeInsets.only(left: 24, right: 24, top: 10),
+              padding: EdgeInsets.only(left: 24, right: 61, top: 10),
               child: TextField(
                 controller: _searchVC,
                 focusNode: _searchNode,
@@ -205,31 +222,46 @@ class _EditPageState extends LifecycleState<EditPage> {
                     color: AppStyle.colors(context).colorLocationText,
                     fontSize: 14,
                     fontWeight: FontWeight.normal),
-                textInputAction: TextInputAction.search,
+                textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: fillColor,
                   hintText: "搜索",
                   hintStyle: AppStyle.placeholderText(context),
+                  prefixIcon: Icon(Icons.search),
+//                  SvgPicture.asset(
+//                    "assets/images/icon_search.svg",
+//                    width: 10,
+//                    height: 10,
+//                  ),
                   contentPadding: EdgeInsets.fromLTRB(16, 10, 40, 10),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(38.0),
                       borderSide: BorderSide.none),
                 ),
-                onEditingComplete:handleSearchAction  ,
-
+                onEditingComplete: handleSearchFinished,
               ),
             )),
         Positioned(
-          right: 25,
-          top: 4,
-          child: IconButton(
-              icon: SvgPicture.asset(
-                "assets/images/icon_search.svg",
-                width: 18,
-                height: 18,
+          right: 0,
+          top: 10,
+          child: SizedBox(
+            child: MaterialButton(
+              padding: EdgeInsets.all(0),
+              shape: CircleBorder(
+                side: BorderSide(
+                  color: Colors.white,
+                ),
               ),
-              onPressed:handleSearchAction),
+              onPressed: handleCancel,
+              child: Text(
+                '取消',
+                style: AppStyle.mainText14(context),
+              ),
+            ),
+            width: 60,
+            height: 38,
+          ),
         )
       ],
     );
@@ -433,7 +465,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                         width: 18,
                         height: 18,
                       ),
-                      onPressed: clickSave))
+                      onPressed: showSearch))
             ],
           ),
           padding: EdgeInsets.fromLTRB(30, 14, 30, 14),
@@ -512,17 +544,120 @@ class _EditPageState extends LifecycleState<EditPage> {
     );
   }
 
-  ///搜素触发方法
-  handleSearchAction() {
-    _searchNode.unfocus();
-
-
-    String searchText = _searchVC.text;
-    debugPrint("===$searchText");
+  showEmptyWidget(BuildContext context, String title, bool isEnable) {
+    if (isEnable) {
+      return InkWell(
+        onTap: () {
+          getPoi();
+        },
+        child: Padding(
+          padding: EdgeInsets.only(top: 30, bottom: 30),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              SvgPicture.asset(
+                "assets/images/icon_poi_none.svg",
+                width: 102,
+                height: 72,
+              ),
+              Text(title,
+                  style: TextStyle(
+                      color: AppStyle.colors(context).colorDescText,
+                      fontSize: 14)),
+              SizedBox(
+                height: 5,
+              ),
+              Text("请点击重试",
+                  style: TextStyle(
+                      color: AppStyle.colors(context).colorDescText,
+                      fontSize: 12)),
+            ],
+          ),
+        ),
+      );
+    } else {
+      return Padding(
+        padding: EdgeInsets.only(top: 30, bottom: 30),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SvgPicture.asset(
+              "assets/images/icon_poi_none.svg",
+              width: 102,
+              height: 72,
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Text(title,
+                style: TextStyle(
+                    color: AppStyle.colors(context).colorDescText,
+                    fontSize: 14)),
+          ],
+        ),
+      );
+    }
   }
 
+  showSearch() {
+    isSearching = true;
+    FocusScope.of(context).requestFocus(_searchNode);
+    setState(() {});
+  }
+
+  ///搜索取消
+  handleCancel() {
+    _searchVC.text = "";
+    _searchNode.unfocus();
+    isSearching = false;
+    getPoi();
+  }
+
+  ///搜索完成
+  handleSearchFinished() {
+    _searchNode.unfocus();
+  }
+
+  ///搜素触发方法
+  handleSearchAction() async {
+    String searchText = _searchVC.text;
+    debugPrint("===$searchText");
+    if (StringUtil.isEmpty(searchText)) {
+      return;
+    }
+    LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
+    PoiResult poiResult = await AMapSearch().searchPoiBound(
+      PoiSearchQuery(
+        query: searchText,
+        location: latLng,
+
+        /// iOS必须
+        searchBound: SearchBound(
+          center: latLng,
+          range: 100,
+
+          ///兴趣点范围阈值📌TODO：暂定1000m
+        ),
+
+        /// Android必须
+      ),
+    );
+    List list = [];
+    poiResult.pois
+        .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
+    poiList = list;
+    if (poiList != null && poiList.length > 0) {
+      isSearching = true;
+      setState(() {});
+    }
+  }
 
   getPoi() async {
+    if (poiPreList != null && poiPreList.length > 0 && !isSearching) {
+      poiList = poiPreList;
+      setState(() {});
+      return;
+    }
     LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
 
     PoiResult poiResult = await AMapSearch().searchPoiBound(
@@ -541,17 +676,26 @@ class _EditPageState extends LifecycleState<EditPage> {
         /// Android必须
       ),
     );
-    print("${poiResult.toString()}");
-    poiResult.pois.reversed
-        .forEach((item) => poiList.add(Poilocation.fromJson(item.toJson())));
-    if (poiList != null && poiList.length > 0) {
-      setState(() {});
+    List list = [];
+    poiResult.pois
+        .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
+    poiPreList = list;
+    if (!isSearching) {
+      poiList = list;
+      if (poiList != null && poiList.length > 0) {
+        setState(() {});
+      }
     }
   }
 
   clickPOI(Poilocation location) {
     pickPoiLocation = location;
-    //_currentLatLng = LatLng(location.latLonPoint.latitude, location.latLonPoint.longitude);
+    _currentLatLng =
+        LatLng(location.latLonPoint.latitude, location.latLonPoint.longitude);
+    _controller.clearMarkers();
+    _controller.addMarker(MarkerOptions(
+      position: _currentLatLng,
+    ));
     setState(() {});
   }
 
@@ -600,58 +744,56 @@ class _EditPageState extends LifecycleState<EditPage> {
     ///备注保存
     if (StringUtil.isNotEmpty(_descTextFieldVC.text)) {
       story.desc = _descTextFieldVC.text;
-      StoryHelper().updateStoryDesc(story);
+      await StoryHelper().updateStoryDesc(story);
       isFlag = true;
     }
 
-    ///标签保存
-    for (String name in addTagList) {
-      if (!tagPreList.contains(name)) {
-        TagHelper().createTag(TagHelper().createTagWithName(name, story.id));
-        isFlag = true;
-      }
-    }
-    for (String name in deleteTagList) {
-      if (tagPreList.contains(name)) {
-        int index = tagPreList.indexOf(name);
-        Tag deleteObj = tagCacheList[index];
-        TagHelper().deleteTag(deleteObj);
-        isFlag = true;
-      }
-    }
-
-    ///人物保存
-    for (String name in addPeopleList) {
-      if (!peoplePreList.contains(name)) {
-        PersonHelper()
-            .createPerson(PersonHelper().createPersonWithName(name, story.id));
-        isFlag = true;
-      }
-    }
-    for (String name in deletePeopleList) {
-      if (peoplePreList.contains(name)) {
-        int index = peoplePreList.indexOf(name);
-        Person deleteObj = personCacheList[index];
-        PersonHelper().deletePerson(deleteObj);
-        isFlag = true;
-      }
-    }
+//    ///标签保存
+//    for (String name in addTagList) {
+//      if (!tagPreList.contains(name)) {
+//        TagHelper().createTag(TagHelper().createTagWithName(name, story.id));
+//        isFlag = true;
+//      }
+//    }
+//    for (String name in deleteTagList) {
+//      if (tagPreList.contains(name)) {
+//        int index = tagPreList.indexOf(name);
+//        Tag deleteObj = tagCacheList[index];
+//        TagHelper().deleteTag(deleteObj);
+//        isFlag = true;
+//      }
+//    }
+//
+//    ///人物保存
+//    for (String name in addPeopleList) {
+//      if (!peoplePreList.contains(name)) {
+//        PersonHelper()
+//            .createPerson(PersonHelper().createPersonWithName(name, story.id));
+//        isFlag = true;
+//      }
+//    }
+//    for (String name in deletePeopleList) {
+//      if (peoplePreList.contains(name)) {
+//        int index = peoplePreList.indexOf(name);
+//        Person deleteObj = personCacheList[index];
+//        PersonHelper().deletePerson(deleteObj);
+//        isFlag = true;
+//      }
+//    }
 
     ///自定义地点保存
     if (pickPoiLocation != null &&
         StringUtil.isNotEmpty(pickPoiLocation.title)) {
       story.customAddress = pickPoiLocation.title;
-      StoryHelper().updateCustomAddress(story);
+      story.lat = pickPoiLocation.latLonPoint.latitude;
+      story.lon = pickPoiLocation.latLonPoint.longitude;
+      await StoryHelper().updateCustomAddress(story);
+      await StoryHelper().updateStoryLonLat(story);
       isFlag = true;
 
       ///存储该pick 点 如果没存过的话
-
     }
-
-    ///返回
-    if (isFlag) {
-      Navigator.pop(context);
-    }
+    Navigator.pop(context);
   }
 
   getShowAddress(Story story) {
