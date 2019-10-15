@@ -27,7 +27,8 @@ class StoryHelper {
   /// 创建story
   Future createStory(Story story) async {
     if (story != null) {
-      return await FlutterOrmPlugin.saveOrm(DBManager.tableStory, story.toJson());
+      return await FlutterOrmPlugin.saveOrm(
+          DBManager.tableStory, story.toJson());
     }
   }
 
@@ -45,7 +46,16 @@ class StoryHelper {
     if (story != null) {
       await Query(DBManager.tableStory).primaryKey([story.id]).update(
           {"custom_address": story.customAddress});
-      print("XXX");
+      return true;
+    }
+    return false;
+  }
+
+  /// 更新story的经纬度
+  Future<bool> updateStoryLonLat(Story story) async {
+    if (story != null) {
+      await Query(DBManager.tableStory)
+          .primaryKey([story.id]).update({"lon": story.lon, "lat": story.lat});
       return true;
     }
     return false;
@@ -114,30 +124,36 @@ class StoryHelper {
 
     /// 检测给的stories集合之后的story并放入集合中
     if (stories != null && stories.length > 0) {
-      List result = await Query(DBManager.tableStory).whereByColumFilters([
-        WhereCondiction(
-            "create_time", WhereCondictionType.MORE_THEN, stories[0].createTime)
-      ]).all();
-      if (result != null && result.length > 0) {
-        result.reversed.forEach((item) {
-          Story story = Story.fromJson(Map<String, dynamic>.from(item));
-          stories.addAll(separateStory(story));
-        });
+      ///如果是第一个是临时的story先移除
+      if (stories[0].id == null) {
+        stories.removeAt(0);
+      }
+      if (stories.length > 0) {
+        List result = await Query(DBManager.tableStory)
+            .orderBy(["create_time desc"]).whereByColumFilters([
+          WhereCondiction("create_time", WhereCondictionType.MORE_THEN,
+              stories[0].createTime)
+        ]).all();
+        if (result != null && result.length > 0) {
+          result.reversed.forEach((item) {
+            Story story = Story.fromJson(Map<String, dynamic>.from(item));
+            stories.insertAll(0, separateStory(story));
+          });
+        }
       }
     }
 
     /// 检测定位中最新的一条是否在story中，不在就添加上
     Mslocation mslocation = await LocationHelper().queryLastLocation();
-    Story lastStory;
+    Story lastStory = await queryLastStory();
     if (mslocation != null) {
-      lastStory = createStoryWithLocation(mslocation);
-      lastStory.date = getShowTime(lastStory.createTime);
+      if (lastStory == null || lastStory.createTime != mslocation.time) {
+        lastStory = createStoryWithLocation(mslocation);
+        lastStory.date = getShowTime(lastStory.createTime);
+        stories.insert(0, lastStory);
+      }
     }
-    if (lastStory != null &&
-        (stories.length == 0 ||
-            stories[0].createTime != lastStory.createTime)) {
-      stories.insert(0, lastStory);
-    }
+
     if (stories.length > 0) {
       stories[0].updateTime = DateTime.now().millisecondsSinceEpoch;
       stories[0].intervalTime = stories[0].updateTime - stories[0].createTime;
@@ -222,7 +238,7 @@ class StoryHelper {
   }
 
   /// 查询足迹，相同的story算一个点
-  Future<int> getFootprint() async {
+  Future<int> getFootprint(List<Story> list) async {
     List list1 = await Query(DBManager.tableStory).needColums(
         ["default_address"]).groupBy(["default_address"]).whereByColumFilters([
       WhereCondiction("custom_address", WhereCondictionType.IS_NULL, true)
@@ -231,7 +247,19 @@ class StoryHelper {
         ["custom_address"]).groupBy(["custom_address"]).whereByColumFilters([
       WhereCondiction("custom_address", WhereCondictionType.IS_NULL, false)
     ]).all();
-    return (list1?.length ?? 0) + (list2?.length ?? 0);
+    int current = 0;
+
+    /// 判断当前还未生成的story的点是否是新的足迹
+    if (list != null && list.length > 0 && list[0].id == null) {
+      List result = await Query(DBManager.tableStory).whereByColumFilters([
+        WhereCondiction(
+            "custom_address", WhereCondictionType.IN, [list[0].defaultAddress])
+      ]).all();
+      if (result == null || result?.length == 0) {
+        current = 1;
+      }
+    }
+    return (list1?.length ?? 0) + (list2?.length ?? 0) + current;
   }
 
   /// 根据Location创建story
