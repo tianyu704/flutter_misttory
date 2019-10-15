@@ -21,9 +21,7 @@ void main() async {
   /// 初始化数据库
   await DBManager.initDB();
   await AMap.init(Constant.iosMapKey);
-  await StoryHelper().deleteMisstory();
   await StoryHelper().updateAllDefaultAddress();
-  await StoryHelper().deleteUnUsefulStory();
 
   /// 主题
   bool isNight = (await LocalStorage.get(LocalStorage.isNight)) ?? false;

@@ -41,6 +41,8 @@ class _HomePageState extends LifecycleState<HomePage> {
       RefreshController(initialRefresh: false);
   int _day = 0, _footprint = 0;
   Timer _timer;
+  bool _isInitState = false;
+  bool _isDealWithLocation = false;
 
   @override
   void initState() {
@@ -49,19 +51,34 @@ class _HomePageState extends LifecycleState<HomePage> {
     checkPermission();
     initData();
     _startTimerRefresh();
+    _isInitState = true;
   }
 
   /// 开始每隔1分钟刷新逻辑
   _startTimerRefresh() {
     Future.delayed(Duration(seconds: 60 - DateTime.now().second), () {
       _timer = Timer.periodic(Duration(seconds: LocationConfig.refreshTime),
-          (timer) async {
-        _stories = await StoryHelper().checkLatestStory(_stories);
-        _day = await StoryHelper().getStoryDays();
-        _footprint = await StoryHelper().getFootprint();
-        setState(() {});
+          (timer) {
+        _refreshLatestStory();
       });
     });
+  }
+
+  /// 刷新最新数据
+  _refreshLatestStory() async {
+    await LocationHelper().createStoryByLocation();
+    _stories = await StoryHelper().checkLatestStory(_stories);
+    _day = await StoryHelper().getStoryDays();
+    _footprint = await StoryHelper().getFootprint(_stories);
+    setState(() {});
+  }
+  /// 初始化数据
+  initData() async {
+    await LocationHelper().createStoryByLocation();
+    _stories = await StoryHelper().queryMoreHistories();
+    _day = await StoryHelper().getStoryDays();
+    _footprint = await StoryHelper().getFootprint(_stories);
+    setState(() {});
   }
 
   /// 检查权限
@@ -87,6 +104,10 @@ class _HomePageState extends LifecycleState<HomePage> {
     _aMapLocation = amap.AMapLocation();
     await _aMapLocation.init(Constant.androidMapKey, Constant.iosMapKey);
     _subscription = _aMapLocation.onLocationChanged.listen((location) async {
+      if (_isDealWithLocation) {
+        return;
+      }
+      _isDealWithLocation = true;
       if (location != null && location.isNotEmpty) {
         try {
           Mslocation mslocation = Mslocation.fromJson(json.decode(location));
@@ -105,6 +126,8 @@ class _HomePageState extends LifecycleState<HomePage> {
           print(e.toString());
         }
       }
+      _isDealWithLocation = false;
+      debugPrint("===========处理新定位完毕！");
     });
     amap.LocationClientOptions options = amap.LocationClientOptions(
       locationMode: amap.LocationMode.Battery_Saving,
@@ -113,14 +136,6 @@ class _HomePageState extends LifecycleState<HomePage> {
       isOnceLocation: true,
     );
     await _aMapLocation.start(options);
-  }
-
-  initData() async {
-    await LocationHelper().createStoryByLocation();
-    _day = await StoryHelper().getStoryDays();
-    _footprint = await StoryHelper().getFootprint();
-    _stories = await StoryHelper().queryMoreHistories();
-    setState(() {});
   }
 
   @override
@@ -178,7 +193,7 @@ class _HomePageState extends LifecycleState<HomePage> {
                 style: AppStyle.primaryText28(context)),
             TextSpan(text: " 天 ", style: AppStyle.contentText16(context)),
             TextSpan(
-                text: "${_footprint == 0 ? "1" : _footprint}",
+                text: "${_footprint == 0 ? "0" : _footprint}",
                 style: AppStyle.primaryText28(context)),
             TextSpan(text: " 个足迹", style: AppStyle.contentText16(context)),
           ],
@@ -304,6 +319,15 @@ class _HomePageState extends LifecycleState<HomePage> {
         ),
       ),
     );
+  }
+
+  @override
+  void onResume() {
+    // TODO: implement onResume
+    super.onResume();
+    if (_isInitState) {
+      _refreshLatestStory();
+    }
   }
 
   @override
