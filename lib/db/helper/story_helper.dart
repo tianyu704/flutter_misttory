@@ -46,7 +46,16 @@ class StoryHelper {
     if (story != null) {
       await Query(DBManager.tableStory).primaryKey([story.id]).update(
           {"custom_address": story.customAddress});
-      print("XXX");
+      return true;
+    }
+    return false;
+  }
+
+  /// 更新story的经纬度
+  Future<bool> updateStoryLonLat(Story story) async {
+    if (story != null) {
+      await Query(DBManager.tableStory)
+          .primaryKey([story.id]).update({"lon": story.lon, "lat": story.lat});
       return true;
     }
     return false;
