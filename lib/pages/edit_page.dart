@@ -64,6 +64,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   bool isSearching = false;
   bool isPoiNone = false;
   bool isPoiSearchNone = false;
+  bool isPoiFirstLoad = true;
 
   ///选择了推荐的点
   Poilocation pickPoiLocation;
@@ -198,35 +199,15 @@ class _EditPageState extends LifecycleState<EditPage> {
           getListTargetWidget(context, isNonePoiList),
         ],
       ),
-//      body: ListView(
-//        children: <Widget>[
-//          descTextField(context),
-////            tagTextField(context),
-////            peopleTextField(context),
-//          locationWidget(context),
-//          locationMapView(context),
-//          Offstage(
-//            offstage: isSearching,
-//            child: poiSectionWidget(context),
-//          ),
-//          Offstage(
-//            offstage: !isSearching,
-//            child: searchWidget(context),
-//          ),
-//          getListTargetWidget(context, isNonePoiList),
-//          Offstage(
-//            offstage: isNonePoiList,
-//            child: poiListWidget(context),
-//          ),
-//          SizedBox(height: 50),
-//        ],
-//      ),
     );
   }
 
   //组织显示的列表部分
   Widget getListTargetWidget(BuildContext context, bool isNonePoiList) {
     if (isNonePoiList) {
+      if (isPoiFirstLoad) {
+        return SliverToBoxAdapter(child: SizedBox(height: 0));
+      }
       return isSearching
           ? showEmptyWidget(context, "抱歉未找到相关地点", false)
           : showEmptyWidget(context, "你好像处在离线状态", true);
@@ -277,7 +258,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                       "assets/images/icon_search.svg",
                     ),
                   ),
-                  contentPadding: EdgeInsets.only(top: 0,right: 15,bottom: 0),
+                  contentPadding: EdgeInsets.only(top: 0, right: 15, bottom: 0),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(38.0),
                       borderSide: BorderSide.none),
@@ -512,7 +493,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                       onPressed: showSearch))
             ],
           ),
-          padding: EdgeInsets.fromLTRB(30, 14, 30, 14),
+          padding: EdgeInsets.fromLTRB(30, 14, 10, 14),
         ),
         Container(
           height: 1,
@@ -710,6 +691,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     poiPreList = list;
     if (!isSearching) {
       poiList = list;
+      isPoiFirstLoad = false;
       if (poiList != null && poiList.length > 0) {
         setState(() {});
       }
