@@ -65,6 +65,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   bool isSearching = false;
   bool isPoiNone = false;
   bool isPoiSearchNone = false;
+  bool isPoiFirstLoad = true;
 
   ///选择了推荐的点
   Poilocation pickPoiLocation;
@@ -196,6 +197,9 @@ class _EditPageState extends LifecycleState<EditPage> {
   //组织显示的列表部分
   Widget getListTargetWidget(BuildContext context,bool isNonePoiList) {
     if (isNonePoiList) {
+      if (isPoiFirstLoad) {
+        return SizedBox(height: 0);
+      }
       return isSearching ? showEmptyWidget(context, "抱歉未找到相关地点", false) : showEmptyWidget(context, "你好像处在离线状态", true);
     } else {
       return poiListWidget(context);
@@ -468,7 +472,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                       onPressed: showSearch))
             ],
           ),
-          padding: EdgeInsets.fromLTRB(30, 14, 30, 14),
+          padding: EdgeInsets.fromLTRB(30, 14, 10, 14),
         ),
         Container(
           height: 1,
@@ -682,6 +686,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     poiPreList = list;
     if (!isSearching) {
       poiList = list;
+      isPoiFirstLoad = false      ;
       if (poiList != null && poiList.length > 0) {
         setState(() {});
       }
