@@ -530,13 +530,13 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   ///保存编辑页面数据
-  clickSave() {
+  clickSave() async {
     //TODO:
     bool isFlag = false;
     Story story = widget.story;
     if (story.id == null) {
       //TODO:创建一条story
-      //StoryHelper().createStory(story);
+      story.id =  await StoryHelper().createStory(story);
     }
 
     ///备注保存

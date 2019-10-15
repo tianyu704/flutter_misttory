@@ -27,7 +27,7 @@ class StoryHelper {
   /// 创建story
   Future createStory(Story story) async {
     if (story != null) {
-      await FlutterOrmPlugin.saveOrm(DBManager.tableStory, story.toJson());
+      return await FlutterOrmPlugin.saveOrm(DBManager.tableStory, story.toJson());
     }
   }
 
