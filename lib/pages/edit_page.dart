@@ -61,6 +61,8 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   ///推荐的地点
   List poiList = [];
+  List poiPreList = [];
+  bool isSearching = false;
 
   ///选择了推荐的点
   Poilocation pickPoiLocation;
@@ -78,6 +80,10 @@ class _EditPageState extends LifecycleState<EditPage> {
         StringUtil.isNotEmpty(widget.story.desc) ? widget.story.desc : "";
     _showTimeStr = DateFormat("MM月dd日 HH:mm").format(
         DateTime.fromMillisecondsSinceEpoch(widget.story.createTime.toInt()));
+    _searchVC.addListener(() {
+      print(_searchVC.text);
+      handleSearchAction();
+    });
 
     ///
     initData();
@@ -115,7 +121,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool isShowPoiList = poiList == null || poiList.length == 0;
+    bool isNonePoiList = poiList == null || poiList.length == 0;
     return Scaffold(
       appBar:
 //        AppBar(
@@ -167,16 +173,16 @@ class _EditPageState extends LifecycleState<EditPage> {
           locationWidget(context),
           locationMapView(context),
           Offstage(
-            offstage: isShowPoiList,
+            offstage: isSearching,
             child: poiSectionWidget(context),
           ),
           Offstage(
-            offstage: false,
+            offstage: !isSearching,
             child: searchWidget(context),
           ),
           SizedBox(height: 8),
           Offstage(
-            offstage: isShowPoiList,
+            offstage: isNonePoiList,
             child: poiListWidget(context),
           ),
           SizedBox(height: 50),
@@ -195,7 +201,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             height: 48,
             width: MediaQuery.of(context).size.width,
             child: Padding(
-              padding: EdgeInsets.only(left: 24, right: 24, top: 10),
+              padding: EdgeInsets.only(left: 24, right: 61, top: 10),
               child: TextField(
                 controller: _searchVC,
                 focusNode: _searchNode,
@@ -205,30 +211,46 @@ class _EditPageState extends LifecycleState<EditPage> {
                     color: AppStyle.colors(context).colorLocationText,
                     fontSize: 14,
                     fontWeight: FontWeight.normal),
-                textInputAction: TextInputAction.search,
+                textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: fillColor,
                   hintText: "搜索",
                   hintStyle: AppStyle.placeholderText(context),
+                  prefixIcon:Icon(Icons.search),
+//                  SvgPicture.asset(
+//                    "assets/images/icon_search.svg",
+//                    width: 10,
+//                    height: 10,
+//                  ),
                   contentPadding: EdgeInsets.fromLTRB(16, 10, 40, 10),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(38.0),
                       borderSide: BorderSide.none),
                 ),
-                onEditingComplete: handleSearchAction,
+                onEditingComplete:handleSearchFinished,
               ),
             )),
         Positioned(
-          right: 25,
-          top: 4,
-          child: IconButton(
-              icon: SvgPicture.asset(
-                "assets/images/icon_search.svg",
-                width: 18,
-                height: 18,
+          right: 0,
+          top: 10,
+          child: SizedBox(
+            child: MaterialButton(
+              padding: EdgeInsets.all(0),
+              shape: CircleBorder(
+                side: BorderSide(
+                  color: Colors.white,
+                ),
               ),
-              onPressed: handleSearchAction),
+              onPressed:  handleCancel,
+              child: Text(
+                '取消',
+                style: AppStyle.mainText14(context),
+              ),
+            ),
+            width: 60,
+            height: 38,
+          ),
         )
       ],
     );
@@ -432,7 +454,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                         width: 18,
                         height: 18,
                       ),
-                      onPressed: clickSave))
+                      onPressed: showSearch))
             ],
           ),
           padding: EdgeInsets.fromLTRB(30, 14, 30, 14),
@@ -511,14 +533,29 @@ class _EditPageState extends LifecycleState<EditPage> {
     );
   }
 
+  showSearch() {
+    isSearching = true;
+    FocusScope.of(context).requestFocus(_searchNode);
+    setState(() {});
+  }
+  ///搜索取消
+  handleCancel () {
+    _searchNode.unfocus();
+    isSearching = false;
+    getPoi();
+  }
+
+  ///搜索完成
+  handleSearchFinished() {
+    _searchNode.unfocus();
+  }
   ///搜素触发方法
   handleSearchAction() async {
-    _searchNode.unfocus();
+
     String searchText = _searchVC.text;
     debugPrint("===$searchText");
-    if (StringUtil.isEmpty(searchText))  {
-      getPoi();
-      return ;
+    if (StringUtil.isEmpty(searchText)) {
+      return;
     }
     LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
     PoiResult poiResult = await AMapSearch().searchPoiBound(
@@ -543,11 +580,19 @@ class _EditPageState extends LifecycleState<EditPage> {
         .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
     poiList = list;
     if (poiList != null && poiList.length > 0) {
+      isSearching = true;
       setState(() {});
     }
   }
 
   getPoi() async {
+
+
+    if (poiPreList != null && poiPreList.length > 0 && !isSearching) {
+      poiList = poiPreList;
+      setState(() {});
+      return;
+    }
     LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
 
     PoiResult poiResult = await AMapSearch().searchPoiBound(
@@ -570,9 +615,12 @@ class _EditPageState extends LifecycleState<EditPage> {
     List list = [];
     poiResult.pois.reversed
         .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
-    poiList = list;
-    if (poiList != null && poiList.length > 0) {
-      setState(() {});
+    poiPreList = list;
+    if (!isSearching) {
+      poiList = list;
+      if (poiList != null && poiList.length > 0) {
+        setState(() {});
+      }
     }
   }
 
@@ -668,13 +716,14 @@ class _EditPageState extends LifecycleState<EditPage> {
     if (pickPoiLocation != null &&
         StringUtil.isNotEmpty(pickPoiLocation.title)) {
       story.customAddress = pickPoiLocation.title;
+      story.lat = pickPoiLocation.latLonPoint.latitude;
+      story.lon = pickPoiLocation.latLonPoint.longitude;
       await StoryHelper().updateCustomAddress(story);
+      await StoryHelper().updateStoryLonLat(story);
       isFlag = true;
 
       ///存储该pick 点 如果没存过的话
-
     }
-
     Navigator.pop(context);
   }
 
