@@ -216,8 +216,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                       borderRadius: BorderRadius.circular(38.0),
                       borderSide: BorderSide.none),
                 ),
-                onEditingComplete:handleSearchAction  ,
-
+                onEditingComplete: handleSearchAction,
               ),
             )),
         Positioned(
@@ -229,7 +228,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                 width: 18,
                 height: 18,
               ),
-              onPressed:handleSearchAction),
+              onPressed: handleSearchAction),
         )
       ],
     );
@@ -513,14 +512,40 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   ///搜素触发方法
-  handleSearchAction() {
+  handleSearchAction() async {
     _searchNode.unfocus();
-
-
     String searchText = _searchVC.text;
     debugPrint("===$searchText");
-  }
+    if (StringUtil.isEmpty(searchText))  {
+      getPoi();
+      return ;
+    }
+    LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
+    PoiResult poiResult = await AMapSearch().searchPoiBound(
+      PoiSearchQuery(
+        query: searchText,
+        location: latLng,
 
+        /// iOS必须
+        searchBound: SearchBound(
+          center: latLng,
+          range: 100,
+
+          ///兴趣点范围阈值📌TODO：暂定1000m
+        ),
+
+        /// Android必须
+      ),
+    );
+    print("${poiResult.toString()}");
+    List list = [];
+    poiResult.pois.reversed
+        .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
+    poiList = list;
+    if (poiList != null && poiList.length > 0) {
+      setState(() {});
+    }
+  }
 
   getPoi() async {
     LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
@@ -542,8 +567,10 @@ class _EditPageState extends LifecycleState<EditPage> {
       ),
     );
     print("${poiResult.toString()}");
+    List list = [];
     poiResult.pois.reversed
-        .forEach((item) => poiList.add(Poilocation.fromJson(item.toJson())));
+        .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
+    poiList = list;
     if (poiList != null && poiList.length > 0) {
       setState(() {});
     }
@@ -600,58 +627,55 @@ class _EditPageState extends LifecycleState<EditPage> {
     ///备注保存
     if (StringUtil.isNotEmpty(_descTextFieldVC.text)) {
       story.desc = _descTextFieldVC.text;
-      StoryHelper().updateStoryDesc(story);
+      await StoryHelper().updateStoryDesc(story);
       isFlag = true;
     }
 
-    ///标签保存
-    for (String name in addTagList) {
-      if (!tagPreList.contains(name)) {
-        TagHelper().createTag(TagHelper().createTagWithName(name, story.id));
-        isFlag = true;
-      }
-    }
-    for (String name in deleteTagList) {
-      if (tagPreList.contains(name)) {
-        int index = tagPreList.indexOf(name);
-        Tag deleteObj = tagCacheList[index];
-        TagHelper().deleteTag(deleteObj);
-        isFlag = true;
-      }
-    }
-
-    ///人物保存
-    for (String name in addPeopleList) {
-      if (!peoplePreList.contains(name)) {
-        PersonHelper()
-            .createPerson(PersonHelper().createPersonWithName(name, story.id));
-        isFlag = true;
-      }
-    }
-    for (String name in deletePeopleList) {
-      if (peoplePreList.contains(name)) {
-        int index = peoplePreList.indexOf(name);
-        Person deleteObj = personCacheList[index];
-        PersonHelper().deletePerson(deleteObj);
-        isFlag = true;
-      }
-    }
+//    ///标签保存
+//    for (String name in addTagList) {
+//      if (!tagPreList.contains(name)) {
+//        TagHelper().createTag(TagHelper().createTagWithName(name, story.id));
+//        isFlag = true;
+//      }
+//    }
+//    for (String name in deleteTagList) {
+//      if (tagPreList.contains(name)) {
+//        int index = tagPreList.indexOf(name);
+//        Tag deleteObj = tagCacheList[index];
+//        TagHelper().deleteTag(deleteObj);
+//        isFlag = true;
+//      }
+//    }
+//
+//    ///人物保存
+//    for (String name in addPeopleList) {
+//      if (!peoplePreList.contains(name)) {
+//        PersonHelper()
+//            .createPerson(PersonHelper().createPersonWithName(name, story.id));
+//        isFlag = true;
+//      }
+//    }
+//    for (String name in deletePeopleList) {
+//      if (peoplePreList.contains(name)) {
+//        int index = peoplePreList.indexOf(name);
+//        Person deleteObj = personCacheList[index];
+//        PersonHelper().deletePerson(deleteObj);
+//        isFlag = true;
+//      }
+//    }
 
     ///自定义地点保存
     if (pickPoiLocation != null &&
         StringUtil.isNotEmpty(pickPoiLocation.title)) {
       story.customAddress = pickPoiLocation.title;
-      StoryHelper().updateCustomAddress(story);
+      await StoryHelper().updateCustomAddress(story);
       isFlag = true;
 
       ///存储该pick 点 如果没存过的话
 
     }
 
-    ///返回
-    if (isFlag) {
-      Navigator.pop(context);
-    }
+    Navigator.pop(context);
   }
 
   getShowAddress(Story story) {
