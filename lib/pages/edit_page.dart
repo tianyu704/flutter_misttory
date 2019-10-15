@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:amap_base/amap_base.dart';
 import 'package:amap_base/src/search/model/poi_result.dart';
 import 'package:amap_base/src/search/model/poi_search_query.dart';
-import 'package:amap_base/src/search/model/poi_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -72,6 +71,8 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///
   String _showTimeStr = "";
 
+  ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -118,6 +119,8 @@ class _EditPageState extends LifecycleState<EditPage> {
   @override
   void dispose() {
     _controller.dispose();
+    _searchVC.dispose();
+    _descTextFieldVC.dispose();
     super.dispose();
   }
 
@@ -125,15 +128,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   Widget build(BuildContext context) {
     bool isNonePoiList = poiList == null || poiList.length == 0;
     return Scaffold(
-      appBar:
-//        AppBar(
-//          title: Text("编辑"),
-//          actions: <Widget>[
-//            IconButton(icon: Icon(Icons.save), onPressed: clickSave)
-//          ],
-//        ),
-
-          AppBar(
+      appBar: AppBar(
         leading: MaterialButton(
           padding: EdgeInsets.all(0),
           shape: CircleBorder(
@@ -167,57 +162,105 @@ class _EditPageState extends LifecycleState<EditPage> {
         ],
       ),
       backgroundColor: AppStyle.colors(context).colorBgPage,
-      body: ListView(
-        children: <Widget>[
-          descTextField(context),
-//            tagTextField(context),
-//            peopleTextField(context),
-          locationWidget(context),
-          locationMapView(context),
-          Offstage(
-            offstage: isSearching,
-            child: poiSectionWidget(context),
+      body: CustomScrollView(
+        controller: _scrollController,
+        slivers: <Widget>[
+          SliverAppBar(
+            pinned: true,
+            elevation: 0,
+            floating: true,
+            bottom: PreferredSize(
+              child: Column(
+                children: <Widget>[
+                  locationWidget(context),
+                  locationMapView(context),
+                  Offstage(
+                    offstage: isSearching,
+                    child: poiSectionWidget(context),
+                  ),
+                  Offstage(
+                    offstage: !isSearching,
+                    child: searchWidget(context),
+                  ),
+                ],
+              ),
+              preferredSize: Size(double.infinity, 316),
+            ),
+            centerTitle: true,
+            expandedHeight: 461,
+            leading: Text(""),
+            backgroundColor: AppStyle.colors(context).colorBgPage,
+            flexibleSpace: FlexibleSpaceBar(
+              collapseMode: CollapseMode.pin,
+              background: descTextField(context),
+            ),
           ),
-          Offstage(
-            offstage: !isSearching,
-            child: searchWidget(context),
-          ),
-          SizedBox(height: 8),
           getListTargetWidget(context, isNonePoiList),
-          Offstage(
-            offstage: isNonePoiList,
-            child: poiListWidget(context) ,
-          ),
-          SizedBox(height: 50),
         ],
       ),
+//      body: ListView(
+//        children: <Widget>[
+//          descTextField(context),
+////            tagTextField(context),
+////            peopleTextField(context),
+//          locationWidget(context),
+//          locationMapView(context),
+//          Offstage(
+//            offstage: isSearching,
+//            child: poiSectionWidget(context),
+//          ),
+//          Offstage(
+//            offstage: !isSearching,
+//            child: searchWidget(context),
+//          ),
+//          getListTargetWidget(context, isNonePoiList),
+//          Offstage(
+//            offstage: isNonePoiList,
+//            child: poiListWidget(context),
+//          ),
+//          SizedBox(height: 50),
+//        ],
+//      ),
     );
   }
+
   //组织显示的列表部分
-  Widget getListTargetWidget(BuildContext context,bool isNonePoiList) {
+  Widget getListTargetWidget(BuildContext context, bool isNonePoiList) {
     if (isNonePoiList) {
-      return isSearching ? showEmptyWidget(context, "抱歉未找到相关地点", false) : showEmptyWidget(context, "你好像处在离线状态", true);
+      return isSearching
+          ? showEmptyWidget(context, "抱歉未找到相关地点", false)
+          : showEmptyWidget(context, "你好像处在离线状态", true);
     } else {
-      return poiListWidget(context);
+      return SliverList(
+        delegate: new SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            //创建列表项
+            return poiCell(poiList[index]);
+          },
+          childCount: poiList?.length ?? 0,
+        ),
+      );
     }
   }
 
   /// 地点搜索
   Widget searchWidget(BuildContext context) {
     Color fillColor = AppStyle.colors(context).colorTextFieldLine;
-    return Stack(
-      alignment: Alignment.center,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        SizedBox(
+        Expanded(
+          flex: 1,
+          child: SizedBox(
             height: 48,
-            width: MediaQuery.of(context).size.width,
+            width: double.infinity,
             child: Padding(
-              padding: EdgeInsets.only(left: 24, right: 61, top: 10),
+              padding: EdgeInsets.only(left: 24, right: 0, top: 10, bottom: 0),
               child: TextField(
                 controller: _searchVC,
                 focusNode: _searchNode,
                 enabled: true,
-                minLines: 1,
+                maxLines: 1,
                 style: TextStyle(
                     color: AppStyle.colors(context).colorLocationText,
                     fontSize: 14,
@@ -228,24 +271,25 @@ class _EditPageState extends LifecycleState<EditPage> {
                   fillColor: fillColor,
                   hintText: "搜索",
                   hintStyle: AppStyle.placeholderText(context),
-                  prefixIcon: Icon(Icons.search),
-//                  SvgPicture.asset(
-//                    "assets/images/icon_search.svg",
-//                    width: 10,
-//                    height: 10,
-//                  ),
-                  contentPadding: EdgeInsets.fromLTRB(16, 10, 40, 10),
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: SvgPicture.asset(
+                      "assets/images/icon_search.svg",
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.only(top: 0,right: 15,bottom: 0),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(38.0),
                       borderSide: BorderSide.none),
                 ),
                 onEditingComplete: handleSearchFinished,
               ),
-            )),
-        Positioned(
-          right: 0,
-          top: 10,
-          child: SizedBox(
+            ),
+          ),
+        ),
+        SizedBox(
+          child: Padding(
+            padding: EdgeInsets.only(top: 10),
             child: MaterialButton(
               padding: EdgeInsets.all(0),
               shape: CircleBorder(
@@ -259,10 +303,10 @@ class _EditPageState extends LifecycleState<EditPage> {
                 style: AppStyle.mainText14(context),
               ),
             ),
-            width: 60,
-            height: 38,
           ),
-        )
+          width: 60,
+          height: 48,
+        ),
       ],
     );
   }
@@ -545,11 +589,13 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   showEmptyWidget(BuildContext context, String title, bool isEnable) {
-    if (isEnable) {
-      return InkWell(
-        onTap: () {
-          getPoi();
-        },
+    return SliverToBoxAdapter(
+      child: InkWell(
+        onTap: isEnable
+            ? () {
+                getPoi();
+              }
+            : null,
         child: Padding(
           padding: EdgeInsets.only(top: 30, bottom: 30),
           child: Column(
@@ -574,32 +620,14 @@ class _EditPageState extends LifecycleState<EditPage> {
             ],
           ),
         ),
-      );
-    } else {
-      return Padding(
-        padding: EdgeInsets.only(top: 30, bottom: 30),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            SvgPicture.asset(
-              "assets/images/icon_poi_none.svg",
-              width: 102,
-              height: 72,
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Text(title,
-                style: TextStyle(
-                    color: AppStyle.colors(context).colorDescText,
-                    fontSize: 14)),
-          ],
-        ),
-      );
-    }
+      ),
+    );
   }
 
   showSearch() {
+    _scrollController.jumpTo(154);
+//    _scrollController.animateTo(154,
+//        duration: Duration(seconds: 1), curve: Curves.linear);
     isSearching = true;
     FocusScope.of(context).requestFocus(_searchNode);
     setState(() {});
