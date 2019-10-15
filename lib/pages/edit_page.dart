@@ -111,8 +111,9 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isShowPoiList =  poiList == null || poiList.length == 0;
     return Scaffold(
-        appBar:
+      appBar:
 //        AppBar(
 //          title: Text("编辑"),
 //          actions: <Widget>[
@@ -120,53 +121,61 @@ class _EditPageState extends LifecycleState<EditPage> {
 //          ],
 //        ),
 
-            AppBar(
-          leading: RawMaterialButton(
-            shape: CircleBorder(
-                side: BorderSide(
+          AppBar(
+        leading: MaterialButton(
+          padding: EdgeInsets.all(0),
+          shape: CircleBorder(
+            side: BorderSide(
               color: Colors.white,
-            )),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text(
-              '取消',
-              style: AppStyle.navCancelText(context),
             ),
           ),
-          title: Text(_showTimeStr, style: AppStyle.mainText17(context)),
-          centerTitle: true,
-          backgroundColor: AppStyle.colors(context).colorBgPage,
-          elevation: 0,
-          actions: <Widget>[
-            RawMaterialButton(
-              onPressed: clickSave,
-              child: Text('保存', style: AppStyle.navSaveText(context)),
-              shape: CircleBorder(
-                  side: BorderSide(
-                color: Colors.white,
-              )),
-            ),
-          ],
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text(
+            '取消',
+            style: AppStyle.navCancelText(context),
+          ),
         ),
+        title: Text(_showTimeStr, style: AppStyle.mainText17(context)),
+        centerTitle: true,
         backgroundColor: AppStyle.colors(context).colorBgPage,
-        body: ListView(
-          children: <Widget>[
-            descTextField(context),
+        elevation: 0,
+        actions: <Widget>[
+          MaterialButton(
+            padding: EdgeInsets.all(0),
+            onPressed: clickSave,
+            child: Text('保存', style: AppStyle.navSaveText(context)),
+            shape: CircleBorder(
+              side: BorderSide(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: AppStyle.colors(context).colorBgPage,
+      body: ListView(
+
+        children: <Widget>[
+          descTextField(context),
 //            tagTextField(context),
 //            peopleTextField(context),
-            locationWidget(context),
-            locationMapView(context),
-            Offstage(
-              offstage: poiList == null || poiList.length == 0,
-              child: poiSectionWidget(context),
-            ),
-            Offstage(
-              offstage: poiList == null || poiList.length == 0,
-              child: poiListWidget(context),
-            ),
-          ],
-        ));
+          locationWidget(context),
+          locationMapView(context),
+          Offstage(
+            offstage:isShowPoiList,
+            child: poiSectionWidget(context),
+          ),
+          SizedBox(height: 8),
+          Offstage(
+            offstage: isShowPoiList,
+            child: poiListWidget(context),
+          ),
+          SizedBox(height: 50),
+        ],
+      ),
+    );
   }
 
   ///地点编辑
@@ -198,9 +207,9 @@ class _EditPageState extends LifecycleState<EditPage> {
           ],
         ),
       ),
-      onTap: () {
-        //TODO:
-      },
+//      onTap: () {
+//        //TODO:
+//      },
     );
   }
 
@@ -269,7 +278,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             controller: _descTextFieldVC,
             focusNode: _descFocusNode,
             enabled: true,
-            maxLines: 5,
+            maxLines: 8,
             style: AppStyle.mainText14(context),
             textInputAction: TextInputAction.done,
             decoration: InputDecoration(
@@ -302,7 +311,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   Widget locationMapView(BuildContext context) {
     return SizedBox(
-      height: 130,
+      height: 220,
       width: double.infinity,
       child: AMapView(
         onAMapViewCreated: (controller) {
@@ -354,20 +363,28 @@ class _EditPageState extends LifecycleState<EditPage> {
               Positioned(
                 left: 0.0,
                 child: Text("可能是下面的地点？",
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        color: AppStyle.colors(context).colorMainText)),
               ),
               Positioned(
                   right: 0.0,
                   child: IconButton(
-                      icon: Icon(Icons.search), onPressed: clickSave))
+                      icon: SvgPicture.asset(
+                        "assets/images/icon_search.svg",
+                        width: 18,
+                        height: 18,
+                      ),
+                      onPressed: clickSave))
             ],
           ),
-          padding: EdgeInsets.all(15),
+          padding: EdgeInsets.fromLTRB(30, 14, 30, 14),
         ),
         Container(
-          color: Colors.black12,
-          padding: EdgeInsets.all(1),
+          height: 1,
+          margin: EdgeInsets.only(left: 24, right: 24),
+          color: AppStyle.colors(context).colorTextFieldLine,
         ),
       ],
     );
@@ -394,18 +411,56 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   Widget poiCell(Poilocation p) {
     String poiName = p.title;
+    String subName = StringUtil.isNotEmpty(p.snippet) ? p.snippet : "";
+
     final size = MediaQuery.of(context).size;
     return InkWell(
-      child: SizedBox(
-          width: size.width,
-          height: 50.0,
-          child: Padding(
-            child: Text(poiName),
-            padding: EdgeInsets.all(15),
-          )),
       onTap: () {
         clickPOI(p);
       },
+      child: Padding(
+        padding: EdgeInsets.only(left: 24, right: 24),
+        child: Row(
+          children: <Widget>[
+            SvgPicture.asset(
+              "assets/images/icon_poi_item.svg",
+              width: 20,
+              height: 20,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(left: 10,top: 8),
+                    child: Text(
+                      poiName,
+                      maxLines: 2,
+                      style: AppStyle.locationText14(context),
+                    ),
+                  ),
+
+                  Padding(
+                    padding: EdgeInsets.only(left: 10,top: 1,bottom: 8),
+                    child: Text(
+                      subName,
+                      style: AppStyle.descText12(context),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+//      child: SizedBox(
+//          width: size.width,
+//          height: 50.0,
+//          child: Padding(
+//            child: Text(poiName),
+//            padding: EdgeInsets.all(15),
+//          )),
+
     );
   }
 
@@ -479,6 +534,10 @@ class _EditPageState extends LifecycleState<EditPage> {
     //TODO:
     bool isFlag = false;
     Story story = widget.story;
+    if (story.id == null) {
+      //TODO:创建一条story
+      //StoryHelper().createStory(story);
+    }
 
     ///备注保存
     if (StringUtil.isNotEmpty(_descTextFieldVC.text)) {
