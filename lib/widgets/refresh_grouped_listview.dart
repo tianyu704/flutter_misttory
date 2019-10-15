@@ -67,6 +67,7 @@ class RefreshGroupedListView<TElement, TGroup> extends StatelessWidget {
           return groupBuilder(context, element);
         },
         itemCount: _flattenedList.length,
+        physics: BouncingScrollPhysics(),
       ),
     );
   }
