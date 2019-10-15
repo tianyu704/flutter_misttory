@@ -48,7 +48,7 @@ class $zh extends S {
   @override
   String get tuesday => "星期二";
   @override
-  String get appName => "迷失";
+  String get appName => "点书";
   @override
   String get wednesday => "星期三";
   @override

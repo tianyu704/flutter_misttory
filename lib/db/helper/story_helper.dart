@@ -193,7 +193,7 @@ class StoryHelper {
   /// 查询最后一条story
   Future<Story> queryLastStory() async {
     Map result = await Query(DBManager.tableStory).orderBy([
-      "id desc",
+      "create_time desc",
     ]).first();
     if (result != null && result.length > 0) {
       return Story.fromJson(Map<String, dynamic>.from(result));
@@ -218,7 +218,7 @@ class StoryHelper {
               .inDays +
           1;
     }
-    return 0;
+    return 1;
   }
 
   /// 查询足迹，相同的story算一个点
@@ -255,7 +255,7 @@ class StoryHelper {
     story.number = location.number;
     story.description = location.description;
     story.createTime = location.time;
-    story.updateTime = location.updatetime;
+    story.updateTime = location.updatetime ?? location.time;
     story.intervalTime = location.updatetime - location.time;
     story.defaultAddress = getDefaultAddress(story);
     story.isDelete = false;

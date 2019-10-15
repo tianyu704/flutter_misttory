@@ -53,6 +53,9 @@ class PersonHelper {
 
   /// 根据storyId查询persons
   Future<List<Person>> queryPersonsByStoryId(num storyId) async {
+    if(storyId == null){
+      return null;
+    }
     List result = await Query(DBManager.tablePerson).whereByColumFilters([
       WhereCondiction("story_id", WhereCondictionType.IN, [storyId])
     ]).all();

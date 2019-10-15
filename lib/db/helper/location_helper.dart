@@ -86,7 +86,7 @@ class LocationHelper {
   /// 查询最后一条Location
   Future<Mslocation> queryLastLocation() async {
     Map result = await Query(DBManager.tableLocation).orderBy([
-      "id desc",
+      "time desc",
     ]).first();
     if (result != null && result.length > 0) {
       return Mslocation.fromJson(Map<String, dynamic>.from(result));
