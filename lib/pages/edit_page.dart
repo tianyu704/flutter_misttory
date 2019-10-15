@@ -216,7 +216,7 @@ class _EditPageState extends LifecycleState<EditPage> {
         delegate: new SliverChildBuilderDelegate(
           (BuildContext context, int index) {
             //创建列表项
-            return poiCell(poiList[index]);
+            return poiCell(index);
           },
           childCount: poiList?.length ?? 0,
         ),
@@ -504,66 +504,52 @@ class _EditPageState extends LifecycleState<EditPage> {
     );
   }
 
-  Widget poiListWidget(BuildContext context) {
-    List<Widget> widgets = [];
-    for (Poilocation p in poiList) {
-      if (StringUtil.isNotEmpty(p.title)) widgets.add(poiCell(p));
-    }
-
-    Widget content = Wrap(
-        verticalDirection: VerticalDirection.down,
-        alignment: WrapAlignment.start,
-        spacing: 8.0,
-        // gap between adjacent chips
-        runSpacing: 4.0,
-        // gap between lines
-        direction: Axis.horizontal,
-        //方向
-        children: widgets);
-    return content;
-  }
-
-  Widget poiCell(Poilocation p) {
+  Widget poiCell(int index) {
+    Poilocation p = poiList[index];
     String poiName = p.title;
     String subName = StringUtil.isNotEmpty(p.snippet) ? p.snippet : "";
-
-    final size = MediaQuery.of(context).size;
-    return InkWell(
-      onTap: () {
-        clickPOI(p);
-      },
-      child: Padding(
-        padding: EdgeInsets.only(left: 24, right: 24),
-        child: Row(
-          children: <Widget>[
-            SvgPicture.asset(
-              "assets/images/icon_poi_item.svg",
-              width: 20,
-              height: 20,
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(left: 10, top: 8),
-                    child: Text(
-                      poiName,
-                      maxLines: 2,
-                      style: AppStyle.locationText14(context),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 10, top: 1, bottom: 8),
-                    child: Text(
-                      subName,
-                      style: AppStyle.descText12(context),
-                    ),
-                  ),
-                ],
+    return Padding(
+      padding: EdgeInsets.only(bottom: index == poiList.length - 1 ? 37 : 0),
+      child: InkWell(
+        onTap: () {
+          clickPOI(p);
+        },
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+          ),
+          child: Row(
+            children: <Widget>[
+              SvgPicture.asset(
+                "assets/images/icon_poi_item.svg",
+                width: 20,
+                height: 20,
               ),
-            )
-          ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(left: 10, top: 8),
+                      child: Text(
+                        poiName,
+                        maxLines: 2,
+                        style: AppStyle.locationText14(context),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 10, top: 1, bottom: 8),
+                      child: Text(
+                        subName,
+                        style: AppStyle.descText12(context),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
