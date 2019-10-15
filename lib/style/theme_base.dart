@@ -17,6 +17,7 @@ abstract class ThemeBase {
   Color colorSaveText;   //导航保存按钮
   Color colorPlaceholderText;//placeholder
   Color colorTextFieldLine;  //TextField
+  Color colorSearchBg;
   Color colorHomeBg;
   Color colorDialog;
   Color colorConfirm;

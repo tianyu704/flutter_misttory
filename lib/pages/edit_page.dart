@@ -38,6 +38,10 @@ class _EditPageState extends LifecycleState<EditPage> {
   TextEditingController _descTextFieldVC = TextEditingController();
   FocusNode _descFocusNode = new FocusNode();
 
+  ///搜索
+  TextEditingController _searchVC = TextEditingController();
+  FocusNode _searchNode = new FocusNode();
+
   ///
   AMapController _controller;
   LatLng _currentLatLng;
@@ -111,7 +115,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool isShowPoiList =  poiList == null || poiList.length == 0;
+    bool isShowPoiList = poiList == null || poiList.length == 0;
     return Scaffold(
       appBar:
 //        AppBar(
@@ -156,7 +160,6 @@ class _EditPageState extends LifecycleState<EditPage> {
       ),
       backgroundColor: AppStyle.colors(context).colorBgPage,
       body: ListView(
-
         children: <Widget>[
           descTextField(context),
 //            tagTextField(context),
@@ -164,8 +167,12 @@ class _EditPageState extends LifecycleState<EditPage> {
           locationWidget(context),
           locationMapView(context),
           Offstage(
-            offstage:isShowPoiList,
+            offstage: isShowPoiList,
             child: poiSectionWidget(context),
+          ),
+          Offstage(
+            offstage: false,
+            child: searchWidget(context),
           ),
           SizedBox(height: 8),
           Offstage(
@@ -175,6 +182,56 @@ class _EditPageState extends LifecycleState<EditPage> {
           SizedBox(height: 50),
         ],
       ),
+    );
+  }
+
+  /// 地点搜索
+  Widget searchWidget(BuildContext context) {
+    Color fillColor = AppStyle.colors(context).colorTextFieldLine;
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        SizedBox(
+            height: 48,
+            width: MediaQuery.of(context).size.width,
+            child: Padding(
+              padding: EdgeInsets.only(left: 24, right: 24, top: 10),
+              child: TextField(
+                controller: _searchVC,
+                focusNode: _searchNode,
+                enabled: true,
+                minLines: 1,
+                style: TextStyle(
+                    color: AppStyle.colors(context).colorLocationText,
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal),
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: fillColor,
+                  hintText: "搜索",
+                  hintStyle: AppStyle.placeholderText(context),
+                  contentPadding: EdgeInsets.fromLTRB(16, 10, 40, 10),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(38.0),
+                      borderSide: BorderSide.none),
+                ),
+                onEditingComplete:handleSearchAction  ,
+
+              ),
+            )),
+        Positioned(
+          right: 25,
+          top: 4,
+          child: IconButton(
+              icon: SvgPicture.asset(
+                "assets/images/icon_search.svg",
+                width: 18,
+                height: 18,
+              ),
+              onPressed:handleSearchAction),
+        )
+      ],
     );
   }
 
@@ -432,16 +489,15 @@ class _EditPageState extends LifecycleState<EditPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.only(left: 10,top: 8),
+                    padding: EdgeInsets.only(left: 10, top: 8),
                     child: Text(
                       poiName,
                       maxLines: 2,
                       style: AppStyle.locationText14(context),
                     ),
                   ),
-
                   Padding(
-                    padding: EdgeInsets.only(left: 10,top: 1,bottom: 8),
+                    padding: EdgeInsets.only(left: 10, top: 1, bottom: 8),
                     child: Text(
                       subName,
                       style: AppStyle.descText12(context),
@@ -453,16 +509,18 @@ class _EditPageState extends LifecycleState<EditPage> {
           ],
         ),
       ),
-//      child: SizedBox(
-//          width: size.width,
-//          height: 50.0,
-//          child: Padding(
-//            child: Text(poiName),
-//            padding: EdgeInsets.all(15),
-//          )),
-
     );
   }
+
+  ///搜素触发方法
+  handleSearchAction() {
+    _searchNode.unfocus();
+
+
+    String searchText = _searchVC.text;
+    debugPrint("===$searchText");
+  }
+
 
   getPoi() async {
     LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
@@ -536,7 +594,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     Story story = widget.story;
     if (story.id == null) {
       //TODO:创建一条story
-      story.id =  await StoryHelper().createStory(story);
+      story.id = await StoryHelper().createStory(story);
     }
 
     ///备注保存

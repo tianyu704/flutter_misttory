@@ -33,6 +33,8 @@ class ThemeNormal extends ThemeBase {
   @override
   Color colorTextFieldLine = Color(0xFFEEEEEE);
   @override
+  Color colorSearchBg = Color(0xFFF5F7FB);
+  @override
   Color colorHomeBg = Color(0xFFFAFAFA);
   @override
   Color colorDialog = Color(0xFFFFFFFF);
