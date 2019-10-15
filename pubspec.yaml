@@ -100,6 +100,7 @@ flutter:
     - assets/images/icon_remain_time.svg
     - assets/images/icon_search.svg
     - assets/images/icon_poi_item.svg
+    - assets/images/icon_poi_none.svg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 

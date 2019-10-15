@@ -63,6 +63,8 @@ class _EditPageState extends LifecycleState<EditPage> {
   List poiList = [];
   List poiPreList = [];
   bool isSearching = false;
+  bool isPoiNone = false;
+  bool isPoiSearchNone = false;
 
   ///选择了推荐的点
   Poilocation pickPoiLocation;
@@ -181,14 +183,23 @@ class _EditPageState extends LifecycleState<EditPage> {
             child: searchWidget(context),
           ),
           SizedBox(height: 8),
+          getListTargetWidget(context, isNonePoiList),
           Offstage(
             offstage: isNonePoiList,
-            child: poiListWidget(context),
+            child: poiListWidget(context) ,
           ),
           SizedBox(height: 50),
         ],
       ),
     );
+  }
+  //组织显示的列表部分
+  Widget getListTargetWidget(BuildContext context,bool isNonePoiList) {
+    if (isNonePoiList) {
+      return isSearching ? showEmptyWidget(context, "抱歉未找到相关地点", false) : showEmptyWidget(context, "你好像处在离线状态", true);
+    } else {
+      return poiListWidget(context);
+    }
   }
 
   /// 地点搜索
@@ -217,7 +228,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                   fillColor: fillColor,
                   hintText: "搜索",
                   hintStyle: AppStyle.placeholderText(context),
-                  prefixIcon:Icon(Icons.search),
+                  prefixIcon: Icon(Icons.search),
 //                  SvgPicture.asset(
 //                    "assets/images/icon_search.svg",
 //                    width: 10,
@@ -228,7 +239,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                       borderRadius: BorderRadius.circular(38.0),
                       borderSide: BorderSide.none),
                 ),
-                onEditingComplete:handleSearchFinished,
+                onEditingComplete: handleSearchFinished,
               ),
             )),
         Positioned(
@@ -242,7 +253,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                   color: Colors.white,
                 ),
               ),
-              onPressed:  handleCancel,
+              onPressed: handleCancel,
               child: Text(
                 '取消',
                 style: AppStyle.mainText14(context),
@@ -533,13 +544,70 @@ class _EditPageState extends LifecycleState<EditPage> {
     );
   }
 
+  showEmptyWidget(BuildContext context, String title, bool isEnable) {
+    if (isEnable) {
+      return InkWell(
+        onTap: () {
+          getPoi();
+        },
+        child: Padding(
+          padding: EdgeInsets.only(top: 30, bottom: 30),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              SvgPicture.asset(
+                "assets/images/icon_poi_none.svg",
+                width: 102,
+                height: 72,
+              ),
+              Text(title,
+                  style: TextStyle(
+                      color: AppStyle.colors(context).colorDescText,
+                      fontSize: 14)),
+              SizedBox(
+                height: 5,
+              ),
+              Text("请点击重试",
+                  style: TextStyle(
+                      color: AppStyle.colors(context).colorDescText,
+                      fontSize: 12)),
+            ],
+          ),
+        ),
+      );
+    } else {
+      return Padding(
+        padding: EdgeInsets.only(top: 30, bottom: 30),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SvgPicture.asset(
+              "assets/images/icon_poi_none.svg",
+              width: 102,
+              height: 72,
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Text(title,
+                style: TextStyle(
+                    color: AppStyle.colors(context).colorDescText,
+                    fontSize: 14)),
+          ],
+        ),
+      );
+    }
+  }
+
   showSearch() {
     isSearching = true;
     FocusScope.of(context).requestFocus(_searchNode);
     setState(() {});
   }
+
   ///搜索取消
-  handleCancel () {
+  handleCancel() {
+    _searchVC.text = "";
     _searchNode.unfocus();
     isSearching = false;
     getPoi();
@@ -549,9 +617,9 @@ class _EditPageState extends LifecycleState<EditPage> {
   handleSearchFinished() {
     _searchNode.unfocus();
   }
+
   ///搜素触发方法
   handleSearchAction() async {
-
     String searchText = _searchVC.text;
     debugPrint("===$searchText");
     if (StringUtil.isEmpty(searchText)) {
@@ -574,9 +642,8 @@ class _EditPageState extends LifecycleState<EditPage> {
         /// Android必须
       ),
     );
-    print("${poiResult.toString()}");
     List list = [];
-    poiResult.pois.reversed
+    poiResult.pois
         .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
     poiList = list;
     if (poiList != null && poiList.length > 0) {
@@ -586,8 +653,6 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   getPoi() async {
-
-
     if (poiPreList != null && poiPreList.length > 0 && !isSearching) {
       poiList = poiPreList;
       setState(() {});
@@ -611,9 +676,8 @@ class _EditPageState extends LifecycleState<EditPage> {
         /// Android必须
       ),
     );
-    print("${poiResult.toString()}");
     List list = [];
-    poiResult.pois.reversed
+    poiResult.pois
         .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
     poiPreList = list;
     if (!isSearching) {
@@ -626,7 +690,12 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   clickPOI(Poilocation location) {
     pickPoiLocation = location;
-    //_currentLatLng = LatLng(location.latLonPoint.latitude, location.latLonPoint.longitude);
+    _currentLatLng =
+        LatLng(location.latLonPoint.latitude, location.latLonPoint.longitude);
+    _controller.clearMarkers();
+    _controller.addMarker(MarkerOptions(
+      position: _currentLatLng,
+    ));
     setState(() {});
   }
 
