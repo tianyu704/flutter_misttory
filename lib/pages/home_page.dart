@@ -57,6 +57,8 @@ class _HomePageState extends LifecycleState<HomePage> {
       _timer = Timer.periodic(Duration(seconds: LocationConfig.refreshTime),
           (timer) async {
         _stories = await StoryHelper().checkLatestStory(_stories);
+        _day = await StoryHelper().getStoryDays();
+        _footprint = await StoryHelper().getFootprint();
         setState(() {});
       });
     });
@@ -90,10 +92,11 @@ class _HomePageState extends LifecycleState<HomePage> {
           Mslocation mslocation = Mslocation.fromJson(json.decode(location));
           if (mslocation != null) {
             mslocation.updatetime = mslocation.time;
-            debugPrint("===========接收到新定位：${mslocation.lon},${mslocation.lat}");
+            debugPrint(
+                "===========接收到新定位：${mslocation.lon},${mslocation.lat},${mslocation.time}");
             int result =
                 await LocationHelper().createOrUpdateLocation(mslocation);
-//            debugPrint("===============$result");
+            debugPrint("===============$result");
             if (result != -1) {
               await initData();
             }

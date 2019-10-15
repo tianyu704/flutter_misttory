@@ -12,6 +12,7 @@ import 'package:misstory/provider/theme_provider.dart';
 import 'package:misstory/utils/common_localization_delegate.dart';
 import 'package:provider/provider.dart';
 
+import 'constant.dart';
 import 'db/local_storage.dart';
 import 'generated/i18n.dart';
 import 'style/app_style.dart';
@@ -19,7 +20,7 @@ import 'style/app_style.dart';
 void main() async {
   /// 初始化数据库
   await DBManager.initDB();
-  await AMap.init('11bcf7a88c8b1a9befeefbaa2ceaef71');
+  await AMap.init(Constant.iosMapKey);
   await StoryHelper().deleteMisstory();
   await StoryHelper().updateAllDefaultAddress();
   await StoryHelper().deleteUnUsefulStory();
