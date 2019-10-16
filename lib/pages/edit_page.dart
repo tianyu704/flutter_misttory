@@ -20,6 +20,8 @@ import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/tag_items_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../location_config.dart';
+
 class EditPage extends StatefulWidget {
   final Story story;
 
@@ -639,9 +641,9 @@ class _EditPageState extends LifecycleState<EditPage> {
         /// iOS必须
         searchBound: SearchBound(
           center: latLng,
-          range: 100,
+          range: LocationConfig.poiSearchInterval,
 
-          ///兴趣点范围阈值📌TODO：暂定1000m
+          ///兴趣点范围阈值📌
         ),
 
         /// Android必须
@@ -673,7 +675,7 @@ class _EditPageState extends LifecycleState<EditPage> {
         /// iOS必须
         searchBound: SearchBound(
           center: latLng,
-          range: 100,
+          range:  LocationConfig.poiSearchInterval,
 
           ///兴趣点范围阈值📌TODO：暂定1000m
         ),

@@ -17,4 +17,7 @@ class LocationConfig {
 
   /// 首页每隔多久刷新一次最新页面显示数据
   static final refreshTime = 60;
+
+  /// poi搜索范围半径
+  static final poiSearchInterval = 1000;
 }
