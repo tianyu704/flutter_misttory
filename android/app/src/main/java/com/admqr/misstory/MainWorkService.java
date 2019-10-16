@@ -91,7 +91,7 @@ public class MainWorkService extends AbsWorkService {
         }
         if (!mLocationClient.isStarted()) {
             AMapLocationClientOption option = new AMapLocationClientOption();
-            option.setInterval(1000 * 60 * 1);
+            option.setInterval(1000 * 60 * 3);
             option.setDeviceModeDistanceFilter(1000);
             option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Battery_Saving);
             mLocationClient.setLocationOption(option);
