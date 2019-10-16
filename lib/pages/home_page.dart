@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_amap_location_plugin/amap_location_lib.dart' as amap;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
@@ -35,6 +36,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends LifecycleState<HomePage> {
   List<Story> _stories = List<Story>();
+  List<Story> _storiesAll = List<Story>();
   amap.AMapLocation _aMapLocation;
   StreamSubscription _subscription;
   RefreshController _refreshController =
@@ -43,13 +45,13 @@ class _HomePageState extends LifecycleState<HomePage> {
   Timer _timer;
   bool _isInitState = false;
   bool _isDealWithLocation = false;
-
+  Story _currentStory;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    checkPermission();
-    initData();
+    _checkPermission();
+    _refreshStory(true);
     _startTimerRefresh();
     _isInitState = true;
   }
@@ -59,30 +61,74 @@ class _HomePageState extends LifecycleState<HomePage> {
     Future.delayed(Duration(seconds: 60 - DateTime.now().second), () {
       _timer = Timer.periodic(Duration(seconds: LocationConfig.refreshTime),
           (timer) {
-        _refreshLatestStory();
+        _refreshStory(false);
       });
     });
   }
 
-  /// 刷新最新数据
-  _refreshLatestStory() async {
+  ///刷新最新的story
+  _refreshStory(bool first) async {
     await LocationHelper().createStoryByLocation();
-    _stories = await StoryHelper().checkLatestStory(_stories);
+    _currentStory = await StoryHelper().getCurrentStory();
+    if (first) {
+      ///初次加载需要查询前20条数据
+      _stories = await StoryHelper().queryMoreHistories();
+    } else {
+      /// 刷新时获取最新的story
+      _stories = await StoryHelper().checkLatestStory(_stories);
+    }
+    _mergeStories();
     _day = await StoryHelper().getStoryDays();
-    _footprint = await StoryHelper().getFootprint(_stories);
-    setState(() {});
+    _footprint = await StoryHelper().getFootprint(_storiesAll);
+    if (mounted) {
+      setState(() {});
+    }
   }
-  /// 初始化数据
-  initData() async {
-    await LocationHelper().createStoryByLocation();
-    _stories = await StoryHelper().queryMoreHistories();
-    _day = await StoryHelper().getStoryDays();
-    _footprint = await StoryHelper().getFootprint(_stories);
-    setState(() {});
+
+  /// 合并_currentStory和_stories
+  _mergeStories() {
+    _storiesAll.clear();
+    if (_currentStory != null) {
+      if (_stories != null && _stories.length > 0) {
+        if (_currentStory.createTime == _stories[0].createTime) {
+          _stories[0].updateTime = DateTime.now().millisecondsSinceEpoch;
+          _stories[0].intervalTime =
+              _stories[0].updateTime - _stories[0].createTime;
+          _storiesAll.addAll(_stories);
+        } else {
+          _storiesAll.add(_currentStory);
+          _storiesAll.addAll(_stories);
+        }
+      } else {
+        _storiesAll.add(_currentStory);
+      }
+    } else {
+      if (_stories != null && _stories.length > 0) {
+        _storiesAll.addAll(_stories);
+      }
+    }
+  }
+
+  ///加载更多
+  _loadMore() async {
+    if (_stories != null && _stories.length > 0) {
+      List<Story> list = await StoryHelper()
+          .queryMoreHistories(time: _stories[_stories.length - 1].createTime);
+      if (list != null && list.length > 0) {
+        _stories.addAll(list);
+        _refreshController.loadComplete();
+      } else {
+        _refreshController.loadNoData();
+      }
+      if (mounted) {
+        _mergeStories();
+        setState(() {});
+      }
+    }
   }
 
   /// 检查权限
-  void checkPermission() async {
+  void _checkPermission() async {
     await PermissionHandler().requestPermissions(
         [PermissionGroup.locationAlways, PermissionGroup.storage]);
     PermissionStatus permissionLocation = await PermissionHandler()
@@ -92,15 +138,15 @@ class _HomePageState extends LifecycleState<HomePage> {
     if (Platform.isAndroid &&
         permissionLocation == PermissionStatus.granted &&
         permissionStorage == PermissionStatus.granted) {
-      initLocation();
+      _initLocation();
     } else if (Platform.isIOS &&
         permissionLocation == PermissionStatus.granted) {
-      initLocation();
+      _initLocation();
     }
   }
 
   ///初始化并开始定位
-  void initLocation() async {
+  void _initLocation() async {
     _aMapLocation = amap.AMapLocation();
     await _aMapLocation.init(Constant.androidMapKey, Constant.iosMapKey);
     _subscription = _aMapLocation.onLocationChanged.listen((location) async {
@@ -119,7 +165,7 @@ class _HomePageState extends LifecycleState<HomePage> {
                 await LocationHelper().createOrUpdateLocation(mslocation);
             debugPrint("===============$result");
             if (result != -1) {
-              await initData();
+              await _refreshStory(false);
             }
           }
         } catch (e) {
@@ -157,27 +203,13 @@ class _HomePageState extends LifecycleState<HomePage> {
   Widget _storyListWidget(BuildContext context) {
     return RefreshGroupedListView<Story, String>(
       _refreshController,
-      collection: _stories,
+      collection: _storiesAll,
       groupBy: (Story g) => g.date,
       listBuilder: (BuildContext context, Story g) =>
           _buildCardItem(context, g),
       groupBuilder: (BuildContext context, String name) =>
           _groupSectionWidget(context, name),
-      onLoading: () async {
-        if (_stories != null && _stories.length > 0) {
-          List<Story> list = await StoryHelper().queryMoreHistories(
-              time: _stories[_stories.length - 1].createTime);
-          if (list != null && list.length > 0) {
-            _stories.addAll(list);
-            _refreshController.loadComplete();
-          } else {
-            _refreshController.loadNoData();
-          }
-          if (mounted) {
-            setState(() {});
-          }
-        }
-      },
+      onLoading: _loadMore,
     );
   }
 
@@ -326,7 +358,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     // TODO: implement onResume
     super.onResume();
     if (_isInitState) {
-      _refreshLatestStory();
+      _refreshStory(false);
     }
   }
 

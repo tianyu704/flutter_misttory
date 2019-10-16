@@ -115,6 +115,7 @@ class LocationHelper {
         }
         if (mslocation.updatetime - mslocation.time >=
             LocationConfig.judgeUsefulLocation) {
+          debugPrint("=================start judge location");
           await StoryHelper().judgeLocation(mslocation);
         }
       }

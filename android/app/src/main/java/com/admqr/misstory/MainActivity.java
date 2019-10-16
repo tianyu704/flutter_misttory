@@ -14,10 +14,11 @@ import com.shihoo.daemon.DaemonEnv;
 import com.shihoo.daemon.IntentWrapper;
 
 import io.flutter.app.FlutterActivity;
+import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
-public class MainActivity extends FlutterActivity {
+public class MainActivity extends FlutterActivity implements MethodChannel.MethodCallHandler {
     //是否 任务完成, 不再需要服务运行? 最好使用SharePreference，注意要在同一进程中访问该属性
     public static boolean isCanStartWorkService;
     MethodChannel methodChannel;
@@ -27,7 +28,16 @@ public class MainActivity extends FlutterActivity {
         super.onCreate(savedInstanceState);
         GeneratedPluginRegistrant.registerWith(this);
         methodChannel = new MethodChannel(getFlutterView(), BuildConfig.APPLICATION_ID);
+        methodChannel.setMethodCallHandler(this);
         startLive();
+    }
+
+
+    @Override
+    public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
+        if (methodCall.method.equals("query_location")) {
+
+        }
     }
 
     public void startLive() {
@@ -92,4 +102,5 @@ public class MainActivity extends FlutterActivity {
             manager.notify(CHANNEL_POSITION, notification);
         }
     }
+
 }

@@ -38,6 +38,7 @@ class StoryHelper {
       num interval = location.updatetime - story.createTime;
       await Query(DBManager.tableStory).primaryKey([story.id]).update(
           {"update_time": location.updatetime, "interval_time": interval});
+      debugPrint("=================update story time");
     }
   }
 
@@ -85,14 +86,12 @@ class StoryHelper {
         list.addAll(separateStory(story));
       });
     }
-    return await checkLatestStory(list);
+    return list;
   }
 
   /// 根据给定time查询time-day到time之间的story
-  Future<List<Story>> queryMoreHistories({num time, num day = 2}) async {
-    bool isFirst = false;
+  Future<List<Story>> queryMoreHistories({num time}) async {
     if (time == null) {
-      isFirst = true;
       time = DateTime.now().millisecondsSinceEpoch;
     }
     List result = await Query(DBManager.tableStory)
@@ -109,11 +108,7 @@ class StoryHelper {
         list.addAll(separateStory(story));
       });
     }
-    if (isFirst) {
-      return await checkLatestStory(list);
-    } else {
-      return list;
-    }
+    return list;
   }
 
   /// 检查当前story位置之后最新的story和Location，并放入story中
@@ -121,44 +116,46 @@ class StoryHelper {
     if (stories == null) {
       stories = List<Story>();
     }
-
     /// 检测给的stories集合之后的story并放入集合中
     if (stories != null && stories.length > 0) {
-      ///如果是第一个是临时的story先移除
-      if (stories[0].id == null) {
-        stories.removeAt(0);
-      }
-      if (stories.length > 0) {
-        List result = await Query(DBManager.tableStory)
-            .orderBy(["create_time desc"]).whereByColumFilters([
-          WhereCondiction("create_time", WhereCondictionType.MORE_THEN,
-              stories[0].createTime)
-        ]).all();
-        if (result != null && result.length > 0) {
-          result.reversed.forEach((item) {
-            Story story = Story.fromJson(Map<String, dynamic>.from(item));
-            stories.insertAll(0, separateStory(story));
-          });
-        }
+      List result = await Query(DBManager.tableStory)
+          .orderBy(["create_time desc"]).whereByColumFilters([
+        WhereCondiction("create_time", WhereCondictionType.MORE_THEN,
+            stories[0].createTime)
+      ]).all();
+      if (result != null && result.length > 0) {
+        result.reversed.forEach((item) {
+          Story story = Story.fromJson(Map<String, dynamic>.from(item));
+          stories.insertAll(0, separateStory(story));
+        });
       }
     }
+    return stories;
+  }
 
-    /// 检测定位中最新的一条是否在story中，不在就添加上
+  /// 获取当前位置的story
+  Future<Story> getCurrentStory() async {
+    Story currentStory;
     Mslocation mslocation = await LocationHelper().queryLastLocation();
     Story lastStory = await queryLastStory();
     if (mslocation != null) {
-      if (lastStory == null || lastStory.createTime != mslocation.time) {
-        lastStory = createStoryWithLocation(mslocation);
-        lastStory.date = getShowTime(lastStory.createTime);
-        stories.insert(0, lastStory);
+      if (lastStory == null) {
+        currentStory = createStoryWithLocation(mslocation);
+      } else {
+        if (mslocation.time == lastStory.createTime) {
+          currentStory = lastStory;
+        } else {
+          currentStory = createStoryWithLocation(mslocation);
+        }
       }
     }
-
-    if (stories.length > 0) {
-      stories[0].updateTime = DateTime.now().millisecondsSinceEpoch;
-      stories[0].intervalTime = stories[0].updateTime - stories[0].createTime;
+    if (currentStory != null) {
+      currentStory.date = getShowTime(currentStory.createTime);
+      currentStory.updateTime = DateTime.now().millisecondsSinceEpoch;
+      currentStory.intervalTime =
+          currentStory.updateTime - currentStory.createTime;
     }
-    return stories;
+    return currentStory;
   }
 
   /// 判断story是否在同一天，不在同一天就分割成多天
@@ -312,6 +309,7 @@ class StoryHelper {
             } else {
               if (await getDistanceBetween(location, story) >
                   LocationConfig.judgeDistanceNum) {
+                debugPrint("======>create1");
                 await createStory(createStoryWithLocation(location));
               } else {
                 await updateStoryTime(location, story);
@@ -320,15 +318,18 @@ class StoryHelper {
           } else {
             if (await getDistanceBetween(location, story) >
                 LocationConfig.judgeDistanceNum) {
+              debugPrint("======>create2");
               await createStory(createStoryWithLocation(location));
             } else {
               await updateStoryTime(location, story);
             }
           }
         } else {
+          debugPrint("======>create3");
           await createStory(createStoryWithLocation(location));
         }
       } else {
+        debugPrint("======>create4");
         await createStory(createStoryWithLocation(location));
       }
     }
