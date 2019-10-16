@@ -185,7 +185,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                   ),
                 ],
               ),
-              preferredSize: Size(double.infinity, 316),
+              preferredSize: Size(double.infinity, 317),
             ),
             centerTitle: true,
             expandedHeight: 461,
@@ -295,14 +295,17 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///地点编辑
   Widget locationWidget(BuildContext context) {
     return InkWell(
+        child: SizedBox(
+      height: 48,
+      width: double.infinity,
       child: Padding(
         padding: EdgeInsets.all(10),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          //mainAxisAlignment: MainAxisAlignment.start,
+          //crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Padding(
-              padding: EdgeInsets.only(top: 3),
+              padding: EdgeInsets.only(top: 0),
               child: SvgPicture.asset(
                 StringUtil.isEmpty(widget.story.customAddress)
                     ? "assets/images/icon_location_empty.svg"
@@ -313,7 +316,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             ),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(left: 10),
+                padding: EdgeInsets.only(left: 10,bottom: 1),
                 child: Text(getShowAddress(widget.story),
                     style: AppStyle.locationText14(context)),
               ),
@@ -321,10 +324,12 @@ class _EditPageState extends LifecycleState<EditPage> {
           ],
         ),
       ),
+    )
+
 //      onTap: () {
 //        //TODO:
 //      },
-    );
+        );
   }
 
   ///标签编辑
@@ -384,7 +389,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   //描述编辑
   Widget descTextField(BuildContext context) {
     return SizedBox(
-        height: 154,
+        height: 144,
         width: MediaQuery.of(context).size.width,
         child: Padding(
           padding: EdgeInsets.only(left: 24, right: 24),
@@ -392,7 +397,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             controller: _descTextFieldVC,
             focusNode: _descFocusNode,
             enabled: true,
-            maxLines: 8,
+            maxLines: 7,
             style: AppStyle.mainText14(context),
             textInputAction: TextInputAction.done,
             decoration: InputDecoration(
@@ -464,43 +469,47 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   Widget poiSectionWidget(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          child: Stack(
-            alignment: Alignment.center, //指定未定位或部分定位widget的对齐方式
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 10),
-              ),
-              Positioned(
-                left: 0.0,
-                child: Text("可能是下面的地点？",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: AppStyle.colors(context).colorMainText)),
-              ),
-              Positioned(
-                  right: 0.0,
-                  child: IconButton(
-                      icon: SvgPicture.asset(
-                        "assets/images/icon_search.svg",
-                        width: 18,
-                        height: 18,
-                      ),
-                      onPressed: showSearch))
-            ],
+    return SizedBox(
+      height: 49,
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            child: Stack(
+              alignment: Alignment.center, //指定未定位或部分定位widget的对齐方式
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                ),
+                Positioned(
+                  left: 0.0,
+                  child: Text("可能是下面的地点？",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: AppStyle.colors(context).colorMainText)),
+                ),
+                Positioned(
+                    right: 0.0,
+                    child: IconButton(
+                        icon: SvgPicture.asset(
+                          "assets/images/icon_search.svg",
+                          width: 18,
+                          height: 18,
+                        ),
+                        onPressed: showSearch))
+              ],
+            ),
+            padding: EdgeInsets.fromLTRB(30, 14, 10, 14),
           ),
-          padding: EdgeInsets.fromLTRB(30, 14, 10, 14),
-        ),
-        Container(
-          height: 1,
-          margin: EdgeInsets.only(left: 24, right: 24),
-          color: AppStyle.colors(context).colorTextFieldLine,
-        ),
-      ],
+          Container(
+            height: 1,
+            margin: EdgeInsets.only(left: 24, right: 24),
+            color: AppStyle.colors(context).colorTextFieldLine,
+          ),
+        ],
+      ),
     );
   }
 
@@ -592,7 +601,8 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   showSearch() {
-    _scrollController.jumpTo(154);
+    _scrollController.jumpTo(0);
+    _scrollController.jumpTo(144);
 //    _scrollController.animateTo(154,
 //        duration: Duration(seconds: 1), curve: Curves.linear);
     isSearching = true;
