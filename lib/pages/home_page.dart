@@ -46,6 +46,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   bool _isInitState = false;
   bool _isDealWithLocation = false;
   Story _currentStory;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -68,6 +69,7 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   ///刷新最新的story
   _refreshStory(bool first) async {
+    await LocationHelper().saveLocation();
     await LocationHelper().createStoryByLocation();
     _currentStory = await StoryHelper().getCurrentStory();
     if (first) {
@@ -86,11 +88,11 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   /// 合并_currentStory和_stories
-  _mergeStories() {
+  _mergeStories() async {
     _storiesAll.clear();
     if (_currentStory != null) {
       if (_stories != null && _stories.length > 0) {
-        if (_currentStory.createTime == _stories[0].createTime) {
+        if (await StoryHelper().judgeSamePlace(_currentStory, _stories[0])) {
           _stories[0].updateTime = DateTime.now().millisecondsSinceEpoch;
           _stories[0].intervalTime =
               _stories[0].updateTime - _stories[0].createTime;
@@ -161,6 +163,7 @@ class _HomePageState extends LifecycleState<HomePage> {
             mslocation.updatetime = mslocation.time;
             debugPrint(
                 "===========接收到新定位：${mslocation.lon},${mslocation.lat},${mslocation.time}");
+            await LocationHelper().saveLocation();
             int result =
                 await LocationHelper().createOrUpdateLocation(mslocation);
             debugPrint("===============$result");

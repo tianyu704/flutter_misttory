@@ -10,8 +10,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.admqr.misstory.db.LocationHelper;
 import com.shihoo.daemon.DaemonEnv;
 import com.shihoo.daemon.IntentWrapper;
+
+import java.util.List;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
@@ -36,7 +39,13 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
         if (methodCall.method.equals("query_location")) {
-
+            List<MSLocation> locationList = LocationHelper.getInstance().getAllLocation();
+            LocationHelper.getInstance().clearLocation();
+            if (locationList != null && locationList.size() > 0) {
+                result.success(JacksonUtil.getInstance().writeValueAsString(locationList));
+            } else {
+                result.success("");
+            }
         }
     }
 

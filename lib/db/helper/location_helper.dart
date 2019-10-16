@@ -1,11 +1,16 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:amap_base/amap_base.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/db/db_manager.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/utils/string_util.dart';
 
 class LocationHelper {
   static final LocationHelper _instance = new LocationHelper._internal();
@@ -13,6 +18,24 @@ class LocationHelper {
   factory LocationHelper() => _instance;
 
   LocationHelper._internal();
+
+  MethodChannel _methodChannel = MethodChannel("com.admqr.misstory");
+
+  ///从Android Realm数据库中读出Location放到Mslocation表中
+  Future saveLocation() async {
+    if (Platform.isAndroid) {
+      String jsonString = await _methodChannel.invokeMethod("query_location");
+      if (StringUtil.isNotEmpty(jsonString)) {
+        List items = json.decode(jsonString);
+        debugPrint("---->${items.length}个位置信息");
+        for (Map item in items) {
+          Mslocation mslocation =
+              Mslocation.fromJson(Map<String, dynamic>.from(item));
+          await createOrUpdateLocation(mslocation);
+        }
+      }
+    }
+  }
 
   /// 根据最新定位的Location创建或更新最后一条Location
   Future<int> createOrUpdateLocation(Mslocation location) async {
@@ -65,7 +88,7 @@ class LocationHelper {
   Future<int> updateLocationTime(num id, Mslocation location) async {
     if (location != null) {
       await Query(DBManager.tableLocation)
-          .primaryKey([id]).update({"updatetime": location.time});
+          .primaryKey([id]).update({"updatetime": location.updatetime});
       return 0;
     }
     return -1;

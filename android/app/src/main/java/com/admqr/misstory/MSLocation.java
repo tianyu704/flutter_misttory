@@ -1,10 +1,16 @@
 package com.admqr.misstory;
 
+import java.io.Serializable;
+
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by hugo on 2019-10-10
  */
-public class MSLocation {
+public class MSLocation extends RealmObject implements Serializable {
 
+    private static final long serialVersionUID = -1188208422160795548L;
     /**
      * id : 1
      * altitude : 0
@@ -40,7 +46,7 @@ public class MSLocation {
      * coordType : GCJ02
      * is_delete : true
      */
-
+    @PrimaryKey
     private long id;
     private double altitude;
     private float speed;

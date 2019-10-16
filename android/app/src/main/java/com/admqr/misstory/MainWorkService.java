@@ -11,6 +11,7 @@ import android.os.Messenger;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.admqr.misstory.db.LocationHelper;
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
@@ -81,7 +82,8 @@ public class MainWorkService extends AbsWorkService {
             mLocationClient.setLocationListener(aMapLocation -> {
                 //Log.d("android", aMapLocation.toStr());
                 try {
-                    saveData(aMapLocation);
+//                    saveData(aMapLocation);
+                    LocationHelper.getInstance().saveLocation(aMapLocation);
                 } catch (Exception e) {
                     Log.d(Tag, e.getLocalizedMessage());
                 }
@@ -89,7 +91,7 @@ public class MainWorkService extends AbsWorkService {
         }
         if (!mLocationClient.isStarted()) {
             AMapLocationClientOption option = new AMapLocationClientOption();
-            option.setInterval(1000 * 60 * 5);
+            option.setInterval(1000 * 60 * 1);
             option.setDeviceModeDistanceFilter(1000);
             option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Battery_Saving);
             mLocationClient.setLocationOption(option);
@@ -131,6 +133,7 @@ public class MainWorkService extends AbsWorkService {
         if (pathFile.exists()) {
             File file = new File(path + "/Misstory");
             SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(file, null);
+            db.enableWriteAheadLogging();
             if (db.isOpen()) {
                 if (location != null && location.getErrorCode() == 0) {
                     MSLocation lastLocation = queryLastLocation(db);

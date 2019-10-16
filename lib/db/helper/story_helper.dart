@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/story.dart';
-import 'package:misstory/utils/calculate_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import '../db_manager.dart';
 import 'package:misstory/models/mslocation.dart';
@@ -18,6 +17,7 @@ class StoryHelper {
   final String tableName = "Story";
   final String columnId = "id";
   final String columnTime = "time";
+
   static final StoryHelper _instance = new StoryHelper._internal();
 
   factory StoryHelper() => _instance;
@@ -116,12 +116,13 @@ class StoryHelper {
     if (stories == null) {
       stories = List<Story>();
     }
+
     /// 检测给的stories集合之后的story并放入集合中
     if (stories != null && stories.length > 0) {
       List result = await Query(DBManager.tableStory)
           .orderBy(["create_time desc"]).whereByColumFilters([
-        WhereCondiction("create_time", WhereCondictionType.MORE_THEN,
-            stories[0].createTime)
+        WhereCondiction(
+            "create_time", WhereCondictionType.MORE_THEN, stories[0].createTime)
       ]).all();
       if (result != null && result.length > 0) {
         result.reversed.forEach((item) {
@@ -335,6 +336,35 @@ class StoryHelper {
     }
   }
 
+  Future<bool> judgeSamePlace(Story story1, Story story2) async {
+    if (story1 != null && story2 != null) {
+      if (story1.aoiName == story2.aoiName) {
+        if (story1.poiName == story2.poiName) {
+          if (story1.address == story2.address) {
+            return true;
+          } else {
+            if (await getDistanceBetweenStory(story1, story2) >
+                LocationConfig.judgeDistanceNum) {
+              return false;
+            } else {
+              return true;
+            }
+          }
+        } else {
+          if (await getDistanceBetweenStory(story1, story2) >
+              LocationConfig.judgeDistanceNum) {
+            return false;
+          } else {
+            return true;
+          }
+        }
+      } else {
+        return false;
+      }
+    }
+    return false;
+  }
+
   Future<void> deleteMisstory() async {
 //    Story story = await queryLastStory();
 //    await Query(DBManager.tableStory).primaryKey([story.id]).delete();
@@ -343,6 +373,13 @@ class StoryHelper {
 
   ///求值：两个坐标点的距离
   Future<double> getDistanceBetween(Mslocation location, Story story) async {
+    LatLng latLng1 = LatLng(location.lat, location.lon);
+    LatLng latLng2 = LatLng(story.lat, story.lon);
+    return await CalculateTools().calcDistance(latLng1, latLng2);
+  }
+
+  ///求值：两个坐标点的距离
+  Future<double> getDistanceBetweenStory(Story location, Story story) async {
     LatLng latLng1 = LatLng(location.lat, location.lon);
     LatLng latLng2 = LatLng(story.lat, story.lon);
     return await CalculateTools().calcDistance(latLng1, latLng2);
