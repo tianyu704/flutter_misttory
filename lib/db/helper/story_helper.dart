@@ -43,13 +43,37 @@ class StoryHelper {
   }
 
   /// 更新story地点
-  Future<bool> updateCustomAddress(Story story) async {
+  Future<Map<num, Story>> updateCustomAddress(Story story) async {
     if (story != null) {
-      await Query(DBManager.tableStory).primaryKey([story.id]).update(
-          {"custom_address": story.customAddress});
-      return true;
+//      await Query(DBManager.tableStory).primaryKey([story.id]).update(
+//          {"custom_address": story.customAddress});
+      List list = await Query(DBManager.tableStory).whereByColumFilters([
+        WhereCondiction(
+            "default_address", WhereCondictionType.IN, [story.defaultAddress])
+      ]).all();
+      LatLng latLng1 = LatLng(story.lat, story.lon);
+
+      if (list != null && list.length > 0) {
+        Map<num, Story> stories = Map<num, Story>();
+        LatLng latLng2;
+        for (Map item in list) {
+          latLng2 = LatLng(item["lat"], item["lon"]);
+          num distance = await CalculateTools().calcDistance(latLng1, latLng2);
+          if (distance < LocationConfig.poiSearchInterval) {
+            item["custom_address"] = story.customAddress;
+            await Query(DBManager.tableStory).primaryKey([item["id"]]).update({
+              "custom_address": story.customAddress,
+              "lon": story.lon,
+              "lat": story.lat
+            });
+            stories[item["id"]] =
+                Story.fromJson(Map<String, dynamic>.from(item));
+          }
+        }
+        return stories;
+      }
     }
-    return false;
+    return null;
   }
 
   /// 更新story的经纬度

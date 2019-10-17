@@ -8,3 +8,6 @@
 
 #jackson
 -keep class com.fasterxml.jackson.**{*;}
+#luakit orm
+-keep class org.chromium.** {*; }
+-keep class com.common.luakit.** {*; }

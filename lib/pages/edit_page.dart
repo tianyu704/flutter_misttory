@@ -318,7 +318,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             ),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(left: 10,bottom: 1),
+                padding: EdgeInsets.only(left: 10, bottom: 1),
                 child: Text(getShowAddress(widget.story),
                     style: AppStyle.locationText14(context)),
               ),
@@ -655,7 +655,9 @@ class _EditPageState extends LifecycleState<EditPage> {
     poiList = list;
     if (poiList != null && poiList.length > 0) {
       isSearching = true;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     }
   }
 
@@ -675,7 +677,7 @@ class _EditPageState extends LifecycleState<EditPage> {
         /// iOS必须
         searchBound: SearchBound(
           center: latLng,
-          range:  LocationConfig.poiSearchInterval,
+          range: LocationConfig.poiSearchInterval,
 
           ///兴趣点范围阈值📌TODO：暂定1000m
         ),
@@ -691,7 +693,9 @@ class _EditPageState extends LifecycleState<EditPage> {
       poiList = list;
       isPoiFirstLoad = false;
       if (poiList != null && poiList.length > 0) {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       }
     }
   }
@@ -790,18 +794,18 @@ class _EditPageState extends LifecycleState<EditPage> {
 //    }
 
     ///自定义地点保存
+    Map<num, Story> stories;
     if (pickPoiLocation != null &&
         StringUtil.isNotEmpty(pickPoiLocation.title)) {
       story.customAddress = pickPoiLocation.title;
       story.lat = pickPoiLocation.latLonPoint.latitude;
       story.lon = pickPoiLocation.latLonPoint.longitude;
-      await StoryHelper().updateCustomAddress(story);
-      await StoryHelper().updateStoryLonLat(story);
+      stories = await StoryHelper().updateCustomAddress(story);
       isFlag = true;
-
       ///存储该pick 点 如果没存过的话
     }
-    Navigator.pop(context);
+    debugPrint("========>${stories.length}");
+    Navigator.pop(context, [stories]);
   }
 
   getShowAddress(Story story) {

@@ -337,7 +337,15 @@ class _HomePageState extends LifecycleState<HomePage> {
         ),
         onTap: () {
           Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => EditPage(story)));
+              .push(MaterialPageRoute(builder: (context) => EditPage(story)))
+              .then((value) {
+            if (value != null) {
+              Map<num, Story> stories = value[0];
+              if (stories != null && stories.length > 0) {
+                notifyStories(stories);
+              }
+            }
+          });
         },
       ),
     );
@@ -362,6 +370,21 @@ class _HomePageState extends LifecycleState<HomePage> {
     super.onResume();
     if (_isInitState) {
       _refreshStory(false);
+    }
+  }
+
+  ///从编辑页面返回后的刷新
+  notifyStories(Map<num, Story> stories) {
+    if (_storiesAll != null && _storiesAll.length > 0) {
+      _storiesAll.forEach((item) {
+        if (stories.containsKey(item.id)) {
+          item.lat = stories[item.id].lat;
+          item.lon = stories[item.id].lon;
+          item.customAddress = stories[item.id].customAddress;
+          item.desc = stories[item.id].desc;
+        }
+      });
+      setState(() {});
     }
   }
 
