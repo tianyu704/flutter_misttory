@@ -187,6 +187,17 @@ class _HomePageState extends LifecycleState<HomePage> {
     await _aMapLocation.start(options);
   }
 
+  ///请求一次定位
+  void _onceLocate() async {
+    amap.LocationClientOptions options = amap.LocationClientOptions(
+      locationMode: amap.LocationMode.Battery_Saving,
+      interval: LocationConfig.interval,
+      distanceFilter: LocationConfig.distanceFilter,
+      isOnceLocation: true,
+    );
+    await _aMapLocation.start(options);
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -370,6 +381,9 @@ class _HomePageState extends LifecycleState<HomePage> {
     super.onResume();
     if (_isInitState) {
       _refreshStory(false);
+      if (Platform.isAndroid) {
+        _onceLocate();
+      }
     }
   }
 
