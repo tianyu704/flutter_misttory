@@ -804,7 +804,6 @@ class _EditPageState extends LifecycleState<EditPage> {
       isFlag = true;
       ///存储该pick 点 如果没存过的话
     }
-    debugPrint("========>${stories.length}");
     Navigator.pop(context, [stories]);
   }
 
