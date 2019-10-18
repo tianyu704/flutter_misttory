@@ -71,5 +71,5 @@ Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
       'is_delete': instance.isDelete,
       'tags': instance.tags,
       'persons': instance.persons,
-      'date': instance.date
+      'date': instance.date,
     };

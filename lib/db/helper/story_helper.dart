@@ -307,9 +307,9 @@ class StoryHelper {
     story.createTime = location.time;
     story.updateTime = location.updatetime ?? location.time;
     story.intervalTime = location.updatetime - location.time;
-    story.defaultAddress = getDefaultAddress(story);
     story.isDelete = false;
-    //TODO:
+    story.defaultAddress = getDefaultAddress(story);
+    //TODO:需要看相同的该地点是否有custom_address,有的话需要赋值
     return story;
   }
 

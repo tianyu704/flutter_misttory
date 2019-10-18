@@ -31,5 +31,5 @@ Map<String, dynamic> _$PoilocationToJson(Poilocation instance) =>
       'title': instance.title,
       'typeCode': instance.typeCode,
       'typeDes': instance.typeDes,
-      'latLonPoint': instance.latLonPoint
+      'latLonPoint': instance.latLonPoint,
     };

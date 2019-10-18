@@ -13,6 +13,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/pages/pois_page.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
@@ -206,6 +207,16 @@ class _HomePageState extends LifecycleState<HomePage> {
       appBar: AppBar(
         centerTitle: false,
         title: _buildHeader(),
+        actions: <Widget>[
+          FlatButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  return SearchPage("");
+                }));
+              },
+              child: Text("Debug"))
+        ],
         backgroundColor: AppStyle.colors(context).colorBgPage,
         elevation: 0,
       ),

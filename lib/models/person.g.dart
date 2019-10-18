@@ -16,5 +16,5 @@ Person _$PersonFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$PersonToJson(Person instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
-      'story_id': instance.storyId
+      'story_id': instance.storyId,
     };

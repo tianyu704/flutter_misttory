@@ -16,5 +16,5 @@ Tag _$TagFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$TagToJson(Tag instance) => <String, dynamic>{
       'id': instance.id,
       'tag_name': instance.tagName,
-      'story_id': instance.storyId
+      'story_id': instance.storyId,
     };

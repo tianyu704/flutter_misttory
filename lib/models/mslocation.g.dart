@@ -77,5 +77,5 @@ Map<String, dynamic> _$MslocationToJson(Mslocation instance) =>
       'isOffset': instance.isOffset,
       'isFixLastLocation': instance.isFixLastLocation,
       'coordType': instance.coordType,
-      'is_delete': instance.isDelete
+      'is_delete': instance.isDelete,
     };

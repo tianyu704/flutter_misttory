@@ -15,5 +15,5 @@ Latlonpoint _$LatlonpointFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$LatlonpointToJson(Latlonpoint instance) =>
     <String, dynamic>{
       'latitude': instance.latitude,
-      'longitude': instance.longitude
+      'longitude': instance.longitude,
     };

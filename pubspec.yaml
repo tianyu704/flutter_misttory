@@ -26,7 +26,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   # sqflite: ^1.1.6+1                #数据库包
-  json_annotation: ^2.0.0      #json包
+  json_annotation: ^3.0.0      #json包
   flutter_amap_location_plugin:    #定位插件包
     git:
       url: https://github.com/FIRHQ/flutter_amap_location_plugin.git
@@ -57,14 +57,17 @@ dependencies:
   flutter_svg: 0.14.2
   pull_to_refresh: ^1.5.7
   loading_indicator: ^1.1.0
+  local_image_provider:
+    git:
+      url: https://github.com/tianyu704/local_image_provider.git
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   build_runner: ^1.0.0         #json开发依赖 是开发过程中的一些辅助工具、脚本
-  json_serializable: ^2.0.0    #json开发依赖 是开发过程中的一些辅助工具、脚本 它是一个自动化的源代码生成器，可以在开发阶段为我们生成JSON序列化模板，这样一来，由于序列化代码不再由我们手写和维护，我们将运行时产生JSON序列化异常的风险降至最低。
-  json_model: ^0.0.2           #json开发依赖 是开发过程中的一些辅助工具、脚本
+  json_serializable: ^3.2.3    #json开发依赖 是开发过程中的一些辅助工具、脚本 它是一个自动化的源代码生成器，可以在开发阶段为我们生成JSON序列化模板，这样一来，由于序列化代码不再由我们手写和维护，我们将运行时产生JSON序列化异常的风险降至最低。
+#  json_model: ^0.0.2           #json开发依赖 是开发过程中的一些辅助工具、脚本
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
