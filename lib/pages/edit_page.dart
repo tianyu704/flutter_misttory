@@ -18,7 +18,7 @@ import 'package:misstory/models/tag.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/tag_items_widget.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+//import 'package:fluttertoast/fluttertoast.dart';
 
 import '../location_config.dart';
 
@@ -719,7 +719,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   addTargetPeople(String name) {
     if (showPeopleList.contains(name)) {
-      Fluttertoast.showToast(msg: "好友已添加");
+      //Fluttertoast.showToast(msg: "好友已添加");
     } else {
       addPeopleList.add(name);
       showPeopleList.add(name);
@@ -735,7 +735,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   addTargetTag(String name) {
     if (showTagList.contains(name)) {
-      Fluttertoast.showToast(msg: "标签已添加");
+    //  Fluttertoast.showToast(msg: "标签已添加");
     } else {
       addTagList.add(name);
       showTagList.add(name);
