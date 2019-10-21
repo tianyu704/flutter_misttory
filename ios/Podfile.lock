@@ -27,7 +27,7 @@ PODS:
     - LuakitPod (>= 1.0.23)
   - flutter_orm_plugin (0.0.1):
     - Flutter
-  - fluttertoast (0.0.2):
+  - local_image_provider (0.0.1):
     - Flutter
   - LuakitPod (1.0.23)
   - MJExtension (3.2.0)
@@ -43,7 +43,7 @@ DEPENDENCIES:
   - flutter_amap_location_plugin (from `.symlinks/plugins/flutter_amap_location_plugin/ios`)
   - flutter_luakit_plugin (from `.symlinks/plugins/flutter_luakit_plugin/ios`)
   - flutter_orm_plugin (from `.symlinks/plugins/flutter_orm_plugin/ios`)
-  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - local_image_provider (from `.symlinks/plugins/local_image_provider/ios`)
   - LuakitPod (~> 1.0.23)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
@@ -72,8 +72,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_luakit_plugin/ios"
   flutter_orm_plugin:
     :path: ".symlinks/plugins/flutter_orm_plugin/ios"
-  fluttertoast:
-    :path: ".symlinks/plugins/fluttertoast/ios"
+  local_image_provider:
+    :path: ".symlinks/plugins/local_image_provider/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
   shared_preferences:
@@ -91,11 +91,11 @@ SPEC CHECKSUMS:
   flutter_amap_location_plugin: f46c35452fd1c14b2deee046393dbbb03de73009
   flutter_luakit_plugin: 081f678c0e6634924c4a33680a53455c514dba9a
   flutter_orm_plugin: f62fd453ff96deb4962cde4a00294a9bd684c974
-  fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
+  local_image_provider: 54ba0242c112882b0597fbfb9900270d63059d58
   LuakitPod: 9b368deeb047c373d34525e0be47f26f68d83af9
   MJExtension: e22bed65fdcd38e957242982b7384f2984c9088e
   permission_handler: d59f41439f5bc6c4d1005f3355e98f05ddc68ece
-  shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
+  shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
 
 PODFILE CHECKSUM: 5acc3fcb64cd14b08402a74bf64008a1584a6d68
 

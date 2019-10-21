@@ -48,12 +48,13 @@ class _SearchPageState extends LifecycleState<SearchPage> {
                 color: Colors.red,
                 height: 100,
                 child: RaisedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (images != null && images.length > 0) {
-                      LatLng latlng = LatLng(images[0].lat, images[0].lon);
+                      LatLng latlng = await CalculateTools().convertCoordinate(lat: images[0].lat, lon: images[0].lon, type: LatLngType.gps);
                       print(latlng.toJson());
                       //39°53'56.118",116°29'11.964"
                       //39.898923,116.48666
+
                       _aMapSearch
                           .searchReGeocode(latlng, 100, 1)
                           .then((result) {
