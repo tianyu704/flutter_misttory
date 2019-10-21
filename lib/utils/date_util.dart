@@ -52,4 +52,15 @@ class DateUtil {
       S.of(context).sunday,
     ];
   }
+
+  static bool isSameDay(num millis1, num millis2) {
+    if (millis1 != null && millis2 != null) {
+      DateTime d1 = DateTime.fromMillisecondsSinceEpoch(millis1);
+      DateTime d2 = DateTime.fromMillisecondsSinceEpoch(millis2);
+      if (d1.year == d2.year && d1.month == d2.month && d1.day == d2.day) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

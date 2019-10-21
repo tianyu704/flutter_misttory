@@ -102,6 +102,9 @@ class _HomePageState extends LifecycleState<HomePage> {
           _storiesAll.add(_currentStory);
           _storiesAll.addAll(_stories);
         }
+        Story story = _stories[0];
+        _storiesAll.removeAt(0);
+        _storiesAll.insertAll(0, StoryHelper().separateStory(story));
       } else {
         _storiesAll.add(_currentStory);
       }
