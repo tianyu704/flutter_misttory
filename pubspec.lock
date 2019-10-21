@@ -340,7 +340,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: a6e6321fbcf9702446db1c94310eadb1a50001e1
+      resolved-ref: "27ec97ed20cf3d786dcc6be2ae1f94a798ab227f"
       url: "https://github.com/tianyu704/local_image_provider.git"
     source: git
     version: "0.6.0"
@@ -434,7 +434,7 @@ packages:
       name: permission_handler
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "3.2.2"
+    version: "3.3.0"
   petitparser:
     dependency: transitive
     description:

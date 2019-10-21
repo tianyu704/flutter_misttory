@@ -20,7 +20,7 @@ class PersonHelper {
     Person person = Person();
     person.name = name;
     person.storyId = storyId;
-    print("json ：${person.toJson()}");
+    debugPrint("json ：${person.toJson()}");
     return person;
   }
 

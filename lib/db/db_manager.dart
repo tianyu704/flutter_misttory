@@ -10,6 +10,7 @@ class DBManager {
   static final String tableStory = "Story";
   static final String tablePerson = "Person";
   static final String tableTag = "Tag";
+  static final String tablePicture = "Picture";
 
   ///初始化
   static initDB() async {
@@ -94,10 +95,21 @@ class DBManager {
     personFields["name"] = Field(FieldType.Text);
     personFields["story_id"] =
         Field(FieldType.Real, foreignKey: true, to: "${dbName}_$tableStory");
+    ///picture表
+    Map<String, Field> pictureFields = new Map<String, Field>();
+    pictureFields["id"] = Field(FieldType.Text, primaryKey: true);
+    pictureFields["story_id"] = Field(FieldType.Real, foreignKey: true, to: "${dbName}_$tableStory");
+    pictureFields["lat"] = Field(FieldType.Real);
+    pictureFields["lon"] = Field(FieldType.Real);
+    pictureFields["pixelWidth"] = Field(FieldType.Real);
+    pictureFields["pixelHeight"] = Field(FieldType.Real);
+    pictureFields["creationDate"] = Field(FieldType.Real);
+    pictureFields["isSynced"] = Field(FieldType.Boolean);
 
     FlutterOrmPlugin.createTable(dbName, tableLocation, locationFields);
     FlutterOrmPlugin.createTable(dbName, tableStory, storyFields);
     FlutterOrmPlugin.createTable(dbName, tableTag, tagFields);
     FlutterOrmPlugin.createTable(dbName, tablePerson, personFields);
+    FlutterOrmPlugin.createTable(dbName, tablePicture, pictureFields);
   }
 }
