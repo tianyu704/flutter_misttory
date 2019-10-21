@@ -112,6 +112,9 @@ class _SearchPageState extends LifecycleState<SearchPage> {
 
   _getPicture() async {
     await LocalImageProvider().initialize();
-    images = await LocalImageProvider().findLatestAfterTime();
+    num start = DateTime.now().millisecondsSinceEpoch;
+    images = await LocalImageProvider().findLatest(10000000);
+    print(
+        "查询到${images?.length}张照片，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
   }
 }
