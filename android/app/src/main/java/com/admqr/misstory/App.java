@@ -1,5 +1,7 @@
 package com.admqr.misstory;
 
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.util.Log;
 
 import androidx.multidex.MultiDex;
@@ -34,7 +36,8 @@ public class App extends FlutterApplication {
             // 设置通知栏的UI
             ForegroundNotificationUtils.setResId(R.mipmap.ic_launcher);
             ForegroundNotificationUtils.setNotifyTitle("Misstory陪你走过每一天");
-            ForegroundNotificationUtils.setNotifyContent("");
+            ForegroundNotificationUtils.setNotifyContent("点击查看");
+            ForegroundNotificationUtils.setPackgeName(BuildConfig.APPLICATION_ID);
             Log.d("wsh-daemon", "启动了看门狗进程");
         }
 
