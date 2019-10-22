@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:local_image_provider/local_image.dart';
 import 'package:local_image_provider/local_image_provider.dart';
-import 'package:misstory/models/story.dart';
+import 'package:misstory/db/helper/location_helper.dart';
+import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/picture.dart';
-import 'package:amap_base/amap_base.dart';
 
 import '../db_manager.dart';
 
@@ -19,14 +19,34 @@ class PictureHelper {
 
   PictureHelper._internal();
 
+  fetchAppSystemPicture() async {
+    Picture p = await PictureHelper().queryOldestPicture();
+    num time = 0;
+    if (p != null) {
+      time = p.creationDate;
+    }
+    await LocalImageProvider().initialize();
+    num start = DateTime.now().millisecondsSinceEpoch;
+    List<LocalImage> list = [];
+    if (time == 0) {
+      list = await LocalImageProvider().findLatest(0);
+    } else {
+      list = await LocalImageProvider().findBeforeTime(time: time);
+    }
+    debugPrint(
+        "======查询到${list?.length}张照片，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
+    if (list != null && list.length > 0) {
+      for (LocalImage image in list) {
+        if (!(await PictureHelper().isExistPictureWithId(image.id))) {
+          await createPicture(createPictureModelWithLocalImage(image));
+        }
+      }
+    }
+    debugPrint(
+        " 存储完Picture表，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
+  }
 
-
-
-
-
-
-
-  Future<Picture> createPictureWithLocalImage(LocalImage image) async {
+  Picture createPictureModelWithLocalImage(LocalImage image) {
     Picture p = Picture();
 
     p.lat = image.lat;
@@ -34,18 +54,18 @@ class PictureHelper {
     p.id = image.id;
     p.creationDate = image.creationDate;
     p.pixelHeight = image.pixelHeight;
-    p.pixelWidth = p.pixelWidth;
+    p.pixelWidth = image.pixelWidth;
+    p.path = image.path;
     p.isSynced = false;
-    debugPrint("json ：${p.toJson()}");
+    //debugPrint("json ：${p.toJson()}");
     return p;
   }
 
   /// 创建Picture 并存库
   Future<bool> createPicture(Picture p) async {
-    //TODO:这里过滤了经纬度为0的点
-    if (p != null && p.lat != 0 && p.lon != 0) {
+    ///这里无条件存储Picture不做处理
+    if (p != null) {
       await FlutterOrmPlugin.saveOrm(DBManager.tablePicture, p.toJson());
-      debugPrint("xsave ${p.id}");
       return true;
     }
     return false;
@@ -61,16 +81,90 @@ class PictureHelper {
     return false;
   }
 
-  /// 查询存储在picture表中最后一条数据
-  Future<Picture> queryLastLocation() async {
+  ///按主键查询数据库中是否存在该条数据
+  Future<bool> isExistPictureWithId(String id) async {
+    Map result = await Query(DBManager.tablePicture).whereBySql("id = ?", [id]).first();
+    if (result != null && result.length > 0) {
+      return true;
+    }
+    return false;
+  }
+  /// 查询存储在picture表中最早一条数据
+  Future<Picture> queryOldestPicture() async {
     Map result = await Query(DBManager.tablePicture).orderBy([
-      "creationDate desc",
+      "creationDate",
     ]).first();
     if (result != null && result.length > 0) {
       return Picture.fromJson(Map<String, dynamic>.from(result));
     }
     return null;
   }
+  ///📌查询并转化picture为location
+  convertPicturesToLocations () async {
+    Mslocation l = await LocationHelper().queryOldestLocation();
+    num time = (l == null) ? 0 : l.time;
+    convertPicturesAfterTime(time);
+    convertPicturesBeforeTime(time);
+  }
+  ///使用app后
+  convertPicturesAfterTime(num time) async {
+    List afterList = await findPicturesAfterTime(time);
+    for (Picture p in afterList) {
+      LocationHelper().createLocationWithPicture(p);
+    }
+  }
+  ///使用app前
+  convertPicturesBeforeTime(num time) async {
+    List beforeList = await findPicturesBeforeTime(time);
+    for (Picture p in beforeList) {
+      LocationHelper().createLocationWithPicture(p);
+    }
+  }
+  ///📌查询未转化为location的图片集合
+  ///从指定时间到当前的未同步的全部图片集合
+  Future<List> findPicturesAfterTime(num time) async {
+    List result;
+    if (time == 0) {
+      result = await Query(DBManager.tablePicture)
+          .orderBy(["creationDate desc"]).whereBySql("isSynced == ? ", [false]).all();
+    }  else {
+      result = await Query(DBManager.tablePicture)
+          .orderBy(["creationDate desc"]).whereBySql("creationDate >= ? and isSynced == ? ", [time,false]).all();
+    }
+    List<Picture> list = [];
+    if (result != null && result.length > 0) {
+      result.forEach((item) {
+        Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
+        list.add(p);
+      });
+      return list;
+    }
+    return null;
+  }
+  ///从最早的到到指定时间的未同步的全部图片集合
+  Future<List> findPicturesBeforeTime(num time) async {
+
+    if (time == 0) {
+      time = DateTime.now().millisecondsSinceEpoch;
+    }
+    List result = await Query(DBManager.tablePicture)
+        .orderBy(["creationDate desc"]).whereBySql("creationDate < ? && isSynced == ? ", [time,false]).all();
+
+    List<Picture> list = [];
+    if (result != null && result.length > 0) {
+      result.forEach((item) {
+        Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
+        list.add(p);
+      });
+      return list;
+    }
+    return null;
+  }
+
+
+
+
+
 
 
 }

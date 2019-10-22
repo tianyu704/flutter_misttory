@@ -5,5 +5,6 @@
   "pixelHeight": 1,
   "lat" : 1.0,
   "lon" : 1.0,
+  "path": "",
   "isSynced" : false
 }

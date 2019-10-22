@@ -18,6 +18,8 @@ class Picture {
 
   num lon;
 
+  String path;
+
   bool isSynced;
 
   factory Picture.fromJson(Map<String, dynamic> json) => _$PictureFromJson(json);

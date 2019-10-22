@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/db/db_manager.dart';
+import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
@@ -42,7 +43,9 @@ class LocationHelper {
   }
   ///图片转化为地点
   Future createLocationWithPicture(Picture p) async {
-
+    ///TODO：此处过滤掉经纬度为 0的图片
+    if (!(p != null && p.lat != 0 && p.lon != 0)) return ;
+    ///
     Mslocation location = Mslocation();
     LatLngType itemType = LatLngType.gps;
     LatLng latlng = await CalculateTools().convertCoordinate(lat: p.lat, lon: p.lon, type: itemType);
@@ -160,6 +163,9 @@ class LocationHelper {
       }
       await FlutterOrmPlugin.saveOrm(
           DBManager.tableLocation, location.toJson());
+      if (picture != null) {
+        PictureHelper().updatePictureStatus(picture);
+      }
       return 0;
     }
     return -1;
@@ -177,6 +183,9 @@ class LocationHelper {
       }
       await Query(DBManager.tableLocation)
           .primaryKey([id]).update({"updatetime": location.updatetime});
+      if (picture != null) {
+        PictureHelper().updatePictureStatus(picture);
+      }
       return 0;
     }
     return -1;
@@ -198,6 +207,17 @@ class LocationHelper {
   Future<Mslocation> queryLastLocation() async {
     Map result = await Query(DBManager.tableLocation).orderBy([
       "time desc",
+    ]).first();
+    if (result != null && result.length > 0) {
+      return Mslocation.fromJson(Map<String, dynamic>.from(result));
+    }
+    return null;
+  }
+
+  /// 查询最早一条Location
+  Future<Mslocation> queryOldestLocation() async {
+    Map result = await Query(DBManager.tableLocation).orderBy([
+      "time",
     ]).first();
     if (result != null && result.length > 0) {
       return Mslocation.fromJson(Map<String, dynamic>.from(result));
