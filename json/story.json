@@ -27,5 +27,5 @@
   "tags": "$[]tag",
   "persons": "$[]person",
   "date": "",
-  "pictures": "$[]picture"
+  "pictures": ""
 }

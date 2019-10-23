@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import "tag.dart";
 import "person.dart";
-import "picture.dart";
 part 'story.g.dart';
 
 @JsonSerializable()
@@ -75,7 +74,7 @@ class Story {
 
   String date;
 
-  List<Picture> pictures;
+  String pictures;
 
   factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
 

@@ -41,10 +41,7 @@ Mslocation _$MslocationFromJson(Map<String, dynamic> json) {
     ..isFixLastLocation = json['isFixLastLocation'] as bool
     ..coordType = json['coordType'] as String
     ..isDelete = json['is_delete'] as bool
-    ..pictures = (json['pictures'] as List)
-        ?.map((e) =>
-            e == null ? null : Picture.fromJson(e as Map<String, dynamic>))
-        ?.toList();
+    ..pictures = json['pictures'] as String;
 }
 
 Map<String, dynamic> _$MslocationToJson(Mslocation instance) =>

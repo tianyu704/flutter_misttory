@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import "picture.dart";
+
 part 'mslocation.g.dart';
 
 @JsonSerializable()
@@ -73,7 +73,7 @@ class Mslocation {
   @JsonKey(name: "is_delete")
   bool isDelete;
 
-  List<Picture> pictures;
+  String pictures;
 
   factory Mslocation.fromJson(Map<String, dynamic> json) => _$MslocationFromJson(json);
 

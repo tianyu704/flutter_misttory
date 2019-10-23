@@ -42,91 +42,91 @@ class LocationHelper {
     }
   }
   ///图片转化为地点
-  Future createLocationWithPicture(Picture p) async {
+  Future<int>  createLocationWithPicture(Picture p) async {
     ///TODO：此处过滤掉经纬度为 0的图片
-    if (!(p != null && p.lat != 0 && p.lon != 0)) return ;
-    ///
+    if (!(p != null && p.lat != 0 && p.lon != 0)) return 1;
+
     Mslocation location = Mslocation();
+    ///latlon
     LatLngType itemType = LatLngType.gps;
     LatLng latlng = await CalculateTools().convertCoordinate(lat: p.lat, lon: p.lon, type: itemType);
-    p.lat = latlng.latitude;
-    p.lon = latlng.longitude;
-    _aMapSearch
-        .searchReGeocode(latlng, 100,  LatLngType.values.indexOf(itemType))
-        .then((result) {
-      ReGeocodeResult _result = result;
-      ///aoi
-      List<Aoi> aois = result.regeocodeAddress.aois;
-      if (aois != null && aois.length > 0) {
-        for (Aoi aoi in aois) {
-          if (StringUtil.isNotEmpty(aoi.aoiName)) {
-            location.aoiname = aoi.aoiName;
-            break;
-          }
-        }
-      }
-      ///poi
-      List<PoiItem> pois = result.regeocodeAddress.pois;
-      if (pois != null && pois.length > 0) {
-        for (PoiItem poi in pois) {
-          if (StringUtil.isNotEmpty(poi.title))  {
-            location.poiname = poi.title;
-            location.poiid = poi.poiId;
-            break;
-          }
-        }
-      }
-      ///road
-      List<Road>roads = _result.regeocodeAddress.roads;
-      if (roads != null && roads.length > 0) {
-        for (Road road in roads) {
-          if (StringUtil.isNotEmpty(road.name)) {
-            location.road = road.name;
-            break;
-          }
-        }
-      }
-      ///address
-      location.address = _result.regeocodeAddress.formatAddress;
-      location.country =    _result.regeocodeAddress.country;
-      location.citycode = _result.regeocodeAddress.cityCode;
-      location.adcode  = _result.regeocodeAddress.adCode;
-      location.province = _result.regeocodeAddress.province;
-      location.city = _result.regeocodeAddress.city;
-      location.district = _result.regeocodeAddress.district;
+    location.lat = latlng.latitude;
+    location.lon = latlng.longitude;
 
-      location.street = _result.regeocodeAddress.streetNumber.street;
-      location.number = _result.regeocodeAddress.streetNumber.number;
-      location.errorCode = 0;
-      location.errorInfo = "success";
-      location.time = p.creationDate;
-      location.provider = "lbs";///基于位置服务
-      location.coordType = "GCJ02";
 
-      //location.altitude =
-      //location.speed =
-      //location.bearing =
-      //location.locationType =
-      //location.locationDetail =
-      //location.floor =
-      //location.description =
-      //location.accuracy =
-      //location.isOffset =
-      //location.is_delete =
-      return createOrUpdateLocation(location,picture: p);
-    });
+    ReGeocodeResult result =  await  _aMapSearch
+        .searchReGeocode(latlng, 100,  LatLngType.values.indexOf(itemType));
+    ///aoi
+    List<Aoi> aois = result.regeocodeAddress.aois;
+    if (aois != null && aois.length > 0) {
+      for (Aoi aoi in aois) {
+        if (StringUtil.isNotEmpty(aoi.aoiName)) {
+          location.aoiname = aoi.aoiName;
+          break;
+        }
+      }
+    }
+    ///poi
+    List<PoiItem> pois = result.regeocodeAddress.pois;
+    if (pois != null && pois.length > 0) {
+      for (PoiItem poi in pois) {
+        if (StringUtil.isNotEmpty(poi.title))  {
+          location.poiname = poi.title;
+          location.poiid = poi.poiId;
+          break;
+        }
+      }
+    }
+    ///road
+    List<Road>roads = result.regeocodeAddress.roads;
+    if (roads != null && roads.length > 0) {
+      for (Road road in roads) {
+        if (StringUtil.isNotEmpty(road.name)) {
+          location.road = road.name;
+          break;
+        }
+      }
+    }
+    ///address
+    location.address = result.regeocodeAddress.formatAddress;
+    location.country =    result.regeocodeAddress.country;
+    location.citycode = result.regeocodeAddress.cityCode;
+    location.adcode  = result.regeocodeAddress.adCode;
+    location.province = result.regeocodeAddress.province;
+    location.city = result.regeocodeAddress.city;
+    location.district = result.regeocodeAddress.district;
+
+    location.street = result.regeocodeAddress.streetNumber.street;
+    location.number = result.regeocodeAddress.streetNumber.number;
+    location.errorCode = 0;
+    location.errorInfo = "success";
+    location.time = p.creationDate;
+    location.updatetime = p.creationDate;
+    location.provider = "lbs";///基于位置服务
+    location.coordType = "GCJ02";
+
+    //location.altitude =
+    //location.speed =
+    //location.bearing =
+    //location.locationType =
+    //location.locationDetail =
+    //location.floor =
+    //location.description =
+    //location.accuracy =
+    //location.isOffset =
+    //location.is_delete =
+    return await createOrUpdateLocation(location,picture: p);
   }
-
 
   /// 根据最新定位的Location创建或更新最后一条Location
   Future<int> createOrUpdateLocation(Mslocation location,{Picture picture}) async {
     if (location != null && location.errorCode == 0) {
-      Mslocation lastLocation = await queryLastLocation();
+      Mslocation lastLocation = (picture != null) ?  await queryOldestLocation() : await queryLastLocation();
       if (lastLocation == null) {
         return await createLocation(location,picture: picture);
       } else if (lastLocation.lon == location.lon &&
           lastLocation.lat == location.lat) {
-        return await updateLocationTime(lastLocation.id, location,picture: picture);
+        return await updateLocationTime(lastLocation, location,picture: picture);
       } else {
         if (lastLocation.aoiname == location.aoiname) {
           if (location.aoiname == null &&
@@ -137,7 +137,7 @@ class LocationHelper {
                 LocationConfig.judgeDistanceNum) {
               return await createLocation(location,picture: picture);
             } else {
-              return await updateLocationTime(lastLocation.id, location,picture: picture);
+              return await updateLocationTime(lastLocation, location,picture: picture);
             }
           }
         } else if (lastLocation.poiname == location.poiname) {
@@ -145,7 +145,7 @@ class LocationHelper {
               LocationConfig.judgeDistanceNum) {
             return await createLocation(location,picture: picture);
           } else {
-            return await updateLocationTime(lastLocation.id, location,picture: picture);
+            return await updateLocationTime(lastLocation, location,picture: picture);
           }
         } else {
           return await createLocation(location,picture: picture);
@@ -159,12 +159,13 @@ class LocationHelper {
   Future<int> createLocation(Mslocation location,{Picture picture}) async {
     if (location != null && location.lat != 0 && location.lon != 0) {
       if (picture != null) {
-        location.pictures = [picture];
+        location.pictures = "${picture.id}";
       }
       await FlutterOrmPlugin.saveOrm(
           DBManager.tableLocation, location.toJson());
       if (picture != null) {
-        PictureHelper().updatePictureStatus(picture);
+       await PictureHelper().updatePictureStatus(picture);
+       //debugPrint("执行p 转 l中 创建l。。。。。");
       }
       return 0;
     }
@@ -172,19 +173,24 @@ class LocationHelper {
   }
 
   /// 更新Location时间
-  Future<int> updateLocationTime(num id, Mslocation location,{Picture picture}) async {
+  Future<int> updateLocationTime(Mslocation lastLocation, Mslocation location,{Picture picture}) async {
+
+    num id = lastLocation.id;
     if (location != null) {
-      if (picture != null) {
-        if (location.pictures == null) {
-          location.pictures = [picture];
+      if (picture == null) {
+        await Query(DBManager.tableLocation)
+            .primaryKey([id]).update({"updatetime": location.updatetime});
+      } else {
+        String str;
+        if (lastLocation.pictures == null) {
+          str = "${picture.id}";
         } else {
-          location.pictures.add(picture);
+          str = "${lastLocation.pictures},${picture.id}";
         }
-      }
-      await Query(DBManager.tableLocation)
-          .primaryKey([id]).update({"updatetime": location.updatetime});
-      if (picture != null) {
-        PictureHelper().updatePictureStatus(picture);
+        await Query(DBManager.tableLocation)
+            .primaryKey([id]).update({"time": location.time,"pictures":str});
+        await PictureHelper().updatePictureStatus(picture);
+        //debugPrint("执行p 转 l中 更新l。。。。。");
       }
       return 0;
     }

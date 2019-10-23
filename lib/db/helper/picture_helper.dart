@@ -101,23 +101,31 @@ class PictureHelper {
   }
   ///📌查询并转化picture为location
   convertPicturesToLocations () async {
+    debugPrint("开始执行p 转 l");
     Mslocation l = await LocationHelper().queryOldestLocation();
     num time = (l == null) ? 0 : l.time;
-    convertPicturesAfterTime(time);
-    convertPicturesBeforeTime(time);
+    await convertPicturesAfterTime(time);
+    await convertPicturesBeforeTime(time);
+    debugPrint("结束执行p 转 l");
   }
   ///使用app后
   convertPicturesAfterTime(num time) async {
     List afterList = await findPicturesAfterTime(time);
-    for (Picture p in afterList) {
-      LocationHelper().createLocationWithPicture(p);
+    if (afterList != null && afterList.length > 0) {
+      for (Picture p in afterList)
+         await LocationHelper().createLocationWithPicture(p);
+      }
+      debugPrint("使用app后数据同步完成location");
     }
   }
   ///使用app前
   convertPicturesBeforeTime(num time) async {
     List beforeList = await findPicturesBeforeTime(time);
-    for (Picture p in beforeList) {
-      LocationHelper().createLocationWithPicture(p);
+    if (beforeList != null && beforeList.length > 0) {
+      for (Picture p in beforeList) {
+        await LocationHelper().createLocationWithPicture(p);
+      }
+      debugPrint("使用app前数据同步完成location");
     }
   }
   ///📌查询未转化为location的图片集合
@@ -126,10 +134,15 @@ class PictureHelper {
     List result;
     if (time == 0) {
       result = await Query(DBManager.tablePicture)
-          .orderBy(["creationDate desc"]).whereBySql("isSynced == ? ", [false]).all();
+          .orderBy(["creationDate desc"]).whereByColumFilters([
+        WhereCondiction("isSynced", WhereCondictionType.IS_NULL, false),
+      ]).all();
     }  else {
       result = await Query(DBManager.tablePicture)
-          .orderBy(["creationDate desc"]).whereBySql("creationDate >= ? and isSynced == ? ", [time,false]).all();
+          .orderBy(["creationDate desc"]).whereByColumFilters([
+        WhereCondiction("creationDate", WhereCondictionType.MORE_THEN, time),
+        WhereCondiction("isSynced", WhereCondictionType.IS_NULL, false),
+      ]).all();
     }
     List<Picture> list = [];
     if (result != null && result.length > 0) {
@@ -148,7 +161,10 @@ class PictureHelper {
       time = DateTime.now().millisecondsSinceEpoch;
     }
     List result = await Query(DBManager.tablePicture)
-        .orderBy(["creationDate desc"]).whereBySql("creationDate < ? && isSynced == ? ", [time,false]).all();
+        .orderBy(["creationDate desc"]).whereByColumFilters([
+      WhereCondiction("creationDate", WhereCondictionType.LESS_THEN, time),
+      WhereCondiction("isSynced", WhereCondictionType.IS_NULL, false),
+    ]).all();
 
     List<Picture> list = [];
     if (result != null && result.length > 0) {
@@ -167,4 +183,4 @@ class PictureHelper {
 
 
 
-}
+
