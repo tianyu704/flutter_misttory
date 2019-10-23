@@ -13,6 +13,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/pages/pictures_page.dart';
 import 'package:misstory/pages/pois_page.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/date_util.dart';
@@ -102,8 +103,7 @@ class _HomePageState extends LifecycleState<HomePage> {
           _storiesAll.add(_currentStory);
           _storiesAll.addAll(_stories);
         }
-        Story story = _stories[0];
-        _storiesAll.removeAt(0);
+        Story story = _storiesAll.removeAt(0);
         _storiesAll.insertAll(0, StoryHelper().separateStory(story));
       } else {
         _storiesAll.add(_currentStory);
@@ -363,14 +363,16 @@ class _HomePageState extends LifecycleState<HomePage> {
         onTap: () {
           Navigator.of(context)
               .push(MaterialPageRoute(builder: (context) => EditPage(story)))
-              .then((value) {
-            if (value != null) {
-              Map<num, Story> stories = value[0];
-              if (stories != null && stories.length > 0) {
-                notifyStories(stories);
+              .then(
+            (value) {
+              if (value != null) {
+                Map<num, Story> stories = value[0];
+                if (stories != null && stories.length > 0) {
+                  notifyStories(stories);
+                }
               }
-            }
-          });
+            },
+          );
         },
       ),
     );
@@ -422,7 +424,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     _subscription.cancel();
     _aMapLocation.dispose();
     _refreshController.dispose();
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 }

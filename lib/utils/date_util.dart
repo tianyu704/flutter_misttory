@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:misstory/generated/i18n.dart';
 
 class DateUtil {
@@ -53,6 +54,7 @@ class DateUtil {
     ];
   }
 
+  ///判断是否为同一天
   static bool isSameDay(num millis1, num millis2) {
     if (millis1 != null && millis2 != null) {
       DateTime d1 = DateTime.fromMillisecondsSinceEpoch(millis1);
@@ -62,5 +64,11 @@ class DateUtil {
       }
     }
     return false;
+  }
+
+  /// 时间戳转换成 10月10日 17：45
+  static String getMonthDayHourMin(num millis) {
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(millis.toInt());
+    return DateFormat("M月d日 HH:mm").format(dateTime);
   }
 }

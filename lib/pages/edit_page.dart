@@ -11,12 +11,14 @@ import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/person_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/helper/tag_helper.dart';
+import 'package:misstory/main.dart';
 import 'package:misstory/models/person.dart';
 import 'package:misstory/models/poilocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/models/tag.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/string_util.dart';
+import 'package:misstory/widgets/my_appbar.dart';
 import 'package:misstory/widgets/tag_items_widget.dart';
 //import 'package:fluttertoast/fluttertoast.dart';
 
@@ -131,8 +133,10 @@ class _EditPageState extends LifecycleState<EditPage> {
   Widget build(BuildContext context) {
     bool isNonePoiList = poiList == null || poiList.length == 0;
     return Scaffold(
-      appBar: AppBar(
-        leading: MaterialButton(
+      appBar: MyAppbar(
+        context,
+        title: Text(_showTimeStr, style: AppStyle.mainText17(context)),
+        leftText: MaterialButton(
           padding: EdgeInsets.all(0),
           shape: CircleBorder(
             side: BorderSide(
@@ -147,22 +151,16 @@ class _EditPageState extends LifecycleState<EditPage> {
             style: AppStyle.navCancelText(context),
           ),
         ),
-        title: Text(_showTimeStr, style: AppStyle.mainText17(context)),
-        centerTitle: true,
-        backgroundColor: AppStyle.colors(context).colorBgPage,
-        elevation: 0,
-        actions: <Widget>[
-          MaterialButton(
-            padding: EdgeInsets.all(0),
-            onPressed: clickSave,
-            child: Text('保存', style: AppStyle.navSaveText(context)),
-            shape: CircleBorder(
-              side: BorderSide(
-                color: Colors.white,
-              ),
+        rightText: MaterialButton(
+          padding: EdgeInsets.all(0),
+          onPressed: clickSave,
+          child: Text('保存', style: AppStyle.navSaveText(context)),
+          shape: CircleBorder(
+            side: BorderSide(
+              color: Colors.white,
             ),
           ),
-        ],
+        ),
       ),
       backgroundColor: AppStyle.colors(context).colorBgPage,
       body: CustomScrollView(
@@ -400,26 +398,32 @@ class _EditPageState extends LifecycleState<EditPage> {
             focusNode: _descFocusNode,
             enabled: true,
             maxLines: 7,
+            cursorWidth: 2,
+            cursorRadius: Radius.circular(1),
+            scrollPhysics: BouncingScrollPhysics(),
+            autocorrect: true,
             style: AppStyle.mainText14(context),
             textInputAction: TextInputAction.done,
             decoration: InputDecoration(
-                hintText: "此刻我想说…",
-                hintStyle: AppStyle.placeholderText(context),
-                border: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                  style: BorderStyle.solid,
-                  color: AppStyle.colors(context).colorTextFieldLine,
-                )),
-                focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                  style: BorderStyle.solid,
-                  color: AppStyle.colors(context).colorPrimary,
-                )),
-                enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                  style: BorderStyle.solid,
-                  color: AppStyle.colors(context).colorTextFieldLine,
-                ))),
+              hintText: "此刻我想说…",
+              hintStyle: AppStyle.placeholderText(context),
+//                border: InputBorder.none
+              border: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                style: BorderStyle.solid,
+                color: AppStyle.colors(context).colorTextFieldLine,
+              )),
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                style: BorderStyle.solid,
+                color: AppStyle.colors(context).colorPrimary,
+              )),
+              enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                style: BorderStyle.solid,
+                color: AppStyle.colors(context).colorTextFieldLine,
+              )),
+            ),
             onEditingComplete: () {
               //TODO:监听输入完成触发
               _descFocusNode.unfocus();
@@ -735,7 +739,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   addTargetTag(String name) {
     if (showTagList.contains(name)) {
-    //  Fluttertoast.showToast(msg: "标签已添加");
+      //  Fluttertoast.showToast(msg: "标签已添加");
     } else {
       addTagList.add(name);
       showTagList.add(name);
@@ -746,7 +750,6 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///保存编辑页面数据
   clickSave() async {
     //TODO:
-    bool isFlag = false;
     Story story = widget.story;
     if (story.id == null) {
       //TODO:创建一条story
@@ -754,11 +757,8 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
 
     ///备注保存
-    if (StringUtil.isNotEmpty(_descTextFieldVC.text)) {
-      story.desc = _descTextFieldVC.text;
-      await StoryHelper().updateStoryDesc(story);
-      isFlag = true;
-    }
+    story.desc = _descTextFieldVC.text ?? "";
+    await StoryHelper().updateStoryDesc(story);
 
 //    ///标签保存
 //    for (String name in addTagList) {
@@ -801,7 +801,7 @@ class _EditPageState extends LifecycleState<EditPage> {
       story.lat = pickPoiLocation.latLonPoint.latitude;
       story.lon = pickPoiLocation.latLonPoint.longitude;
       stories = await StoryHelper().updateCustomAddress(story);
-      isFlag = true;
+
       ///存储该pick 点 如果没存过的话
     }
     Navigator.pop(context, [stories]);
