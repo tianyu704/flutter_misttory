@@ -14,6 +14,8 @@ import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/my_appbar.dart';
 import 'package:misstory/widgets/picture.dart';
 
+import 'edit_page.dart';
+
 ///
 /// Create by Hugo.Guo
 /// Date: 2019-10-21
@@ -36,6 +38,7 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
   String _title = "";
   List<LocalImage> _images;
   double width;
+  dynamic _result;
 
   @override
   void initState() {
@@ -72,6 +75,19 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+        ),
+        leftIcon: MaterialButton(
+          child: SvgPicture.asset(
+            "assets/images/icon_back.svg",
+          ),
+          shape: CircleBorder(
+            side: BorderSide(
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () {
+            Navigator.of(context).pop(_result);
+          },
         ),
         isHero: true,
       ),
@@ -110,9 +126,24 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
                 ),
               ),
             ),
-            IconButton(
-                icon: SvgPicture.asset("assets/images/icon_edit.svg"),
-                onPressed: () {}),
+            SizedBox(
+              width: 44,
+              height: 44,
+              child: MaterialButton(
+                onPressed: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(
+                          builder: (context) => EditPage(_story)))
+                      .then(
+                    (value) {
+                      _result = value;
+                    },
+                  );
+                },
+                padding: EdgeInsets.all(0),
+                child: SvgPicture.asset("assets/images/icon_edit.svg"),
+              ),
+            ),
           ],
         ),
       ),
@@ -137,26 +168,23 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
   ///图片子元素
   Widget _buildItem(context, index) {
     LocalImage image = _images[index];
-    return Hero(
-      tag: image.id,
-      child: Picture(
-        image,
-        width: width,
-        height: width,
-        radius: 6,
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => PictureViewPage(
-                _images,
-                _title,
-                _address,
-                position: index,
-              ),
+    return Picture(
+      image,
+      width: width,
+      height: width,
+      radius: 6,
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => PictureViewPage(
+              _images,
+              _title,
+              _address,
+              position: index,
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

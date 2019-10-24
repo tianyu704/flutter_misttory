@@ -42,13 +42,19 @@ class _PictureState extends State<Picture> with TickerProviderStateMixin {
   StreamSubscription _subscription;
   Uint8List _imageMemory;
   AnimationController _controller;
+  Animation animation;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 300),
+      lowerBound: 0.0,
+      upperBound: 1.0,
+    );
+    animation = CurvedAnimation(parent: _controller, curve: Curves.easeInBack);
     _localImage = widget.localImage;
     _imageMemory = _localImage.bytes;
     if (!_isLoading) {
@@ -66,36 +72,19 @@ class _PictureState extends State<Picture> with TickerProviderStateMixin {
         setState(() {});
       }
     } else {
-      if (Platform.isAndroid) {
-        _subscription = Stream.fromFuture(FlutterImageCompress.compressWithFile(
-          _localImage.path,
-          minWidth: widget.width.toInt(),
-          minHeight: widget.height.toInt(),
-          quality: 100,
-        )).listen((value) {
-          _imageMemory = Uint8List.fromList(value);
-          _localImage.bytes = _imageMemory;
-          MSImageCache().addCache(_getKey(), _imageMemory);
-          _isLoading = false;
-          if (mounted) {
-            setState(() {});
-          }
-        });
-      } else {
-        _subscription = Stream.fromFuture(LocalImageProvider().imageBytes(
-          Platform.isAndroid ? _localImage.path : _localImage.id,
-          widget.width.toInt(),
-          widget.height.toInt(),
-        )).listen((value) {
-          _imageMemory = value;
-          _localImage.bytes = _imageMemory;
-          MSImageCache().addCache(_getKey(), _imageMemory);
-          _isLoading = false;
-          if (mounted) {
-            setState(() {});
-          }
-        });
-      }
+      _subscription = Stream.fromFuture(LocalImageProvider().imageBytes(
+        Platform.isAndroid ? _localImage.path : _localImage.id,
+        widget.width.toInt(),
+        widget.height.toInt(),
+      )).listen((value) {
+        _imageMemory = value;
+        _localImage.bytes = _imageMemory;
+        MSImageCache().addCache(_getKey(), _imageMemory);
+        _isLoading = false;
+        if (mounted) {
+          setState(() {});
+        }
+      });
     }
   }
 
@@ -105,41 +94,34 @@ class _PictureState extends State<Picture> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+//    print("==========${_imageMemory?.length}");
+    _controller.forward();
     // TODO: implement build
     return GestureDetector(
       onTap: _imageMemory == null ? null : widget.onTap,
-      child: _imageMemory == null
-          ? Container(
-              decoration: BoxDecoration(
-                  color: Color(0xFFDDDDDD),
-                  borderRadius:
-                      BorderRadius.all(Radius.circular(widget.radius))),
+      child: FadeTransition(
+        opacity: animation,
+        child: _imageMemory == null
+            ? Container(
+                decoration: BoxDecoration(
+                    color: Color(0xFFDDDDDD),
+                    borderRadius:
+                        BorderRadius.all(Radius.circular(widget.radius))),
 //              child: Icon(
 //                Icons.image,
 //                color: Colors.grey,
 //              ),
-            )
-          : ExtendedImage.memory(
-              _imageMemory,
-              fit: widget.fit,
-              width: widget.width,
-              height: widget.height,
-              borderRadius: BorderRadius.all(Radius.circular(widget.radius)),
-              shape: BoxShape.rectangle,
-              mode: widget.mode,
-            ),
-//      child: FadeTransition(
-//        opacity: _controller,
-//        child: ExtendedImage.memory(
-//          _imageMemory == null ? Image.asset("") : _imageMemory,
-//          fit: widget.fit,
-//          width: widget.width,
-//          height: widget.height,
-//          borderRadius: BorderRadius.all(Radius.circular(widget.radius)),
-//          shape: BoxShape.rectangle,
-//          mode: widget.mode,
-//        ),
-//      ),
+              )
+            : ExtendedImage.memory(
+                _imageMemory,
+                fit: widget.fit,
+                width: widget.width,
+                height: widget.height,
+                borderRadius: BorderRadius.all(Radius.circular(widget.radius)),
+                shape: BoxShape.rectangle,
+                mode: widget.mode,
+              ),
+      ),
     );
   }
 
@@ -147,6 +129,7 @@ class _PictureState extends State<Picture> with TickerProviderStateMixin {
   void dispose() {
     // TODO: implement dispose
     _subscription?.cancel();
+    _controller.dispose();
     _isLoading = false;
     super.dispose();
   }

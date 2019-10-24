@@ -62,11 +62,13 @@ class MyAppbar extends PreferredSize {
                     ),
                   ),
                   Expanded(
-                    child: Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: title,
-                      ),
+                    flex: 1,
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      alignment: Alignment.center,
+                      child: title,
                     ),
                   ),
                   SizedBox(

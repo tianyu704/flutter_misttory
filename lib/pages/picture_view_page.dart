@@ -43,7 +43,7 @@ class _PictureViewPageState extends LifecycleState<PictureViewPage> {
     _currentIndex = widget.position;
     _images = widget.images;
     _pageController =
-        PageController(initialPage: _currentIndex, viewportFraction: 1);
+        PageController(initialPage: _currentIndex, viewportFraction: 0.9999);
   }
 
   @override
@@ -56,6 +56,7 @@ class _PictureViewPageState extends LifecycleState<PictureViewPage> {
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             Hero(
               tag: "date",
@@ -96,16 +97,13 @@ class _PictureViewPageState extends LifecycleState<PictureViewPage> {
 
   Widget _buildItem(BuildContext context, int index) {
     LocalImage image = _images[index];
-    return Hero(
-      tag: image.id,
-      child: Picture(
-        image,
-        width: _width,
-        height: _height,
-        radius: 0,
-        fit: BoxFit.fitWidth,
-        mode: ExtendedImageMode.gesture,
-      ),
+    return Picture(
+      image,
+      width: _width,
+      height: _height,
+      radius: 0,
+      fit: BoxFit.contain,
+      mode: ExtendedImageMode.gesture,
     );
   }
 

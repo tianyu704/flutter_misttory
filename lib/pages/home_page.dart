@@ -288,12 +288,36 @@ class _HomePageState extends LifecycleState<HomePage> {
             children: <Widget>[
               SizedBox(
                 width: 56,
-                child: Padding(
-                  padding: EdgeInsets.only(top: 2),
-                  child: Text(
-                    "$date",
-                    style: AppStyle.locationText14(context),
-                  ),
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 2),
+                      child: Text(
+                        "$date",
+                        style: AppStyle.locationText14(context),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                      child: FlatButton(
+                        onPressed: () {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(
+                                  builder: (context) => PicturesPage(story)))
+                              .then(
+                            (value) {
+                              if (value != null) {
+                                Map<num, Story> stories = value[0];
+                                if (stories != null && stories.length > 0) {
+                                  notifyStories(stories);
+                                }
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Expanded(

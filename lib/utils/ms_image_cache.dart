@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 ///
 /// Create by Hugo.Guo
 /// Date: 2019-10-23
@@ -12,7 +13,7 @@ class MSImageCache {
 
   Map<String, Uint8List> imageCache = Map<String, Uint8List>();
   List<String> keys = List<String>();
-  final num MAX_SIZE = 1024 * 1024 * 100;
+  final num MAX_SIZE = 1024 * 1024 * 20;
   num size = 0;
 
   void addCache(String key, Uint8List value) {
@@ -22,7 +23,7 @@ class MSImageCache {
     if (!imageCache.containsKey(key)) {
       imageCache[key] = value;
       size += value.length;
-//      print((size/1024/1024));
+      print((size / 1024 / 1024));
       keys.add(key);
       _judgeSize();
     }
