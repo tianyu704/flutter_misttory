@@ -475,46 +475,49 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   Widget poiSectionWidget(BuildContext context) {
-    return SizedBox(
-      height: 49,
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            child: Stack(
-              alignment: Alignment.center, //指定未定位或部分定位widget的对齐方式
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                ),
-                Positioned(
-                  left: 0.0,
-                  child: Text("可能是下面的地点？",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                          color: AppStyle.colors(context).colorMainText)),
-                ),
-                Positioned(
-                    right: 0.0,
-                    child: IconButton(
-                        icon: SvgPicture.asset(
-                          "assets/images/icon_search.svg",
-                          width: 18,
-                          height: 18,
-                        ),
-                        onPressed: showSearch))
-              ],
+    return InkWell(
+      onTap: showSearch,
+      child: SizedBox(
+        height: 49,
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              child: Stack(
+                alignment: Alignment.center, //指定未定位或部分定位widget的对齐方式
+                children: <Widget>[
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                  ),
+                  Positioned(
+                    left: 0.0,
+                    child: Text("可能是下面的地点？",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            color: AppStyle.colors(context).colorMainText)),
+                  ),
+                  Positioned(
+                      right: 0.0,
+                      child: IconButton(
+                          icon: SvgPicture.asset(
+                            "assets/images/icon_search.svg",
+                            width: 18,
+                            height: 18,
+                          ),
+                          onPressed: showSearch))
+                ],
+              ),
+              padding: EdgeInsets.fromLTRB(30, 14, 10, 14),
             ),
-            padding: EdgeInsets.fromLTRB(30, 14, 10, 14),
-          ),
-          Container(
-            height: 1,
-            margin: EdgeInsets.only(left: 24, right: 24),
-            color: AppStyle.colors(context).colorTextFieldLine,
-          ),
-        ],
+            Container(
+              height: 1,
+              margin: EdgeInsets.only(left: 24, right: 24),
+              color: AppStyle.colors(context).colorTextFieldLine,
+            ),
+          ],
+        ),
       ),
     );
   }

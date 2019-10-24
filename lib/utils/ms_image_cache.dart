@@ -23,7 +23,7 @@ class MSImageCache {
     if (!imageCache.containsKey(key)) {
       imageCache[key] = value;
       size += value.length;
-      print((size / 1024 / 1024));
+//      print((size / 1024 / 1024));
       keys.add(key);
       _judgeSize();
     }

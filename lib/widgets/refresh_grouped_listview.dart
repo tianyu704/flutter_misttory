@@ -13,7 +13,7 @@ typedef Widget GroupBuilderFunction<TGroup>(BuildContext context, TGroup group);
 class RefreshGroupedListView<TElement, TGroup> extends StatelessWidget {
   final List<TElement> collection;
   final GroupFunction<TElement, TGroup> groupBy;
-  final ListBuilderFunction<TElement> listBuilder;
+  final ListBuilderFunction<TItem<TElement>> listBuilder;
   final GroupBuilderFunction<TGroup> groupBuilder;
 
   final List<dynamic> _flattenedList = List();
@@ -61,7 +61,7 @@ class RefreshGroupedListView<TElement, TGroup> extends StatelessWidget {
       child: ListView.builder(
         itemBuilder: (context, index) {
           var element = _flattenedList[index];
-          if (element is TElement) {
+          if (element is TItem) {
             return listBuilder(context, element);
           }
           return groupBuilder(context, element);
@@ -74,7 +74,7 @@ class RefreshGroupedListView<TElement, TGroup> extends StatelessWidget {
 }
 
 class Grouper<TElement, TGroup> {
-  final Map<TGroup, List<TElement>> _groupedList = {};
+  final Map<TGroup, List<TItem<TElement>>> _groupedList = {};
 
   List<dynamic> groupList(
       List<TElement> collection, GroupFunction<TElement, TGroup> groupBy) {
@@ -83,13 +83,33 @@ class Grouper<TElement, TGroup> {
       throw ArgumentError("GroupBy function can not be null");
 
     List flattenedList = List();
+    var lastKey;
     collection.forEach((element) {
       var key = groupBy(element);
       if (!_groupedList.containsKey(key)) {
-        _groupedList[key] = List<TElement>();
+        if (lastKey != null) {
+          TItem item = _groupedList[lastKey][_groupedList[lastKey].length - 1];
+          if (item.position == ItemPosition.START) {
+            item.position = ItemPosition.ALL;
+          } else {
+            item.position = ItemPosition.END;
+          }
+        }
+        _groupedList[key] = List<TItem<TElement>>();
+        _groupedList[key].add(TItem(ItemPosition.START, element));
+      } else {
+        _groupedList[key].add(TItem(ItemPosition.CENTER, element));
       }
-      _groupedList[key].add(element);
+      lastKey = key;
     });
+    if (lastKey != null) {
+      TItem item = _groupedList[lastKey][_groupedList[lastKey].length - 1];
+      if (item.position == ItemPosition.START) {
+        item.position = ItemPosition.ALL;
+      } else {
+        item.position = ItemPosition.END;
+      }
+    }
     _groupedList.forEach((key, list) {
       flattenedList.add(key);
       flattenedList.addAll(list);
@@ -97,3 +117,12 @@ class Grouper<TElement, TGroup> {
     return flattenedList;
   }
 }
+
+class TItem<TElement> {
+  ItemPosition position;
+  TElement tElement;
+
+  TItem(this.position, this.tElement);
+}
+
+enum ItemPosition { START, CENTER, END, ALL }

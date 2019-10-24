@@ -18,6 +18,7 @@ import 'package:misstory/pages/pois_page.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
+import 'package:misstory/widgets/location_item.dart';
 import 'package:misstory/widgets/refresh_grouped_listview.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -211,14 +212,17 @@ class _HomePageState extends LifecycleState<HomePage> {
         centerTitle: false,
         title: _buildHeader(),
         actions: <Widget>[
-          FlatButton(
-              onPressed: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  return SearchPage("");
-                }));
-              },
-              child: Text("Debug"))
+          Offstage(
+            offstage: !Constant.isDebug,
+            child: FlatButton(
+                onPressed: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    return SearchPage("");
+                  }));
+                },
+                child: Text("Debug")),
+          ),
         ],
         backgroundColor: AppStyle.colors(context).colorBgPage,
         elevation: 0,
@@ -233,8 +237,8 @@ class _HomePageState extends LifecycleState<HomePage> {
       _refreshController,
       collection: _storiesAll,
       groupBy: (Story g) => g.date,
-      listBuilder: (BuildContext context, Story g) =>
-          _buildCardItem(context, g),
+      listBuilder: (BuildContext context, TItem<Story> item) =>
+          _buildCardItem(context, item),
       groupBuilder: (BuildContext context, String name) =>
           _groupSectionWidget(context, name),
       onLoading: _loadMore,
@@ -265,140 +269,39 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   ///展示定位的卡片
-  Widget _buildCardItem(context, Story story) {
-    String date = "";
-    if (story?.createTime != null && story.createTime != 0) {
-      DateTime dateTime =
-          DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
-      date = DateFormat("HH:mm").format(dateTime);
-    }
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.only(left: 40, top: 8, bottom: 8, right: 16),
-      color: AppStyle.colors(context).colorBgCard,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10))),
-      elevation: 0,
-      child: InkWell(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(
-                width: 56,
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(top: 2),
-                      child: Text(
-                        "$date",
-                        style: AppStyle.locationText14(context),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 20,
-                      child: FlatButton(
-                        onPressed: () {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(
-                                  builder: (context) => PicturesPage(story)))
-                              .then(
-                            (value) {
-                              if (value != null) {
-                                Map<num, Story> stories = value[0];
-                                if (stories != null && stories.length > 0) {
-                                  notifyStories(stories);
-                                }
-                              }
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: 3),
-                          child: SvgPicture.asset(
-                            StringUtil.isEmpty(story.customAddress)
-                                ? "assets/images/icon_location_empty.svg"
-                                : "assets/images/icon_location_fill.svg",
-                            width: 14,
-                            height: 14,
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Text(
-                              StringUtil.isEmpty(story.customAddress)
-                                  ? story.defaultAddress
-                                  : story.customAddress,
-                              maxLines: 2,
-                              style: AppStyle.locationText14(context),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 4),
-                    Row(
-                      children: <Widget>[
-                        SvgPicture.asset(
-                          "assets/images/icon_remain_time.svg",
-                          width: 12,
-                          height: 12,
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 11),
-                          child: Text(
-                            DateUtil.getStayShowTime(story.intervalTime),
-                            style: AppStyle.descText12(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Offstage(
-                      offstage: StringUtil.isEmpty(story.desc),
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 16),
-                        child: Text(
-                          story?.desc ?? "",
-                          style: AppStyle.contentText12(context),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        onTap: () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => EditPage(story)))
-              .then(
-            (value) {
-              if (value != null) {
-                Map<num, Story> stories = value[0];
-                if (stories != null && stories.length > 0) {
-                  notifyStories(stories);
-                }
+  Widget _buildCardItem(context, TItem<Story> item) {
+    return LocationItem(
+      item,
+      onPressCard: () {
+        Navigator.of(context)
+            .push(MaterialPageRoute(
+                builder: (context) => EditPage(item.tElement)))
+            .then(
+          (value) {
+            if (value != null) {
+              Map<num, Story> stories = value[0];
+              if (stories != null && stories.length > 0) {
+                notifyStories(stories);
               }
-            },
-          );
-        },
-      ),
+            }
+          },
+        );
+      },
+      onPressPicture: () {
+        Navigator.of(context)
+            .push(MaterialPageRoute(
+                builder: (context) => PicturesPage(item.tElement)))
+            .then(
+          (value) {
+            if (value != null) {
+              Map<num, Story> stories = value[0];
+              if (stories != null && stories.length > 0) {
+                notifyStories(stories);
+              }
+            }
+          },
+        );
+      },
     );
   }
 
@@ -406,10 +309,10 @@ class _HomePageState extends LifecycleState<HomePage> {
   Widget _groupSectionWidget(BuildContext context, String groupName) {
     return SizedBox(
       child: Padding(
-        padding: EdgeInsets.only(left: 24, top: 8, bottom: 8),
+        padding: EdgeInsets.only(left: 24, top: 10, bottom: 10, right: 24),
         child: Text(
           DateUtil.getMonthDayWeek(context, groupName),
-          style: AppStyle.mainText16(context, fontWeight: FontWeight.w500),
+          style: AppStyle.mainText18(context, fontWeight: FontWeight.w500),
         ),
       ),
     );

@@ -76,12 +76,12 @@ class AppStyle {
           decoration: TextDecoration.none,
           fontWeight: bold ? FontWeight.w500 : FontWeight.normal);
 
-  static TextStyle mainText18(BuildContext context, {bold = false}) =>
+  static TextStyle mainText18(BuildContext context, {fontWeight = FontWeight.normal}) =>
       TextStyle(
           color: colors(context).colorMainText,
           fontSize: 18,
           decoration: TextDecoration.none,
-          fontWeight: bold ? FontWeight.bold : FontWeight.normal);
+          fontWeight: fontWeight);
 
   static TextStyle mainText20(BuildContext context) => TextStyle(
         color: colors(context).colorMainText,
