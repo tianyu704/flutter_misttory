@@ -61,7 +61,7 @@ class _PictureState extends State<Picture> with TickerProviderStateMixin {
     }
   }
 
-  _loadImage() {
+  _loadImage() async{
     _isLoading = true;
     Uint8List list = MSImageCache().getImageCache(_getKey());
     if (list != null) {
@@ -71,6 +71,7 @@ class _PictureState extends State<Picture> with TickerProviderStateMixin {
         setState(() {});
       }
     } else {
+      await LocalImageProvider().initialize();
       _subscription = Stream.fromFuture(LocalImageProvider().imageBytes(
         Platform.isAndroid ? _localImage.path : _localImage.id,
         widget.width.toInt(),

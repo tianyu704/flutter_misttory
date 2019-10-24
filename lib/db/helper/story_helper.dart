@@ -246,10 +246,12 @@ class StoryHelper {
     Map story2 =
         await Query(DBManager.tableStory).orderBy(["create_time asc"]).first();
     if (story1 != null && story2 != null) {
-      num time1 = story1["create_time"] as num;
-      num time2 = story2["update_time"] as num;
+      num time1 = story1["update_time"] as num;
+      num time2 = story2["create_time"] as num;
       DateTime dateTime1 = DateTime.fromMillisecondsSinceEpoch(time1.toInt());
       DateTime dateTime2 = DateTime.fromMillisecondsSinceEpoch(time2.toInt());
+      print(time1);
+      print(time2);
       return DateTime(dateTime1.year, dateTime1.month, dateTime1.day)
               .difference(
                   DateTime(dateTime2.year, dateTime2.month, dateTime2.day))
