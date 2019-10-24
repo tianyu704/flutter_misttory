@@ -5,6 +5,7 @@ import 'package:misstory/models/story.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
+import 'package:misstory/widgets/picture_item.dart';
 import 'package:misstory/widgets/refresh_grouped_listview.dart';
 
 ///
@@ -36,95 +37,99 @@ class LocationItem extends StatelessWidget {
       elevation: 0,
       child: InkWell(
         child: Column(
+          mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             Padding(
               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
                 children: <Widget>[
-                  SizedBox(
-                    width: 56,
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        width: 56,
+                        child: Padding(
                           padding: EdgeInsets.only(top: 2),
                           child: Text(
                             "$date",
                             style: AppStyle.mainText14(context),
                           ),
                         ),
-                        SizedBox(
-                          height: 20,
-                          child: FlatButton(
-                            onPressed: onPressPicture,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Row(
+                      ),
+                      Expanded(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.only(top: 3),
-                              child: SvgPicture.asset(
-                                StringUtil.isEmpty(story.customAddress)
-                                    ? "assets/images/icon_location_empty.svg"
-                                    : "assets/images/icon_location_fill.svg",
-                                width: 14,
-                                height: 14,
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: EdgeInsets.only(top: 3),
+                                  child: SvgPicture.asset(
+                                    StringUtil.isEmpty(story.customAddress)
+                                        ? "assets/images/icon_location_empty.svg"
+                                        : "assets/images/icon_location_fill.svg",
+                                    width: 14,
+                                    height: 14,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(left: 10),
+                                    child: Text(
+                                      StringUtil.isEmpty(story.customAddress)
+                                          ? story.defaultAddress
+                                          : story.customAddress,
+                                      maxLines: 2,
+                                      style: AppStyle.mainText14(context,
+                                          weight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            Expanded(
+                            SizedBox(height: 4),
+                            Row(
+                              children: <Widget>[
+                                SvgPicture.asset(
+                                  "assets/images/icon_remain_time.svg",
+                                  width: 12,
+                                  height: 12,
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 11),
+                                  child: Text(
+                                    DateUtil.getStayShowTime(
+                                        story.intervalTime),
+                                    style: AppStyle.descText12(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Offstage(
+                              offstage: StringUtil.isEmpty(story.desc),
                               child: Padding(
-                                padding: EdgeInsets.only(left: 10),
+                                padding: EdgeInsets.only(top: 4),
                                 child: Text(
-                                  StringUtil.isEmpty(story.customAddress)
-                                      ? story.defaultAddress
-                                      : story.customAddress,
+                                  story?.desc ?? "",
+                                  style: AppStyle.contentText12(context),
                                   maxLines: 2,
-                                  style: AppStyle.mainText14(context,
-                                      weight: FontWeight.w500),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 4),
-                        Row(
-                          children: <Widget>[
-                            SvgPicture.asset(
-                              "assets/images/icon_remain_time.svg",
-                              width: 12,
-                              height: 12,
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 11),
-                              child: Text(
-                                DateUtil.getStayShowTime(story.intervalTime),
-                                style: AppStyle.descText12(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Offstage(
-                          offstage: StringUtil.isEmpty(story.desc),
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 4),
-                            child: Text(
-                              story?.desc ?? "",
-                              style: AppStyle.contentText12(context),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  Offstage(
+//                    offstage: story.pictures == null,
+                    offstage: false,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 5),
+                      child: PictureItem(story.pictures ?? "", onPressPicture),
                     ),
                   ),
                 ],

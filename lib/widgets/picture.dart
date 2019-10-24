@@ -6,6 +6,7 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:local_image_provider/local_image.dart';
 import 'package:local_image_provider/local_image_provider.dart';
+import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/ms_image_cache.dart';
 
 ///
@@ -55,13 +56,13 @@ class _PictureState extends State<Picture> with TickerProviderStateMixin {
     );
     animation = CurvedAnimation(parent: _controller, curve: Curves.easeInBack);
     _localImage = widget.localImage;
-    _imageMemory = _localImage.bytes;
-    if (!_isLoading) {
+    _imageMemory = _localImage?.bytes;
+    if (!_isLoading && _localImage != null) {
       _loadImage();
     }
   }
 
-  _loadImage() async{
+  _loadImage() async {
     _isLoading = true;
     Uint8List list = MSImageCache().getImageCache(_getKey());
     if (list != null) {
@@ -104,7 +105,7 @@ class _PictureState extends State<Picture> with TickerProviderStateMixin {
         child: _imageMemory == null
             ? Container(
                 decoration: BoxDecoration(
-                    color: Color(0xFFDDDDDD),
+                    color: AppStyle.colors(context).colorPicBg,
                     borderRadius:
                         BorderRadius.all(Radius.circular(widget.radius))),
 //              child: Icon(

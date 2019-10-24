@@ -37,6 +37,8 @@ class ThemeNormal extends ThemeBase {
   @override
   Color colorHomeBg = Color(0xFFFAFAFA);
   @override
+  Color colorPicBg = Color(0xFFDDDDDD);
+  @override
   Color colorDialog = Color(0xFFFFFFFF);
   @override
   Color colorConfirm = Color(0xFF476BE1);

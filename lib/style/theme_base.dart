@@ -19,6 +19,7 @@ abstract class ThemeBase {
   Color colorTextFieldLine;  //TextField
   Color colorSearchBg;
   Color colorHomeBg;
+  Color colorPicBg;
   Color colorDialog;
   Color colorConfirm;
   Color colorCancel;
