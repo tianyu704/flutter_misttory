@@ -20,27 +20,41 @@ class PictureHelper {
   PictureHelper._internal();
 
   fetchAppSystemPicture() async {
-    Picture p = await PictureHelper().queryOldestPicture();
+
+    List picList = await queryPictureConverted();
+
+    Picture beforeP =  picList != null && picList.length > 0 ? picList.last :null;
+    Picture afterP =  picList != null && picList.length > 0 ? picList.first :null;
     num time = 0;
-    if (p != null) {
-      time = p.creationDate;
+    if (beforeP != null) {
+      time = beforeP.creationDate;
     }
     await LocalImageProvider().initialize();
     num start = DateTime.now().millisecondsSinceEpoch;
     List<LocalImage> list = [];
+    List<LocalImage> afterList = [];
     if (time == 0) {
       list = await LocalImageProvider().findLatest(0);
     } else {
-      list = await LocalImageProvider().findBeforeTime(time: time);
+      afterList = await LocalImageProvider().findAfterTime(time: afterP.creationDate);
+      list =   await LocalImageProvider().findBeforeTime(time: time);
     }
     debugPrint(
         "======查询到${list?.length}张照片，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
-    if (list != null && list.length > 0) {
-      for (LocalImage image in list) {
+    if (afterList != null && afterList.length > 0) {
+      print("===${afterList.length}==${afterP.creationDate}===");
+      for (LocalImage image in afterList) {
         if (!(await PictureHelper().isExistPictureWithId(image.id))) {
           await createPicture(createPictureModelWithLocalImage(image));
         }
       }
+    }
+    if (list != null && list.length > 0) {
+//      for (LocalImage image in list) {
+//        if (!(await PictureHelper().isExistPictureWithId(image.id))) {
+//          await createPicture(createPictureModelWithLocalImage(image));
+//        }
+//      }
     }
     debugPrint(
         " 存储完Picture表，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
@@ -107,13 +121,13 @@ class PictureHelper {
     if (list == null || list.length == 0) {
       Mslocation l = await LocationHelper().queryOldestLocation();
       num time = (l == null) ? 0 : l.time;
-      await convertPicturesAfterTime(1569541141000);
-      //await convertPicturesBeforeTime(time);
+      await convertPicturesAfterTime(time);
+      await convertPicturesBeforeTime(time);
     } else {
       Picture earliestP = list.last;
       Picture newestP = list.first;
       await convertPicturesAfterTime(newestP.creationDate);
-      //await convertPicturesBeforeTime(earliestP.creationDate);
+     // await convertPicturesBeforeTime(earliestP.creationDate);
     }
     debugPrint("结束执行p 转 l");
   }
@@ -121,6 +135,7 @@ class PictureHelper {
   convertPicturesAfterTime(num time) async {
     List afterList = await findPicturesAfterTime(time);
     if (afterList != null && afterList.length > 0) {
+      print("${afterList.length}");
       for (Picture p in afterList)
          await LocationHelper().createLocationWithPicture(p,false);
       }

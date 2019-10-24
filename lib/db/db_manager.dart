@@ -51,7 +51,7 @@ class DBManager {
     locationFields["coordType"] = Field(FieldType.Text);
     locationFields["is_delete"] = Field(FieldType.Boolean);
     locationFields["pictures"] = Field(FieldType.Text);
-    locationFields["isFromPicture"] = Field(FieldType.Boolean);
+    locationFields["isFromPicture"] = Field(FieldType.Real);
 
     ///故事表
     Map<String, Field> storyFields = new Map<String, Field>();
@@ -82,6 +82,7 @@ class DBManager {
     storyFields["interval_time"] = Field(FieldType.Real);
     storyFields["is_delete"] = Field(FieldType.Boolean);
     storyFields["pictures"] = Field(FieldType.Text);
+    storyFields["isFromPicture"] = Field(FieldType.Real);
 
     ///tag表
     Map<String, Field> tagFields = new Map<String, Field>();

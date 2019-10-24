@@ -33,7 +33,7 @@ class StoryHelper {
   }
 
   /// 更新story时间
-  Future updateStoryTime(Mslocation location, Story story,{bool isNoneUserBefore = false}) async {
+  Future updateStoryTime(Mslocation location, Story story) async {
     if (location != null && story != null) {
 
       if (location.time < story.createTime) {
@@ -321,6 +321,7 @@ class StoryHelper {
     story.isDelete = false;
     story.defaultAddress = getDefaultAddress(story);
     story.pictures = location.pictures;
+    story.isFromPicture = location.isFromPicture == 1 ? 1 : 0;
     //TODO:需要看相同的该地点是否有custom_address,有的话需要赋值
     return story;
   }
@@ -371,15 +372,14 @@ class StoryHelper {
       }
     }
   }
-  ///坐标点转化成story(即创建或更新) isNoneUseBefore 是否是第一次使用之前app的图产生的定位
-  Future<void>convertStoryWithEverLocation(Mslocation lastLocation,Mslocation location,{bool isNoneUseBefore}) async {
+  ///坐标点转化成story(即创建或更新)
+  Future<void>convertStoryWithEverLocation(Mslocation lastLocation,Mslocation location) async {
     Story story = await findTargetStoryWithLocation(lastLocation);
     if (story == null) {
       await createStory(createStoryWithLocation(location));
       print("story 创建 ${location.aoiname}");
     } else {
-      location.pictures =
-      await updateStoryTime(location, story,isNoneUserBefore: isNoneUseBefore);
+      await updateStoryTime(location, story);
       print("story 更新 ${story.aoiName}   ${story.id}");
 
     }

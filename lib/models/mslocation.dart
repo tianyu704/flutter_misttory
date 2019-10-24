@@ -75,7 +75,7 @@ class Mslocation {
 
   String pictures;
 
-  bool isFromPicture;
+  num isFromPicture;
 
   factory Mslocation.fromJson(Map<String, dynamic> json) => _$MslocationFromJson(json);
 

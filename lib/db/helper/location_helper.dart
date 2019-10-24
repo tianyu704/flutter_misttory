@@ -104,6 +104,7 @@ class LocationHelper {
     location.updatetime = p.creationDate;
     location.provider = "lbs";///基于位置服务
     location.coordType = "GCJ02";
+    location.isFromPicture = 1;
 
     //location.altitude =
     //location.speed =
@@ -121,15 +122,6 @@ class LocationHelper {
   /// 根据最新定位的Location创建或更新最后一条Location
   Future<int> createOrUpdateLocation(Mslocation location,{Picture picture,bool isNoneUseBefore}) async {
 
-    if (picture!= null && !isNoneUseBefore) {
-      print("after start to creat or update location");
-       Mslocation updateLocation = await findTargetLocationWithPicture(picture);
-       if (updateLocation == null) {
-         return await createLocation(location,picture: picture,isNoneUseBefore:false);
-       } else {
-         return await updateLocationTime(updateLocation, location,picture: picture,isNoneUseBefore:false);
-       }
-    }
     if (location != null && location.errorCode == 0) {
       Mslocation lastLocation = (picture != null) ?  await queryOldestLocation() : await queryLastLocation();
       if (lastLocation == null) {
@@ -170,12 +162,13 @@ class LocationHelper {
     if (location != null && location.lat != 0 && location.lon != 0) {
       if (picture != null) {
         location.pictures = "${picture.id}";
+        location.isFromPicture = 1;
       }
       print("===$location==");
       await FlutterOrmPlugin.saveOrm(
           DBManager.tableLocation, location.toJson());
       if (picture != null) {
-        await StoryHelper().convertStoryWithEverLocation(location,location,isNoneUseBefore:isNoneUseBefore);
+        await StoryHelper().convertStoryWithEverLocation(location,location);
         print("新创建story");
         await PictureHelper().updatePictureStatus(picture);
       }
@@ -205,7 +198,7 @@ class LocationHelper {
         location.pictures =str;///为了更新story的pictures
         await Query(DBManager.tableLocation)
             .primaryKey([id]).update({"time": location.time,"pictures":str});
-        await StoryHelper().convertStoryWithEverLocation(lastLocation,location,isNoneUseBefore:isNoneUseBefore);
+        await StoryHelper().convertStoryWithEverLocation(lastLocation,location);
         print("xxXX");
         await PictureHelper().updatePictureStatus(picture);
       }
@@ -286,7 +279,7 @@ class LocationHelper {
     Map result = await Query(DBManager.tableLocation)
         .whereByColumFilters([
       WhereCondiction("time", WhereCondictionType.EQ_OR_LESS_THEN, p.creationDate),
-      WhereCondiction("updatetime", WhereCondictionType.MORE_THEN, p.creationDate),
+      WhereCondiction("updatetime", WhereCondictionType.EQ_OR_MORE_THEN, p.creationDate),
     ]).first();
 
     if (result != null) {

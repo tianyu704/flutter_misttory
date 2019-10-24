@@ -41,7 +41,8 @@ Story _$StoryFromJson(Map<String, dynamic> json) {
             e == null ? null : Person.fromJson(e as Map<String, dynamic>))
         ?.toList()
     ..date = json['date'] as String
-    ..pictures = json['pictures'] as String;
+    ..pictures = json['pictures'] as String
+    ..isFromPicture = json['isFromPicture'] as num;
 }
 
 Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
@@ -74,4 +75,5 @@ Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
       'persons': instance.persons,
       'date': instance.date,
       'pictures': instance.pictures,
+      'isFromPicture': instance.isFromPicture,
     };
