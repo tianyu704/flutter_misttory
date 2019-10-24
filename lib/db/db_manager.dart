@@ -51,6 +51,7 @@ class DBManager {
     locationFields["coordType"] = Field(FieldType.Text);
     locationFields["is_delete"] = Field(FieldType.Boolean);
     locationFields["pictures"] = Field(FieldType.Text);
+    locationFields["isFromPicture"] = Field(FieldType.Boolean);
 
     ///故事表
     Map<String, Field> storyFields = new Map<String, Field>();
@@ -106,7 +107,7 @@ class DBManager {
     pictureFields["pixelWidth"] = Field(FieldType.Real);
     pictureFields["pixelHeight"] = Field(FieldType.Real);
     pictureFields["creationDate"] = Field(FieldType.Real);
-    pictureFields["isSynced"] = Field(FieldType.Boolean);
+    pictureFields["isSynced"] = Field(FieldType.Real);
 
     FlutterOrmPlugin.createTable(dbName, tableLocation, locationFields);
     FlutterOrmPlugin.createTable(dbName, tableStory, storyFields);

@@ -6,5 +6,5 @@
   "lat" : 1.0,
   "lon" : 1.0,
   "path": "",
-  "isSynced" : false
+  "isSynced" : 0
 }

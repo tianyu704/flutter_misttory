@@ -56,7 +56,7 @@ class PictureHelper {
     p.pixelHeight = image.pixelHeight;
     p.pixelWidth = image.pixelWidth;
     p.path = image.path;
-    p.isSynced = false;
+    p.isSynced = 0;
     //debugPrint("json ：${p.toJson()}");
     return p;
   }
@@ -75,7 +75,7 @@ class PictureHelper {
   Future<bool> updatePictureStatus(Picture p) async {
     if (p != null) {
       await Query(DBManager.tablePicture)
-          .primaryKey([p.id]).update({"isSynced": true});
+          .primaryKey([p.id]).update({"isSynced": 1});
       return true;
     }
     return false;
@@ -84,7 +84,7 @@ class PictureHelper {
   ///按主键查询数据库中是否存在该条数据
   Future<bool> isExistPictureWithId(String id) async {
     Map result = await Query(DBManager.tablePicture).whereBySql("id = ?", [id]).first();
-    if (result != null && result.length > 0) {
+    if (result != null) {
       return true;
     }
     return false;
@@ -102,10 +102,19 @@ class PictureHelper {
   ///📌查询并转化picture为location
   convertPicturesToLocations () async {
     debugPrint("开始执行p 转 l");
-    Mslocation l = await LocationHelper().queryOldestLocation();
-    num time = (l == null) ? 0 : l.time;
-    await convertPicturesAfterTime(time);
-    await convertPicturesBeforeTime(time);
+
+    List<Picture> list = await queryPictureConverted();
+    if (list == null || list.length == 0) {
+      Mslocation l = await LocationHelper().queryOldestLocation();
+      num time = (l == null) ? 0 : l.time;
+      await convertPicturesAfterTime(1569541141000);
+      //await convertPicturesBeforeTime(time);
+    } else {
+      Picture earliestP = list.last;
+      Picture newestP = list.first;
+      await convertPicturesAfterTime(newestP.creationDate);
+      //await convertPicturesBeforeTime(earliestP.creationDate);
+    }
     debugPrint("结束执行p 转 l");
   }
   ///使用app后
@@ -113,7 +122,7 @@ class PictureHelper {
     List afterList = await findPicturesAfterTime(time);
     if (afterList != null && afterList.length > 0) {
       for (Picture p in afterList)
-         await LocationHelper().createLocationWithPicture(p);
+         await LocationHelper().createLocationWithPicture(p,false);
       }
       debugPrint("使用app后数据同步完成location");
     }
@@ -123,7 +132,7 @@ class PictureHelper {
     List beforeList = await findPicturesBeforeTime(time);
     if (beforeList != null && beforeList.length > 0) {
       for (Picture p in beforeList) {
-        await LocationHelper().createLocationWithPicture(p);
+        await LocationHelper().createLocationWithPicture(p,true);
       }
       debugPrint("使用app前数据同步完成location");
     }
@@ -135,13 +144,13 @@ class PictureHelper {
     if (time == 0) {
       result = await Query(DBManager.tablePicture)
           .orderBy(["creationDate desc"]).whereByColumFilters([
-        WhereCondiction("isSynced", WhereCondictionType.IS_NULL, false),
+        WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
       ]).all();
     }  else {
       result = await Query(DBManager.tablePicture)
           .orderBy(["creationDate desc"]).whereByColumFilters([
         WhereCondiction("creationDate", WhereCondictionType.MORE_THEN, time),
-        WhereCondiction("isSynced", WhereCondictionType.IS_NULL, false),
+        WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
       ]).all();
     }
     List<Picture> list = [];
@@ -163,7 +172,7 @@ class PictureHelper {
     List result = await Query(DBManager.tablePicture)
         .orderBy(["creationDate desc"]).whereByColumFilters([
       WhereCondiction("creationDate", WhereCondictionType.LESS_THEN, time),
-      WhereCondiction("isSynced", WhereCondictionType.IS_NULL, false),
+      WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
     ]).all();
 
     List<Picture> list = [];
@@ -176,6 +185,24 @@ class PictureHelper {
     }
     return null;
   }
+
+  ///查询已转化图片的集合：目的是拿到最大最小时间
+  Future<List> queryPictureConverted() async {
+     List result =  await Query(DBManager.tablePicture)
+         .orderBy(["creationDate desc"])
+         .whereByColumFilters([WhereCondiction("isSynced", WhereCondictionType.IN, [1]),
+     ]).all();
+     List<Picture> list = [];
+     if (result != null && result.length > 0) {
+       result.forEach((item) {
+         Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
+         list.add(p);
+       });
+       return list;
+     }
+     return null;
+  }
+
 
 
 

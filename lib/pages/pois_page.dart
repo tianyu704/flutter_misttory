@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:local_image_provider/local_image.dart';
 import 'package:local_image_provider/local_image_provider.dart';
+import 'package:misstory/db/helper/picture_helper.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -105,16 +106,32 @@ class _SearchPageState extends LifecycleState<SearchPage> {
 //              childCount: 50, //50个列表项
 //            ),
 //          ),
+        SliverToBoxAdapter (child:
+          RaisedButton(
+              child: Text("测试存储Picture"),
+              onPressed: (){
+                _syncPictures();
+          })
+
+          ,),
         ],
       ),
     );
   }
 
   _getPicture() async {
-    await LocalImageProvider().initialize();
-    num start = DateTime.now().millisecondsSinceEpoch;
-    images = await LocalImageProvider().findLatest(10000000);
-    print(
-        "查询到${images?.length}张照片，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
+//    await LocalImageProvider().initialize();
+//    num start = DateTime.now().millisecondsSinceEpoch;
+//    images = await LocalImageProvider().findLatest(10000000);
+//    print(
+//        "查询到${images?.length}张照片，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
+  }
+
+  ///同步图片逻辑
+  _syncPictures () async{
+    await PictureHelper().convertPicturesToLocations();
+    if (mounted) {
+      setState(() {});
+    }
   }
 }

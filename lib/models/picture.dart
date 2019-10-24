@@ -20,7 +20,7 @@ class Picture {
 
   String path;
 
-  bool isSynced;
+  num isSynced;
 
   factory Picture.fromJson(Map<String, dynamic> json) => _$PictureFromJson(json);
 
