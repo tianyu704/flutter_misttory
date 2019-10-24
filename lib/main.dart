@@ -13,6 +13,7 @@ import 'package:misstory/utils/common_localization_delegate.dart';
 import 'package:provider/provider.dart';
 
 import 'constant.dart';
+import 'db/helper/picture_helper.dart';
 import 'db/local_storage.dart';
 import 'generated/i18n.dart';
 import 'style/app_style.dart';
@@ -22,6 +23,7 @@ void main() async {
   await DBManager.initDB();
   await AMap.init(Constant.iosMapKey);
   await StoryHelper().updateAllDefaultAddress();
+  await PictureHelper().fetchAppSystemPicture();///TODO:此时就要求授权了 等产品逻辑具体化 再修改
 
   /// 主题
   bool isNight = (await LocalStorage.get(LocalStorage.isNight)) ?? false;

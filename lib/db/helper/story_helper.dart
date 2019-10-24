@@ -250,8 +250,6 @@ class StoryHelper {
       num time2 = story2["create_time"] as num;
       DateTime dateTime1 = DateTime.fromMillisecondsSinceEpoch(time1.toInt());
       DateTime dateTime2 = DateTime.fromMillisecondsSinceEpoch(time2.toInt());
-      print(time1);
-      print(time2);
       return DateTime(dateTime1.year, dateTime1.month, dateTime1.day)
               .difference(
                   DateTime(dateTime2.year, dateTime2.month, dateTime2.day))

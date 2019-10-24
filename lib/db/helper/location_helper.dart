@@ -6,11 +6,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/db/db_manager.dart';
+import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/string_util.dart';
+import 'package:misstory/models/picture.dart';
+import 'package:amap_base/src/search/model/poi_item.dart';
 
 class LocationHelper {
   static final LocationHelper _instance = new LocationHelper._internal();
@@ -18,6 +21,8 @@ class LocationHelper {
   factory LocationHelper() => _instance;
 
   LocationHelper._internal();
+
+  static final AMapSearch _aMapSearch = AMapSearch();
 
   MethodChannel _methodChannel = MethodChannel("com.admqr.misstory");
 
@@ -36,38 +41,114 @@ class LocationHelper {
       }
     }
   }
+  ///图片转化为地点
+  Future<int>  createLocationWithPicture(Picture p) async {
+    ///TODO：此处过滤掉经纬度为 0的图片
+    if (!(p != null && p.lat != 0 && p.lon != 0)) return 1;
+
+    Mslocation location = Mslocation();
+    ///latlon
+    LatLngType itemType = LatLngType.gps;
+    LatLng latlng = await CalculateTools().convertCoordinate(lat: p.lat, lon: p.lon, type: itemType);
+    location.lat = latlng.latitude;
+    location.lon = latlng.longitude;
+
+
+    ReGeocodeResult result =  await  _aMapSearch
+        .searchReGeocode(latlng, 100,  LatLngType.values.indexOf(itemType));
+    ///aoi
+    List<Aoi> aois = result.regeocodeAddress.aois;
+    if (aois != null && aois.length > 0) {
+      for (Aoi aoi in aois) {
+        if (StringUtil.isNotEmpty(aoi.aoiName)) {
+          location.aoiname = aoi.aoiName;
+          break;
+        }
+      }
+    }
+    ///poi
+    List<PoiItem> pois = result.regeocodeAddress.pois;
+    if (pois != null && pois.length > 0) {
+      for (PoiItem poi in pois) {
+        if (StringUtil.isNotEmpty(poi.title))  {
+          location.poiname = poi.title;
+          location.poiid = poi.poiId;
+          break;
+        }
+      }
+    }
+    ///road
+    List<Road>roads = result.regeocodeAddress.roads;
+    if (roads != null && roads.length > 0) {
+      for (Road road in roads) {
+        if (StringUtil.isNotEmpty(road.name)) {
+          location.road = road.name;
+          break;
+        }
+      }
+    }
+    ///address
+    location.address = result.regeocodeAddress.formatAddress;
+    location.country =    result.regeocodeAddress.country;
+    location.citycode = result.regeocodeAddress.cityCode;
+    location.adcode  = result.regeocodeAddress.adCode;
+    location.province = result.regeocodeAddress.province;
+    location.city = result.regeocodeAddress.city;
+    location.district = result.regeocodeAddress.district;
+
+    location.street = result.regeocodeAddress.streetNumber.street;
+    location.number = result.regeocodeAddress.streetNumber.number;
+    location.errorCode = 0;
+    location.errorInfo = "success";
+    location.time = p.creationDate;
+    location.updatetime = p.creationDate;
+    location.provider = "lbs";///基于位置服务
+    location.coordType = "GCJ02";
+
+    //location.altitude =
+    //location.speed =
+    //location.bearing =
+    //location.locationType =
+    //location.locationDetail =
+    //location.floor =
+    //location.description =
+    //location.accuracy =
+    //location.isOffset =
+    //location.is_delete =
+    return await createOrUpdateLocation(location,picture: p);
+  }
 
   /// 根据最新定位的Location创建或更新最后一条Location
-  Future<int> createOrUpdateLocation(Mslocation location) async {
+  Future<int> createOrUpdateLocation(Mslocation location,{Picture picture}) async {
     if (location != null && location.errorCode == 0) {
-      Mslocation lastLocation = await queryLastLocation();
+      Mslocation lastLocation = (picture != null) ?  await queryOldestLocation() : await queryLastLocation();
       if (lastLocation == null) {
-        return await createLocation(location);
+        return await createLocation(location,picture: picture);
       } else if (lastLocation.lon == location.lon &&
           lastLocation.lat == location.lat) {
-        return await updateLocationTime(lastLocation.id, location);
+        return await updateLocationTime(lastLocation, location,picture: picture);
       } else {
         if (lastLocation.aoiname == location.aoiname) {
           if (location.aoiname == null &&
               lastLocation.poiname != location.poiname) {
-            return await createLocation(location);
+            return await createLocation(location,picture: picture);
           } else {
             if (await getDistanceBetween(location, lastLocation) >
                 LocationConfig.judgeDistanceNum) {
-              return await createLocation(location);
+              return await createLocation(location,picture: picture);
             } else {
-              return await updateLocationTime(lastLocation.id, location);
+              return await updateLocationTime(lastLocation, location,picture: picture);
             }
           }
         } else if (lastLocation.poiname == location.poiname) {
           if (await getDistanceBetween(location, lastLocation) >
               LocationConfig.judgeDistanceNum) {
-            return await createLocation(location);
+            return await createLocation(location,picture: picture);
           } else {
-            return await updateLocationTime(lastLocation.id, location);
+            return await updateLocationTime(lastLocation, location,picture: picture);
           }
         } else {
-          return await createLocation(location);
+          return await createLocation(location,picture: picture);
         }
       }
     }
@@ -75,20 +156,42 @@ class LocationHelper {
   }
 
   /// 创建Location一条记录
-  Future<int> createLocation(Mslocation location) async {
+  Future<int> createLocation(Mslocation location,{Picture picture}) async {
     if (location != null && location.lat != 0 && location.lon != 0) {
+      if (picture != null) {
+        location.pictures = "${picture.id}";
+      }
       await FlutterOrmPlugin.saveOrm(
           DBManager.tableLocation, location.toJson());
+      if (picture != null) {
+       await PictureHelper().updatePictureStatus(picture);
+       //debugPrint("执行p 转 l中 创建l。。。。。");
+      }
       return 0;
     }
     return -1;
   }
 
   /// 更新Location时间
-  Future<int> updateLocationTime(num id, Mslocation location) async {
+  Future<int> updateLocationTime(Mslocation lastLocation, Mslocation location,{Picture picture}) async {
+
+    num id = lastLocation.id;
     if (location != null) {
-      await Query(DBManager.tableLocation)
-          .primaryKey([id]).update({"updatetime": location.updatetime});
+      if (picture == null) {
+        await Query(DBManager.tableLocation)
+            .primaryKey([id]).update({"updatetime": location.updatetime});
+      } else {
+        String str;
+        if (lastLocation.pictures == null) {
+          str = "${picture.id}";
+        } else {
+          str = "${lastLocation.pictures},${picture.id}";
+        }
+        await Query(DBManager.tableLocation)
+            .primaryKey([id]).update({"time": location.time,"pictures":str});
+        await PictureHelper().updatePictureStatus(picture);
+        //debugPrint("执行p 转 l中 更新l。。。。。");
+      }
       return 0;
     }
     return -1;
@@ -110,6 +213,17 @@ class LocationHelper {
   Future<Mslocation> queryLastLocation() async {
     Map result = await Query(DBManager.tableLocation).orderBy([
       "time desc",
+    ]).first();
+    if (result != null && result.length > 0) {
+      return Mslocation.fromJson(Map<String, dynamic>.from(result));
+    }
+    return null;
+  }
+
+  /// 查询最早一条Location
+  Future<Mslocation> queryOldestLocation() async {
+    Map result = await Query(DBManager.tableLocation).orderBy([
+      "time",
     ]).first();
     if (result != null && result.length > 0) {
       return Mslocation.fromJson(Map<String, dynamic>.from(result));

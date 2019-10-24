@@ -26,5 +26,6 @@
   "is_delete": true,
   "tags": "$[]tag",
   "persons": "$[]person",
-  "date": ""
+  "date": "",
+  "pictures": ""
 }
