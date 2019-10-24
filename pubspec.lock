@@ -199,13 +199,6 @@ packages:
       url: "https://github.com/FIRHQ/flutter_amap_location_plugin.git"
     source: git
     version: "0.0.1"
-  flutter_image_compress:
-    dependency: "direct main"
-    description:
-      name: flutter_image_compress
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.6.3"
   flutter_localizations:
     dependency: "direct main"
     description: flutter

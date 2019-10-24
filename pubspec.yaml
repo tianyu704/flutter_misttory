@@ -60,9 +60,9 @@ dependencies:
   local_image_provider:
     git:
       url: https://github.com/tianyu704/local_image_provider.git
-#  flutter_image_compress: ^0.6.3
-  extended_image: ^0.6.4
-  flutter_image_compress: 0.6.3
+  #  flutter_image_compress: ^0.6.3
+  extended_image: ^0.6.4 #图片展示
+#  flutter_image_compress: 0.6.3 #图片压缩
 
 dev_dependencies:
   flutter_test:

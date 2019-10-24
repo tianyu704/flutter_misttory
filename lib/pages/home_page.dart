@@ -309,7 +309,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   Widget _groupSectionWidget(BuildContext context, String groupName) {
     return SizedBox(
       child: Padding(
-        padding: EdgeInsets.only(left: 24, top: 10, bottom: 10, right: 24),
+        padding: EdgeInsets.only(left: 24, top: 20, bottom: 10, right: 24),
         child: Text(
           DateUtil.getMonthDayWeek(context, groupName),
           style: AppStyle.mainText18(context, fontWeight: FontWeight.w500),
