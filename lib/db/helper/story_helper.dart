@@ -35,7 +35,6 @@ class StoryHelper {
   /// 更新story时间
   Future updateStoryTime(Mslocation location, Story story) async {
     if (location != null && story != null) {
-
       if (location.time < story.createTime) {
         story.createTime = location.time;
       }
@@ -47,8 +46,12 @@ class StoryHelper {
       if (StringUtil.isNotEmpty(location.pictures)) {
         story.pictures = location.pictures;
       }
-      await Query(DBManager.tableStory).primaryKey([story.id]).update(
-          {"update_time": story.updateTime, "interval_time": interval,"pictures":story.pictures,"create_time":story.createTime});
+      await Query(DBManager.tableStory).primaryKey([story.id]).update({
+        "update_time": story.updateTime,
+        "interval_time": interval,
+        "pictures": story.pictures,
+        "create_time": story.createTime
+      });
       debugPrint("=================update story time");
     }
   }
@@ -250,6 +253,17 @@ class StoryHelper {
     return null;
   }
 
+  /// 查询最早一条story
+  Future<Story> queryOldestStory() async {
+    Map result = await Query(DBManager.tableStory).orderBy([
+      "create_time",
+    ]).first();
+    if (result != null && result.length > 0) {
+      return Story.fromJson(Map<String, dynamic>.from(result));
+    }
+    return null;
+  }
+
   /// 查询记录的天数
   Future<int> getStoryDays() async {
     Map story1 =
@@ -334,11 +348,19 @@ class StoryHelper {
   }
 
   ///坐标点更新故事或创建故事
-  Future<void> judgeLocation(Mslocation location) async {
+  Future<void> judgeLocation(Mslocation location,
+      {LocationFromType itemType = LocationFromType.normal}) async {
     if (location != null &&
         location.errorCode == 0 &&
         StringUtil.isNotEmpty(location.address)) {
-      Story story = await queryLastStory();
+      Story story;
+      if (LocationFromType.before == itemType) {
+        story = await queryOldestStory();
+      } else if (LocationFromType.after == itemType) {
+        story = await findTargetStoryWithLocation(location);
+      } else {
+        story = await queryLastStory();
+      }
       if (story != null) {
         if (location.aoiname == story.aoiName) {
           if (location.poiname == story.poiName) {
@@ -372,8 +394,11 @@ class StoryHelper {
       }
     }
   }
+
   ///坐标点转化成story(即创建或更新)
-  Future<void> convertStoryWithEverLocation(Mslocation lastLocation,Mslocation location) async {
+
+  Future<void> convertStoryWithEverLocation(
+      Mslocation lastLocation, Mslocation location) async {
     Story story = await findTargetStoryWithLocation(lastLocation);
     if (story == null) {
       await createStory(createStoryWithLocation(location));
@@ -413,23 +438,33 @@ class StoryHelper {
     return false;
   }
 
-
   ///根据坐标点查找对应story
-  Future<Story>findTargetStoryWithLocation(Mslocation location) async {
+  Future<Story> findTargetStoryWithLocation(Mslocation location) async {
     if (location == null) {
       return null;
     }
-
     num updateTime = location.updatetime;
     Map result;
-    result = await Query(DBManager.tableStory)
-        .whereByColumFilters([
-      WhereCondiction("create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
-      WhereCondiction("update_time", WhereCondictionType.EQ_OR_MORE_THEN, updateTime),
+    result = await Query(DBManager.tableStory).whereByColumFilters([
+      WhereCondiction(
+          "create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
+      WhereCondiction(
+          "update_time", WhereCondictionType.EQ_OR_MORE_THEN, updateTime),
     ]).first();
-
+    if (result == null) {
+      result = await Query(DBManager.tableStory).whereByColumFilters([
+        WhereCondiction(
+            "create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
+      ]).first();
+      if (result != null) {
+        Story lastStory = Story.fromJson(Map<String, dynamic>.from(result));
+        if (lastStory.updateTime >= location.time) {
+          return lastStory;
+        }
+      }
+    }
     if (result != null) {
-       return Story.fromJson(Map<String, dynamic>.from(result));
+      return Story.fromJson(Map<String, dynamic>.from(result));
     }
     return null;
   }
@@ -496,9 +531,8 @@ class StoryHelper {
 
   ///删除图片生成的位置信息
   Future deletePictureStory() async {
-    await Query(DBManager.tableStory)
-        .whereByColumFilters(
-        [WhereCondiction("isFromPicture", WhereCondictionType.IN, [1])])
-        .delete();
+    await Query(DBManager.tableStory).whereByColumFilters([
+      WhereCondiction("isFromPicture", WhereCondictionType.IN, [1])
+    ]).delete();
   }
 }
