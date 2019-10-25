@@ -229,6 +229,8 @@ class _PictureItemState extends LifecycleState<PictureItem> {
               onTap: widget.onTap,
             )
           : Container(
+              width: width,
+              height: height,
               decoration: BoxDecoration(
                   color: AppStyle.colors(context).colorPicBg,
                   borderRadius: BorderRadius.all(Radius.circular(6))),
