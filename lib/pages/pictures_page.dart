@@ -168,23 +168,26 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
   ///图片子元素
   Widget _buildItem(context, index) {
     LocalImage image = _images[index];
-    return Picture(
-      image,
-      width: width,
-      height: width,
-      radius: 6,
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PictureViewPage(
-              _images,
-              _title,
-              _address,
-              position: index,
+    return Hero(
+      tag: image.id,
+      child: Picture(
+        image,
+        width: width,
+        height: width,
+        radius: 6,
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PictureViewPage(
+                _images,
+                _title,
+                _address,
+                position: index,
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:extended_image/extended_image.dart';
@@ -43,67 +44,78 @@ class _PictureViewPageState extends LifecycleState<PictureViewPage> {
     _currentIndex = widget.position;
     _images = widget.images;
     _pageController =
-        PageController(initialPage: _currentIndex, viewportFraction: 0.9999);
+        PageController(initialPage: _currentIndex, viewportFraction: 1);
   }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Scaffold(
-      appBar: MyAppbar(
-        context,
-        isHero: true,
-        title: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            Hero(
-              tag: "date",
-              child: Text(
-                widget.title ?? "",
-                style: AppStyle.mainText14(context, bold: true),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+    return ExtendedImageSlidePage(
+      child: Scaffold(
+        appBar: MyAppbar(
+          context,
+          isHero: true,
+          title: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              Hero(
+                tag: "date",
+                child: Text(
+                  widget.title ?? "",
+                  style: AppStyle.mainText14(context, bold: true),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-            Hero(
-              tag: "address",
-              child: Text(
-                widget.subTitle ?? "",
-                style: AppStyle.mainText10(context),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              Hero(
+                tag: "address",
+                child: Text(
+                  widget.subTitle ?? "",
+                  style: AppStyle.mainText10(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+        ),
+//        backgroundColor: AppStyle.colors(context).colorBgPage,
+        body: ExtendedImageGesturePageView.builder(
+          scrollDirection: Axis.horizontal,
+          controller: _pageController,
+          itemBuilder: _buildItem,
+          canMovePage: (details) {
+            return true;
+          },
+          itemCount: _images?.length ?? 0,
+          onPageChanged: (index) {
+            _currentIndex = index;
+          },
         ),
       ),
-      backgroundColor: AppStyle.colors(context).colorBgPage,
-      body: ExtendedImageGesturePageView.builder(
-        scrollDirection: Axis.horizontal,
-        controller: _pageController,
-        itemBuilder: _buildItem,
-        canMovePage: (details) {
-          return true;
-        },
-        itemCount: _images?.length ?? 0,
-        onPageChanged: (index) {
-          _currentIndex = index;
-        },
-      ),
+      slideAxis: SlideAxis.both,
+      slideType: SlideType.onlyImage,
+      resetPageDuration: Duration(milliseconds: 300),
+      onSlidingPage: (state){
+
+      },
     );
   }
 
   Widget _buildItem(BuildContext context, int index) {
     LocalImage image = _images[index];
-    return Picture(
-      image,
-      width: _width,
-      height: _height,
-      radius: 0,
-      fit: BoxFit.contain,
-      mode: ExtendedImageMode.gesture,
+    return Hero(
+      tag: image.id,
+      child: Picture(
+        image,
+        width: _width,
+        height: _height,
+        radius: 0,
+        fit: BoxFit.contain,
+        mode: ExtendedImageMode.gesture,
+      ),
     );
   }
 
@@ -113,4 +125,44 @@ class _PictureViewPageState extends LifecycleState<PictureViewPage> {
     _pageController.dispose();
     super.dispose();
   }
+
+//  Color defaultSlidePageBackgroundHandler(
+//      {Offset offset, Size pageSize, Color color, SlideAxis pageGestureAxis}) {
+//    double opacity = 0.0;
+//    if (pageGestureAxis == SlideAxis.both) {
+//      opacity = offset.distance /
+//          (Offset(pageSize.width, pageSize.height).distance / 2.0);
+//    } else if (pageGestureAxis == SlideAxis.horizontal) {
+//      opacity = offset.dx.abs() / (pageSize.width / 2.0);
+//    } else if (pageGestureAxis == SlideAxis.vertical) {
+//      opacity = offset.dy.abs() / (pageSize.height / 2.0);
+//    }
+//    return color.withOpacity(min(1.0, max(1.0 - opacity, 0.0)));
+//  }
+//
+//  bool defaultSlideEndHandler(
+//      {Offset offset, Size pageSize, SlideAxis pageGestureAxis}) {
+//    if (pageGestureAxis == SlideAxis.both) {
+//      return offset.distance >
+//          Offset(pageSize.width, pageSize.height).distance / 3.5;
+//    } else if (pageGestureAxis == SlideAxis.horizontal) {
+//      return offset.dx.abs() > pageSize.width / 3.5;
+//    } else if (pageGestureAxis == SlideAxis.vertical) {
+//      return offset.dy.abs() > pageSize.height / 3.5;
+//    }
+//    return true;
+//  }
+//
+//  double defaultSlideScaleHandler(
+//      {Offset offset, Size pageSize, SlideAxis pageGestureAxis}) {
+//    double scale = 0.0;
+//    if (pageGestureAxis == SlideAxis.both) {
+//      scale = offset.distance / Offset(pageSize.width, pageSize.height).distance;
+//    } else if (pageGestureAxis == SlideAxis.horizontal) {
+//      scale = offset.dx.abs() / (pageSize.width / 2.0);
+//    } else if (pageGestureAxis == SlideAxis.vertical) {
+//      scale = offset.dy.abs() / (pageSize.height / 2.0);
+//    }
+//    return max(1.0 - scale, 0.8);
+//  }
 }

@@ -51,7 +51,7 @@ class _PictureState extends State<Picture> with TickerProviderStateMixin {
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 300),
-      lowerBound: 0.0,
+      lowerBound: 0.9,
       upperBound: 1.0,
     );
     animation = CurvedAnimation(parent: _controller, curve: Curves.easeInBack);
@@ -100,29 +100,33 @@ class _PictureState extends State<Picture> with TickerProviderStateMixin {
     // TODO: implement build
     return GestureDetector(
       onTap: _imageMemory == null ? null : widget.onTap,
-      child: FadeTransition(
-        opacity: animation,
-        child: _imageMemory == null
-            ? Container(
-                decoration: BoxDecoration(
-                    color: AppStyle.colors(context).colorPicBg,
-                    borderRadius:
-                        BorderRadius.all(Radius.circular(widget.radius))),
+      child:
+//      FadeTransition(
+//        opacity: animation,
+//        child:
+          _imageMemory == null
+              ? Container(
+                  decoration: BoxDecoration(
+                      color: AppStyle.colors(context).colorPicBg,
+                      borderRadius:
+                          BorderRadius.all(Radius.circular(widget.radius))),
 //              child: Icon(
 //                Icons.image,
 //                color: Colors.grey,
 //              ),
-              )
-            : ExtendedImage.memory(
-                _imageMemory,
-                fit: widget.fit,
-                width: widget.width,
-                height: widget.height,
-                borderRadius: BorderRadius.all(Radius.circular(widget.radius)),
-                shape: BoxShape.rectangle,
-                mode: widget.mode,
-              ),
-      ),
+                )
+              : ExtendedImage.memory(
+                  _imageMemory,
+                  fit: widget.fit,
+                  width: widget.width,
+                  height: widget.height,
+                  borderRadius:
+                      BorderRadius.all(Radius.circular(widget.radius)),
+                  shape: BoxShape.rectangle,
+                  mode: widget.mode,
+                  enableSlideOutPage: false,
+                ),
+//      ),
     );
   }
 
