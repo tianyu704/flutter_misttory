@@ -139,6 +139,7 @@ class LocationHelper {
         return await updateLocationTime(updateLocation, location,picture: picture,isNoneUseBefore:false);
       }
     }
+
     if (location != null && location.errorCode == 0) {
       Mslocation lastLocation = (picture != null) ?  await queryOldestLocation() : await queryLastLocation();
       if (lastLocation == null) {
