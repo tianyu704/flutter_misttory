@@ -43,7 +43,7 @@ class ThemeNormal extends ThemeBase {
   @override
   Color colorCancel = Color(0x99333333);
   @override
-  Color colorLine = Color(0x24E0E0E0);
+  Color colorLine = Color(0xFFECECF3);
   @override
   Color colorLike = Color(0xFFF9706B);
   @override

@@ -130,8 +130,7 @@ class _SearchPageState extends LifecycleState<SearchPage> {
   ///同步图片逻辑
   _syncPictures () async{
 
-    //await PictureHelper().fetchAppSystemPicture();///TODO:此时就要求授权了 等产品逻辑具体化 再修改
-    await PictureHelper().convertPicturesToLocations();
+
     if (mounted) {
       setState(() {});
     }

@@ -37,11 +37,20 @@ class AppStyle {
   static ThemeBase colors(BuildContext context) =>
       Provider.of<ThemeProvider>(context).themeBase;
 
+  static TextStyle mainText10(BuildContext context,
+          {bold = false, weight = FontWeight.normal, color = null}) =>
+      TextStyle(
+          color: color == null ? colors(context).colorMainText : color,
+          fontSize: 10,
+          decoration: TextDecoration.none,
+          fontWeight: bold ? FontWeight.bold : weight);
+
   static TextStyle mainText12(BuildContext context,
           {bold = false, weight = FontWeight.normal, color = null}) =>
       TextStyle(
           color: color == null ? colors(context).colorMainText : color,
           fontSize: 12,
+          decoration: TextDecoration.none,
           fontWeight: bold ? FontWeight.bold : weight);
 
   static TextStyle mainText14(BuildContext context,
@@ -49,6 +58,7 @@ class AppStyle {
       TextStyle(
           color: colors(context).colorMainText,
           fontSize: 14,
+          decoration: TextDecoration.none,
           fontWeight: bold ? FontWeight.bold : weight);
 
   static TextStyle mainText16(BuildContext context,
@@ -56,59 +66,110 @@ class AppStyle {
       TextStyle(
           color: colors(context).colorMainText,
           fontSize: 16,
+          decoration: TextDecoration.none,
           fontWeight: fontWeight);
+
   static TextStyle mainText17(BuildContext context, {bold = false}) =>
       TextStyle(
           color: colors(context).colorMainText,
           fontSize: 17,
+          decoration: TextDecoration.none,
           fontWeight: bold ? FontWeight.w500 : FontWeight.normal);
 
-  static TextStyle mainText18(BuildContext context, {bold = false}) =>
+  static TextStyle mainText18(BuildContext context, {fontWeight = FontWeight.normal}) =>
       TextStyle(
           color: colors(context).colorMainText,
           fontSize: 18,
-          fontWeight: bold ? FontWeight.bold : FontWeight.normal);
+          decoration: TextDecoration.none,
+          fontWeight: fontWeight);
 
-  static TextStyle mainText20(BuildContext context) =>
-      TextStyle(color: colors(context).colorMainText, fontSize: 20);
+  static TextStyle mainText20(BuildContext context) => TextStyle(
+        color: colors(context).colorMainText,
+        fontSize: 20,
+        decoration: TextDecoration.none,
+      );
 
-  static TextStyle mainText22(BuildContext context) =>
-      TextStyle(color: colors(context).colorMainText, fontSize: 22);
+  static TextStyle mainText22(BuildContext context) => TextStyle(
+        color: colors(context).colorMainText,
+        fontSize: 22,
+        decoration: TextDecoration.none,
+      );
 
-  static TextStyle contentText12(BuildContext context) =>
-      TextStyle(color: colors(context).colorContentText, fontSize: 12);
+  static TextStyle contentText12(BuildContext context) => TextStyle(
+        color: colors(context).colorContentText,
+        fontSize: 12,
+        decoration: TextDecoration.none,
+      );
 
-  static TextStyle contentText14(BuildContext context) =>
-      TextStyle(color: colors(context).colorContentText, fontSize: 14);
+  static TextStyle contentText14(BuildContext context) => TextStyle(
+        color: colors(context).colorContentText,
+        fontSize: 14,
+        decoration: TextDecoration.none,
+      );
 
-  static TextStyle contentText16(BuildContext context) =>
-      TextStyle(color: colors(context).colorContentText, fontSize: 16);
+  static TextStyle contentText16(BuildContext context) => TextStyle(
+        color: colors(context).colorContentText,
+        fontSize: 16,
+        decoration: TextDecoration.none,
+      );
 
-  static TextStyle confirmText14(BuildContext context) =>
-      TextStyle(color: colors(context).colorConfirm, fontSize: 14);
+  static TextStyle confirmText14(BuildContext context) => TextStyle(
+        color: colors(context).colorConfirm,
+        fontSize: 14,
+        decoration: TextDecoration.none,
+      );
 
-  static TextStyle cancelText14(BuildContext context) =>
-      TextStyle(color: colors(context).colorCancel, fontSize: 14);
+  static TextStyle cancelText14(BuildContext context) => TextStyle(
+        color: colors(context).colorCancel,
+        fontSize: 14,
+        decoration: TextDecoration.none,
+      );
 
-  static TextStyle cancelText12(BuildContext context) =>
-      TextStyle(color: colors(context).colorCancel, fontSize: 12);
+  static TextStyle cancelText12(BuildContext context) => TextStyle(
+        color: colors(context).colorCancel,
+        fontSize: 12,
+        decoration: TextDecoration.none,
+      );
 
-  static TextStyle descText12(BuildContext context) =>
-      TextStyle(color: colors(context).colorDescText, fontSize: 12);
+  static TextStyle descText12(BuildContext context) => TextStyle(
+        color: colors(context).colorDescText,
+        fontSize: 12,
+        decoration: TextDecoration.none,
+      );
 
-  static TextStyle primaryText28(BuildContext context) =>
-      TextStyle(color: colors(context).colorPrimary, fontSize: 28);
+  static TextStyle primaryText28(BuildContext context) => TextStyle(
+        color: colors(context).colorPrimary,
+        fontSize: 28,
+        decoration: TextDecoration.none,
+      );
 
-  static TextStyle locationText14(BuildContext context) =>
-      TextStyle(color: colors(context).colorLocationText, fontSize: 14);
-  static TextStyle locationText16(BuildContext context) =>
-      TextStyle(color: colors(context).colorLocationText, fontSize: 16);
+  static TextStyle locationText14(BuildContext context) => TextStyle(
+        color: colors(context).colorLocationText,
+        fontSize: 14,
+        decoration: TextDecoration.none,
+      );
 
-  static TextStyle navCancelText(BuildContext context) =>
-      TextStyle(color: colors(context).colorCancelText, fontSize: 17);
-  static TextStyle navSaveText(BuildContext context) =>
-      TextStyle(color: colors(context).colorSaveText, fontSize: 17,fontWeight: FontWeight.bold);
-  static TextStyle placeholderText(BuildContext context) =>
-      TextStyle(color: colors(context).colorPlaceholderText, fontSize: 14,fontWeight: FontWeight.normal);
+  static TextStyle locationText16(BuildContext context) => TextStyle(
+        color: colors(context).colorLocationText,
+        fontSize: 16,
+        decoration: TextDecoration.none,
+      );
 
+  static TextStyle navCancelText(BuildContext context) => TextStyle(
+        color: colors(context).colorCancelText,
+        fontSize: 17,
+        decoration: TextDecoration.none,
+      );
+
+  static TextStyle navSaveText(BuildContext context) => TextStyle(
+      color: colors(context).colorSaveText,
+      fontSize: 17,
+      decoration: TextDecoration.none,
+      fontWeight: FontWeight.bold);
+
+  static TextStyle placeholderText(BuildContext context) => TextStyle(
+      color: colors(context).colorPlaceholderText,
+      fontSize: 14,
+      decoration: TextDecoration.none,
+      fontWeight: FontWeight.normal);
 }

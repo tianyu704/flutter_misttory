@@ -51,7 +51,7 @@ dependencies:
   flutter_orm_plugin: ^1.0.9
   grouped_listview: ^0.0.2 #分组包
   provider: ^3.1.0
-  shared_preferences: ^0.5.3+4
+  shared_preferences: 0.5.3+4
   full_icon_button: ^0.0.1+3
   #fluttertoast: ^3.1.3
   flutter_svg: 0.14.2
@@ -60,6 +60,9 @@ dependencies:
   local_image_provider:
     git:
       url: https://github.com/tianyu704/local_image_provider.git
+  #  flutter_image_compress: ^0.6.3
+  extended_image: ^0.6.4 #图片展示
+#  flutter_image_compress: 0.6.3 #图片压缩
 
 dev_dependencies:
   flutter_test:
@@ -104,6 +107,8 @@ flutter:
     - assets/images/icon_search.svg
     - assets/images/icon_poi_item.svg
     - assets/images/icon_poi_none.svg
+    - assets/images/icon_edit.svg
+    - assets/images/icon_back.svg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 

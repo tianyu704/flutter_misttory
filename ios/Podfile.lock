@@ -31,6 +31,8 @@ PODS:
     - Flutter
   - LuakitPod (1.0.23)
   - MJExtension (3.2.0)
+  - path_provider (0.0.1):
+    - Flutter
   - permission_handler (3.3.0):
     - Flutter
   - shared_preferences (0.0.1):
@@ -45,6 +47,7 @@ DEPENDENCIES:
   - flutter_orm_plugin (from `.symlinks/plugins/flutter_orm_plugin/ios`)
   - local_image_provider (from `.symlinks/plugins/local_image_provider/ios`)
   - LuakitPod (~> 1.0.23)
+  - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
@@ -74,6 +77,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_orm_plugin/ios"
   local_image_provider:
     :path: ".symlinks/plugins/local_image_provider/ios"
+  path_provider:
+    :path: ".symlinks/plugins/path_provider/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
   shared_preferences:
@@ -94,8 +99,9 @@ SPEC CHECKSUMS:
   local_image_provider: dce3592c21eaa668e5a2fff03cb6c9e53a60dff2
   LuakitPod: 9b368deeb047c373d34525e0be47f26f68d83af9
   MJExtension: e22bed65fdcd38e957242982b7384f2984c9088e
+  path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
   permission_handler: 67637977b227d62d46bfbf524f335f8568de5a73
-  shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
+  shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
 
 PODFILE CHECKSUM: 5acc3fcb64cd14b08402a74bf64008a1584a6d68
 

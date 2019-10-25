@@ -257,8 +257,8 @@ class StoryHelper {
     Map story2 =
         await Query(DBManager.tableStory).orderBy(["create_time asc"]).first();
     if (story1 != null && story2 != null) {
-      num time1 = story1["create_time"] as num;
-      num time2 = story2["update_time"] as num;
+      num time1 = story1["update_time"] as num;
+      num time2 = story2["create_time"] as num;
       DateTime dateTime1 = DateTime.fromMillisecondsSinceEpoch(time1.toInt());
       DateTime dateTime2 = DateTime.fromMillisecondsSinceEpoch(time2.toInt());
       return DateTime(dateTime1.year, dateTime1.month, dateTime1.day)
@@ -339,6 +339,7 @@ class StoryHelper {
         location.errorCode == 0 &&
         StringUtil.isNotEmpty(location.address)) {
       Story story = await queryLastStory();
+
       if (story != null) {
         if (location.aoiname == story.aoiName) {
           if (location.poiname == story.poiName) {
@@ -381,7 +382,6 @@ class StoryHelper {
     } else {
       await updateStoryTime(location, story);
       print("story 更新 ${story.aoiName}   ${story.id}");
-
     }
   }
 
@@ -420,6 +420,7 @@ class StoryHelper {
     if (location == null) {
       return null;
     }
+
     num updateTime = location.updatetime;
     Map result;
     result = await Query(DBManager.tableStory)

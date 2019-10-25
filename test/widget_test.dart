@@ -5,6 +5,8 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:misstory/db/helper/story_helper.dart';
@@ -44,14 +46,26 @@ void main() {
 //      ..createTime = 1570758432968
 //      ..updateTime = 1570759933269;
     List<Story> list = StoryHelper().separateStory(story);
-    list.forEach((item){print(item.toJson());});
-
+    list.forEach((item) {
+      print(item.toJson());
+    });
   });
 
-  test("insert",(){
-    List list =[1,2,3,4];
-    List list1 =[5,6,7,8];
+  test("insert", () {
+    List list = [1, 2, 3, 4];
+    List list1 = [5, 6, 7, 8];
     list1.insertAll(0, list);
     print(list1);
+  });
+
+  test("map", () {
+    Map<String, String> map = Map<String, String>();
+    map["a"] = "1";
+    map["b"] = "2";
+    map["c"] = "3";
+    map["d"] = "4";
+    map["a"] = "5";
+    print(map);
+    HashMap hashMap;
   });
 }

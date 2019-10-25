@@ -37,10 +37,9 @@ class PictureHelper {
       list = await LocalImageProvider().findLatest(0);
     } else {
       afterList = await LocalImageProvider().findAfterTime(time: afterP.creationDate);
-      list =   await LocalImageProvider().findBeforeTime(time: time);
+      //list =   await LocalImageProvider().findBeforeTime(time: time);
     }
-    debugPrint(
-        "======查询到${list?.length}张照片，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
+    //debugPrint("======查询到${list?.length}张照片，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
     if (afterList != null && afterList.length > 0) {
       print("===${afterList.length}==${afterP.creationDate}===");
       for (LocalImage image in afterList) {
@@ -50,11 +49,11 @@ class PictureHelper {
       }
     }
     if (list != null && list.length > 0) {
-//      for (LocalImage image in list) {
-//        if (!(await PictureHelper().isExistPictureWithId(image.id))) {
-//          await createPicture(createPictureModelWithLocalImage(image));
-//        }
-//      }
+      for (LocalImage image in list) {
+        if (!(await PictureHelper().isExistPictureWithId(image.id))) {
+          await createPicture(createPictureModelWithLocalImage(image));
+        }
+      }
     }
     debugPrint(
         " 存储完Picture表，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
@@ -127,7 +126,7 @@ class PictureHelper {
       Picture earliestP = list.last;
       Picture newestP = list.first;
       await convertPicturesAfterTime(newestP.creationDate);
-     // await convertPicturesBeforeTime(earliestP.creationDate);
+      await convertPicturesBeforeTime(earliestP.creationDate);
     }
     debugPrint("结束执行p 转 l");
   }
@@ -135,7 +134,6 @@ class PictureHelper {
   convertPicturesAfterTime(num time) async {
     List afterList = await findPicturesAfterTime(time);
     if (afterList != null && afterList.length > 0) {
-      print("${afterList.length}");
       for (Picture p in afterList)
          await LocationHelper().createLocationWithPicture(p,false);
       }

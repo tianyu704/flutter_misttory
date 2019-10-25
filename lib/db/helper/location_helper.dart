@@ -15,6 +15,13 @@ import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/models/picture.dart';
 import 'package:amap_base/src/search/model/poi_item.dart';
 
+
+enum LocationFromType {
+  normal,
+  before,
+  after
+}
+
 class LocationHelper {
   static final LocationHelper _instance = new LocationHelper._internal();
 
@@ -122,6 +129,16 @@ class LocationHelper {
   /// 根据最新定位的Location创建或更新最后一条Location
   Future<int> createOrUpdateLocation(Mslocation location,{Picture picture,bool isNoneUseBefore}) async {
 
+    if (picture!= null && !isNoneUseBefore) {
+      print("after start to creat or update location");
+      Mslocation updateLocation = await findTargetLocationWithPicture(picture);
+      if (updateLocation == null) {
+        return await createLocation(location,picture: picture,isNoneUseBefore:false);
+      } else {
+        print("location 更新");
+        return await updateLocationTime(updateLocation, location,picture: picture,isNoneUseBefore:false);
+      }
+    }
     if (location != null && location.errorCode == 0) {
       Mslocation lastLocation = (picture != null) ?  await queryOldestLocation() : await queryLastLocation();
       if (lastLocation == null) {
@@ -168,7 +185,12 @@ class LocationHelper {
       await FlutterOrmPlugin.saveOrm(
           DBManager.tableLocation, location.toJson());
       if (picture != null) {
-        await StoryHelper().convertStoryWithEverLocation(location,location);
+        if (isNoneUseBefore) {
+          await StoryHelper().convertStoryWithEverLocation(location,location);
+        } else {
+          await StoryHelper().judgeLocation(location);
+        }
+      //  await StoryHelper().judgeLocation(location,fromType: isNoneUseBefore ? LocationFromType.before :LocationFromType.after);
         print("新创建story");
         await PictureHelper().updatePictureStatus(picture);
       }
@@ -194,11 +216,18 @@ class LocationHelper {
           str = "${lastLocation.pictures},${picture.id}";
         }
         lastLocation.pictures = str;
-        //lastLocation.time = location.time;
         location.pictures =str;///为了更新story的pictures
+        num startTime = (location.time < lastLocation.time) ? location.time:lastLocation.time ;
+        num updateTime = (location.updatetime > lastLocation.updatetime) ? location.updatetime : lastLocation.updatetime;
         await Query(DBManager.tableLocation)
-            .primaryKey([id]).update({"time": location.time,"pictures":str});
-        await StoryHelper().convertStoryWithEverLocation(lastLocation,location);
+            .primaryKey([id]).update({"time": startTime ,"updatetime":updateTime,"pictures":str});
+        if (isNoneUseBefore) {
+          await StoryHelper().convertStoryWithEverLocation(lastLocation,location);
+        } else {
+          await StoryHelper().judgeLocation(location);
+        }
+        //
+       //(location,lastLocation: lastLocation,fromType: isNoneUseBefore ? LocationFromType.before :LocationFromType.after);
         print("xxXX");
         await PictureHelper().updatePictureStatus(picture);
       }
