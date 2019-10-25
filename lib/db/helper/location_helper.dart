@@ -15,12 +15,7 @@ import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/models/picture.dart';
 import 'package:amap_base/src/search/model/poi_item.dart';
 
-
-enum LocationFromType {
-  normal,
-  before,
-  after
-}
+enum LocationFromType { normal, before, after }
 
 class LocationHelper {
   static final LocationHelper _instance = new LocationHelper._internal();
@@ -48,21 +43,24 @@ class LocationHelper {
       }
     }
   }
+
   ///图片转化为地点
-  Future<int>  createLocationWithPicture(Picture p,bool isNoneUseBefore) async {
+  Future<int> createLocationWithPicture(Picture p, bool isNoneUseBefore) async {
     ///TODO：此处过滤掉经纬度为 0的图片
     if (!(p != null && p.lat != 0 && p.lon != 0)) return 1;
 
     Mslocation location = Mslocation();
+
     ///latlon
     LatLngType itemType = LatLngType.gps;
-    LatLng latlng = await CalculateTools().convertCoordinate(lat: p.lat, lon: p.lon, type: itemType);
+    LatLng latlng = await CalculateTools()
+        .convertCoordinate(lat: p.lat, lon: p.lon, type: itemType);
     location.lat = latlng.latitude;
     location.lon = latlng.longitude;
 
+    ReGeocodeResult result = await _aMapSearch.searchReGeocode(
+        latlng, 100, LatLngType.values.indexOf(itemType));
 
-    ReGeocodeResult result =  await  _aMapSearch
-        .searchReGeocode(latlng, 100,  LatLngType.values.indexOf(itemType));
     ///aoi
     List<Aoi> aois = result.regeocodeAddress.aois;
     if (aois != null && aois.length > 0) {
@@ -73,19 +71,21 @@ class LocationHelper {
         }
       }
     }
+
     ///poi
     List<PoiItem> pois = result.regeocodeAddress.pois;
     if (pois != null && pois.length > 0) {
       for (PoiItem poi in pois) {
-        if (StringUtil.isNotEmpty(poi.title))  {
+        if (StringUtil.isNotEmpty(poi.title)) {
           location.poiname = poi.title;
           location.poiid = poi.poiId;
           break;
         }
       }
     }
+
     ///road
-    List<Road>roads = result.regeocodeAddress.roads;
+    List<Road> roads = result.regeocodeAddress.roads;
     if (roads != null && roads.length > 0) {
       for (Road road in roads) {
         if (StringUtil.isNotEmpty(road.name)) {
@@ -94,11 +94,12 @@ class LocationHelper {
         }
       }
     }
+
     ///address
     location.address = result.regeocodeAddress.formatAddress;
-    location.country =    result.regeocodeAddress.country;
+    location.country = result.regeocodeAddress.country;
     location.citycode = result.regeocodeAddress.cityCode;
-    location.adcode  = result.regeocodeAddress.adCode;
+    location.adcode = result.regeocodeAddress.adCode;
     location.province = result.regeocodeAddress.province;
     location.city = result.regeocodeAddress.city;
     location.district = result.regeocodeAddress.district;
@@ -109,7 +110,9 @@ class LocationHelper {
     location.errorInfo = "success";
     location.time = p.creationDate;
     location.updatetime = p.creationDate;
-    location.provider = "lbs";///基于位置服务
+    location.provider = "lbs";
+
+    ///基于位置服务
     location.coordType = "GCJ02";
     location.isFromPicture = 1;
 
@@ -123,52 +126,72 @@ class LocationHelper {
     //location.accuracy =
     //location.isOffset =
     //location.is_delete =
-    return await createOrUpdateLocation(location,picture: p,isNoneUseBefore:isNoneUseBefore);
+    return await createOrUpdateLocation(location,
+        picture: p,
+        itemType:
+            isNoneUseBefore ? LocationFromType.before : LocationFromType.after);
   }
 
   /// 根据最新定位的Location创建或更新最后一条Location
-  Future<int> createOrUpdateLocation(Mslocation location,{Picture picture,bool isNoneUseBefore}) async {
+  Future<int> createOrUpdateLocation(Mslocation location,
+      {Picture picture, LocationFromType itemType}) async {
+//    if (picture!= null && LocationFromType.after == itemType) {
+//      print("after start to creat or update location");
+//      Mslocation updateLocation = await findTargetLocationWithPicture(picture);
+//      if (updateLocation == null) {
+//        return await createLocation(location,picture: picture,itemType:LocationFromType.after);
+//      } else {
+//        print("location 更新");
+//        return await updateLocationTime(updateLocation, location,picture: picture,itemType:LocationFromType.after);
+//      }
+//    }
 
-    if (picture!= null && !isNoneUseBefore) {
-      print("after start to creat or update location");
-      Mslocation updateLocation = await findTargetLocationWithPicture(picture);
-      if (updateLocation == null) {
-        return await createLocation(location,picture: picture,isNoneUseBefore:false);
-      } else {
-        print("location 更新");
-        return await updateLocationTime(updateLocation, location,picture: picture,isNoneUseBefore:false);
-      }
-    }
+    ///TODO:最大的一张图片比最大的location时间大的情况还没考虑
 
     if (location != null && location.errorCode == 0) {
-      Mslocation lastLocation = (picture != null) ?  await queryOldestLocation() : await queryLastLocation();
+      Mslocation lastLocation;
+      if (LocationFromType.before == itemType) {
+        lastLocation = await queryOldestLocation();
+      } else if (LocationFromType.after == itemType) {
+        lastLocation = await findTargetLocationWithPicture(picture);
+      } else {
+        lastLocation = await queryLastLocation();
+      }
       if (lastLocation == null) {
-        return await createLocation(location,picture: picture);
+        return await createLocation(location,
+            picture: picture, itemType: itemType);
       } else if (lastLocation.lon == location.lon &&
           lastLocation.lat == location.lat) {
-        return await updateLocationTime(lastLocation, location,picture: picture);
+        return await updateLocationTime(lastLocation, location,
+            picture: picture, itemType: itemType);
       } else {
         if (lastLocation.aoiname == location.aoiname) {
           if (location.aoiname == null &&
               lastLocation.poiname != location.poiname) {
-            return await createLocation(location,picture: picture);
+            return await createLocation(location,
+                picture: picture, itemType: itemType);
           } else {
             if (await getDistanceBetween(location, lastLocation) >
                 LocationConfig.judgeDistanceNum) {
-              return await createLocation(location,picture: picture);
+              return await createLocation(location,
+                  picture: picture, itemType: itemType);
             } else {
-              return await updateLocationTime(lastLocation, location,picture: picture);
+              return await updateLocationTime(lastLocation, location,
+                  picture: picture, itemType: itemType);
             }
           }
         } else if (lastLocation.poiname == location.poiname) {
           if (await getDistanceBetween(location, lastLocation) >
               LocationConfig.judgeDistanceNum) {
-            return await createLocation(location,picture: picture);
+            return await createLocation(location,
+                picture: picture, itemType: itemType);
           } else {
-            return await updateLocationTime(lastLocation, location,picture: picture);
+            return await updateLocationTime(lastLocation, location,
+                picture: picture, itemType: itemType);
           }
         } else {
-          return await createLocation(location,picture: picture);
+          return await createLocation(location,
+              picture: picture, itemType: itemType);
         }
       }
     }
@@ -176,7 +199,9 @@ class LocationHelper {
   }
 
   /// 创建Location一条记录
-  Future<int> createLocation(Mslocation location,{Picture picture,bool isNoneUseBefore = true}) async {
+  Future<int> createLocation(Mslocation location,
+      {Picture picture,
+      LocationFromType itemType = LocationFromType.normal}) async {
     if (location != null && location.lat != 0 && location.lon != 0) {
       if (picture != null) {
         location.pictures = "${picture.id}";
@@ -186,24 +211,18 @@ class LocationHelper {
       await FlutterOrmPlugin.saveOrm(
           DBManager.tableLocation, location.toJson());
       if (picture != null) {
-        if (isNoneUseBefore) {
-          await StoryHelper().convertStoryWithEverLocation(location,location);
-        } else {
-          await StoryHelper().judgeLocation(location);
-        }
-      //  await StoryHelper().judgeLocation(location,fromType: isNoneUseBefore ? LocationFromType.before :LocationFromType.after);
-        print("新创建story");
+        await StoryHelper().judgeLocation(location, itemType: itemType);
         await PictureHelper().updatePictureStatus(picture);
       }
-      debugPrint("执行p 转 l中 创建l。。。${isNoneUseBefore}。。");
+      debugPrint("执行p 转 l中 创建l。。。$itemType。。");
       return 0;
     }
     return -1;
   }
 
   /// 更新Location时间
-  Future<int> updateLocationTime(Mslocation lastLocation, Mslocation location,{Picture picture,bool isNoneUseBefore = true}) async {
-
+  Future<int> updateLocationTime(Mslocation lastLocation, Mslocation location,
+      {Picture picture, LocationFromType itemType}) async {
     num id = lastLocation.id;
     if (location != null) {
       if (picture == null) {
@@ -217,22 +236,24 @@ class LocationHelper {
           str = "${lastLocation.pictures},${picture.id}";
         }
         lastLocation.pictures = str;
-        location.pictures =str;///为了更新story的pictures
-        num startTime = (location.time < lastLocation.time) ? location.time:lastLocation.time ;
-        num updateTime = (location.updatetime > lastLocation.updatetime) ? location.updatetime : lastLocation.updatetime;
-        await Query(DBManager.tableLocation)
-            .primaryKey([id]).update({"time": startTime ,"updatetime":updateTime,"pictures":str});
-        if (isNoneUseBefore) {
-          await StoryHelper().convertStoryWithEverLocation(lastLocation,location);
-        } else {
-          await StoryHelper().judgeLocation(location);
-        }
-        //
-       //(location,lastLocation: lastLocation,fromType: isNoneUseBefore ? LocationFromType.before :LocationFromType.after);
+        location.pictures = str;
+
+        ///为了更新story的pictures
+        num startTime = (location.time < lastLocation.time)
+            ? location.time
+            : lastLocation.time;
+        num updateTime = (location.updatetime > lastLocation.updatetime)
+            ? location.updatetime
+            : lastLocation.updatetime;
+        lastLocation.time = startTime;
+        lastLocation.updatetime = updateTime;
+        await Query(DBManager.tableLocation).primaryKey([id]).update(
+            {"time": startTime, "updatetime": updateTime, "pictures": str});
+        await StoryHelper().judgeLocation(lastLocation, itemType: itemType);
         print("xxXX");
         await PictureHelper().updatePictureStatus(picture);
       }
-      debugPrint("执行p 转 l中 更新l。。。。。${isNoneUseBefore}");
+      debugPrint("执行p 转 l中 更新l。。。。。$itemType");
       return 0;
     }
     return -1;
@@ -302,18 +323,21 @@ class LocationHelper {
   }
 
   ///根据Picture查找对应Location
-  Future<Mslocation>findTargetLocationWithPicture(Picture p) async {
+  Future<Mslocation> findTargetLocationWithPicture(Picture p) async {
     if (p == null) {
       return null;
     }
-    Map result = await Query(DBManager.tableLocation)
-        .whereByColumFilters([
-      WhereCondiction("time", WhereCondictionType.EQ_OR_LESS_THEN, p.creationDate),
-      WhereCondiction("updatetime", WhereCondictionType.EQ_OR_MORE_THEN, p.creationDate),
+    Map result = await Query(DBManager.tableLocation).orderBy([
+      "time desc",
+    ]).whereByColumFilters([
+      WhereCondiction(
+          "time", WhereCondictionType.EQ_OR_LESS_THEN, p.creationDate),
+      WhereCondiction(
+          "updatetime", WhereCondictionType.EQ_OR_MORE_THEN, p.creationDate),
     ]).first();
 
     if (result != null) {
-      return  Mslocation.fromJson(Map<String, dynamic>.from(result));
+      return Mslocation.fromJson(Map<String, dynamic>.from(result));
     }
     return null;
   }

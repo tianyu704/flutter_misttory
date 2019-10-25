@@ -133,9 +133,13 @@ class PictureHelper {
     List<Picture> list = await queryPictureConverted();
     if (list == null || list.length == 0) {
       Mslocation l = await LocationHelper().queryOldestLocation();
-      num time = (l == null) ? 0 : l.time;
-      await convertPicturesAfterTime(time);
-      await convertPicturesBeforeTime(time);
+      num time = (l == null) ? DateTime.now().millisecondsSinceEpoch : l.time;
+      if (l == null) {
+        await convertPicturesBeforeTime(time);
+      } else {
+        await convertPicturesAfterTime(time);
+        await convertPicturesBeforeTime(time);
+      }
     } else {
       Picture earliestP = list.last;
       Picture newestP = list.first;
@@ -147,7 +151,9 @@ class PictureHelper {
 
   ///使用app后
   convertPicturesAfterTime(num time) async {
-    List afterList = await findPicturesAfterTime(time);
+    List temp = await findPicturesAfterTime(time);
+    List afterList = temp;
+    //temp.reversed.toList();//当前方法把时间
     if (afterList != null && afterList.length > 0) {
       for (Picture p in afterList)
         await LocationHelper().createLocationWithPicture(p, false);
