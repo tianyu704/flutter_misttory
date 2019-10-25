@@ -232,16 +232,23 @@ class PictureHelper {
     return null;
   }
 
+  ///更新图片路径
   Future<bool> updatePicturePath(String id, String path) async {
     await Query(DBManager.tablePicture).primaryKey([id]).update({"path": path});
     return true;
   }
 
+  /// 把图片的path添加上
   Future addPath() async {
     await LocalImageProvider().initialize();
     List<LocalImage> localImages = await LocalImageProvider().findAfterTime();
     for (LocalImage image in localImages) {
       updatePicturePath(image.id, image.path);
     }
+  }
+
+  ///清空picture表
+  Future clear() async {
+    await Query(DBManager.tablePicture).delete();
   }
 }

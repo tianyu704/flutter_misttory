@@ -325,4 +325,11 @@ class LocationHelper {
     LatLng latLng2 = LatLng(location2.lat, location2.lon);
     return await CalculateTools().calcDistance(latLng1, latLng2);
   }
+  ///删除图片生成的位置信息
+  Future deletePictureLocation() async {
+    await Query(DBManager.tableLocation)
+        .whereByColumFilters(
+        [WhereCondiction("isFromPicture", WhereCondictionType.IN, [1])])
+        .delete();
+  }
 }

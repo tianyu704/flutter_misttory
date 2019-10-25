@@ -373,7 +373,7 @@ class StoryHelper {
     }
   }
   ///坐标点转化成story(即创建或更新)
-  Future<void>convertStoryWithEverLocation(Mslocation lastLocation,Mslocation location) async {
+  Future<void> convertStoryWithEverLocation(Mslocation lastLocation,Mslocation location) async {
     Story story = await findTargetStoryWithLocation(lastLocation);
     if (story == null) {
       await createStory(createStoryWithLocation(location));
@@ -492,5 +492,13 @@ class StoryHelper {
       WhereCondiction("interval_time", WhereCondictionType.LESS_THEN,
           LocationConfig.judgeUsefulLocation)
     ]).delete();
+  }
+
+  ///删除图片生成的位置信息
+  Future deletePictureStory() async {
+    await Query(DBManager.tableStory)
+        .whereByColumFilters(
+        [WhereCondiction("isFromPicture", WhereCondictionType.IN, [1])])
+        .delete();
   }
 }

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:local_image_provider/local_image.dart';
 import 'package:local_image_provider/local_image_provider.dart';
+import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
+import 'package:misstory/db/helper/story_helper.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -51,7 +53,10 @@ class _SearchPageState extends LifecycleState<SearchPage> {
                 child: RaisedButton(
                   onPressed: () async {
                     if (images != null && images.length > 0) {
-                      LatLng latlng = await CalculateTools().convertCoordinate(lat: images[0].lat, lon: images[0].lon, type: LatLngType.gps);
+                      LatLng latlng = await CalculateTools().convertCoordinate(
+                          lat: images[0].lat,
+                          lon: images[0].lon,
+                          type: LatLngType.gps);
                       print(latlng.toJson());
                       //39°53'56.118",116°29'11.964"
                       //39.898923,116.48666
@@ -106,14 +111,23 @@ class _SearchPageState extends LifecycleState<SearchPage> {
 //              childCount: 50, //50个列表项
 //            ),
 //          ),
-        SliverToBoxAdapter (child:
-          RaisedButton(
-              child: Text("测试存储Picture"),
-              onPressed: (){
-                _syncPictures();
-          })
-
-          ,),
+          SliverToBoxAdapter(
+            child: RaisedButton(
+                child: Text("测试存储Picture"),
+                onPressed: () {
+                  _syncPictures();
+                }),
+          ),
+          SliverToBoxAdapter(
+            child: RaisedButton(
+                child: Text("删除Picture和Picture生成的Location、Story"),
+                onPressed: () async {
+                  await PictureHelper().clear();
+                  await LocationHelper().deletePictureLocation();
+                  await StoryHelper().deletePictureStory();
+                  debugPrint("！！！！！！！！！删除成功！！！！！！！");
+                }),
+          ),
         ],
       ),
     );
@@ -128,9 +142,7 @@ class _SearchPageState extends LifecycleState<SearchPage> {
   }
 
   ///同步图片逻辑
-  _syncPictures () async{
-
-
+  _syncPictures() async {
     if (mounted) {
       setState(() {});
     }

@@ -90,22 +90,25 @@ class LocationItem extends StatelessWidget {
                               ],
                             ),
                             SizedBox(height: 4),
-                            Row(
-                              children: <Widget>[
-                                SvgPicture.asset(
-                                  "assets/images/icon_remain_time.svg",
-                                  width: 12,
-                                  height: 12,
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 11),
-                                  child: Text(
-                                    DateUtil.getStayShowTime(
-                                        story.intervalTime),
-                                    style: AppStyle.descText12(context),
+                            Offstage(
+                              offstage: story.isFromPicture == 1,
+                              child: Row(
+                                children: <Widget>[
+                                  SvgPicture.asset(
+                                    "assets/images/icon_remain_time.svg",
+                                    width: 12,
+                                    height: 12,
                                   ),
-                                ),
-                              ],
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 11),
+                                    child: Text(
+                                      DateUtil.getStayShowTime(
+                                          story.intervalTime),
+                                      style: AppStyle.descText12(context),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                             Offstage(
                               offstage: StringUtil.isEmpty(story.desc),
