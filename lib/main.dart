@@ -23,7 +23,10 @@ void main() async {
   await DBManager.initDB();
   await AMap.init(Constant.iosMapKey);
   await StoryHelper().updateAllDefaultAddress();
-  await PictureHelper().fetchAppSystemPicture();///TODO:此时就要求授权了 等产品逻辑具体化 再修改
+
+  ///TODO:此时就要求授权了 等产品逻辑具体化 再修改
+  await PictureHelper().fetchAppSystemPicture();
+//  await PictureHelper().addPath();
 
   /// 主题
   bool isNight = (await LocalStorage.get(LocalStorage.isNight)) ?? false;

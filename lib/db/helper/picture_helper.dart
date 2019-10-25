@@ -154,81 +154,94 @@ class PictureHelper {
     }
     debugPrint("使用app后数据同步完成location");
   }
-}
 
-///使用app前
-convertPicturesBeforeTime(num time) async {
-  List beforeList = await findPicturesBeforeTime(time);
-  if (beforeList != null && beforeList.length > 0) {
-    for (Picture p in beforeList) {
-      await LocationHelper().createLocationWithPicture(p, true);
+  ///使用app前
+  convertPicturesBeforeTime(num time) async {
+    List beforeList = await findPicturesBeforeTime(time);
+    if (beforeList != null && beforeList.length > 0) {
+      for (Picture p in beforeList) {
+        await LocationHelper().createLocationWithPicture(p, true);
+      }
+      debugPrint("使用app前数据同步完成location");
     }
-    debugPrint("使用app前数据同步完成location");
   }
-}
 
-///📌查询未转化为location的图片集合
-///从指定时间到当前的未同步的全部图片集合
-Future<List> findPicturesAfterTime(num time) async {
-  List result;
-  if (time == 0) {
-    result = await Query(DBManager.tablePicture)
+  ///📌查询未转化为location的图片集合
+  ///从指定时间到当前的未同步的全部图片集合
+  Future<List> findPicturesAfterTime(num time) async {
+    List result;
+    if (time == 0) {
+      result = await Query(DBManager.tablePicture)
+          .orderBy(["creationDate desc"]).whereByColumFilters([
+        WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
+      ]).all();
+    } else {
+      result = await Query(DBManager.tablePicture)
+          .orderBy(["creationDate desc"]).whereByColumFilters([
+        WhereCondiction("creationDate", WhereCondictionType.MORE_THEN, time),
+        WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
+      ]).all();
+    }
+    List<Picture> list = [];
+    if (result != null && result.length > 0) {
+      result.forEach((item) {
+        Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
+        list.add(p);
+      });
+      return list;
+    }
+    return null;
+  }
+
+  ///从最早的到到指定时间的未同步的全部图片集合
+  Future<List> findPicturesBeforeTime(num time) async {
+    if (time == 0) {
+      time = DateTime.now().millisecondsSinceEpoch;
+    }
+    List result = await Query(DBManager.tablePicture)
         .orderBy(["creationDate desc"]).whereByColumFilters([
+      WhereCondiction("creationDate", WhereCondictionType.LESS_THEN, time),
       WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
     ]).all();
-  } else {
-    result = await Query(DBManager.tablePicture)
+
+    List<Picture> list = [];
+    if (result != null && result.length > 0) {
+      result.forEach((item) {
+        Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
+        list.add(p);
+      });
+      return list;
+    }
+    return null;
+  }
+
+  ///查询已转化图片的集合：目的是拿到最大最小时间
+  Future<List> queryPictureConverted() async {
+    List result = await Query(DBManager.tablePicture)
         .orderBy(["creationDate desc"]).whereByColumFilters([
-      WhereCondiction("creationDate", WhereCondictionType.MORE_THEN, time),
-      WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
+      WhereCondiction("isSynced", WhereCondictionType.IN, [1]),
     ]).all();
+    List<Picture> list = [];
+    if (result != null && result.length > 0) {
+      result.forEach((item) {
+        Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
+        list.add(p);
+      });
+      return list;
+    }
+    return null;
   }
-  List<Picture> list = [];
-  if (result != null && result.length > 0) {
-    result.forEach((item) {
-      Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
-      list.add(p);
-    });
-    return list;
-  }
-  return null;
-}
 
-///从最早的到到指定时间的未同步的全部图片集合
-Future<List> findPicturesBeforeTime(num time) async {
-  if (time == 0) {
-    time = DateTime.now().millisecondsSinceEpoch;
+  Future<bool> updatePicturePath(String id, String path) async {
+    await Query(DBManager.tablePicture).primaryKey([id]).update({"path": path});
+    return true;
   }
-  List result = await Query(DBManager.tablePicture)
-      .orderBy(["creationDate desc"]).whereByColumFilters([
-    WhereCondiction("creationDate", WhereCondictionType.LESS_THEN, time),
-    WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
-  ]).all();
 
-  List<Picture> list = [];
-  if (result != null && result.length > 0) {
-    result.forEach((item) {
-      Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
-      list.add(p);
-    });
-    return list;
+  Future addPath() async {
+    await LocalImageProvider().initialize();
+    List<LocalImage> localImages = await LocalImageProvider().findAfterTime();
+    for (LocalImage image in localImages) {
+      updatePicturePath(image.id, image.path);
+    }
   }
-  return null;
-}
-
-///查询已转化图片的集合：目的是拿到最大最小时间
-Future<List> queryPictureConverted() async {
-  List result = await Query(DBManager.tablePicture)
-      .orderBy(["creationDate desc"]).whereByColumFilters([
-    WhereCondiction("isSynced", WhereCondictionType.IN, [1]),
-  ]).all();
-  List<Picture> list = [];
-  if (result != null && result.length > 0) {
-    result.forEach((item) {
-      Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
-      list.add(p);
-    });
-    return list;
-  }
-  return null;
 }
