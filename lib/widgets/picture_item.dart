@@ -1,13 +1,14 @@
 import 'dart:core';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:local_image_provider/local_image.dart';
-import 'package:local_image_provider/local_image_provider.dart';
+import 'package:misstory/db/helper/picture_helper.dart';
+import 'package:misstory/models/picture.dart' as model;
 import 'package:misstory/style/app_style.dart';
-import 'package:misstory/widgets/picture.dart';
+import 'package:misstory/utils/string_util.dart';
+import 'package:misstory/widgets/picture_widget.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -32,6 +33,7 @@ class _PictureItemState extends LifecycleState<PictureItem> {
   int _size = 0;
   double _width;
   double _pixelRatio;
+  List<String> _ids;
 
   @override
   void initState() {
@@ -39,22 +41,28 @@ class _PictureItemState extends LifecycleState<PictureItem> {
     super.initState();
     _pixelRatio = window.devicePixelRatio;
     _width = window.physicalSize.width / _pixelRatio - 80;
-//    _size = widget.pictures.split(",").length;
-    _size = Random().nextInt(7);
-    initImages();
+    if (!StringUtil.isEmpty(widget.pictures)) {
+      //    _size = Random().nextInt(7);
+      _ids = widget.pictures.split(",");
+      if (_ids != null && _ids.length > 0) {
+        _size = _ids.length;
+        initImages();
+      }
+    }
   }
 
   initImages() async {
-//    _images = PictureHelper()
-    await LocalImageProvider().initialize();
-    List<LocalImage> images =
-        await LocalImageProvider().findLatestAfterTime(num: 100);
-    for (int i = 0; i < _size; i++) {
-      _images.add(images[Random().nextInt(images.length)]);
+    for (String id in _ids) {
+      _images.add(switchLocalImage(await PictureHelper().queryPictureById(id)));
     }
     if (mounted) {
       setState(() {});
     }
+  }
+
+  LocalImage switchLocalImage(model.Picture picture) {
+    return LocalImage(picture.id, picture.creationDate, picture.pixelWidth,
+        picture.pixelHeight, picture.lon, picture.lat, picture.path, null);
   }
 
   @override
@@ -212,7 +220,7 @@ class _PictureItemState extends LifecycleState<PictureItem> {
       width: width,
       height: height,
       child: has
-          ? Picture(
+          ? PictureWidget(
               _images[index],
               width: width * _pixelRatio * 1.5,
               height: height * _pixelRatio * 1.5,

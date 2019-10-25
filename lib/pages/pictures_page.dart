@@ -12,7 +12,7 @@ import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/my_appbar.dart';
-import 'package:misstory/widgets/picture.dart';
+import 'package:misstory/widgets/picture_widget.dart';
 
 import 'edit_page.dart';
 
@@ -170,7 +170,7 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
     LocalImage image = _images[index];
     return Hero(
       tag: image.id,
-      child: Picture(
+      child: PictureWidget(
         image,
         width: width,
         height: width,

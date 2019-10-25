@@ -8,7 +8,7 @@ import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:local_image_provider/local_image.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/widgets/my_appbar.dart';
-import 'package:misstory/widgets/picture.dart';
+import 'package:misstory/widgets/picture_widget.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -108,7 +108,7 @@ class _PictureViewPageState extends LifecycleState<PictureViewPage> {
     LocalImage image = _images[index];
     return Hero(
       tag: image.id,
-      child: Picture(
+      child: PictureWidget(
         image,
         width: _width,
         height: _height,

@@ -125,8 +125,8 @@ class LocationItem extends StatelessWidget {
                     ],
                   ),
                   Offstage(
-//                    offstage: story.pictures == null,
-                    offstage: false,
+                    offstage: StringUtil.isEmpty(story.pictures),
+//                    offstage: false,
                     child: Padding(
                       padding: EdgeInsets.only(top: 5),
                       child: PictureItem(story.pictures ?? "", onPressPicture),

@@ -13,7 +13,7 @@ import 'package:misstory/utils/ms_image_cache.dart';
 /// Create by Hugo.Guo
 /// Date: 2019-10-22
 ///
-class Picture extends StatefulWidget {
+class PictureWidget extends StatefulWidget {
   final LocalImage localImage;
   final double width, height;
   final double radius;
@@ -21,7 +21,7 @@ class Picture extends StatefulWidget {
   final BoxFit fit;
   final ExtendedImageMode mode;
 
-  Picture(this.localImage,
+  PictureWidget(this.localImage,
       {this.width = 200,
       this.height = 200,
       this.radius = 6,
@@ -32,11 +32,11 @@ class Picture extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return _PictureState();
+    return _PictureWidgetState();
   }
 }
 
-class _PictureState extends State<Picture> with TickerProviderStateMixin {
+class _PictureWidgetState extends State<PictureWidget> with TickerProviderStateMixin {
   LocalImage _localImage;
   bool _isLoading = false;
   StreamSubscription _subscription;
