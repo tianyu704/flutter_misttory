@@ -361,7 +361,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "965f2b89830d87630b322dd3538827930be74906"
+      resolved-ref: "7bf4cc92dd4ef0bef2dc4b39ad2350f4e5c71d79"
       url: "https://github.com/tianyu704/local_image_provider.git"
     source: git
     version: "0.6.0"
