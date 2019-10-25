@@ -251,4 +251,9 @@ class PictureHelper {
   Future clear() async {
     await Query(DBManager.tablePicture).delete();
   }
+
+  LocalImage switchLocalImage(Picture picture) {
+    return LocalImage(picture.id, picture.creationDate, picture.pixelWidth.toInt(),
+        picture.pixelHeight.toInt(), picture.lon, picture.lat, picture.path, null);
+  }
 }

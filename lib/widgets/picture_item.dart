@@ -55,18 +55,14 @@ class _PictureItemState extends LifecycleState<PictureItem> {
 
   initImages() async {
     for (String id in _ids) {
-      _images.add(switchLocalImage(await PictureHelper().queryPictureById(id)));
+      _images.add(PictureHelper().switchLocalImage(await PictureHelper().queryPictureById(id)));
     }
     if (mounted) {
       setState(() {});
     }
   }
 
-  LocalImage switchLocalImage(model.Picture picture) {
-    print("========pictures=========${picture.toJson()}");
-    return LocalImage(picture.id, picture.creationDate, picture.pixelWidth.toInt(),
-        picture.pixelHeight.toInt(), picture.lon, picture.lat, picture.path, null);
-  }
+
 
   @override
   Widget build(BuildContext context) {
