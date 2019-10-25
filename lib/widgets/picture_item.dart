@@ -44,6 +44,7 @@ class _PictureItemState extends LifecycleState<PictureItem> {
     if (!StringUtil.isEmpty(widget.pictures)) {
       //    _size = Random().nextInt(7);
       _ids = widget.pictures.split(",");
+      debugPrint("========pictures=========$_ids");
       if (_ids != null && _ids.length > 0) {
         _size = _ids.length;
         initImages();
@@ -61,6 +62,7 @@ class _PictureItemState extends LifecycleState<PictureItem> {
   }
 
   LocalImage switchLocalImage(model.Picture picture) {
+    print("========pictures=========${picture.toJson()}");
     return LocalImage(picture.id, picture.creationDate, picture.pixelWidth,
         picture.pixelHeight, picture.lon, picture.lat, picture.path, null);
   }

@@ -20,21 +20,36 @@ class PictureHelper {
   PictureHelper._internal();
 
   fetchAppSystemPicture() async {
-    Picture p = await PictureHelper().queryOldestPicture();
+    List picList = await queryPictureConverted();
+
+    Picture beforeP =
+        picList != null && picList.length > 0 ? picList.last : null;
+    Picture afterP =
+        picList != null && picList.length > 0 ? picList.first : null;
     num time = 0;
-    if (p != null) {
-      time = p.creationDate;
+    if (beforeP != null) {
+      time = beforeP.creationDate;
     }
     await LocalImageProvider().initialize();
     num start = DateTime.now().millisecondsSinceEpoch;
     List<LocalImage> list = [];
+    List<LocalImage> afterList = [];
     if (time == 0) {
-      list = await LocalImageProvider().findLatest(0);
+      list = await LocalImageProvider().findAfterTime();
     } else {
-      list = await LocalImageProvider().findBeforeTime(time: time);
+      afterList =
+          await LocalImageProvider().findAfterTime(time: afterP.creationDate);
+      //list =   await LocalImageProvider().findBeforeTime(time: time);
     }
-    debugPrint(
-        "======查询到${list?.length}张照片，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
+    //debugPrint("======查询到${list?.length}张照片，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
+    if (afterList != null && afterList.length > 0) {
+      print("===${afterList.length}==${afterP.creationDate}===");
+      for (LocalImage image in afterList) {
+        if (!(await PictureHelper().isExistPictureWithId(image.id))) {
+          await createPicture(createPictureModelWithLocalImage(image));
+        }
+      }
+    }
     if (list != null && list.length > 0) {
       for (LocalImage image in list) {
         if (!(await PictureHelper().isExistPictureWithId(image.id))) {
@@ -56,7 +71,7 @@ class PictureHelper {
     p.pixelHeight = image.pixelHeight;
     p.pixelWidth = image.pixelWidth;
     p.path = image.path;
-    p.isSynced = false;
+    p.isSynced = 0;
     //debugPrint("json ：${p.toJson()}");
     return p;
   }
@@ -84,7 +99,7 @@ class PictureHelper {
   Future<bool> updatePictureStatus(Picture p) async {
     if (p != null) {
       await Query(DBManager.tablePicture)
-          .primaryKey([p.id]).update({"isSynced": true});
+          .primaryKey([p.id]).update({"isSynced": 1});
       return true;
     }
     return false;
@@ -94,7 +109,7 @@ class PictureHelper {
   Future<bool> isExistPictureWithId(String id) async {
     Map result =
         await Query(DBManager.tablePicture).whereBySql("id = ?", [id]).first();
-    if (result != null && result.length > 0) {
+    if (result != null) {
       return true;
     }
     return false;
@@ -114,10 +129,19 @@ class PictureHelper {
   ///📌查询并转化picture为location
   convertPicturesToLocations() async {
     debugPrint("开始执行p 转 l");
-    Mslocation l = await LocationHelper().queryOldestLocation();
-    num time = (l == null) ? 0 : l.time;
-    await convertPicturesAfterTime(time);
-    await convertPicturesBeforeTime(time);
+
+    List<Picture> list = await queryPictureConverted();
+    if (list == null || list.length == 0) {
+      Mslocation l = await LocationHelper().queryOldestLocation();
+      num time = (l == null) ? 0 : l.time;
+      await convertPicturesAfterTime(time);
+      await convertPicturesBeforeTime(time);
+    } else {
+      Picture earliestP = list.last;
+      Picture newestP = list.first;
+      await convertPicturesAfterTime(newestP.creationDate);
+      await convertPicturesBeforeTime(earliestP.creationDate);
+    }
     debugPrint("结束执行p 转 l");
   }
 
@@ -126,7 +150,7 @@ class PictureHelper {
     List afterList = await findPicturesAfterTime(time);
     if (afterList != null && afterList.length > 0) {
       for (Picture p in afterList)
-        await LocationHelper().createLocationWithPicture(p);
+        await LocationHelper().createLocationWithPicture(p, false);
     }
     debugPrint("使用app后数据同步完成location");
   }
@@ -137,7 +161,7 @@ convertPicturesBeforeTime(num time) async {
   List beforeList = await findPicturesBeforeTime(time);
   if (beforeList != null && beforeList.length > 0) {
     for (Picture p in beforeList) {
-      await LocationHelper().createLocationWithPicture(p);
+      await LocationHelper().createLocationWithPicture(p, true);
     }
     debugPrint("使用app前数据同步完成location");
   }
@@ -150,13 +174,13 @@ Future<List> findPicturesAfterTime(num time) async {
   if (time == 0) {
     result = await Query(DBManager.tablePicture)
         .orderBy(["creationDate desc"]).whereByColumFilters([
-      WhereCondiction("isSynced", WhereCondictionType.IS_NULL, false),
+      WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
     ]).all();
   } else {
     result = await Query(DBManager.tablePicture)
         .orderBy(["creationDate desc"]).whereByColumFilters([
       WhereCondiction("creationDate", WhereCondictionType.MORE_THEN, time),
-      WhereCondiction("isSynced", WhereCondictionType.IS_NULL, false),
+      WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
     ]).all();
   }
   List<Picture> list = [];
@@ -178,9 +202,26 @@ Future<List> findPicturesBeforeTime(num time) async {
   List result = await Query(DBManager.tablePicture)
       .orderBy(["creationDate desc"]).whereByColumFilters([
     WhereCondiction("creationDate", WhereCondictionType.LESS_THEN, time),
-    WhereCondiction("isSynced", WhereCondictionType.IS_NULL, false),
+    WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
   ]).all();
 
+  List<Picture> list = [];
+  if (result != null && result.length > 0) {
+    result.forEach((item) {
+      Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
+      list.add(p);
+    });
+    return list;
+  }
+  return null;
+}
+
+///查询已转化图片的集合：目的是拿到最大最小时间
+Future<List> queryPictureConverted() async {
+  List result = await Query(DBManager.tablePicture)
+      .orderBy(["creationDate desc"]).whereByColumFilters([
+    WhereCondiction("isSynced", WhereCondictionType.IN, [1]),
+  ]).all();
   List<Picture> list = [];
   if (result != null && result.length > 0) {
     result.forEach((item) {

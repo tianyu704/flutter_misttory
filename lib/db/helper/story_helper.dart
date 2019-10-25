@@ -35,9 +35,20 @@ class StoryHelper {
   /// 更新story时间
   Future updateStoryTime(Mslocation location, Story story) async {
     if (location != null && story != null) {
-      num interval = location.updatetime - story.createTime;
+
+      if (location.time < story.createTime) {
+        story.createTime = location.time;
+      }
+      if (location.updatetime > story.updateTime) {
+        story.updateTime = location.updatetime;
+      }
+      num interval = story.updateTime - story.createTime;
+
+      if (StringUtil.isNotEmpty(location.pictures)) {
+        story.pictures = location.pictures;
+      }
       await Query(DBManager.tableStory).primaryKey([story.id]).update(
-          {"update_time": location.updatetime, "interval_time": interval});
+          {"update_time": story.updateTime, "interval_time": interval,"pictures":story.pictures,"create_time":story.createTime});
       debugPrint("=================update story time");
     }
   }
@@ -309,6 +320,8 @@ class StoryHelper {
     story.intervalTime = location.updatetime - location.time;
     story.isDelete = false;
     story.defaultAddress = getDefaultAddress(story);
+    story.pictures = location.pictures;
+    story.isFromPicture = location.isFromPicture == 1 ? 1 : 0;
     //TODO:需要看相同的该地点是否有custom_address,有的话需要赋值
     return story;
   }
@@ -326,6 +339,7 @@ class StoryHelper {
         location.errorCode == 0 &&
         StringUtil.isNotEmpty(location.address)) {
       Story story = await queryLastStory();
+
       if (story != null) {
         if (location.aoiname == story.aoiName) {
           if (location.poiname == story.poiName) {
@@ -359,6 +373,17 @@ class StoryHelper {
       }
     }
   }
+  ///坐标点转化成story(即创建或更新)
+  Future<void>convertStoryWithEverLocation(Mslocation lastLocation,Mslocation location) async {
+    Story story = await findTargetStoryWithLocation(lastLocation);
+    if (story == null) {
+      await createStory(createStoryWithLocation(location));
+      print("story 创建 ${location.aoiname}");
+    } else {
+      await updateStoryTime(location, story);
+      print("story 更新 ${story.aoiName}   ${story.id}");
+    }
+  }
 
   Future<bool> judgeSamePlace(Story story1, Story story2) async {
     if (story1 != null && story2 != null) {
@@ -387,6 +412,27 @@ class StoryHelper {
       }
     }
     return false;
+  }
+
+
+  ///根据坐标点查找对应story
+  Future<Story>findTargetStoryWithLocation(Mslocation location) async {
+    if (location == null) {
+      return null;
+    }
+
+    num updateTime = location.updatetime;
+    Map result;
+    result = await Query(DBManager.tableStory)
+        .whereByColumFilters([
+      WhereCondiction("create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
+      WhereCondiction("update_time", WhereCondictionType.EQ_OR_MORE_THEN, updateTime),
+    ]).first();
+
+    if (result != null) {
+       return Story.fromJson(Map<String, dynamic>.from(result));
+    }
+    return null;
   }
 
   Future<void> deleteMisstory() async {

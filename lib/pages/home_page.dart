@@ -9,6 +9,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/db/helper/location_helper.dart';
+import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
@@ -57,9 +58,17 @@ class _HomePageState extends LifecycleState<HomePage> {
     _checkPermission();
     _refreshStory(true);
     _startTimerRefresh();
+    _syncPictures();
     _isInitState = true;
   }
 
+  ///同步图片逻辑
+  _syncPictures () async{
+    await PictureHelper().convertPicturesToLocations();
+    if (mounted) {
+      setState(() {});
+    }
+  }
   /// 开始每隔1分钟刷新逻辑
   _startTimerRefresh() {
     Future.delayed(Duration(seconds: 60 - DateTime.now().second), () {
