@@ -339,7 +339,6 @@ class StoryHelper {
         location.errorCode == 0 &&
         StringUtil.isNotEmpty(location.address)) {
       Story story = await queryLastStory();
-
       if (story != null) {
         if (location.aoiname == story.aoiName) {
           if (location.poiname == story.poiName) {
