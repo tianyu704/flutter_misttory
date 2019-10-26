@@ -127,9 +127,8 @@ class PictureHelper {
   }
 
   ///📌查询并转化picture为location
-  convertPicturesToLocations() async {
+  Future<bool> convertPicturesToLocations() async {
     debugPrint("开始执行p 转 l");
-
     List<Picture> list = await queryPictureConverted();
     if (list == null || list.length == 0) {
       Mslocation l = await LocationHelper().queryOldestLocation();
@@ -147,6 +146,7 @@ class PictureHelper {
       await convertPicturesBeforeTime(earliestP.creationDate);
     }
     debugPrint("结束执行p 转 l");
+    return true;
   }
 
   ///使用app后
@@ -160,7 +160,7 @@ class PictureHelper {
   }
 
   ///使用app前
-  convertPicturesBeforeTime(num time) async {
+  Future<int> convertPicturesBeforeTime(num time) async {
     List beforeList = await findPicturesBeforeTime(time);
     if (beforeList != null && beforeList.length > 0) {
       for (Picture p in beforeList) {
@@ -182,7 +182,8 @@ class PictureHelper {
     } else {
       result = await Query(DBManager.tablePicture)
           .orderBy(["creationDate"]).whereByColumFilters([
-        WhereCondiction("creationDate", WhereCondictionType.EQ_OR_MORE_THEN, time),
+        WhereCondiction(
+            "creationDate", WhereCondictionType.EQ_OR_MORE_THEN, time),
         WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
       ]).all();
     }
@@ -242,6 +243,11 @@ class PictureHelper {
     return true;
   }
 
+  Future<bool> hasCreatePicture() async {
+    Map result = await Query(DBManager.tablePicture).first();
+    return result != null;
+  }
+
   /// 把图片的path添加上
   Future addPath() async {
     await LocalImageProvider().initialize();
@@ -258,7 +264,14 @@ class PictureHelper {
   }
 
   LocalImage switchLocalImage(Picture picture) {
-    return LocalImage(picture.id, picture.creationDate, picture.pixelWidth.toInt(),
-        picture.pixelHeight.toInt(), picture.lon, picture.lat, picture.path, null);
+    return LocalImage(
+        picture.id,
+        picture.creationDate,
+        picture.pixelWidth.toInt(),
+        picture.pixelHeight.toInt(),
+        picture.lon,
+        picture.lat,
+        picture.path,
+        null);
   }
 }

@@ -55,20 +55,22 @@ class _HomePageState extends LifecycleState<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+//    _syncPictures();
     _checkPermission();
     _refreshStory(true);
     _startTimerRefresh();
-    _syncPictures();
+
     _isInitState = true;
   }
 
   ///同步图片逻辑
-  _syncPictures () async{
+  _syncPictures() async {
     await PictureHelper().convertPicturesToLocations();
     if (mounted) {
-      setState(() {});
+      _refreshStory(false);
     }
   }
+
   /// 开始每隔1分钟刷新逻辑
   _startTimerRefresh() {
     Future.delayed(Duration(seconds: 60 - DateTime.now().second), () {
@@ -198,7 +200,7 @@ class _HomePageState extends LifecycleState<HomePage> {
       distanceFilter: LocationConfig.distanceFilter,
       isOnceLocation: true,
     );
-    await _aMapLocation.start(options);
+    await _aMapLocation?.start(options);
   }
 
   ///请求一次定位
@@ -209,7 +211,7 @@ class _HomePageState extends LifecycleState<HomePage> {
       distanceFilter: LocationConfig.distanceFilter,
       isOnceLocation: true,
     );
-    await _aMapLocation.start(options);
+    await _aMapLocation?.start(options);
   }
 
   @override

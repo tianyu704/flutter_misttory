@@ -44,7 +44,7 @@ class _PictureItemState extends LifecycleState<PictureItem> {
     if (!StringUtil.isEmpty(widget.pictures)) {
       //    _size = Random().nextInt(7);
       _ids = widget.pictures.split(",");
-      debugPrint("========pictures=========$_ids");
+//      debugPrint("========pictures=========$_ids");
       if (_ids != null && _ids.length > 0) {
         _size = _ids.length;
         if (_size > 6) _size = 6;

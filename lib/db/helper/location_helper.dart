@@ -168,6 +168,9 @@ class LocationHelper {
         }
       } else {
         lastLocation = await queryLastLocation();
+        if (lastLocation.isFromPicture == 1) {
+          return await createLocation(location);
+        }
       }
       if (lastLocation == null) {
         return await createLocation(location,
@@ -297,7 +300,7 @@ class LocationHelper {
   /// 查询最早一条Location
   Future<Mslocation> queryOldestLocation() async {
     Map result = await Query(DBManager.tableLocation).orderBy([
-      "time",
+      "time asc",
     ]).whereByColumFilters([
       WhereCondiction("errorCode", WhereCondictionType.IN, [0])
     ]).first();
@@ -316,7 +319,8 @@ class LocationHelper {
     }
     List result = await Query(DBManager.tableLocation)
         .orderBy(["time"]).whereByColumFilters([
-      WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, time)
+      WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, time),
+      WhereCondiction("isFromPicture", WhereCondictionType.IS_NULL, true)
     ]).all();
     if (result != null && result.length > 0) {
       debugPrint("===========待更新条数${result.length}");
