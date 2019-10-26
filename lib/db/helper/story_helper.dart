@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/db/helper/location_helper.dart';
+import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/location_config.dart';
+import 'package:misstory/models/picture.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
@@ -121,10 +123,11 @@ class StoryHelper {
     List<Story> list = [];
 
     if (result != null && result.length > 0) {
-      result.reversed.forEach((item) {
+      result = result.reversed.toList();
+      for (Map item in result) {
         Story story = Story.fromJson(Map<String, dynamic>.from(item));
-        list.addAll(separateStory(story));
-      });
+        list.addAll(await separateStory(story));
+      }
     }
     return list;
   }
@@ -137,16 +140,16 @@ class StoryHelper {
     List result = await Query(DBManager.tableStory)
         .orderBy(["create_time desc"])
         .whereByColumFilters([
-          WhereCondiction("create_time", WhereCondictionType.LESS_THEN, time)
+          WhereCondiction("update_time", WhereCondictionType.LESS_THEN, time)
         ])
         .limit(20)
         .all();
     List<Story> list = [];
     if (result != null && result.length > 0) {
-      result.forEach((item) {
+      for (Map item in result) {
         Story story = Story.fromJson(Map<String, dynamic>.from(item));
-        list.addAll(separateStory(story));
-      });
+        list.addAll(await separateStory(story));
+      }
     }
     return list;
   }
@@ -165,10 +168,11 @@ class StoryHelper {
             "create_time", WhereCondictionType.MORE_THEN, stories[0].createTime)
       ]).all();
       if (result != null && result.length > 0) {
-        result.reversed.forEach((item) {
+        result = result.reversed.toList();
+        for (Map item in result) {
           Story story = Story.fromJson(Map<String, dynamic>.from(item));
-          stories.insertAll(0, separateStory(story));
-        });
+          stories.insertAll(0, await separateStory(story));
+        }
       }
     }
     return stories;
@@ -200,7 +204,7 @@ class StoryHelper {
   }
 
   /// 判断story是否在同一天，不在同一天就分割成多天
-  List<Story> separateStory(Story story) {
+  Future<List<Story>> separateStory(Story story) async {
     List<Story> list = [];
     DateTime dateTime1 =
         DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
@@ -213,6 +217,16 @@ class StoryHelper {
       list.add(story);
       return list;
     } else {
+      List<String> ids;
+      Map<String, Picture> picturesMap = Map<String, Picture>();
+      if (StringUtil.isNotEmpty(story.pictures)) {
+        ids = story.pictures.split(",");
+        for (String id in ids) {
+          Picture picture = await PictureHelper().queryPictureById(id);
+          picturesMap[id] = picture;
+        }
+      }
+
       Map<String, dynamic> map = story.toJson();
       Story story1;
       int intervalDay = day2.difference(day1).inDays;
@@ -231,6 +245,20 @@ class StoryHelper {
         }
         story1.date = getShowTime(story1.createTime);
         story1.intervalTime = story1.updateTime - story1.createTime;
+        if (ids != null) {
+          for (String id in ids) {
+            if (picturesMap.containsKey(id) &&
+                DateUtil.isSameDay(
+                    picturesMap[id].creationDate, story1.createTime)) {
+              if (story1.pictures == null) {
+                story1.pictures = id;
+              } else {
+                story1.pictures = "${story1.pictures},$id";
+              }
+              picturesMap.remove(id);
+            }
+          }
+        }
         list.add(story1);
       }
       return list.reversed.toList();

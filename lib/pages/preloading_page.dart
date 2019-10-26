@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
+import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/eventbus/event_bus_util.dart';
+import 'package:misstory/eventbus/refresh_day.dart';
 import 'package:misstory/pages/home_page.dart';
 import 'package:misstory/style/app_style.dart';
 
@@ -21,23 +25,40 @@ class PreLoadingPage extends StatefulWidget {
 
 class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
   bool _showStep = false;
+  StreamSubscription _refreshSubscription;
+  int count = 0;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _createPictures();
+    _refreshSubscription = EventBusUtil.listen<RefreshDay>((refreshDay) async {
+      count++;
+      if (count > 100) {
+        _showStep = true;
+        setState(() {});
+      }
+    });
   }
 
   _createPictures() async {
     await PictureHelper().fetchAppSystemPicture();
-    setState(() {
+    if (await PictureHelper().getPictureSyc() > 50) {
       _showStep = true;
-    });
+      setState(() {});
+      Navigator.of(context)
+          .pushReplacement(MaterialPageRoute(builder: (context) {
+        return HomePage();
+      }));
+    }
     await PictureHelper().convertPicturesToLocations();
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-      return HomePage();
-    }));
+    if (mounted) {
+      Navigator.of(context)
+          .pushReplacement(MaterialPageRoute(builder: (context) {
+        return HomePage();
+      }));
+    }
   }
 
   @override
@@ -86,5 +107,12 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _refreshSubscription.cancel();
   }
 }

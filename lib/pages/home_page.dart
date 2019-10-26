@@ -11,6 +11,8 @@ import 'package:intl/intl.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/eventbus/event_bus_util.dart';
+import 'package:misstory/eventbus/refresh_day.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
@@ -50,6 +52,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   bool _isInitState = false;
   bool _isDealWithLocation = false;
   Story _currentStory;
+  StreamSubscription _refreshSubscription;
 
   @override
   void initState() {
@@ -59,8 +62,14 @@ class _HomePageState extends LifecycleState<HomePage> {
     _checkPermission();
     _refreshStory(true);
     _startTimerRefresh();
-
     _isInitState = true;
+
+    _refreshSubscription = EventBusUtil.listen<RefreshDay>((refreshDay) async {
+      _day = await StoryHelper().getStoryDays();
+      _footprint = await StoryHelper().getFootprint(_storiesAll);
+      _refreshController.loadComplete();
+      setState(() {});
+    });
   }
 
   ///同步图片逻辑
@@ -103,35 +112,42 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   /// 合并_currentStory和_stories
   _mergeStories() async {
-    _storiesAll.clear();
+    List<Story> temp = [];
     if (_currentStory != null) {
       if (_stories != null && _stories.length > 0) {
         if (await StoryHelper().judgeSamePlace(_currentStory, _stories[0])) {
           _stories[0].updateTime = DateTime.now().millisecondsSinceEpoch;
           _stories[0].intervalTime =
               _stories[0].updateTime - _stories[0].createTime;
-          _storiesAll.addAll(_stories);
+          temp.addAll(_stories);
         } else {
-          _storiesAll.add(_currentStory);
-          _storiesAll.addAll(_stories);
+          temp.add(_currentStory);
+          temp.addAll(_stories);
         }
-        Story story = _storiesAll.removeAt(0);
-        _storiesAll.insertAll(0, StoryHelper().separateStory(story));
+        Story story = temp.removeAt(0);
+        temp.insertAll(0, await StoryHelper().separateStory(story));
       } else {
-        _storiesAll.add(_currentStory);
+        temp.add(_currentStory);
       }
     } else {
       if (_stories != null && _stories.length > 0) {
-        _storiesAll.addAll(_stories);
+        temp.addAll(_stories);
       }
     }
+    _storiesAll = temp;
   }
+
+  bool _isLoading = false;
 
   ///加载更多
   _loadMore() async {
-    if (_stories != null && _stories.length > 0) {
+    if (_isLoading) {
+      return;
+    }
+    if (!_isLoading && _stories != null && _stories.length > 0) {
+      _isLoading = true;
       List<Story> list = await StoryHelper()
-          .queryMoreHistories(time: _stories[_stories.length - 1].createTime);
+          .queryMoreHistories(time: _stories[_stories.length - 1].updateTime);
       if (list != null && list.length > 0) {
         _stories.addAll(list);
         _refreshController.loadComplete();
@@ -142,6 +158,7 @@ class _HomePageState extends LifecycleState<HomePage> {
         _mergeStories();
         setState(() {});
       }
+      _isLoading = false;
     }
   }
 
@@ -360,6 +377,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   void dispose() {
     // TODO: implement dispose
     _subscription.cancel();
+    _refreshSubscription.cancel();
     _aMapLocation.dispose();
     _refreshController.dispose();
     _timer?.cancel();

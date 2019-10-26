@@ -3,6 +3,7 @@ import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:local_image_provider/local_image.dart';
 import 'package:local_image_provider/local_image_provider.dart';
 import 'package:misstory/db/helper/location_helper.dart';
+import 'package:misstory/eventbus/event_bus_util.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/picture.dart';
 
@@ -153,8 +154,10 @@ class PictureHelper {
   convertPicturesAfterTime(num time) async {
     List afterList = await findPicturesAfterTime(time);
     if (afterList != null && afterList.length > 0) {
-      for (Picture p in afterList)
+      for (Picture p in afterList) {
         await LocationHelper().createLocationWithPicture(p, false);
+        EventBusUtil.fireRefreshDay();
+      }
     }
     debugPrint("使用app后数据同步完成location");
   }
@@ -165,6 +168,7 @@ class PictureHelper {
     if (beforeList != null && beforeList.length > 0) {
       for (Picture p in beforeList) {
         await LocationHelper().createLocationWithPicture(p, true);
+        EventBusUtil.fireRefreshDay();
       }
       debugPrint("使用app前数据同步完成location");
     }
@@ -273,5 +277,15 @@ class PictureHelper {
         picture.lat,
         picture.path,
         null);
+  }
+
+  Future<int> getPictureSyc() async {
+    List result = await Query(DBManager.tablePicture).whereByColumFilters([
+      WhereCondiction("isSynced", WhereCondictionType.IN, [1]),
+    ]).all();
+    if (result != null) {
+      return result.length;
+    }
+    return 0;
   }
 }

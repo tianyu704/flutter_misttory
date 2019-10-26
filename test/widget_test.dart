@@ -37,7 +37,7 @@ void main() {
     print(await StoryHelper().getDistanceBetween1());
   });
 
-  test("separate", () {
+  test("separate", () async{
     Story story = Story()
       ..createTime = 1570630867160
       ..updateTime = 1570668978351;
@@ -45,7 +45,7 @@ void main() {
 //    Story story = Story()
 //      ..createTime = 1570758432968
 //      ..updateTime = 1570759933269;
-    List<Story> list = StoryHelper().separateStory(story);
+    List<Story> list =await StoryHelper().separateStory(story);
     list.forEach((item) {
       print(item.toJson());
     });
@@ -73,5 +73,18 @@ void main() {
     var a;
     var b;
     print(a==b);
+  });
+
+  test("remove",(){
+    List<String> a = ["a","b","c","d","e"];
+    for(String item in a){
+      if(item == "a"){
+        a.remove(item);
+      }
+      if(item == "b"){
+        a.remove(item);
+      }
+    }
+    print(a);
   });
 }
