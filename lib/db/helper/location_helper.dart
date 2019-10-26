@@ -11,6 +11,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/models/picture.dart';
 import 'package:amap_base/src/search/model/poi_item.dart';
@@ -152,8 +153,19 @@ class LocationHelper {
       Mslocation lastLocation;
       if (LocationFromType.before == itemType) {
         lastLocation = await queryOldestLocation();
+        if (lastLocation != null &&
+            !DateUtil.isSameDay(lastLocation.time, location.time)) {
+          return await createLocation(location,
+              picture: picture, itemType: itemType);
+        }
       } else if (LocationFromType.after == itemType) {
-        lastLocation = await findTargetLocationWithPicture(picture);
+        lastLocation = await findTargetLocationWithPicture(location);
+        if (lastLocation == null) {
+          lastLocation = await queryLastLocation();
+          if (lastLocation.updatetime > location.time) {
+            lastLocation = null;
+          }
+        }
       } else {
         lastLocation = await queryLastLocation();
       }
@@ -286,6 +298,8 @@ class LocationHelper {
   Future<Mslocation> queryOldestLocation() async {
     Map result = await Query(DBManager.tableLocation).orderBy([
       "time",
+    ]).whereByColumFilters([
+      WhereCondiction("errorCode", WhereCondictionType.IN, [0])
     ]).first();
     if (result != null && result.length > 0) {
       return Mslocation.fromJson(Map<String, dynamic>.from(result));
@@ -313,7 +327,8 @@ class LocationHelper {
           mslocation.updatetime = mslocation.time;
         }
         if (mslocation.updatetime - mslocation.time >=
-            LocationConfig.judgeUsefulLocation) {
+                LocationConfig.judgeUsefulLocation ||
+            mslocation.isFromPicture == 1) {
           debugPrint("=================start judge location");
           await StoryHelper().judgeLocation(mslocation);
         }
@@ -323,21 +338,31 @@ class LocationHelper {
   }
 
   ///根据Picture查找对应Location
-  Future<Mslocation> findTargetLocationWithPicture(Picture p) async {
-    if (p == null) {
+  Future<Mslocation> findTargetLocationWithPicture(
+      Mslocation mslocation) async {
+    if (mslocation == null) {
       return null;
     }
     Map result = await Query(DBManager.tableLocation).orderBy([
-      "time desc",
+      "time",
     ]).whereByColumFilters([
       WhereCondiction(
-          "time", WhereCondictionType.EQ_OR_LESS_THEN, p.creationDate),
+          "time", WhereCondictionType.EQ_OR_LESS_THEN, mslocation.time),
       WhereCondiction(
-          "updatetime", WhereCondictionType.EQ_OR_MORE_THEN, p.creationDate),
+          "updatetime", WhereCondictionType.EQ_OR_MORE_THEN, mslocation.time),
     ]).first();
 
-    if (result != null) {
+    if (result != null && result.length > 0) {
       return Mslocation.fromJson(Map<String, dynamic>.from(result));
+    } else {
+      Map r = await Query(DBManager.tableLocation)
+          .orderBy(["time desc"]).whereByColumFilters([
+        WhereCondiction(
+            "time", WhereCondictionType.EQ_OR_LESS_THEN, mslocation.time)
+      ]).first();
+      if (r != null) {
+        return Mslocation.fromJson(Map<String, dynamic>.from(r));
+      }
     }
     return null;
   }
@@ -349,11 +374,15 @@ class LocationHelper {
     LatLng latLng2 = LatLng(location2.lat, location2.lon);
     return await CalculateTools().calcDistance(latLng1, latLng2);
   }
+
   ///删除图片生成的位置信息
   Future deletePictureLocation() async {
+//    await Query(DBManager.tableLocation)
+//        .whereByColumFilters(
+//        [WhereCondiction("isFromPicture", WhereCondictionType.IN, [1])])
+//        .delete();
     await Query(DBManager.tableLocation)
-        .whereByColumFilters(
-        [WhereCondiction("isFromPicture", WhereCondictionType.IN, [1])])
-        .delete();
+        .whereBySql("isFromPicture = ?", [1]).delete();
+    print("-------删除Picture生成的Location成功");
   }
 }

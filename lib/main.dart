@@ -26,6 +26,7 @@ void main() async {
 
   ///TODO:此时就要求授权了 等产品逻辑具体化 再修改
   await PictureHelper().fetchAppSystemPicture();
+  await StoryHelper().clear();
 //  await PictureHelper().addPath();
 
   /// 主题

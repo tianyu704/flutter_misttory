@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import '../db_manager.dart';
 import 'package:misstory/models/mslocation.dart';
@@ -44,7 +45,11 @@ class StoryHelper {
       num interval = story.updateTime - story.createTime;
 
       if (StringUtil.isNotEmpty(location.pictures)) {
-        story.pictures = location.pictures;
+        if (StringUtil.isEmpty(story.pictures)) {
+          story.pictures = location.pictures;
+        } else {
+          story.pictures = "${story.pictures},${location.pictures}";
+        }
       }
       await Query(DBManager.tableStory).primaryKey([story.id]).update({
         "update_time": story.updateTime,
@@ -206,7 +211,7 @@ class StoryHelper {
         DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
     DateTime day1 = DateTime(dateTime1.year, dateTime1.month, dateTime1.day);
     DateTime day2 = DateTime(dateTime2.year, dateTime2.month, dateTime2.day);
-    if (day1.isAtSameMomentAs(day2)) {
+    if (day1.isAtSameMomentAs(day2) || story.isFromPicture == 1) {
       story.date = getShowTime(story.createTime);
       list.add(story);
       return list;
@@ -356,6 +361,10 @@ class StoryHelper {
       Story story;
       if (LocationFromType.before == itemType) {
         story = await queryOldestStory();
+        if (story != null &&
+            !DateUtil.isSameDay(story.createTime, location.time)) {
+          return await createStory(createStoryWithLocation(location));
+        }
       } else if (LocationFromType.after == itemType) {
         story = await findTargetStoryWithLocation(location);
       } else {
@@ -452,7 +461,7 @@ class StoryHelper {
           "update_time", WhereCondictionType.EQ_OR_MORE_THEN, updateTime),
     ]).first();
     if (result == null) {
-      result = await Query(DBManager.tableStory).whereByColumFilters([
+      result = await Query(DBManager.tableStory).orderBy(["create_time desc"]).whereByColumFilters([
         WhereCondiction(
             "create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
       ]).first();
@@ -490,8 +499,8 @@ class StoryHelper {
   }
 
   Future<double> getDistanceBetween1() async {
-    LatLng latLng1 = LatLng(116.492896, 39.899667);
-    LatLng latLng2 = LatLng(116.4929, 39.900061);
+    LatLng latLng1 = LatLng(30.94507622612847, 120.89830213758681);
+    LatLng latLng2 = LatLng(30.94544731987847, 120.89528781467014);
     return await CalculateTools().calcDistance(latLng1, latLng2);
 //    return await CalculateUtil.calculateLineDistance(latLng1, latLng2);
   }
@@ -531,8 +540,15 @@ class StoryHelper {
 
   ///删除图片生成的位置信息
   Future deletePictureStory() async {
-    await Query(DBManager.tableStory).whereByColumFilters([
-      WhereCondiction("isFromPicture", WhereCondictionType.IN, [1])
-    ]).delete();
+//    await Query(DBManager.tableStory).whereByColumFilters([
+//      WhereCondiction("isFromPicture", WhereCondictionType.IN, [1])
+//    ]).delete();
+    await Query(DBManager.tableStory)
+        .whereBySql("isFromPicture = ?", [1]).delete();
+    print("-------删除Picture生成的Story成功");
+  }
+
+  Future clear()async{
+    await Query(DBManager.tableStory).delete();
   }
 }

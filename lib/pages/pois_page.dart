@@ -122,10 +122,11 @@ class _SearchPageState extends LifecycleState<SearchPage> {
             child: RaisedButton(
                 child: Text("删除Picture和Picture生成的Location、Story"),
                 onPressed: () async {
-                  await PictureHelper().clear();
-                  await LocationHelper().deletePictureLocation();
-                  await StoryHelper().deletePictureStory();
-                  debugPrint("！！！！！！！！！删除成功！！！！！！！");
+//                  await PictureHelper().clear();
+//                  await LocationHelper().deletePictureLocation();
+//                  await StoryHelper().deletePictureStory();
+//                  debugPrint("！！！！！！！！！删除成功！！！！！！！");
+                    debugPrint("=========${await StoryHelper().getDistanceBetween1()}");
                 }),
           ),
         ],

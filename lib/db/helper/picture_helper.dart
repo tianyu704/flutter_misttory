@@ -151,9 +151,7 @@ class PictureHelper {
 
   ///使用app后
   convertPicturesAfterTime(num time) async {
-    List temp = await findPicturesAfterTime(time);
-    List afterList = temp;
-    //temp.reversed.toList();//当前方法把时间
+    List afterList = await findPicturesAfterTime(time);
     if (afterList != null && afterList.length > 0) {
       for (Picture p in afterList)
         await LocationHelper().createLocationWithPicture(p, false);
@@ -178,13 +176,13 @@ class PictureHelper {
     List result;
     if (time == 0) {
       result = await Query(DBManager.tablePicture)
-          .orderBy(["creationDate desc"]).whereByColumFilters([
+          .orderBy(["creationDate"]).whereByColumFilters([
         WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
       ]).all();
     } else {
       result = await Query(DBManager.tablePicture)
-          .orderBy(["creationDate desc"]).whereByColumFilters([
-        WhereCondiction("creationDate", WhereCondictionType.MORE_THEN, time),
+          .orderBy(["creationDate"]).whereByColumFilters([
+        WhereCondiction("creationDate", WhereCondictionType.EQ_OR_MORE_THEN, time),
         WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
       ]).all();
     }
@@ -256,6 +254,7 @@ class PictureHelper {
   ///清空picture表
   Future clear() async {
     await Query(DBManager.tablePicture).delete();
+    print("-------删除Picture表成功");
   }
 
   LocalImage switchLocalImage(Picture picture) {

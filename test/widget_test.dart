@@ -68,4 +68,10 @@ void main() {
     print(map);
     HashMap hashMap;
   });
+
+  test("null", () {
+    var a;
+    var b;
+    print(a==b);
+  });
 }

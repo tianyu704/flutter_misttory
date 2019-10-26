@@ -57,8 +57,8 @@ class DateUtil {
   ///判断是否为同一天
   static bool isSameDay(num millis1, num millis2) {
     if (millis1 != null && millis2 != null) {
-      DateTime d1 = DateTime.fromMillisecondsSinceEpoch(millis1);
-      DateTime d2 = DateTime.fromMillisecondsSinceEpoch(millis2);
+      DateTime d1 = DateTime.fromMillisecondsSinceEpoch(millis1.toInt());
+      DateTime d2 = DateTime.fromMillisecondsSinceEpoch(millis2.toInt());
       if (d1.year == d2.year && d1.month == d2.month && d1.day == d2.day) {
         return true;
       }
