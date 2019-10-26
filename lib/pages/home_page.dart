@@ -13,6 +13,7 @@ import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/eventbus/event_bus_util.dart';
 import 'package:misstory/eventbus/refresh_day.dart';
+import 'package:misstory/eventbus/refresh_home.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
@@ -53,6 +54,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   bool _isDealWithLocation = false;
   Story _currentStory;
   StreamSubscription _refreshSubscription;
+  StreamSubscription _refreshHomeSubscription;
 
   @override
   void initState() {
@@ -69,6 +71,11 @@ class _HomePageState extends LifecycleState<HomePage> {
       _footprint = await StoryHelper().getFootprint(_storiesAll);
       _refreshController.loadComplete();
       setState(() {});
+    });
+
+    _refreshHomeSubscription =
+        EventBusUtil.listen<RefreshHome>((refreshHome) async {
+      _refreshStory(false);
     });
   }
 
@@ -102,7 +109,7 @@ class _HomePageState extends LifecycleState<HomePage> {
       /// 刷新时获取最新的story
       _stories = await StoryHelper().checkLatestStory(_stories);
     }
-    _mergeStories();
+    await _mergeStories();
     _day = await StoryHelper().getStoryDays();
     _footprint = await StoryHelper().getFootprint(_storiesAll);
     if (mounted) {
@@ -119,6 +126,7 @@ class _HomePageState extends LifecycleState<HomePage> {
           _stories[0].updateTime = DateTime.now().millisecondsSinceEpoch;
           _stories[0].intervalTime =
               _stories[0].updateTime - _stories[0].createTime;
+          _stories[0].pictures = _currentStory.pictures;
           temp.addAll(_stories);
         } else {
           temp.add(_currentStory);
@@ -355,6 +363,14 @@ class _HomePageState extends LifecycleState<HomePage> {
       if (Platform.isAndroid) {
         _onceLocate();
       }
+      refreshNewPictures();
+    }
+  }
+
+  void refreshNewPictures() async {
+    if (_storiesAll != null && _storiesAll.length > 0) {
+      await PictureHelper().fetchAppSystemPicture();
+      await PictureHelper().convertPicturesAfterTime(_storiesAll[0].createTime);
     }
   }
 
@@ -378,6 +394,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     // TODO: implement dispose
     _subscription.cancel();
     _refreshSubscription.cancel();
+    _refreshHomeSubscription.cancel();
     _aMapLocation.dispose();
     _refreshController.dispose();
     _timer?.cancel();

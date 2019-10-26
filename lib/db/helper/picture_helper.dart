@@ -158,6 +158,7 @@ class PictureHelper {
         await LocationHelper().createLocationWithPicture(p, false);
         EventBusUtil.fireRefreshDay();
       }
+      EventBusUtil.fireRefreshHome();
     }
     debugPrint("使用app后数据同步完成location");
   }
