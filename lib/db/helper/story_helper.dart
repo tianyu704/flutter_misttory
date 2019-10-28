@@ -30,7 +30,7 @@ class StoryHelper {
   /// 创建story
   Future createStory(Story story) async {
     if (story != null) {
-      print("======创建story！！！！！！！！！");
+      print("======创建story！");
       return await FlutterOrmPlugin.saveOrm(
           DBManager.tableStory, story.toJson());
     }
@@ -205,6 +205,17 @@ class StoryHelper {
 
   /// 判断story是否在同一天，不在同一天就分割成多天
   Future<List<Story>> separateStory(Story story) async {
+    ///找到Picture
+    List<String> ids;
+    Map<String, Picture> picturesMap = Map<String, Picture>();
+    if (StringUtil.isNotEmpty(story.pictures)) {
+      ids = story.pictures.split(",");
+      for (String id in ids) {
+        Picture picture = await PictureHelper().queryPictureById(id);
+        picturesMap[id] = picture;
+      }
+    }
+
     List<Story> list = [];
     DateTime dateTime1 =
         DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
@@ -214,19 +225,10 @@ class StoryHelper {
     DateTime day2 = DateTime(dateTime2.year, dateTime2.month, dateTime2.day);
     if (day1.isAtSameMomentAs(day2) || story.isFromPicture == 1) {
       story.date = getShowTime(story.createTime);
+      story.pictureList = picturesMap?.values?.toList() ?? null;
       list.add(story);
       return list;
     } else {
-      List<String> ids;
-      Map<String, Picture> picturesMap = Map<String, Picture>();
-      if (StringUtil.isNotEmpty(story.pictures)) {
-        ids = story.pictures.split(",");
-        for (String id in ids) {
-          Picture picture = await PictureHelper().queryPictureById(id);
-          picturesMap[id] = picture;
-        }
-      }
-
       Map<String, dynamic> map = story.toJson();
       Story story1;
       int intervalDay = day2.difference(day1).inDays;
@@ -247,6 +249,7 @@ class StoryHelper {
         story1.intervalTime = story1.updateTime - story1.createTime;
         if (ids != null) {
           story1.pictures = "";
+          story1.pictureList = [];
           for (String id in ids) {
             if (picturesMap.containsKey(id) &&
                 DateUtil.isSameDay(
@@ -256,6 +259,7 @@ class StoryHelper {
               } else {
                 story1.pictures = "${story1.pictures},$id";
               }
+              story1.pictureList.add(picturesMap[id]);
               picturesMap.remove(id);
             }
           }
@@ -575,6 +579,7 @@ class StoryHelper {
 //    ]).delete();
     await Query(DBManager.tableStory)
         .whereBySql("isFromPicture = ?", [1]).delete();
+    await Query(DBManager.tableStory).update({"pictures": ""});
     print("-------删除Picture生成的Story成功");
   }
 

@@ -6,6 +6,7 @@ import 'package:local_image_provider/local_image_provider.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/db/local_storage.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -122,11 +123,12 @@ class _SearchPageState extends LifecycleState<SearchPage> {
             child: RaisedButton(
                 child: Text("删除Picture和Picture生成的Location、Story"),
                 onPressed: () async {
-//                  await PictureHelper().clear();
-//                  await LocationHelper().deletePictureLocation();
-//                  await StoryHelper().deletePictureStory();
-//                  debugPrint("！！！！！！！！！删除成功！！！！！！！");
-                    debugPrint("=========${await StoryHelper().getDistanceBetween1()}");
+                  await PictureHelper().clear();
+                  await LocationHelper().deletePictureLocation();
+                  await StoryHelper().deletePictureStory();
+                  await LocalStorage.saveBool(LocalStorage.isStep, false);
+                  debugPrint("！！！！！！！！！删除成功！！！！！！！");
+//                    debugPrint("=========${await StoryHelper().getDistanceBetween1()}");
                 }),
           ),
         ],

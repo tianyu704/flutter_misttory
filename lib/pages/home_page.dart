@@ -13,7 +13,7 @@ import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/eventbus/event_bus_util.dart';
 import 'package:misstory/eventbus/refresh_day.dart';
-import 'package:misstory/eventbus/refresh_home.dart';
+import 'package:misstory/eventbus/refresh_after_pic_finish.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
@@ -50,7 +50,7 @@ class _HomePageState extends LifecycleState<HomePage> {
       RefreshController(initialRefresh: false);
   int _day = 0, _footprint = 0;
   Timer _timer;
-  bool _isInitState = false;
+  bool _isFirstLoad = true;
   bool _isDealWithLocation = false;
   Story _currentStory;
   StreamSubscription _refreshSubscription;
@@ -60,11 +60,9 @@ class _HomePageState extends LifecycleState<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-//    _syncPictures();
+    _syncPictures();
     _checkPermission();
-    _refreshStory(true);
     _startTimerRefresh();
-    _isInitState = true;
 
     _refreshSubscription = EventBusUtil.listen<RefreshDay>((refreshDay) async {
       _day = await StoryHelper().getStoryDays();
@@ -74,16 +72,15 @@ class _HomePageState extends LifecycleState<HomePage> {
     });
 
     _refreshHomeSubscription =
-        EventBusUtil.listen<RefreshHome>((refreshHome) async {
-      _refreshStory(false);
+        EventBusUtil.listen<ConvertAfterPictureFinish>((refreshHome) async {
+      _refreshStory();
     });
   }
 
   ///同步图片逻辑
   _syncPictures() async {
-    await PictureHelper().convertPicturesToLocations();
-    if (mounted) {
-      _refreshStory(false);
+    if (!PictureHelper().isPictureConverting) {
+      await PictureHelper().convertPicturesToLocations();
     }
   }
 
@@ -92,17 +89,19 @@ class _HomePageState extends LifecycleState<HomePage> {
     Future.delayed(Duration(seconds: 60 - DateTime.now().second), () {
       _timer = Timer.periodic(Duration(seconds: LocationConfig.refreshTime),
           (timer) {
-        _refreshStory(false);
+        _refreshStory();
       });
     });
   }
 
   ///刷新最新的story
-  _refreshStory(bool first) async {
+  _refreshStory() async {
     await LocationHelper().saveLocation();
     await LocationHelper().createStoryByLocation();
     _currentStory = await StoryHelper().getCurrentStory();
-    if (first) {
+    if (_isFirstLoad) {
+      _isFirstLoad = false;
+
       ///初次加载需要查询前20条数据
       _stories = await StoryHelper().queryMoreHistories();
     } else {
@@ -194,6 +193,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     _aMapLocation = amap.AMapLocation();
     await _aMapLocation.init(Constant.androidMapKey, Constant.iosMapKey);
     _subscription = _aMapLocation.onLocationChanged.listen((location) async {
+//      print("==========$location");
       if (_isDealWithLocation) {
         return;
       }
@@ -201,7 +201,7 @@ class _HomePageState extends LifecycleState<HomePage> {
       if (location != null && location.isNotEmpty) {
         try {
           Mslocation mslocation = Mslocation.fromJson(json.decode(location));
-          if (mslocation != null) {
+          if (mslocation != null && mslocation.errorCode == 0) {
             mslocation.updatetime = mslocation.time;
             debugPrint(
                 "===========接收到新定位：${mslocation.lon},${mslocation.lat},${mslocation.time}");
@@ -210,7 +210,11 @@ class _HomePageState extends LifecycleState<HomePage> {
                 await LocationHelper().createOrUpdateLocation(mslocation);
             debugPrint("===============$result");
             if (result != -1) {
-              await _refreshStory(false);
+              await _refreshStory();
+            }
+          } else {
+            if (_isFirstLoad) {
+              await _refreshStory();
             }
           }
         } catch (e) {
@@ -359,13 +363,13 @@ class _HomePageState extends LifecycleState<HomePage> {
   void onResume() {
     // TODO: implement onResume
     super.onResume();
-    if (_isInitState) {
+    if (!_isFirstLoad) {
       if (Platform.isAndroid) {
         print("]]]]]]]]]]]]]]]]]]]]]]");
         _onceLocate();
       }
       refreshNewPictures().then((_) {
-        _refreshStory(false);
+        _refreshStory();
       });
     }
   }

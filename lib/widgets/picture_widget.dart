@@ -6,6 +6,8 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:local_image_provider/local_image.dart';
 import 'package:local_image_provider/local_image_provider.dart';
+import 'package:misstory/db/helper/picture_helper.dart';
+import 'package:misstory/models/picture.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/ms_image_cache.dart';
 
@@ -14,7 +16,7 @@ import 'package:misstory/utils/ms_image_cache.dart';
 /// Date: 2019-10-22
 ///
 class PictureWidget extends StatefulWidget {
-  final LocalImage localImage;
+  final Picture localImage;
   final double width, height;
   final double radius;
   final Function onTap;
@@ -36,7 +38,8 @@ class PictureWidget extends StatefulWidget {
   }
 }
 
-class _PictureWidgetState extends State<PictureWidget> with TickerProviderStateMixin {
+class _PictureWidgetState extends State<PictureWidget>
+    with TickerProviderStateMixin {
   LocalImage _localImage;
   bool _isLoading = false;
   StreamSubscription _subscription;
@@ -55,7 +58,7 @@ class _PictureWidgetState extends State<PictureWidget> with TickerProviderStateM
       upperBound: 1.0,
     );
     animation = CurvedAnimation(parent: _controller, curve: Curves.easeInBack);
-    _localImage = widget.localImage;
+    _localImage = PictureHelper().switchLocalImage(widget.localImage);
     _imageMemory = _localImage?.bytes;
     if (!_isLoading && _localImage != null) {
       _loadImage();

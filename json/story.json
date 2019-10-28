@@ -29,5 +29,6 @@
   "date": "",
   "pictures": "",
   "isFromPicture": 0,
-  "coord_type": "GCJ02"
+  "coord_type": "GCJ02",
+  "localImages": "$[]picture"
 }

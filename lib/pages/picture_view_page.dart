@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:local_image_provider/local_image.dart';
+import 'package:misstory/models/picture.dart' as model;
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/widgets/my_appbar.dart';
 import 'package:misstory/widgets/picture_widget.dart';
@@ -15,7 +16,7 @@ import 'package:misstory/widgets/picture_widget.dart';
 /// Date: 2019-10-23
 ///
 class PictureViewPage extends StatefulWidget {
-  final List<LocalImage> images;
+  final List<model.Picture> images;
   final String title;
   final String subTitle;
   final int position;
@@ -32,7 +33,6 @@ class PictureViewPage extends StatefulWidget {
 class _PictureViewPageState extends LifecycleState<PictureViewPage> {
   PageController _pageController;
   int _currentIndex;
-  List<LocalImage> _images;
   double _width, _height;
 
   @override
@@ -42,7 +42,6 @@ class _PictureViewPageState extends LifecycleState<PictureViewPage> {
     _width = window.physicalSize.width;
     _height = window.physicalSize.height * 7 / 10;
     _currentIndex = widget.position;
-    _images = widget.images;
     _pageController =
         PageController(initialPage: _currentIndex, viewportFraction: 1);
   }
@@ -89,7 +88,7 @@ class _PictureViewPageState extends LifecycleState<PictureViewPage> {
           canMovePage: (details) {
             return true;
           },
-          itemCount: _images?.length ?? 0,
+          itemCount: widget.images?.length ?? 0,
           onPageChanged: (index) {
             _currentIndex = index;
           },
@@ -105,7 +104,7 @@ class _PictureViewPageState extends LifecycleState<PictureViewPage> {
   }
 
   Widget _buildItem(BuildContext context, int index) {
-    LocalImage image = _images[index];
+    model.Picture image = widget.images[index];
     return Hero(
       tag: image.id,
       child: PictureWidget(

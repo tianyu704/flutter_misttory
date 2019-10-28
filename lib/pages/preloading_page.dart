@@ -6,7 +6,9 @@ import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/db/local_storage.dart';
 import 'package:misstory/eventbus/event_bus_util.dart';
+import 'package:misstory/eventbus/refresh_after_pic_finish.dart';
 import 'package:misstory/eventbus/refresh_day.dart';
 import 'package:misstory/pages/home_page.dart';
 import 'package:misstory/style/app_style.dart';
@@ -26,7 +28,9 @@ class PreLoadingPage extends StatefulWidget {
 class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
   bool _showStep = false;
   StreamSubscription _refreshSubscription;
+  StreamSubscription _refreshHomeSubscription;
   int count = 0;
+  bool _afterTimeFinish = false;
 
   @override
   void initState() {
@@ -35,24 +39,29 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
     _createPictures();
     _refreshSubscription = EventBusUtil.listen<RefreshDay>((refreshDay) async {
       count++;
-      if (count > 50) {
+      if (count > 50 && _afterTimeFinish) {
+        LocalStorage.saveBool(LocalStorage.isStep, true);
         _showStep = true;
         setState(() {});
       }
+    });
+    _refreshHomeSubscription =
+        EventBusUtil.listen<ConvertAfterPictureFinish>((refreshHome) async {
+      _afterTimeFinish = true;
     });
   }
 
   _createPictures() async {
     await PictureHelper().fetchAppSystemPicture();
     if (await PictureHelper().getPictureSyc() > 50) {
-      await PictureHelper().convertPicturesToLocations();
       _showStep = true;
       setState(() {});
       Navigator.of(context)
           .pushReplacement(MaterialPageRoute(builder: (context) {
         return HomePage();
       }));
-    }else{
+      await PictureHelper().convertPicturesToLocations();
+    } else {
       await PictureHelper().convertPicturesToLocations();
       if (mounted) {
         Navigator.of(context)
@@ -114,7 +123,8 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
   @override
   void dispose() {
     // TODO: implement dispose
-    super.dispose();
     _refreshSubscription.cancel();
+    _refreshHomeSubscription.cancel();
+    super.dispose();
   }
 }

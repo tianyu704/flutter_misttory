@@ -18,7 +18,9 @@ import 'db/helper/picture_helper.dart';
 import 'db/local_storage.dart';
 import 'generated/i18n.dart';
 import 'style/app_style.dart';
-bool hasCreatePicture;
+
+bool isStep;
+
 void main() async {
   /// 初始化数据库
   await DBManager.initDB();
@@ -26,7 +28,7 @@ void main() async {
   await StoryHelper().updateAllDefaultAddress();
 
   ///TODO:此时就要求授权了 等产品逻辑具体化 再修改
-  hasCreatePicture = await PictureHelper().hasCreatePicture();
+  isStep = (await LocalStorage.get(LocalStorage.isStep)) ?? false;
 //  await StoryHelper().clear();
 //  await PictureHelper().addPath();
 
@@ -74,7 +76,8 @@ class MyApp extends StatelessWidget {
       supportedLocales: S.delegate.supportedLocales,
       localeListResolutionCallback:
           S.delegate.listResolution(fallback: const Locale('zh', '')),
-      home: PreLoadingPage(),
+      home: isStep ? HomePage() : PreLoadingPage(),
+//      home: PreLoadingPage(),
     );
   }
 }

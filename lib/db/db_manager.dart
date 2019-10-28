@@ -1,6 +1,8 @@
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 
+import 'helper/location_helper.dart';
+import 'helper/picture_helper.dart';
 import 'local_storage.dart';
 
 ///
@@ -134,7 +136,11 @@ class DBManager {
       ///处理更新数据库操作
       //新添加的字段附上默认值
       await StoryHelper().updateCoordType();
-//      await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
+      await PictureHelper().clear();
+      await StoryHelper().deletePictureStory();
+      await LocationHelper().deletePictureLocation();
+      await LocalStorage.saveBool(LocalStorage.isStep, false);
+      await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
     }
   }
 }

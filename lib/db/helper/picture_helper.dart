@@ -20,6 +20,8 @@ class PictureHelper {
 
   PictureHelper._internal();
 
+  bool isPictureConverting = false;
+
   fetchAppSystemPicture() async {
     List picList = await queryPictureConverted();
 
@@ -129,6 +131,7 @@ class PictureHelper {
 
   ///📌查询并转化picture为location
   Future<bool> convertPicturesToLocations() async {
+    isPictureConverting = true;
     debugPrint("开始执行p 转 l");
     List<Picture> list = await queryPictureConverted();
     if (list == null || list.length == 0) {
@@ -146,7 +149,8 @@ class PictureHelper {
       await convertPicturesAfterTime(newestP.creationDate);
       await convertPicturesBeforeTime(earliestP.creationDate);
     }
-    debugPrint("结束执行p 转 l");
+    debugPrint("结束执行p 转 l！！！！！！！！完成啦！！！！！！！！");
+    isPictureConverting = false;
     return true;
   }
 
@@ -159,7 +163,7 @@ class PictureHelper {
         EventBusUtil.fireRefreshDay();
       }
     }
-    EventBusUtil.fireRefreshHome();
+    EventBusUtil.fireConvertAfterPictureFinish();
     debugPrint("使用app后数据同步完成location");
   }
 

@@ -46,89 +46,93 @@ class LocationHelper {
   }
 
   ///图片转化为地点,isNoneUseBefore没有使用以前的
-  createLocationWithPicture(Picture p, bool isNoneUseBefore) async {
+  Future createLocationWithPicture(Picture p, bool isNoneUseBefore) async {
     ///TODO：此处过滤掉经纬度为 0的图片
     if (!(p != null && p.lat != 0 && p.lon != 0)) return 1;
 
-    Mslocation location = Mslocation();
+    try {
+      ReGeocodeResult result =
+          await _aMapSearch.searchReGeocode(LatLng(p.lat, p.lon), 300, 1);
+      Mslocation location = Mslocation();
 
-    ///latlon
-    location.lat = p.lat;
-    location.lon = p.lon;
+      ///latlon
+      location.lat = p.lat;
+      location.lon = p.lon;
 
-    ReGeocodeResult result =
-        await _aMapSearch.searchReGeocode(LatLng(p.lat, p.lon), 300, 1);
-    print(result.toJson());
-
-    ///aoi
-    List<Aoi> aois = result.regeocodeAddress.aois;
-    if (aois != null && aois.length > 0) {
-      for (Aoi aoi in aois) {
-        if (StringUtil.isNotEmpty(aoi.aoiName)) {
-          location.aoiname = aoi.aoiName;
-          break;
+      ///aoi
+      List<Aoi> aois = result.regeocodeAddress.aois;
+      if (aois != null && aois.length > 0) {
+        for (Aoi aoi in aois) {
+          if (StringUtil.isNotEmpty(aoi.aoiName)) {
+            location.aoiname = aoi.aoiName;
+            break;
+          }
         }
       }
-    }
 
-    ///poi
-    List<PoiItem> pois = result.regeocodeAddress.pois;
-    if (pois != null && pois.length > 0) {
-      for (PoiItem poi in pois) {
-        if (StringUtil.isNotEmpty(poi.title)) {
-          location.poiname = poi.title;
-          location.poiid = poi.poiId;
-          break;
+      ///poi
+      List<PoiItem> pois = result.regeocodeAddress.pois;
+      if (pois != null && pois.length > 0) {
+        for (PoiItem poi in pois) {
+          if (StringUtil.isNotEmpty(poi.title)) {
+            location.poiname = poi.title;
+            location.poiid = poi.poiId;
+            break;
+          }
         }
       }
-    }
 
-    ///road
-    List<Road> roads = result.regeocodeAddress.roads;
-    if (roads != null && roads.length > 0) {
-      for (Road road in roads) {
-        if (StringUtil.isNotEmpty(road.name)) {
-          location.road = road.name;
-          break;
+      ///road
+      List<Road> roads = result.regeocodeAddress.roads;
+      if (roads != null && roads.length > 0) {
+        for (Road road in roads) {
+          if (StringUtil.isNotEmpty(road.name)) {
+            location.road = road.name;
+            break;
+          }
         }
       }
+
+      ///address
+      location.address = result.regeocodeAddress.formatAddress;
+      location.country = result.regeocodeAddress.country;
+      location.citycode = result.regeocodeAddress.cityCode;
+      location.adcode = result.regeocodeAddress.adCode;
+      location.province = result.regeocodeAddress.province;
+      location.city = result.regeocodeAddress.city;
+      location.district = result.regeocodeAddress.district;
+
+      location.street = result.regeocodeAddress.streetNumber.street;
+      location.number = result.regeocodeAddress.streetNumber.number;
+      location.errorCode = 0;
+      location.errorInfo = "success";
+      location.time = p.creationDate;
+      location.updatetime = p.creationDate;
+      location.provider = "lbs";
+
+      ///基于位置服务
+      location.coordType = "WGS84"; //默认WGS84坐标系
+      location.isFromPicture = 1;
+
+      //location.altitude =
+      //location.speed =
+      //location.bearing =
+      //location.locationType =
+      //location.locationDetail =
+      //location.floor =
+      //location.description =
+      //location.accuracy =
+      //location.isOffset =
+      //location.is_delete =
+      return await createOrUpdateLocation(location,
+          picture: p,
+          itemType: isNoneUseBefore
+              ? LocationFromType.before
+              : LocationFromType.after);
+    } catch (e) {
+      print(e);
+      return 1;
     }
-
-    ///address
-    location.address = result.regeocodeAddress.formatAddress;
-    location.country = result.regeocodeAddress.country;
-    location.citycode = result.regeocodeAddress.cityCode;
-    location.adcode = result.regeocodeAddress.adCode;
-    location.province = result.regeocodeAddress.province;
-    location.city = result.regeocodeAddress.city;
-    location.district = result.regeocodeAddress.district;
-
-    location.street = result.regeocodeAddress.streetNumber.street;
-    location.number = result.regeocodeAddress.streetNumber.number;
-    location.errorCode = 0;
-    location.errorInfo = "success";
-    location.time = p.creationDate;
-    location.updatetime = p.creationDate;
-    location.provider = "lbs";
-
-    ///基于位置服务
-    location.coordType = "WGS84"; //默认WGS84坐标系
-    location.isFromPicture = 1;
-
-    //location.altitude =
-    //location.speed =
-    //location.bearing =
-    //location.locationType =
-    //location.locationDetail =
-    //location.floor =
-    //location.description =
-    //location.accuracy =
-    //location.isOffset =
-    //location.is_delete =
-    return await createOrUpdateLocation(location,
-        picture: p,
-        itemType:
-            isNoneUseBefore ? LocationFromType.before : LocationFromType.after);
   }
 
   /// 根据最新定位的Location创建或更新最后一条Location
@@ -163,6 +167,9 @@ class LocationHelper {
           if (lastLocation.updatetime > location.time) {
             lastLocation = null;
           }
+        } else {
+          return await updateLocationTime(lastLocation, location,
+              picture: picture, itemType: itemType);
         }
       } else {
         lastLocation = await queryLastLocation();
@@ -385,6 +392,7 @@ class LocationHelper {
 //        .delete();
     await Query(DBManager.tableLocation)
         .whereBySql("isFromPicture = ?", [1]).delete();
+    await Query(DBManager.tableLocation).update({"pictures": ""});
     print("-------删除Picture生成的Location成功");
   }
 }

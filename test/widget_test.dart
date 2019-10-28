@@ -6,6 +6,7 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,7 +38,7 @@ void main() {
     print(await StoryHelper().getDistanceBetween1());
   });
 
-  test("separate", () async{
+  test("separate", () async {
     Story story = Story()
       ..createTime = 1570630867160
       ..updateTime = 1570668978351;
@@ -45,7 +46,7 @@ void main() {
 //    Story story = Story()
 //      ..createTime = 1570758432968
 //      ..updateTime = 1570759933269;
-    List<Story> list =await StoryHelper().separateStory(story);
+    List<Story> list = await StoryHelper().separateStory(story);
     list.forEach((item) {
       print(item.toJson());
     });
@@ -72,19 +73,52 @@ void main() {
   test("null", () {
     var a;
     var b;
-    print(a==b);
+    print(a == b);
   });
 
-  test("remove",(){
-    List<String> a = ["a","b","c","d","e"];
-    for(String item in a){
-      if(item == "a"){
+  test("remove", () {
+    List<String> a = ["a", "b", "c", "d", "e"];
+    for (String item in a) {
+      if (item == "a") {
         a.remove(item);
       }
-      if(item == "b"){
+      if (item == "b") {
         a.remove(item);
       }
     }
     print(a);
   });
+  test("aaaa", () async{
+//    testa(0).then((v) {
+//      print("11$v");
+//    }, onError: (e) {
+//      print("22$e");
+//    });
+
+    try{
+      var a = await testa(0);
+      print("11$a");
+    }catch(e){
+      print("22$e");
+    }
+
+  });
+}
+testb(){
+  Future.delayed(Duration(seconds: 2)).then((v){
+//    testa(0).then((v){
+//      return v;
+//    },onError: (e){
+//      return e;
+//    });
+  return testa(0);
+  });
+}
+
+Future testa(var i) async {
+  if(i ==0 ){
+    return throw(Exception(["aaaaaaa"]));
+  }
+  double n = 10 / 0;
+  return n;
 }

@@ -7,6 +7,7 @@ import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:local_image_provider/local_image.dart';
 import 'package:local_image_provider/local_image_provider.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
+import 'package:misstory/models/picture.dart' as model;
 import 'package:misstory/models/story.dart';
 import 'package:misstory/pages/picture_view_page.dart';
 import 'package:misstory/style/app_style.dart';
@@ -37,7 +38,6 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
   Story _story;
   String _address = "";
   String _title = "";
-  List<LocalImage> _images = List<LocalImage>();
   double width;
   dynamic _result;
 
@@ -56,15 +56,6 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
       _title = DateUtil.getMonthDayHourMin(_story.createTime);
       _address =
           "${StringUtil.isEmpty(_story.customAddress) ? _story.defaultAddress : _story.customAddress}，${_story.city}${_story.district}";
-      if (!StringUtil.isEmpty(_story.pictures)) {
-        await LocalImageProvider().initialize();
-        List<String> ids = _story.pictures.split(",");
-        print("==============共有图片${ids.length}张$ids");
-        for (String id in ids) {
-          _images.add(PictureHelper()
-              .switchLocalImage(await PictureHelper().queryPictureById(id)));
-        }
-      }
       setState(() {});
     }
   }
@@ -168,14 +159,14 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
           mainAxisSpacing: 4),
       itemBuilder: _buildItem,
       scrollDirection: Axis.vertical,
-      itemCount: _images?.length ?? 0,
+      itemCount: widget.story?.pictureList?.length ?? 0,
       padding: EdgeInsets.all(10),
     );
   }
 
   ///图片子元素
   Widget _buildItem(context, index) {
-    LocalImage image = _images[index];
+    model.Picture image = widget.story?.pictureList[index];
     return Hero(
       tag: image.id,
       child: PictureWidget(
@@ -187,7 +178,7 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => PictureViewPage(
-                _images,
+                widget.story?.pictureList,
                 _title,
                 _address,
                 position: index,
