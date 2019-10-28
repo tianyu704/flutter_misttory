@@ -60,6 +60,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    print("=============initstate");
 //    _syncPictures();
     _checkPermission();
     _refreshStory(true);
@@ -190,6 +191,7 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   ///初始化并开始定位
   void _initLocation() async {
+    print("===================_initLocation");
     _aMapLocation = amap.AMapLocation();
     await _aMapLocation.init(Constant.androidMapKey, Constant.iosMapKey);
     _subscription = _aMapLocation.onLocationChanged.listen((location) async {
@@ -359,15 +361,17 @@ class _HomePageState extends LifecycleState<HomePage> {
     // TODO: implement onResume
     super.onResume();
     if (_isInitState) {
-      _refreshStory(false);
       if (Platform.isAndroid) {
+        print("]]]]]]]]]]]]]]]]]]]]]]");
         _onceLocate();
       }
-      refreshNewPictures();
+      refreshNewPictures().then((_) {
+        _refreshStory(false);
+      });
     }
   }
 
-  void refreshNewPictures() async {
+  Future refreshNewPictures() async {
     if (_storiesAll != null && _storiesAll.length > 0) {
       await PictureHelper().fetchAppSystemPicture();
       await PictureHelper().convertPicturesAfterTime(_storiesAll[0].createTime);

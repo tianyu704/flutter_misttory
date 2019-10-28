@@ -246,11 +246,12 @@ class StoryHelper {
         story1.date = getShowTime(story1.createTime);
         story1.intervalTime = story1.updateTime - story1.createTime;
         if (ids != null) {
+          story1.pictures = "";
           for (String id in ids) {
             if (picturesMap.containsKey(id) &&
                 DateUtil.isSameDay(
                     picturesMap[id].creationDate, story1.createTime)) {
-              if (story1.pictures == null) {
+              if (StringUtil.isEmpty(story1.pictures)) {
                 story1.pictures = id;
               } else {
                 story1.pictures = "${story1.pictures},$id";

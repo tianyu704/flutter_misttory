@@ -35,7 +35,7 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
     _createPictures();
     _refreshSubscription = EventBusUtil.listen<RefreshDay>((refreshDay) async {
       count++;
-      if (count > 100) {
+      if (count > 50) {
         _showStep = true;
         setState(() {});
       }
@@ -45,19 +45,21 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
   _createPictures() async {
     await PictureHelper().fetchAppSystemPicture();
     if (await PictureHelper().getPictureSyc() > 50) {
+      await PictureHelper().convertPicturesToLocations();
       _showStep = true;
       setState(() {});
       Navigator.of(context)
           .pushReplacement(MaterialPageRoute(builder: (context) {
         return HomePage();
       }));
-    }
-    await PictureHelper().convertPicturesToLocations();
-    if (mounted) {
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (context) {
-        return HomePage();
-      }));
+    }else{
+      await PictureHelper().convertPicturesToLocations();
+      if (mounted) {
+        Navigator.of(context)
+            .pushReplacement(MaterialPageRoute(builder: (context) {
+          return HomePage();
+        }));
+      }
     }
   }
 
