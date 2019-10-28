@@ -60,7 +60,6 @@ class _HomePageState extends LifecycleState<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    print("=============initstate");
 //    _syncPictures();
     _checkPermission();
     _refreshStory(true);

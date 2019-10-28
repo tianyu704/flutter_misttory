@@ -45,22 +45,20 @@ class LocationHelper {
     }
   }
 
-  ///图片转化为地点
-  Future<int> createLocationWithPicture(Picture p, bool isNoneUseBefore) async {
+  ///图片转化为地点,isNoneUseBefore没有使用以前的
+  createLocationWithPicture(Picture p, bool isNoneUseBefore) async {
     ///TODO：此处过滤掉经纬度为 0的图片
     if (!(p != null && p.lat != 0 && p.lon != 0)) return 1;
 
     Mslocation location = Mslocation();
 
     ///latlon
-    LatLngType itemType = LatLngType.gps;
-    LatLng latlng = await CalculateTools()
-        .convertCoordinate(lat: p.lat, lon: p.lon, type: itemType);
-    location.lat = latlng.latitude;
-    location.lon = latlng.longitude;
+    location.lat = p.lat;
+    location.lon = p.lon;
 
-    ReGeocodeResult result = await _aMapSearch.searchReGeocode(
-        latlng, 100, LatLngType.values.indexOf(itemType));
+    ReGeocodeResult result =
+        await _aMapSearch.searchReGeocode(LatLng(p.lat, p.lon), 300, 1);
+    print(result.toJson());
 
     ///aoi
     List<Aoi> aois = result.regeocodeAddress.aois;
@@ -114,7 +112,7 @@ class LocationHelper {
     location.provider = "lbs";
 
     ///基于位置服务
-    location.coordType = "GCJ02";
+    location.coordType = "WGS84"; //默认WGS84坐标系
     location.isFromPicture = 1;
 
     //location.altitude =

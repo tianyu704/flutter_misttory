@@ -7,6 +7,7 @@ class LocalStorage {
   static const uid = "uid";
   static const isNight = "is_night";
   static const theme = "theme";
+  static const dbVersion = "db_version";
 
   static save(String key, value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

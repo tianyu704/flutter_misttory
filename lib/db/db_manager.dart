@@ -1,4 +1,7 @@
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
+import 'package:misstory/db/helper/story_helper.dart';
+
+import 'local_storage.dart';
 
 ///
 /// Create by Liqun
@@ -11,6 +14,7 @@ class DBManager {
   static final String tablePerson = "Person";
   static final String tableTag = "Tag";
   static final String tablePicture = "Picture";
+  static final int dbVersion = 1;
 
   ///初始化
   static initDB() async {
@@ -83,6 +87,7 @@ class DBManager {
     storyFields["is_delete"] = Field(FieldType.Boolean);
     storyFields["pictures"] = Field(FieldType.Text);
     storyFields["isFromPicture"] = Field(FieldType.Real);
+    storyFields["coord_type"] = Field(FieldType.Text);
 
     ///tag表
     Map<String, Field> tagFields = new Map<String, Field>();
@@ -99,10 +104,12 @@ class DBManager {
     personFields["name"] = Field(FieldType.Text);
     personFields["story_id"] =
         Field(FieldType.Real, foreignKey: true, to: "${dbName}_$tableStory");
+
     ///picture表
     Map<String, Field> pictureFields = new Map<String, Field>();
     pictureFields["id"] = Field(FieldType.Text, primaryKey: true);
-    pictureFields["story_id"] = Field(FieldType.Real, foreignKey: true, to: "${dbName}_$tableStory");
+    pictureFields["story_id"] =
+        Field(FieldType.Real, foreignKey: true, to: "${dbName}_$tableStory");
     pictureFields["lat"] = Field(FieldType.Real);
     pictureFields["lon"] = Field(FieldType.Real);
     pictureFields["pixelWidth"] = Field(FieldType.Real);
@@ -110,11 +117,24 @@ class DBManager {
     pictureFields["creationDate"] = Field(FieldType.Real);
     pictureFields["isSynced"] = Field(FieldType.Real);
     pictureFields["path"] = Field(FieldType.Text);
+    locationFields["is_delete"] = Field(FieldType.Boolean);
 
-    FlutterOrmPlugin.createTable(dbName, tableLocation, locationFields);
-    FlutterOrmPlugin.createTable(dbName, tableStory, storyFields);
-    FlutterOrmPlugin.createTable(dbName, tableTag, tagFields);
-    FlutterOrmPlugin.createTable(dbName, tablePerson, personFields);
-    FlutterOrmPlugin.createTable(dbName, tablePicture, pictureFields);
+    await FlutterOrmPlugin.createTable(dbName, tableLocation, locationFields);
+    await FlutterOrmPlugin.createTable(dbName, tableStory, storyFields);
+    await FlutterOrmPlugin.createTable(dbName, tableTag, tagFields);
+    await FlutterOrmPlugin.createTable(dbName, tablePerson, personFields);
+    await FlutterOrmPlugin.createTable(dbName, tablePicture, pictureFields);
+
+    dynamic oldVersion = await LocalStorage.get(LocalStorage.dbVersion);
+    if (oldVersion == null) {
+      oldVersion = 0;
+    }
+    if (oldVersion == 0) {
+//      print("xxxxxxxxxxxxxxx");
+      ///处理更新数据库操作
+      //新添加的字段附上默认值
+      await StoryHelper().updateCoordType();
+//      await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
+    }
   }
 }

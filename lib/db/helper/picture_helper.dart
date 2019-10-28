@@ -164,7 +164,7 @@ class PictureHelper {
   }
 
   ///使用app前
-  Future<int> convertPicturesBeforeTime(num time) async {
+  convertPicturesBeforeTime(num time) async {
     List beforeList = await findPicturesBeforeTime(time);
     if (beforeList != null && beforeList.length > 0) {
       for (Picture p in beforeList) {

@@ -581,4 +581,8 @@ class StoryHelper {
   Future clear() async {
     await Query(DBManager.tableStory).delete();
   }
+
+  Future updateCoordType() async {
+    await Query(DBManager.tableStory).update({"coord_type": "GCJ02"});
+  }
 }

@@ -28,5 +28,6 @@
   "persons": "$[]person",
   "date": "",
   "pictures": "",
-  "isFromPicture": 0
+  "isFromPicture": 0,
+  "coord_type": "GCJ02"
 }

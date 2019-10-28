@@ -84,6 +84,20 @@ class _EditPageState extends LifecycleState<EditPage> {
 
     ///数据初始化
     _currentLatLng = LatLng(widget.story.lat, widget.story.lon);
+    if (widget.story.coordType == "WGS84") {
+      CalculateTools()
+          .convertCoordinate(
+              lat: widget.story.lat,
+              lon: widget.story.lon,
+              type: LatLngType.gps)
+          .then((v) {
+        _currentLatLng = v;
+        _controller?.clearMarkers();
+        _controller?.addMarker(MarkerOptions(
+          position: _currentLatLng,
+        ));
+      });
+    }
     _descTextFieldVC.text =
         StringUtil.isNotEmpty(widget.story.desc) ? widget.story.desc : "";
     _showTimeStr = DateFormat("MM月dd日 HH:mm").format(
@@ -459,7 +473,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             isZoomControlsEnabled: false,
           ));
           _controller.setMyLocationStyle(_myLocationStyle);
-          _controller.setZoomLevel(16);
+          _controller.setZoomLevel(10);
         },
         amapOptions: AMapOptions(
           compassEnabled: false,
