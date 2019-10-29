@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:intl/intl.dart';
@@ -214,8 +216,10 @@ class StoryHelper {
     if (story.pictureList != null && story.pictureList.length > 0) {
       List<Picture> pictures = [];
       await LocalImageProvider().initialize();
+      bool isAndroid = Platform.isAndroid;
       for (Picture picture in story.pictureList) {
-        if (await LocalImageProvider().imageExists(picture.path)) {
+        if (await LocalImageProvider()
+            .imageExists(isAndroid ? picture.path : picture.id)) {
           pictures.add(picture);
         }
       }

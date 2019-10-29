@@ -296,13 +296,15 @@ class PictureHelper {
     }
     return 0;
   }
+
   ///检查图片是否还存在
   Future checkPicture() async {
     num millis = DateTime.now().millisecondsSinceEpoch;
     List result = await Query(DBManager.tablePicture).all();
     if (result != null && result.length > 0) {
+      String key = Platform.isAndroid ? "path" : "id";
       for (Map map in result) {
-        if (!(await LocalImageProvider().imageExists(map["path"] as String))) {
+        if (!(await LocalImageProvider().imageExists(map[key] as String))) {
           await Query(DBManager.tablePicture).primaryKey([map["id"]]).delete();
         }
       }
