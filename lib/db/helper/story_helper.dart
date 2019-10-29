@@ -256,7 +256,15 @@ class StoryHelper {
     DateTime day2 = DateTime(dateTime2.year, dateTime2.month, dateTime2.day);
     if (day1.isAtSameMomentAs(day2) || story.isFromPicture == 1) {
       story.date = getShowTime(story.createTime);
-      story.pictureList = picturesMap?.values?.toList() ?? null;
+      story.pictureList = [];
+      List<Picture> pics = picturesMap?.values?.toList() ?? null;
+      if (pics != null && pics.length > 0) {
+        for (Picture picture in pics) {
+          if (DateUtil.isSameDay(picture.creationDate, story.createTime)) {
+            story.pictureList.add(picture);
+          }
+        }
+      }
       list.add(story);
       return list;
     } else {
