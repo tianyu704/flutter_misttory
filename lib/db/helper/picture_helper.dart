@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:local_image_provider/local_image.dart';
@@ -6,6 +8,7 @@ import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/eventbus/event_bus_util.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/picture.dart';
+import 'package:misstory/utils/ms_image_cache.dart';
 
 import '../db_manager.dart';
 
@@ -292,5 +295,19 @@ class PictureHelper {
       return result.length;
     }
     return 0;
+  }
+  ///检查图片是否还存在
+  Future checkPicture() async {
+    num millis = DateTime.now().millisecondsSinceEpoch;
+    List result = await Query(DBManager.tablePicture).all();
+    if (result != null && result.length > 0) {
+      for (Map map in result) {
+        if (!(await LocalImageProvider().imageExists(map["path"] as String))) {
+          await Query(DBManager.tablePicture).primaryKey([map["id"]]).delete();
+        }
+      }
+    }
+    print(
+        "=======检查图片是否被删除时长${DateTime.now().millisecondsSinceEpoch - millis}毫秒");
   }
 }

@@ -17,6 +17,9 @@ class MSImageCache {
   num size = 0;
 
   void addCache(String key, Uint8List value) {
+    if (value == null) {
+      return;
+    }
     if (imageCache == null) {
       imageCache = Map<String, Uint8List>();
     }
@@ -26,6 +29,12 @@ class MSImageCache {
 //      print((size / 1024 / 1024));
       keys.add(key);
       _judgeSize();
+    }
+  }
+
+  void removeCache(String key) {
+    if (imageCache != null && imageCache.containsKey(key)) {
+      imageCache.remove(key);
     }
   }
 

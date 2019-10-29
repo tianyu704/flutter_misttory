@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:intl/intl.dart';
+import 'package:local_image_provider/local_image_provider.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/location_config.dart';
@@ -156,26 +157,32 @@ class StoryHelper {
 
   /// 检查当前story位置之后最新的story和Location，并放入story中
   Future<List<Story>> checkLatestStory(List<Story> stories) async {
+    num millis = DateTime.now().millisecondsSinceEpoch;
     if (stories == null) {
       stories = List<Story>();
     }
+    List<Story> checkedStories = [];
+    for (Story story in stories) {
+      checkedStories.add(await checkStoryPictures(story));
+    }
+    print("检查图片是否被删除耗时${DateTime.now().millisecondsSinceEpoch - millis}");
 
     /// 检测给的stories集合之后的story并放入集合中
-    if (stories != null && stories.length > 0) {
+    if (checkedStories != null && checkedStories.length > 0) {
       List result = await Query(DBManager.tableStory)
           .orderBy(["create_time desc"]).whereByColumFilters([
-        WhereCondiction(
-            "create_time", WhereCondictionType.MORE_THEN, stories[0].createTime)
+        WhereCondiction("create_time", WhereCondictionType.MORE_THEN,
+            checkedStories[0].createTime)
       ]).all();
       if (result != null && result.length > 0) {
         result = result.reversed.toList();
         for (Map item in result) {
           Story story = Story.fromJson(Map<String, dynamic>.from(item));
-          stories.insertAll(0, await separateStory(story));
+          checkedStories.insertAll(0, await separateStory(story));
         }
       }
     }
-    return stories;
+    return checkedStories;
   }
 
   /// 获取当前位置的story
@@ -203,6 +210,20 @@ class StoryHelper {
     return currentStory;
   }
 
+  Future<Story> checkStoryPictures(Story story) async {
+    if (story.pictureList != null && story.pictureList.length > 0) {
+      List<Picture> pictures = [];
+      await LocalImageProvider().initialize();
+      for (Picture picture in story.pictureList) {
+        if (await LocalImageProvider().imageExists(picture.path)) {
+          pictures.add(picture);
+        }
+      }
+      story.pictureList = pictures;
+    }
+    return story;
+  }
+
   /// 判断story是否在同一天，不在同一天就分割成多天
   Future<List<Story>> separateStory(Story story) async {
     ///找到Picture
@@ -210,9 +231,18 @@ class StoryHelper {
     Map<String, Picture> picturesMap = Map<String, Picture>();
     if (StringUtil.isNotEmpty(story.pictures)) {
       ids = story.pictures.split(",");
+      StringBuffer newIds = StringBuffer();
       for (String id in ids) {
-        Picture picture = await PictureHelper().queryPictureById(id);
-        picturesMap[id] = picture;
+        if (StringUtil.isNotEmpty(id)) {
+          Picture picture = await PictureHelper().queryPictureById(id);
+          if (picture != null) {
+            picturesMap[id] = picture;
+            newIds.write(newIds.length == 0 ? id : ",$id");
+          }
+        }
+      }
+      if (newIds.toString() != story.pictures) {
+        await updateLocationPictures(story.id, newIds.toString());
       }
     }
 
@@ -562,6 +592,12 @@ class StoryHelper {
             .primaryKey([id]).update({"default_address": defaultAddress});
       }
     }
+  }
+
+  ///更新图片
+  Future updateLocationPictures(num id, String pictures) async {
+    await Query(DBManager.tableStory)
+        .primaryKey([id]).update({"pictures": pictures});
   }
 
   /// 删除无用的story

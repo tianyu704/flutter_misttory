@@ -88,36 +88,47 @@ void main() {
     }
     print(a);
   });
-  test("aaaa", () async{
+  test("aaaa", () async {
 //    testa(0).then((v) {
 //      print("11$v");
 //    }, onError: (e) {
 //      print("22$e");
 //    });
 
-    try{
+    try {
       var a = await testa(0);
       print("11$a");
-    }catch(e){
+    } catch (e) {
       print("22$e");
     }
+  });
 
+  test("stringbuffer", () {
+    String a = "1,2,3,4,5";
+    List b = a.split(",");
+    StringBuffer s = StringBuffer();
+    print(s.toString());
+    for (String i in b) {
+      s.write(s.length == 0 ? i : ",$i");
+    }
+    print(a == s.toString());
   });
 }
-testb(){
-  Future.delayed(Duration(seconds: 2)).then((v){
+
+testb() {
+  Future.delayed(Duration(seconds: 2)).then((v) {
 //    testa(0).then((v){
 //      return v;
 //    },onError: (e){
 //      return e;
 //    });
-  return testa(0);
+    return testa(0);
   });
 }
 
 Future testa(var i) async {
-  if(i ==0 ){
-    return throw(Exception(["aaaaaaa"]));
+  if (i == 0) {
+    return throw (Exception(["aaaaaaa"]));
   }
   double n = 10 / 0;
   return n;
