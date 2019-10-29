@@ -127,6 +127,7 @@ class _SearchPageState extends LifecycleState<SearchPage> {
                   await LocationHelper().deletePictureLocation();
                   await StoryHelper().deletePictureStory();
                   await LocalStorage.saveBool(LocalStorage.isStep, false);
+                  await LocalStorage.saveInt(LocalStorage.dbVersion, 0);
                   debugPrint("！！！！！！！！！删除成功！！！！！！！");
 //                    debugPrint("=========${await StoryHelper().getDistanceBetween1()}");
                 }),

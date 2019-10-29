@@ -207,7 +207,7 @@ class StoryHelper {
       currentStory.intervalTime =
           currentStory.updateTime - currentStory.createTime;
     }
-    return currentStory;
+    return await checkStoryPictures(currentStory);
   }
 
   Future<Story> checkStoryPictures(Story story) async {
@@ -242,7 +242,8 @@ class StoryHelper {
         }
       }
       if (newIds.toString() != story.pictures) {
-        await updateLocationPictures(story.id, newIds.toString());
+        await updateStoryPictures(story.id, newIds.toString());
+        story.pictures = newIds.toString();
       }
     }
 
@@ -595,9 +596,10 @@ class StoryHelper {
   }
 
   ///更新图片
-  Future updateLocationPictures(num id, String pictures) async {
+  Future updateStoryPictures(num id, String pictures) async {
     await Query(DBManager.tableStory)
         .primaryKey([id]).update({"pictures": pictures});
+    return true;
   }
 
   /// 删除无用的story

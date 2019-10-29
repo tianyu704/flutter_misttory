@@ -365,7 +365,6 @@ class _HomePageState extends LifecycleState<HomePage> {
     super.onResume();
     if (!_isFirstLoad) {
       if (Platform.isAndroid) {
-        print("]]]]]]]]]]]]]]]]]]]]]]");
         _onceLocate();
       }
       refreshNewPictures().then((_) {
@@ -378,7 +377,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     if (_storiesAll != null && _storiesAll.length > 0) {
       await PictureHelper().fetchAppSystemPicture();
       await PictureHelper().convertPicturesAfterTime(_storiesAll[0].createTime);
-      PictureHelper().checkPicture(); //这个不用等待
+      await PictureHelper().checkPicture();
     }
   }
 

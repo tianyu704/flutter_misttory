@@ -26,6 +26,9 @@ class PictureItem extends StatelessWidget {
     _pixelRatio = window.devicePixelRatio;
     _width = window.physicalSize.width / _pixelRatio - 80;
     _size = pictures?.length ?? 0;
+    if (_size > 6) {
+      _size = 6;
+    }
     switch (_size ?? 0) {
       case 0:
         return Container(
