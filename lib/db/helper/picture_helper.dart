@@ -141,6 +141,7 @@ class PictureHelper {
       Mslocation l = await LocationHelper().queryOldestLocation();
       num time = (l == null) ? DateTime.now().millisecondsSinceEpoch : l.time;
       if (l == null) {
+        EventBusUtil.fireConvertAfterPictureFinish();
         await convertPicturesBeforeTime(time);
       } else {
         await convertPicturesAfterTime(time);

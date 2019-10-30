@@ -24,12 +24,12 @@ PODS:
   - flutter_luakit_plugin (0.0.1):
     - curl (>= 1.0.0)
     - Flutter
-    - LuakitPod (>= 1.0.23)
+    - LuakitPod (>= 1.0.24)
   - flutter_orm_plugin (0.0.1):
     - Flutter
   - local_image_provider (0.0.1):
     - Flutter
-  - LuakitPod (1.0.23)
+  - LuakitPod (1.0.24)
   - MJExtension (3.2.0)
   - path_provider (0.0.1):
     - Flutter
@@ -41,12 +41,12 @@ PODS:
 DEPENDENCIES:
   - amap_base (from `.symlinks/plugins/amap_base/ios`)
   - curl (~> 1.0.0)
-  - Flutter (from `.symlinks/flutter/ios-release`)
+  - Flutter (from `.symlinks/flutter/ios`)
   - flutter_amap_location_plugin (from `.symlinks/plugins/flutter_amap_location_plugin/ios`)
   - flutter_luakit_plugin (from `.symlinks/plugins/flutter_luakit_plugin/ios`)
   - flutter_orm_plugin (from `.symlinks/plugins/flutter_orm_plugin/ios`)
   - local_image_provider (from `.symlinks/plugins/local_image_provider/ios`)
-  - LuakitPod (~> 1.0.23)
+  - LuakitPod (~> 1.0.24)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
@@ -68,7 +68,7 @@ EXTERNAL SOURCES:
   amap_base:
     :path: ".symlinks/plugins/amap_base/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios-release"
+    :path: ".symlinks/flutter/ios"
   flutter_amap_location_plugin:
     :path: ".symlinks/plugins/flutter_amap_location_plugin/ios"
   flutter_luakit_plugin:
@@ -94,15 +94,15 @@ SPEC CHECKSUMS:
   curl: ec0615c2f1046f5751549e6e714f845c9b609805
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_amap_location_plugin: f46c35452fd1c14b2deee046393dbbb03de73009
-  flutter_luakit_plugin: 081f678c0e6634924c4a33680a53455c514dba9a
+  flutter_luakit_plugin: b7bfad980dd10394ced46336643de78b999f80fd
   flutter_orm_plugin: f62fd453ff96deb4962cde4a00294a9bd684c974
   local_image_provider: dce3592c21eaa668e5a2fff03cb6c9e53a60dff2
-  LuakitPod: 9b368deeb047c373d34525e0be47f26f68d83af9
+  LuakitPod: d6806a7bbeba3fd77cc64f08253b73722905a7a1
   MJExtension: e22bed65fdcd38e957242982b7384f2984c9088e
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
   permission_handler: 67637977b227d62d46bfbf524f335f8568de5a73
   shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
 
-PODFILE CHECKSUM: 5acc3fcb64cd14b08402a74bf64008a1584a6d68
+PODFILE CHECKSUM: c7f10f7ecbf0c33bc40c1e044e4fcb2a97e49d07
 
 COCOAPODS: 1.8.1
