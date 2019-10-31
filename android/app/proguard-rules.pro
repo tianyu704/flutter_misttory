@@ -11,3 +11,11 @@
 #luakit orm
 -keep class org.chromium.** {*; }
 -keep class com.common.luakit.** {*; }
+
+#okhttp
+-dontwarn okhttp3.**
+-keep class okhttp3.**{*;}
+
+#okio
+-dontwarn okio.**
+-keep class okio.**{*;}

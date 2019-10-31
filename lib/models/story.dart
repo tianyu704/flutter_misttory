@@ -1,8 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:local_image_provider/local_image.dart';
-import 'package:misstory/models/picture.dart';
 import "tag.dart";
 import "person.dart";
+import "picture.dart";
 part 'story.g.dart';
 
 @JsonSerializable()
@@ -83,7 +82,7 @@ class Story {
   @JsonKey(name: "coord_type")
   String coordType;
 
-  List<Picture> pictureList;
+  List<Picture> localImages;
 
   factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
 

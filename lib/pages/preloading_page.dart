@@ -55,7 +55,7 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
   _createPictures() async {
     await PictureHelper().fetchAppSystemPicture();
     if (await PictureHelper().getPictureSyc() > 50) {
-      setState(() {});
+      LocalStorage.saveBool(LocalStorage.isStep, true);
       Navigator.of(context)
           .pushReplacement(MaterialPageRoute(builder: (context) {
         return HomePage();
@@ -64,6 +64,7 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
     } else {
       await PictureHelper().convertPicturesToLocations();
       if (mounted) {
+        LocalStorage.saveBool(LocalStorage.isStep, true);
         Navigator.of(context)
             .pushReplacement(MaterialPageRoute(builder: (context) {
           return HomePage();

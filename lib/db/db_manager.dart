@@ -16,7 +16,7 @@ class DBManager {
   static final String tablePerson = "Person";
   static final String tableTag = "Tag";
   static final String tablePicture = "Picture";
-  static final int dbVersion = 1;
+  static final int dbVersion = 2;
 
   ///初始化
   static initDB() async {
@@ -140,6 +140,11 @@ class DBManager {
       await StoryHelper().deletePictureStory();
       await LocationHelper().deletePictureLocation();
       await LocalStorage.saveBool(LocalStorage.isStep, false);
+      await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
+    }
+
+    if(oldVersion < dbVersion){
+      await StoryHelper().updateAllDefaultAddress();
       await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
     }
   }

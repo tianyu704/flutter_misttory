@@ -11,6 +11,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/net/http_manager.dart' as http;
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/models/picture.dart';
@@ -28,6 +29,8 @@ class LocationHelper {
   static final AMapSearch _aMapSearch = AMapSearch();
 
   MethodChannel _methodChannel = MethodChannel("com.admqr.misstory");
+  ReGeocodeResult reGeocodeResult;
+  Picture cachePicture;
 
   ///从Android Realm数据库中读出Location放到Mslocation表中
   Future saveLocation() async {
@@ -51,68 +54,87 @@ class LocationHelper {
     if (!(p != null && p.lat != 0 && p.lon != 0)) return 1;
 
     try {
-      ReGeocodeResult result =
-          await _aMapSearch.searchReGeocode(LatLng(p.lat, p.lon), 300, 1);
-      Mslocation location = Mslocation();
+      if (!(cachePicture != null &&
+          cachePicture.lat == p.lat &&
+          cachePicture.lon == p.lon &&
+          reGeocodeResult != null)) {
+        reGeocodeResult =
+            await _aMapSearch.searchReGeocode(LatLng(p.lat, p.lon), 300, 1);
+      }
+      cachePicture = p;
+
+      Mslocation mslocation = Mslocation();
 
       ///latlon
-      location.lat = p.lat;
-      location.lon = p.lon;
-
-      ///aoi
-      List<Aoi> aois = result.regeocodeAddress.aois;
-      if (aois != null && aois.length > 0) {
-        for (Aoi aoi in aois) {
-          if (StringUtil.isNotEmpty(aoi.aoiName)) {
-            location.aoiname = aoi.aoiName;
-            break;
-          }
-        }
-      }
-
-      ///poi
-      List<PoiItem> pois = result.regeocodeAddress.pois;
-      if (pois != null && pois.length > 0) {
-        for (PoiItem poi in pois) {
-          if (StringUtil.isNotEmpty(poi.title)) {
-            location.poiname = poi.title;
-            location.poiid = poi.poiId;
-            break;
-          }
-        }
-      }
-
-      ///road
-      List<Road> roads = result.regeocodeAddress.roads;
-      if (roads != null && roads.length > 0) {
-        for (Road road in roads) {
-          if (StringUtil.isNotEmpty(road.name)) {
-            location.road = road.name;
-            break;
-          }
-        }
-      }
-
-      ///address
-      location.address = result.regeocodeAddress.formatAddress;
-      location.country = result.regeocodeAddress.country;
-      location.citycode = result.regeocodeAddress.cityCode;
-      location.adcode = result.regeocodeAddress.adCode;
-      location.province = result.regeocodeAddress.province;
-      location.city = result.regeocodeAddress.city;
-      location.district = result.regeocodeAddress.district;
-
-      location.street = result.regeocodeAddress.streetNumber.street;
-      location.number = result.regeocodeAddress.streetNumber.number;
-      location.errorCode = 0;
-      location.errorInfo = "success";
-      location.time = p.creationDate;
-      location.updatetime = p.creationDate;
-      location.provider = "lbs";
+      mslocation.lat = p.lat;
+      mslocation.lon = p.lon;
+      mslocation.errorCode = 0;
+      mslocation.errorInfo = "success";
+      mslocation.time = p.creationDate;
+      mslocation.updatetime = p.creationDate;
+      mslocation.provider = "lbs";
 
       ///基于位置服务
-      location.coordType = "WGS84"; //默认WGS84坐标系
-      location.isFromPicture = 1;
+      mslocation.coordType = "WGS84"; //默认WGS84坐标系
+      mslocation.isFromPicture = 1;
+
+      if (reGeocodeResult == null ||
+          reGeocodeResult.regeocodeAddress == null ||
+          StringUtil.isEmpty(reGeocodeResult.regeocodeAddress.country)) {
+        mslocation = await http.requestLocation(mslocation);
+        if (mslocation == null) {
+          print("p 转 l 获取地理位置失败！！！！");
+          return 1;
+        }
+      } else {
+        ///aoi
+        List<Aoi> aois = reGeocodeResult.regeocodeAddress.aois;
+        if (aois != null && aois.length > 0) {
+          for (Aoi aoi in aois) {
+            if (StringUtil.isNotEmpty(aoi.aoiName)) {
+              mslocation.aoiname = aoi.aoiName;
+              break;
+            }
+          }
+        }
+
+        ///poi
+        List<PoiItem> pois = reGeocodeResult.regeocodeAddress.pois;
+        if (pois != null && pois.length > 0) {
+          for (PoiItem poi in pois) {
+            if (StringUtil.isNotEmpty(poi.title)) {
+              mslocation.poiname = poi.title;
+              mslocation.poiid = poi.poiId;
+              break;
+            }
+          }
+        }
+
+        ///road
+        List<Road> roads = reGeocodeResult.regeocodeAddress.roads;
+        if (roads != null && roads.length > 0) {
+          for (Road road in roads) {
+            if (StringUtil.isNotEmpty(road.name)) {
+              mslocation.road = road.name;
+              break;
+            }
+          }
+        }
+
+        ///address
+        mslocation.address = reGeocodeResult.regeocodeAddress.formatAddress;
+        mslocation.country = reGeocodeResult.regeocodeAddress.country;
+        mslocation.citycode = reGeocodeResult.regeocodeAddress.cityCode;
+        mslocation.adcode = reGeocodeResult.regeocodeAddress.adCode;
+        mslocation.province = reGeocodeResult.regeocodeAddress.province;
+        mslocation.city = reGeocodeResult.regeocodeAddress.city;
+        mslocation.district = reGeocodeResult.regeocodeAddress.district;
+
+        mslocation.street =
+            reGeocodeResult.regeocodeAddress.streetNumber.street;
+        mslocation.number =
+            reGeocodeResult.regeocodeAddress.streetNumber.number;
+      }
 
       //location.altitude =
       //location.speed =
@@ -124,13 +146,13 @@ class LocationHelper {
       //location.accuracy =
       //location.isOffset =
       //location.is_delete =
-      return await createOrUpdateLocation(location,
+      return await createOrUpdateLocation(mslocation,
           picture: p,
           itemType: isNoneUseBefore
               ? LocationFromType.before
               : LocationFromType.after);
     } catch (e) {
-      print(e);
+      print("p 转 l 获取地理位置失败！！！！$e");
       return 1;
     }
   }

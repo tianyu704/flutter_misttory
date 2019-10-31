@@ -1,23 +1,30 @@
-package com.admqr.misstory;
+package com.admqr.misstory.service;
 
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Messenger;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.admqr.misstory.MainActivity;
 import com.admqr.misstory.db.LocationHelper;
+import com.admqr.misstory.model.LocationResult;
+import com.admqr.misstory.model.MSLocation;
+import com.admqr.misstory.net.HttpRequest;
+import com.admqr.misstory.utils.JacksonUtil;
+import com.admqr.misstory.utils.LocationUtil;
+import com.admqr.misstory.utils.LogUtil;
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
+import com.lzy.okgo.callback.StringCallback;
+import com.lzy.okgo.model.Response;
 import com.shihoo.daemon.work.AbsWorkService;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -27,10 +34,11 @@ import me.yohom.amapbase.search.LatLng;
 
 
 public class MainWorkService extends AbsWorkService {
-    static final String Tag = "native db========>";
+    static final String TAG = "native db========>";
     private Disposable mDisposable;
     private long mSaveDataStamp;
     AMapLocationClient mLocationClient;
+    LocationUtil locationUtil;
 
     /**
      * 是否 任务完成, 不再需要服务运行?
@@ -63,6 +71,9 @@ public class MainWorkService extends AbsWorkService {
     public void onServiceKilled() {
 //        saveData();
         Log.d("wsh-daemon", "onServiceKilled --- 保存数据到磁盘");
+        if (handler != null) {
+            handler.removeMessages(1);
+        }
     }
 
     @Override
@@ -70,6 +81,9 @@ public class MainWorkService extends AbsWorkService {
         //取消对任务的订阅
         if (mDisposable != null && !mDisposable.isDisposed()) {
             mDisposable.dispose();
+        }
+        if (handler != null) {
+            handler.removeMessages(1);
         }
 //        saveData();
     }
@@ -82,17 +96,59 @@ public class MainWorkService extends AbsWorkService {
             mLocationClient.setLocationListener(aMapLocation -> {
                 //Log.d("android", aMapLocation.toStr());
                 try {
-//                    saveData(aMapLocation);
-                    LocationHelper.getInstance().saveLocation(aMapLocation);
+
+                    if (aMapLocation != null && aMapLocation.getErrorCode() == 0) {
+                        HttpRequest.getInstance().cancel(HttpRequest.locationTag);
+                        if ("GCJ02".equals(aMapLocation.getCoordType())) {
+                            LocationHelper.getInstance().saveLocation(aMapLocation);
+                        } else {
+                            HttpRequest.getInstance().requestLocation(aMapLocation.getLatitude() + "," + aMapLocation.getLongitude(), new StringCallback() {
+                                @Override
+                                public void onSuccess(Response<String> response) {
+                                    if (response != null && !TextUtils.isEmpty(response.body())) {
+                                        LocationResult result = JacksonUtil.getInstance().readValue(response.body(), LocationResult.class);
+                                        if (result != null && result.getMeta() != null
+                                                && result.getMeta().getCode() == 200
+                                                && result.getResponse() != null
+                                                && result.getResponse().getVenues() != null
+                                                && result.getResponse().getVenues().size() > 0) {
+                                            LocationResult.ResponseBean.VenuesBean venuesBean = result.getResponse().getVenues().get(0);
+                                            aMapLocation.setAoiName(venuesBean.getName());
+                                            aMapLocation.setPoiName(venuesBean.getName());
+                                            if (venuesBean.getLocation() != null) {
+                                                LocationResult.ResponseBean.VenuesBean.LocationBean locationBean = venuesBean.getLocation();
+                                                if (!TextUtils.isEmpty(locationBean.getCountry())) {
+                                                    aMapLocation.setCountry(locationBean.getCountry());
+                                                }
+                                                if (!TextUtils.isEmpty(locationBean.getCity())) {
+                                                    aMapLocation.setCity(locationBean.getCity());
+                                                }
+                                                if (!TextUtils.isEmpty(locationBean.getState())) {
+                                                    aMapLocation.setProvince(locationBean.getState());
+                                                }
+                                                if (!TextUtils.isEmpty(locationBean.getAddress())) {
+                                                    aMapLocation.setAddress(locationBean.getAddress());
+                                                }
+                                            }
+                                            LogUtil.d(TAG,aMapLocation.toString());
+                                            LocationHelper.getInstance().saveLocation(aMapLocation);
+                                        }
+
+                                    }
+                                }
+                            });
+                        }
+                    }
                 } catch (Exception e) {
-                    Log.d(Tag, e.getLocalizedMessage());
+                    Log.d(TAG, e.getLocalizedMessage());
                 }
             });
         }
         if (!mLocationClient.isStarted()) {
             AMapLocationClientOption option = new AMapLocationClientOption();
             option.setInterval(1000 * 60 * 3);
-            option.setDeviceModeDistanceFilter(1000);
+            option.setDeviceModeDistanceFilter(500);
+            option.setMockEnable(true);
             option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Battery_Saving);
             mLocationClient.setLocationOption(option);
             Observable.timer(30, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
@@ -102,106 +158,37 @@ public class MainWorkService extends AbsWorkService {
                 }
             });
         }
-//        Log.d("wsh-daemon", "检查磁盘中是否有上次销毁时保存的数据");
+//        if (locationUtil == null) {
+//            locationUtil = new LocationUtil(MainWorkService.this);
+//            locationUtil.setMsLocationListener(location -> {
+//                Log.d(TAG, JacksonUtil.getInstance().writeValueAsString(location));
+//            });
+//            handler.sendEmptyMessageDelayed(1, 10 * 1000);
+//        }
+
 //        mDisposable = Observable
-//                .interval(60, TimeUnit.SECONDS)
+//                .interval(10, 60, TimeUnit.SECONDS)
 //                //取消任务时取消定时唤醒
-//                .doOnDispose(new Action() {
-//                    @Override
-//                    public void run() throws Exception {
-//                        Log.d("wsh-daemon", " -- doOnDispose ---  取消订阅 .... ");
-//                        saveData();
-//                    }
-//                })
-//                .subscribe(new Consumer<Long>() {
-//                    @Override
-//                    public void accept(Long aLong) throws Exception {
-//                        Log.d("wsh-daemon", "每 60 秒采集一次数据... count = " + aLong);
-////                        if (aLong > 0 && aLong % 18 == 0) {
-//                        saveData();
-//                        Log.d("wsh-daemon", "   采集数据  saveCount = " + (aLong - 1));
-////                        }
-//                        //Toast.makeText(MainWorkService.this, aLong + "", Toast.LENGTH_SHORT).show();
-//                    }
+//                .doOnDispose(() -> {
+//                    Log.d(TAG, " -- doOnDispose ---  取消订阅 .... ");
+//                }).subscribeOn(Schedulers.io())
+//                .subscribe(c -> {
+//
 //                });
     }
 
-
-    private void saveData(AMapLocation location) {
-        String path = getDir("data", MODE_PRIVATE).getAbsolutePath();
-        File pathFile = new File(path);
-        if (pathFile.exists()) {
-            File file = new File(path + "/Misstory");
-            SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(file, null);
-            db.enableWriteAheadLogging();
-            if (db.isOpen()) {
-                if (location != null && location.getErrorCode() == 0) {
-                    MSLocation lastLocation = queryLastLocation(db);
-                    if (lastLocation == null) {
-                        createLocation(db, location);
-//                        Log.d(Tag, "1111111111");
-                    } else if (lastLocation.getLon() == location.getLongitude() &&
-                            lastLocation.getLat() == location.getLatitude()) {
-                        updateLocationTime(db, lastLocation.getId(), location);
-                    } else {
-                        if (TextUtils.equals(lastLocation.getAoiname(), location.getAoiName())) {
-                            if (getDistanceBetween(location, lastLocation) >
-                                    5000) {
-                                createLocation(db, location);
-//                                Log.d(Tag, "2222222222");
-                            } else {
-                                updateLocationTime(db, lastLocation.getId(), location);
-                            }
-                        } else if (TextUtils.equals(lastLocation.getPoiname(), location.getPoiName())) {
-                            if (getDistanceBetween(location, lastLocation) >
-                                    5000) {
-                                createLocation(db, location);
-//                                Log.d(Tag, "333333333333");
-                            } else {
-                                updateLocationTime(db, lastLocation.getId(), location);
-                            }
-                        } else {
-                            createLocation(db, location);
-//                            Log.d(Tag, "44444444444");
-                        }
-                    }
-                }
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Log.d(TAG, " -- 1分钟执行一次.... ");
+            if (locationUtil.isStarted()) {
+                locationUtil.stop();
             }
-            db.close();
-            Log.d(Tag, "save success!!!!!!");
+            locationUtil.start();
+            handler.sendEmptyMessageDelayed(1, 60 * 1000);
         }
-    }
-
-    //更新时间
-    public void updateLocationTime(SQLiteDatabase db, long id, AMapLocation aMapLocation) {
-        String sql = "update MSLocation set updatetime = " + aMapLocation.getTime() + " where id = " + id;
-        db.execSQL(sql);
-        Log.d(Tag, "update success!!!!!!");
-    }
-
-    //查询最后一条Location
-    public MSLocation queryLastLocation(SQLiteDatabase db) {
-        Cursor cursor = db.query("MSLocation", null, null, null, null, null, "time");
-        Log.d(Tag, cursor.getCount() + "");
-        if (cursor.moveToLast()) {
-            MSLocation location = new MSLocation();
-//            cursor.move(cursor.getCount() - 1);
-            long id = cursor.getInt(cursor.getColumnIndex("id"));
-            double lon = cursor.getDouble(cursor.getColumnIndex("lon"));
-            double lat = cursor.getDouble(cursor.getColumnIndex("lat"));
-            String aoiname = cursor.getString(cursor.getColumnIndex("aoiname"));
-            String poiname = cursor.getString(cursor.getColumnIndex("poiname"));
-            location.setId(id);
-            location.setLon(lon);
-            location.setLat(lat);
-            location.setAoiname(aoiname);
-            location.setPoiname(poiname);
-            Log.d(Tag, "id:" + id + ",lon:" + lon + ",lat:" + lat + ",aoiname:" + aoiname + ",poiname:" + poiname);
-            return location;
-
-        }
-        return null;
-    }
+    };
 
 
     //创建一条Location
@@ -240,7 +227,7 @@ public class MainWorkService extends AbsWorkService {
         contentValues.put("coordType", aMapLocation.getCoordType());
         contentValues.put("is_delete", false);
         db.insert("MSLocation", null, contentValues);
-        Log.d(Tag, "create success!!!!!!");
+        Log.d(TAG, "create success!!!!!!");
     }
 
     //计算距离
@@ -248,7 +235,7 @@ public class MainWorkService extends AbsWorkService {
         LatLng latLng1 = new LatLng(location.getLatitude(), location.getLongitude());
         LatLng latLng2 = new LatLng(msLocation.getLat(), msLocation.getLon());
         float distance = calculateLineDistance(latLng1, latLng2);
-        Log.d(Tag, "distance is " + distance + " !!!!!!");
+        Log.d(TAG, "distance is " + distance + " !!!!!!");
         return distance;
     }
 

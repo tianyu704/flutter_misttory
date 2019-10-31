@@ -8,11 +8,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.admqr.misstory.db.LocationHelper;
+import com.admqr.misstory.model.MSLocation;
+import com.admqr.misstory.service.MainWorkService;
+import com.admqr.misstory.utils.JacksonUtil;
+import com.admqr.misstory.utils.LocationUtil;
 import com.shihoo.daemon.DaemonEnv;
-import com.shihoo.daemon.IntentWrapper;
 
 import java.util.List;
 
@@ -33,6 +35,9 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         methodChannel = new MethodChannel(getFlutterView(), BuildConfig.APPLICATION_ID);
         methodChannel.setMethodCallHandler(this);
         startLive();
+        if (!LocationUtil.hasPermission(this)) {
+            LocationUtil.requestPermission(this);
+        }
     }
 
 
@@ -111,5 +116,6 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
             manager.notify(CHANNEL_POSITION, notification);
         }
     }
+
 
 }

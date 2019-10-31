@@ -43,7 +43,11 @@ Story _$StoryFromJson(Map<String, dynamic> json) {
     ..date = json['date'] as String
     ..pictures = json['pictures'] as String
     ..isFromPicture = json['isFromPicture'] as num
-    ..coordType = json["coord_type"] as String;
+    ..coordType = json['coord_type'] as String
+    ..localImages = (json['localImages'] as List)
+        ?.map((e) =>
+            e == null ? null : Picture.fromJson(e as Map<String, dynamic>))
+        ?.toList();
 }
 
 Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
@@ -78,4 +82,5 @@ Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
       'pictures': instance.pictures,
       'isFromPicture': instance.isFromPicture,
       'coord_type': instance.coordType,
+      'localImages': instance.localImages,
     };

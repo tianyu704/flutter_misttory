@@ -213,17 +213,17 @@ class StoryHelper {
   }
 
   Future<Story> checkStoryPictures(Story story) async {
-    if (story.pictureList != null && story.pictureList.length > 0) {
+    if (story.localImages != null && story.localImages.length > 0) {
       List<Picture> pictures = [];
       await LocalImageProvider().initialize();
       bool isAndroid = Platform.isAndroid;
-      for (Picture picture in story.pictureList) {
+      for (Picture picture in story.localImages) {
         if (await LocalImageProvider()
             .imageExists(isAndroid ? picture.path : picture.id)) {
           pictures.add(picture);
         }
       }
-      story.pictureList = pictures;
+      story.localImages = pictures;
     }
     return story;
   }
@@ -260,12 +260,12 @@ class StoryHelper {
     DateTime day2 = DateTime(dateTime2.year, dateTime2.month, dateTime2.day);
     if (day1.isAtSameMomentAs(day2) || story.isFromPicture == 1) {
       story.date = getShowTime(story.createTime);
-      story.pictureList = [];
+      story.localImages = [];
       List<Picture> pics = picturesMap?.values?.toList() ?? null;
       if (pics != null && pics.length > 0) {
         for (Picture picture in pics) {
           if (DateUtil.isSameDay(picture.creationDate, story.createTime)) {
-            story.pictureList.add(picture);
+            story.localImages.add(picture);
           }
         }
       }
@@ -292,7 +292,7 @@ class StoryHelper {
         story1.intervalTime = story1.updateTime - story1.createTime;
         if (ids != null) {
           story1.pictures = "";
-          story1.pictureList = [];
+          story1.localImages = [];
           for (String id in ids) {
             if (picturesMap.containsKey(id) &&
                 DateUtil.isSameDay(
@@ -302,7 +302,7 @@ class StoryHelper {
               } else {
                 story1.pictures = "${story1.pictures},$id";
               }
-              story1.pictureList.add(picturesMap[id]);
+              story1.localImages.add(picturesMap[id]);
               picturesMap.remove(id);
             }
           }
@@ -411,6 +411,7 @@ class StoryHelper {
     story.updateTime = location.updatetime ?? location.time;
     story.intervalTime = location.updatetime - location.time;
     story.isDelete = false;
+    story.coordType = location.coordType;
     story.defaultAddress = getDefaultAddress(story);
     story.pictures = location.pictures;
     story.isFromPicture = location.isFromPicture;
@@ -420,9 +421,9 @@ class StoryHelper {
 
   /// 获取默认address
   String getDefaultAddress(Story story) {
-    return StringUtil.isEmpty(story.aoiName)
-        ? (StringUtil.isEmpty(story.poiName) ? story.address : story.poiName)
-        : story.aoiName;
+    return StringUtil.isEmpty(story.poiName)
+        ? (StringUtil.isEmpty(story.address) ? story.aoiName : story.address)
+        : story.poiName;
   }
 
   ///坐标点更新故事或创建故事
@@ -584,9 +585,7 @@ class StoryHelper {
 
   /// 给库中数据默认上default_address
   Future updateAllDefaultAddress() async {
-    List list = await Query(DBManager.tableStory).whereByColumFilters([
-      WhereCondiction("default_address", WhereCondictionType.IS_NULL, true)
-    ]).all();
+    List list = await Query(DBManager.tableStory).all();
     if (list != null && list.length > 0) {
       Map<String, dynamic> map;
       num id;
@@ -598,9 +597,9 @@ class StoryHelper {
         aoiname = map["aoi_name"] as String;
         poiname = map["poi_name"] as String;
         address = map["address"] as String;
-        defaultAddress = StringUtil.isEmpty(aoiname)
-            ? (StringUtil.isEmpty(poiname) ? address : poiname)
-            : aoiname;
+        defaultAddress = StringUtil.isEmpty(poiname)
+            ? (StringUtil.isEmpty(address) ? aoiname : address)
+            : poiname;
         await Query(DBManager.tableStory)
             .primaryKey([id]).update({"default_address": defaultAddress});
       }

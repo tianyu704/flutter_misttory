@@ -2,6 +2,8 @@ library grouped_listview;
 
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:misstory/db/helper/picture_helper.dart';
+import 'package:misstory/models/picture.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -40,7 +42,12 @@ class RefreshGroupedListView<TElement, TGroup> extends StatelessWidget {
       footer: CustomFooter(builder: (BuildContext context, LoadStatus mode) {
         Widget body;
         if (mode == LoadStatus.idle) {
-          body = Text("上拉加载", style: AppStyle.descText12(context));
+          if (PictureHelper().isPictureConverting) {
+            body =
+                Text("正在生成时间轴,请稍后...", style: AppStyle.descText12(context));
+          } else {
+            body = Text("上拉加载", style: AppStyle.descText12(context));
+          }
         } else if (mode == LoadStatus.loading) {
           body = SizedBox(
             height: 30,
@@ -51,7 +58,11 @@ class RefreshGroupedListView<TElement, TGroup> extends StatelessWidget {
         } else if (mode == LoadStatus.canLoading) {
           body = Text("松手,加载更多!", style: AppStyle.descText12(context));
         } else {
-          body = Text("没有更多数据了!", style: AppStyle.descText12(context));
+          if (PictureHelper().isPictureConverting) {
+            body = Text("正在生成时间轴,请稍后...", style: AppStyle.descText12(context));
+          } else {
+            body = Text("没有更多数据了!", style: AppStyle.descText12(context));
+          }
         }
         return Container(
           height: 55.0,

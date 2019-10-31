@@ -25,7 +25,7 @@ void main() async {
   /// 初始化数据库
   await DBManager.initDB();
   await AMap.init(Constant.iosMapKey);
-  await StoryHelper().updateAllDefaultAddress();
+//  await StoryHelper().updateAllDefaultAddress();
 
   ///TODO:此时就要求授权了 等产品逻辑具体化 再修改
   isStep = (await LocalStorage.get(LocalStorage.isStep)) ?? false;
