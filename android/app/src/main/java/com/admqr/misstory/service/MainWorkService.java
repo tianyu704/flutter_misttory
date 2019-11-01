@@ -147,8 +147,9 @@ public class MainWorkService extends AbsWorkService {
         if (!mLocationClient.isStarted()) {
             AMapLocationClientOption option = new AMapLocationClientOption();
             option.setInterval(1000 * 60 * 3);
-            option.setDeviceModeDistanceFilter(500);
-            option.setMockEnable(true);
+            option.setDeviceModeDistanceFilter(100);
+            option.setMockEnable(false);
+//            option.setGeoLanguage(AMapLocationClientOption.GeoLanguage.EN);
             option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Battery_Saving);
             mLocationClient.setLocationOption(option);
             Observable.timer(30, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {

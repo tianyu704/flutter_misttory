@@ -67,9 +67,10 @@ class _SearchPageState extends LifecycleState<SearchPage> {
                         //39.898923,116.48666
                         //40.74224,-73.99386
                         //37.5536,126.921774
+                        //28.189403,113.212998
                         _aMapSearch
                             .searchReGeocode(
-                                LatLng(37.5536, 126.921774), 100, 1)
+                                LatLng(28.189403, 113.212998), 100, 1)
                             .then((result) {
                           _result = result.regeocodeAddress.toString();
                           debugPrint(result.toString());
@@ -91,9 +92,10 @@ class _SearchPageState extends LifecycleState<SearchPage> {
                         //39.898923,116.48666
                         //40.74224,-73.99386
                         //37.5536,126.921774
+                        //28.189403,113.212998
                         Mslocation mslocation = Mslocation()
-                          ..lat = 37.5536
-                          ..lon = 126.921774
+                          ..lat = 28.189403
+                          ..lon = 113.212998
                           ..errorCode = 0;
                         mslocation = await http.requestLocation(mslocation);
                         _result = mslocation?.toJson()?.toString() ?? "空";

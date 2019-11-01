@@ -4,8 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/constant.dart';
 import 'package:misstory/models/foursquare.dart';
+import 'package:misstory/models/latlonpoint.dart';
 import 'package:misstory/models/location.dart';
 import 'package:misstory/models/mslocation.dart';
+import 'package:misstory/models/poilocation.dart';
 import 'package:misstory/models/venue.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'address.dart';
@@ -109,7 +111,7 @@ class HttpManager {
 
 final HttpManager httpManager = new HttpManager();
 
-/// 获取用户信息
+/// 获取地点信息
 Future<Mslocation> requestLocation(Mslocation mslocation) async {
   if (mslocation != null && mslocation.errorCode == 0) {
     try {
@@ -151,6 +153,50 @@ Future<Mslocation> requestLocation(Mslocation mslocation) async {
             }
           }
           return mslocation;
+        }
+      }
+    } on DioError catch (e) {
+      print(e.response);
+    }
+  }
+  return null;
+}
+
+/// 获取地点信息
+Future<List<Poilocation>> requestLocations(String latlon) async {
+  if (StringUtil.isNotEmpty(latlon)) {
+    try {
+      Response response = await Dio().get(
+        Address.requestLocation(),
+        queryParameters: {
+          "limit": 20,
+          "client_id": Constant.clientId,
+          "client_secret": Constant.clientSecret,
+          "ll": latlon,
+          "v": DateFormat("yyyyMMdd").format(DateTime.now()),
+        },
+      );
+      if (response.data != null && response.data is Map) {
+        Foursquare foursquare = Foursquare.fromJson(
+            Map<String, dynamic>.from(response.data as Map));
+        if (foursquare != null &&
+            foursquare.meta != null &&
+            foursquare.meta.code == 200 &&
+            foursquare.response != null &&
+            foursquare.response.venues != null &&
+            foursquare.response.venues.length > 0) {
+          List<Poilocation> poilocations = [];
+          Poilocation poilocation;
+          foursquare.response.venues.forEach((item) {
+            poilocation = Poilocation()
+              ..title = item.name
+              ..snippet = item.location?.address
+              ..latLonPoint = (Latlonpoint()
+                ..latitude = item.location?.lat
+                ..longitude = item.location.lng);
+            poilocations.add(poilocation);
+          });
+          return poilocations;
         }
       }
     } on DioError catch (e) {

@@ -7,6 +7,7 @@ import 'package:local_image_provider/local_image_provider.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/location_config.dart';
+import 'package:misstory/models/coord_type.dart';
 import 'package:misstory/models/picture.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/date_util.dart';
@@ -637,6 +638,6 @@ class StoryHelper {
   }
 
   Future updateCoordType() async {
-    await Query(DBManager.tableStory).update({"coord_type": "GCJ02"});
+    await Query(DBManager.tableStory).update({"coord_type": CoordType.aMap});
   }
 }

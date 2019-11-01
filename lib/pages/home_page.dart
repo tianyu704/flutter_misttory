@@ -15,6 +15,7 @@ import 'package:misstory/eventbus/event_bus_util.dart';
 import 'package:misstory/eventbus/refresh_day.dart';
 import 'package:misstory/eventbus/refresh_after_pic_finish.dart';
 import 'package:misstory/location_config.dart';
+import 'package:misstory/models/coord_type.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/pages/pictures_page.dart';
@@ -204,7 +205,7 @@ class _HomePageState extends LifecycleState<HomePage> {
       if (location != null && location.isNotEmpty) {
         try {
           Mslocation mslocation = Mslocation.fromJson(json.decode(location));
-          if ("GCJ02" != mslocation.coordType) {
+          if (CoordType.aMap != mslocation.coordType) {
             mslocation = await http.requestLocation(mslocation);
           }
           if (mslocation != null && mslocation.errorCode == 0) {
