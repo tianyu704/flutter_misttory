@@ -73,6 +73,7 @@ public class MainWorkService extends AbsWorkService {
         Log.d("wsh-daemon", "onServiceKilled --- 保存数据到磁盘");
         if (handler != null) {
             handler.removeMessages(1);
+            handler.removeMessages(0);
         }
     }
 
@@ -84,6 +85,7 @@ public class MainWorkService extends AbsWorkService {
         }
         if (handler != null) {
             handler.removeMessages(1);
+            handler.removeMessages(0);
         }
 //        saveData();
     }
@@ -94,7 +96,8 @@ public class MainWorkService extends AbsWorkService {
             mLocationClient = new AMapLocationClient(this);
             //设置定位回调监听
             mLocationClient.setLocationListener(aMapLocation -> {
-                //Log.d("android", aMapLocation.toStr());
+                mLocationClient.stopLocation();
+                Log.d(TAG, aMapLocation.getLocationType() + ":" + aMapLocation.getLatitude() + "," + aMapLocation.getLongitude());
                 try {
 
                     if (aMapLocation != null && aMapLocation.getErrorCode() == 0) {
@@ -130,7 +133,7 @@ public class MainWorkService extends AbsWorkService {
                                                     aMapLocation.setAddress(locationBean.getAddress());
                                                 }
                                             }
-                                            LogUtil.d(TAG,aMapLocation.toString());
+                                            LogUtil.d(TAG, aMapLocation.toString());
                                             LocationHelper.getInstance().saveLocation(aMapLocation);
                                         }
 
@@ -144,21 +147,11 @@ public class MainWorkService extends AbsWorkService {
                 }
             });
         }
-        if (!mLocationClient.isStarted()) {
-            AMapLocationClientOption option = new AMapLocationClientOption();
-            option.setInterval(1000 * 60 * 3);
-            option.setDeviceModeDistanceFilter(100);
-            option.setMockEnable(false);
-//            option.setGeoLanguage(AMapLocationClientOption.GeoLanguage.EN);
-            option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Battery_Saving);
-            mLocationClient.setLocationOption(option);
-            Observable.timer(30, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
-                @Override
-                public void accept(Long aLong) throws Exception {
-                    mLocationClient.startLocation();
-                }
-            });
+        if (mLocationClient != null) {
+            handler.removeMessages(0);
+            handler.sendEmptyMessageDelayed(0, 30 * 1000);
         }
+
 //        if (locationUtil == null) {
 //            locationUtil = new LocationUtil(MainWorkService.this);
 //            locationUtil.setMsLocationListener(location -> {
@@ -182,12 +175,35 @@ public class MainWorkService extends AbsWorkService {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            Log.d(TAG, " -- 1分钟执行一次.... ");
-            if (locationUtil.isStarted()) {
-                locationUtil.stop();
+//            Log.d(TAG, msg.what + "==" + mLocationClient.isStarted());
+            if (msg.what == 0 && mLocationClient != null) {
+                mLocationClient.stopLocation();
+                AMapLocationClientOption option = new AMapLocationClientOption();
+//                    option.setInterval(1000 * 60 * 3);
+                option.setDeviceModeDistanceFilter(100);
+                option.setMockEnable(false);
+                option.setOnceLocation(true);
+                option.setOnceLocationLatest(true);
+//            option.setGeoLanguage(AMapLocationClientOption.GeoLanguage.EN);
+                option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+                mLocationClient.setLocationOption(option);
+                mLocationClient.startLocation();
+//                    Observable.timer(30, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
+//                        @Override
+//                        public void accept(Long aLong) throws Exception {
+//                            mLocationClient.startLocation();
+//                        }
+//                    });
+                handler.sendEmptyMessageDelayed(0, 3 * 60 * 1000);
+            } else if (msg.what == 1) {
+                Log.d(TAG, " -- 1分钟执行一次.... ");
+                if (locationUtil.isStarted()) {
+                    locationUtil.stop();
+                }
+                locationUtil.start();
+                handler.sendEmptyMessageDelayed(1, 60 * 1000);
             }
-            locationUtil.start();
-            handler.sendEmptyMessageDelayed(1, 60 * 1000);
+
         }
     };
 
