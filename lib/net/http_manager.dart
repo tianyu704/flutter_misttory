@@ -10,6 +10,7 @@ import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/poilocation.dart';
 import 'package:misstory/models/venue.dart';
 import 'package:misstory/utils/string_util.dart';
+import '../location_config.dart';
 import 'address.dart';
 import 'code.dart';
 import 'interceptors/error_interceptor.dart';
@@ -163,7 +164,7 @@ Future<Mslocation> requestLocation(Mslocation mslocation) async {
 }
 
 /// 获取地点信息
-Future<List<Poilocation>> requestLocations(String latlon) async {
+Future<List<Poilocation>> requestLocations({String latlon, String near}) async {
   if (StringUtil.isNotEmpty(latlon)) {
     try {
       Response response = await Dio().get(
@@ -172,6 +173,8 @@ Future<List<Poilocation>> requestLocations(String latlon) async {
           "limit": 20,
           "client_id": Constant.clientId,
           "client_secret": Constant.clientSecret,
+          "near": near,
+          "radius": LocationConfig.poiSearchInterval,
           "ll": latlon,
           "v": DateFormat("yyyyMMdd").format(DateTime.now()),
         },

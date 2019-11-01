@@ -678,8 +678,9 @@ class _EditPageState extends LifecycleState<EditPage> {
           .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
       poiList = list;
     } else {
-      poiList = await http
-          .requestLocations("${widget.story.lat}, ${widget.story.lon}");
+      print("start......");
+      poiList = await http.requestLocations(
+          latlon: "${widget.story.lat}, ${widget.story.lon}", near: searchText);
     }
 
     if (poiList != null && poiList.length > 0) {
@@ -720,8 +721,8 @@ class _EditPageState extends LifecycleState<EditPage> {
           .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
       poiPreList = list;
     } else {
-      poiPreList = await http
-          .requestLocations("${widget.story.lat}, ${widget.story.lon}");
+      poiPreList = await http.requestLocations(
+          latlon: "${widget.story.lat}, ${widget.story.lon}");
     }
     if (!isSearching) {
       poiList = poiPreList;
