@@ -15,6 +15,7 @@ import 'package:misstory/eventbus/event_bus_util.dart';
 import 'package:misstory/eventbus/refresh_day.dart';
 import 'package:misstory/eventbus/refresh_after_pic_finish.dart';
 import 'package:misstory/location_config.dart';
+import 'package:misstory/models/coord_type.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/pages/pictures_page.dart';
@@ -26,6 +27,7 @@ import 'package:misstory/widgets/location_item.dart';
 import 'package:misstory/widgets/refresh_grouped_listview.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:misstory/net/http_manager.dart' as http;
 import '../constant.dart';
 import 'edit_page.dart';
 
@@ -68,7 +70,9 @@ class _HomePageState extends LifecycleState<HomePage> {
       _day = await StoryHelper().getStoryDays();
       _footprint = await StoryHelper().getFootprint(_storiesAll);
       _refreshController.loadComplete();
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
 
     _refreshHomeSubscription =
@@ -80,7 +84,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   ///同步图片逻辑
   _syncPictures() async {
     if (!PictureHelper().isPictureConverting) {
-      await PictureHelper().convertPicturesToLocations();
+      PictureHelper().convertPicturesToLocations();
     }
   }
 
@@ -201,6 +205,9 @@ class _HomePageState extends LifecycleState<HomePage> {
       if (location != null && location.isNotEmpty) {
         try {
           Mslocation mslocation = Mslocation.fromJson(json.decode(location));
+          if (CoordType.aMap != mslocation.coordType) {
+            mslocation = await http.requestLocation(mslocation);
+          }
           if (mslocation != null && mslocation.errorCode == 0) {
             mslocation.updatetime = mslocation.time;
             debugPrint(
@@ -374,10 +381,10 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   Future refreshNewPictures() async {
-    if (_storiesAll != null && _storiesAll.length > 0) {
-      await PictureHelper().fetchAppSystemPicture();
-      await PictureHelper().convertPicturesAfterTime(_storiesAll[0].createTime);
-      await PictureHelper().checkPicture();
+    await PictureHelper().fetchAppSystemPicture();
+    await PictureHelper().checkPicture();
+    if (!PictureHelper().isPictureConverting) {
+      await PictureHelper().convertPicturesAfterTime(0);
     }
   }
 
@@ -392,7 +399,9 @@ class _HomePageState extends LifecycleState<HomePage> {
           item.desc = stories[item.id].desc;
         }
       });
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     }
   }
 

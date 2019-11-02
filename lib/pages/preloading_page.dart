@@ -26,7 +26,6 @@ class PreLoadingPage extends StatefulWidget {
 }
 
 class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
-  bool _showStep = false;
   StreamSubscription _refreshSubscription;
   StreamSubscription _refreshHomeSubscription;
   int count = 0;
@@ -41,8 +40,10 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
       count++;
       if (count > 50 && _afterTimeFinish) {
         LocalStorage.saveBool(LocalStorage.isStep, true);
-        _showStep = true;
-        setState(() {});
+        Navigator.of(context)
+            .pushReplacement(MaterialPageRoute(builder: (context) {
+          return HomePage();
+        }));
       }
     });
     _refreshHomeSubscription =
@@ -54,8 +55,7 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
   _createPictures() async {
     await PictureHelper().fetchAppSystemPicture();
     if (await PictureHelper().getPictureSyc() > 50) {
-      _showStep = true;
-      setState(() {});
+      LocalStorage.saveBool(LocalStorage.isStep, true);
       Navigator.of(context)
           .pushReplacement(MaterialPageRoute(builder: (context) {
         return HomePage();
@@ -64,6 +64,7 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
     } else {
       await PictureHelper().convertPicturesToLocations();
       if (mounted) {
+        LocalStorage.saveBool(LocalStorage.isStep, true);
         Navigator.of(context)
             .pushReplacement(MaterialPageRoute(builder: (context) {
           return HomePage();
@@ -100,20 +101,6 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
                 textAlign: TextAlign.center,
               ),
             ),
-            RaisedButton(
-                onPressed: _showStep
-                    ? () {
-                        Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (context) {
-                          return HomePage();
-                        }));
-                      }
-                    : null,
-                color: AppStyle.colors(context).colorPrimary,
-                child: Text(
-                  _showStep ? "暂时跳过" : "请稍后",
-                  style: TextStyle(color: Colors.white),
-                )),
           ],
         ),
       ),

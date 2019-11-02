@@ -46,7 +46,7 @@ DEPENDENCIES:
   - flutter_luakit_plugin (from `.symlinks/plugins/flutter_luakit_plugin/ios`)
   - flutter_orm_plugin (from `.symlinks/plugins/flutter_orm_plugin/ios`)
   - local_image_provider (from `.symlinks/plugins/local_image_provider/ios`)
-  - LuakitPod (~> 1.0.23)
+  - LuakitPod (~> 1.0.24)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
@@ -103,6 +103,6 @@ SPEC CHECKSUMS:
   permission_handler: 67637977b227d62d46bfbf524f335f8568de5a73
   shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
 
-PODFILE CHECKSUM: 5acc3fcb64cd14b08402a74bf64008a1584a6d68
+PODFILE CHECKSUM: c7f10f7ecbf0c33bc40c1e044e4fcb2a97e49d07
 
 COCOAPODS: 1.8.1

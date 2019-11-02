@@ -55,7 +55,7 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
     if (_story != null) {
       _title = DateUtil.getMonthDayHourMin(_story.createTime);
       _address =
-          "${StringUtil.isEmpty(_story.customAddress) ? _story.defaultAddress : _story.customAddress}，${_story.city}${_story.district}";
+          "${StringUtil.isEmpty(_story.customAddress) ? _story.defaultAddress : _story.customAddress}，${_story.city ?? ""}${_story.district ?? ""}";
       setState(() {});
     }
   }
@@ -159,14 +159,14 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
           mainAxisSpacing: 4),
       itemBuilder: _buildItem,
       scrollDirection: Axis.vertical,
-      itemCount: widget.story?.pictureList?.length ?? 0,
+      itemCount: widget.story?.localImages?.length ?? 0,
       padding: EdgeInsets.all(10),
     );
   }
 
   ///图片子元素
   Widget _buildItem(context, index) {
-    model.Picture image = widget.story?.pictureList[index];
+    model.Picture image = widget.story?.localImages[index];
     return Hero(
       tag: image.id,
       child: PictureWidget(
@@ -178,7 +178,7 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => PictureViewPage(
-                widget.story?.pictureList,
+                widget.story?.localImages,
                 _title,
                 _address,
                 position: index,

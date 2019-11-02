@@ -1,4 +1,4 @@
-package com.admqr.misstory;
+package com.admqr.misstory.utils;
 
 import android.text.TextUtils;
 import android.util.Log;

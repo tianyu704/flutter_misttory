@@ -1,4 +1,4 @@
-package com.admqr.misstory;
+package com.admqr.misstory.utils;
 
 import android.app.ActivityManager;
 import android.content.Context;

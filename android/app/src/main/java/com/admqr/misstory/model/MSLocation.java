@@ -1,4 +1,4 @@
-package com.admqr.misstory;
+package com.admqr.misstory.model;
 
 import java.io.Serializable;
 

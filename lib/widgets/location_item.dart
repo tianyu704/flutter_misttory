@@ -128,13 +128,13 @@ class LocationItem extends StatelessWidget {
                     ],
                   ),
                   Offstage(
-                    offstage: !(story.pictureList != null &&
-                        story.pictureList.length > 0),
+                    offstage: !(story.localImages != null &&
+                        story.localImages.length > 0),
 //                    offstage: false,
                     child: Padding(
                       padding: EdgeInsets.only(top: 5),
                       child: PictureItem(
-                          story.pictureList ?? null, onPressPicture),
+                          story.localImages ?? null, onPressPicture),
                     ),
                   ),
                 ],

@@ -3,7 +3,7 @@ package com.admqr.misstory.db;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.admqr.misstory.MSLocation;
+import com.admqr.misstory.model.MSLocation;
 import com.amap.api.location.AMapLocation;
 
 import java.util.List;

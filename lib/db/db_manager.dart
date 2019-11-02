@@ -16,7 +16,7 @@ class DBManager {
   static final String tablePerson = "Person";
   static final String tableTag = "Tag";
   static final String tablePicture = "Picture";
-  static final int dbVersion = 1;
+  static final int dbVersion = 2;
 
   ///初始化
   static initDB() async {
@@ -135,11 +135,16 @@ class DBManager {
 //      print("xxxxxxxxxxxxxxx");
       ///处理更新数据库操作
       //新添加的字段附上默认值
-      await StoryHelper().updateCoordType();
       await PictureHelper().clear();
       await StoryHelper().deletePictureStory();
       await LocationHelper().deletePictureLocation();
+      await StoryHelper().updateCoordType();
       await LocalStorage.saveBool(LocalStorage.isStep, false);
+      await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
+    }
+
+    if(oldVersion < dbVersion){
+      await StoryHelper().updateAllDefaultAddress();
       await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
     }
   }

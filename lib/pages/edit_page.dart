@@ -12,6 +12,7 @@ import 'package:misstory/db/helper/person_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/helper/tag_helper.dart';
 import 'package:misstory/main.dart';
+import 'package:misstory/models/coord_type.dart';
 import 'package:misstory/models/person.dart';
 import 'package:misstory/models/poilocation.dart';
 import 'package:misstory/models/story.dart';
@@ -20,6 +21,7 @@ import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/my_appbar.dart';
 import 'package:misstory/widgets/tag_items_widget.dart';
+import 'package:misstory/net/http_manager.dart' as http;
 //import 'package:fluttertoast/fluttertoast.dart';
 
 import '../location_config.dart';
@@ -653,27 +655,34 @@ class _EditPageState extends LifecycleState<EditPage> {
     if (StringUtil.isEmpty(searchText)) {
       return;
     }
-    LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
-    PoiResult poiResult = await AMapSearch().searchPoiBound(
-      PoiSearchQuery(
-        query: searchText,
-        location: latLng,
+    if (isInChina()) {
+      LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
+      PoiResult poiResult = await AMapSearch().searchPoiBound(
+        PoiSearchQuery(
+          query: searchText,
+          location: latLng,
 
-        /// iOS必须
-        searchBound: SearchBound(
-          center: latLng,
-          range: LocationConfig.poiSearchInterval,
+          /// iOS必须
+          searchBound: SearchBound(
+            center: latLng,
+            range: LocationConfig.poiSearchInterval,
 
-          ///兴趣点范围阈值📌
+            ///兴趣点范围阈值📌
+          ),
+
+          /// Android必须
         ),
+      );
+      List list = [];
+      poiResult.pois
+          .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
+      poiList = list;
+    } else {
+      print("start......");
+      poiList = await http.requestLocations(
+          latlon: "${widget.story.lat}, ${widget.story.lon}", near: searchText);
+    }
 
-        /// Android必须
-      ),
-    );
-    List list = [];
-    poiResult.pois
-        .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
-    poiList = list;
     if (poiList != null && poiList.length > 0) {
       isSearching = true;
       if (mounted) {
@@ -688,30 +697,35 @@ class _EditPageState extends LifecycleState<EditPage> {
       setState(() {});
       return;
     }
-    LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
 
-    PoiResult poiResult = await AMapSearch().searchPoiBound(
-      PoiSearchQuery(
-        query: "",
-        location: latLng,
+    if (isInChina()) {
+      LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
+      PoiResult poiResult = await AMapSearch().searchPoiBound(
+        PoiSearchQuery(
+          query: "",
+          location: latLng,
 
-        /// iOS必须
-        searchBound: SearchBound(
-          center: latLng,
-          range: LocationConfig.poiSearchInterval,
+          /// iOS必须
+          searchBound: SearchBound(
+            center: latLng,
+            range: LocationConfig.poiSearchInterval,
 
-          ///兴趣点范围阈值📌TODO：暂定1000m
+            ///兴趣点范围阈值📌TODO：暂定1000m
+          ),
+
+          /// Android必须
         ),
-
-        /// Android必须
-      ),
-    );
-    List list = [];
-    poiResult.pois
-        .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
-    poiPreList = list;
+      );
+      List list = [];
+      poiResult.pois
+          .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
+      poiPreList = list;
+    } else {
+      poiPreList = await http.requestLocations(
+          latlon: "${widget.story.lat}, ${widget.story.lon}");
+    }
     if (!isSearching) {
-      poiList = list;
+      poiList = poiPreList;
       isPoiFirstLoad = false;
       if (poiList != null && poiList.length > 0) {
         if (mounted) {
@@ -719,6 +733,12 @@ class _EditPageState extends LifecycleState<EditPage> {
         }
       }
     }
+  }
+
+  bool isInChina() {
+    return (CoordType.aMap == widget.story.coordType) ||
+        ("中国" == widget.story.country) ||
+        ("China" == widget.story.country);
   }
 
   clickPOI(Poilocation location) {

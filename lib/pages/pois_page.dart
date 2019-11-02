@@ -7,6 +7,8 @@ import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/local_storage.dart';
+import 'package:misstory/models/mslocation.dart';
+import 'package:misstory/net/http_manager.dart' as http;
 
 ///
 /// Create by Hugo.Guo
@@ -51,27 +53,59 @@ class _SearchPageState extends LifecycleState<SearchPage> {
               child: Container(
                 color: Colors.red,
                 height: 100,
-                child: RaisedButton(
-                  onPressed: () async {
-                    if (images != null && images.length > 0) {
-                      LatLng latlng = await CalculateTools().convertCoordinate(
-                          lat: images[0].lat,
-                          lon: images[0].lon,
-                          type: LatLngType.gps);
-                      print(latlng.toJson());
-                      //39°53'56.118",116°29'11.964"
-                      //39.898923,116.48666
-
-                      _aMapSearch
-                          .searchReGeocode(latlng, 100, 1)
-                          .then((result) {
-                        _result = result.regeocodeAddress.toString();
+                child: Row(
+                  children: <Widget>[
+                    RaisedButton(
+                      onPressed: () async {
+//                    if (images != null && images.length > 0) {
+//                      LatLng latlng = await CalculateTools().convertCoordinate(
+//                          lat: images[0].lat,
+//                          lon: images[0].lon,
+//                          type: LatLngType.gps);
+//                      print(latlng.toJson());
+                        //39°53'56.118",116°29'11.964"
+                        //39.898923,116.48666
+                        //40.74224,-73.99386
+                        //37.5536,126.921774
+                        //28.189403,113.212998
+                        _aMapSearch
+                            .searchReGeocode(
+                                LatLng(28.189403, 113.212998), 100, 1)
+                            .then((result) {
+                          _result = result.regeocodeAddress.toString();
+                          debugPrint(result.toString());
+                          setState(() {});
+                        });
+//                    }
+                      },
+                      child: Text("高德获取"),
+                    ),
+                    RaisedButton(
+                      onPressed: () async {
+//                    if (images != null && images.length > 0) {
+//                      LatLng latlng = await CalculateTools().convertCoordinate(
+//                          lat: images[0].lat,
+//                          lon: images[0].lon,
+//                          type: LatLngType.gps);
+//                      print(latlng.toJson());
+                        //39°53'56.118",116°29'11.964"
+                        //39.898923,116.48666
+                        //40.74224,-73.99386
+                        //37.5536,126.921774
+                        //28.189403,113.212998
+                        Mslocation mslocation = Mslocation()
+                          ..lat = 28.189403
+                          ..lon = 113.212998
+                          ..errorCode = 0;
+                        mslocation = await http.requestLocation(mslocation);
+                        _result = mslocation?.toJson()?.toString() ?? "空";
                         debugPrint(_result);
                         setState(() {});
-                      });
-                    }
-                  },
-                  child: Text("获取"),
+//                    }
+                      },
+                      child: Text("foursquare获取"),
+                    )
+                  ],
                 ),
               ),
               preferredSize: Size(double.infinity, 100),

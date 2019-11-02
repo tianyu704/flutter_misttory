@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 
 import 'package:misstory/main.dart';
+import 'package:misstory/models/picture.dart';
 import 'package:misstory/models/story.dart';
 
 void main() {
@@ -113,6 +114,21 @@ void main() {
     }
     print(a == s.toString());
   });
+
+  test("modify", () {
+    Picture p;
+    Picture picture = Picture()
+      ..id = "1"
+      ..path = "1";
+    p=picture;
+    convert(picture);
+    print(p.path);
+  });
+}
+
+convert(Picture picture){
+  Picture p = picture;
+  p.path = "2";
 }
 
 testb() {
