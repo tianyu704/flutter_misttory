@@ -459,7 +459,7 @@ class _EditPageState extends LifecycleState<EditPage> {
         Positioned(
           bottom: 10.0,
           right: 8.0,
-           width: 45,
+          width: 45,
           height: 45,
           child: RaisedButton(
             color: AppStyle.colors(context).colorBgPage,
@@ -472,7 +472,9 @@ class _EditPageState extends LifecycleState<EditPage> {
             ),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(45 / 2)),
-            onPressed: clickDeleteStory,
+            onPressed: (){
+              _showAlertView(context);
+            },
           ),
         ),
       ],
@@ -812,16 +814,45 @@ class _EditPageState extends LifecycleState<EditPage> {
       setState(() {});
     }
   }
+
+  void _showAlertView(BuildContext cxt) {
+
+    String title = "确认删除地点 ${getShowAddress(widget.story)} ？";
+    showCupertinoModalPopup<int>(
+        context: cxt,
+        builder: (cxt) {
+          var dialog = CupertinoActionSheet(
+            ///title: Text("This is Title"),
+            message: Text(title),
+            cancelButton: CupertinoActionSheetAction(
+                onPressed: () {
+                  Navigator.pop(cxt, 0);
+                }, child: Text("取消")),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                  onPressed: () {
+                    clickDeleteStory();
+                    Navigator.pop(cxt, 1);
+                  },
+                  child: Text("删除",style: TextStyle(color: Colors.red),)),
+            ],
+          );
+          return dialog;
+        });
+  }
+
   ///删除当前story
-  clickDeleteStory() async{
+  clickDeleteStory() async {
     Story story = widget.story;
     if (story.id != null) {
       await StoryHelper().deleteTargetStoryWithStoryId(story.id);
     }
-    await LocationHelper().deleteTargetLocationWithTime(story.createTime, story.updateTime);
+    await LocationHelper()
+        .deleteTargetLocationWithTime(story.createTime, story.updateTime);
     debugPrint("删除完毕");
-    Navigator.pop(context,story);
+    Navigator.pop(context, story);
   }
+
   ///保存编辑页面数据
   clickSave() async {
     //TODO:
