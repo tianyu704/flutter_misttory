@@ -1,4 +1,4 @@
-import 'package:connectivity/connectivity.dart';
+//import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 
 import '../code.dart';
@@ -15,14 +15,14 @@ class ErrorInterceptors extends InterceptorsWrapper {
   @override
   onRequest(RequestOptions options) async {
     //没有网络
-    var connectivityResult = await (new Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.none) {
-      return _dio.resolve(new ResultData(
-          Code.errorHandleFunction(
-              Code.NETWORK_ERROR, "请检查您的网络或网络权限是否开启", false),
-          false,
-          Code.NETWORK_ERROR));
-    }
+//    var connectivityResult = await (new Connectivity().checkConnectivity());
+//    if (connectivityResult == ConnectivityResult.none) {
+//      return _dio.resolve(new ResultData(
+//          Code.errorHandleFunction(
+//              Code.NETWORK_ERROR, "请检查您的网络或网络权限是否开启", false),
+//          false,
+//          Code.NETWORK_ERROR));
+//    }
     return options;
   }
 }

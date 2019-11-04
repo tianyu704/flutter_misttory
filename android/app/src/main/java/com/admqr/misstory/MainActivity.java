@@ -35,9 +35,9 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         methodChannel = new MethodChannel(getFlutterView(), BuildConfig.APPLICATION_ID);
         methodChannel.setMethodCallHandler(this);
         startLive();
-        if (!LocationUtil.hasPermission(this)) {
-            LocationUtil.requestPermission(this);
-        }
+//        if (!LocationUtil.hasPermission(this)) {
+//            LocationUtil.requestPermission(this);
+//        }
     }
 
 
@@ -51,6 +51,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
             } else {
                 result.success("");
             }
+        } else if(methodCall.method.equals("request_location_permission")){
         }
     }
 

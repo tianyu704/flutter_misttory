@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:misstory/eventbus/refresh_after_pic_finish.dart';
 import 'package:misstory/eventbus/refresh_day.dart';
 import 'package:misstory/pages/home_page.dart';
 import 'package:misstory/style/app_style.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -35,10 +37,10 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _createPictures();
     _refreshSubscription = EventBusUtil.listen<RefreshDay>((refreshDay) async {
       count++;
       if (count > 50 && _afterTimeFinish) {
+        _afterTimeFinish = false;
         LocalStorage.saveBool(LocalStorage.isStep, true);
         Navigator.of(context)
             .pushReplacement(MaterialPageRoute(builder: (context) {
@@ -50,6 +52,7 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
         EventBusUtil.listen<ConvertAfterPictureFinish>((refreshHome) async {
       _afterTimeFinish = true;
     });
+    _createPictures();
   }
 
   _createPictures() async {
@@ -71,6 +74,8 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
         }));
       }
     }
+    PermissionHandler()
+        .requestPermissions([PermissionGroup.locationAlways]);
   }
 
   @override

@@ -57,6 +57,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   Story _currentStory;
   StreamSubscription _refreshSubscription;
   StreamSubscription _refreshHomeSubscription;
+  bool hasBuild = false;
 
   @override
   void initState() {
@@ -70,7 +71,7 @@ class _HomePageState extends LifecycleState<HomePage> {
       _day = await StoryHelper().getStoryDays();
       _footprint = await StoryHelper().getFootprint(_storiesAll);
       _refreshController.loadComplete();
-      if (mounted) {
+      if (mounted && hasBuild) {
         setState(() {});
       }
     });
@@ -175,20 +176,25 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   /// 检查权限
   void _checkPermission() async {
-    await PermissionHandler().requestPermissions(
-        [PermissionGroup.locationAlways, PermissionGroup.storage]);
-    PermissionStatus permissionLocation = await PermissionHandler()
-        .checkPermissionStatus(PermissionGroup.locationAlways);
-    PermissionStatus permissionStorage = await PermissionHandler()
-        .checkPermissionStatus(PermissionGroup.storage);
-    if (Platform.isAndroid &&
-        permissionLocation == PermissionStatus.granted &&
-        permissionStorage == PermissionStatus.granted) {
+//    print("=========start");
+//    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+//    print("=========pass1");
+//    await PermissionHandler()
+//        .requestPermissions([PermissionGroup.locationAlways]);
+//    print("=========pass2");
+//    PermissionStatus permissionLocation = await PermissionHandler()
+//        .checkPermissionStatus(PermissionGroup.locationAlways);
+//    PermissionStatus permissionStorage = await PermissionHandler()
+//        .checkPermissionStatus(PermissionGroup.storage);
+//    print("=========$permissionLocation,$permissionStorage");
+//    if (Platform.isAndroid &&
+//        permissionLocation == PermissionStatus.granted &&
+//        permissionStorage == PermissionStatus.granted) {
+//      _initLocation();
+//    } else if (Platform.isIOS &&
+//        permissionLocation == PermissionStatus.granted) {
       _initLocation();
-    } else if (Platform.isIOS &&
-        permissionLocation == PermissionStatus.granted) {
-      _initLocation();
-    }
+//    }
   }
 
   ///初始化并开始定位
@@ -253,6 +259,7 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    hasBuild = true;
     // TODO: implement build
     return Scaffold(
       backgroundColor: AppStyle.colors(context).colorBgPage,

@@ -36,7 +36,7 @@ class PictureHelper {
     if (beforeP != null) {
       time = beforeP.creationDate;
     }
-    await LocalImageProvider().initialize();
+    print(await LocalImageProvider().initialize());
     num start = DateTime.now().millisecondsSinceEpoch;
     List<LocalImage> list = [];
     List<LocalImage> afterList = [];

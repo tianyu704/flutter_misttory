@@ -65,7 +65,7 @@ dependencies:
 #  flutter_image_compress: 0.6.3 #图片压缩
   event_bus: ^1.1.0
   dio: ^2.1.8
-  connectivity: ^0.4.5+2
+#  connectivity: ^0.4.5+2
 
 dev_dependencies:
   flutter_test:
