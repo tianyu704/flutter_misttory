@@ -31,8 +31,9 @@
   "isOffset": true,
   "isFixLastLocation": false,
   "coordType": "GCJ02",
-  "is_delete": true,
   "pictures": "",
-  "isFromPicture": 0
+  "isFromPicture": 0,
+  "is_deleted":0
+
 }
 

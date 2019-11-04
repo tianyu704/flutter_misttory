@@ -32,7 +32,6 @@ Story _$StoryFromJson(Map<String, dynamic> json) {
     ..customAddress = json['custom_address'] as String
     ..defaultAddress = json['default_address'] as String
     ..desc = json['desc'] as String
-    ..isDelete = json['is_delete'] as bool
     ..tags = (json['tags'] as List)
         ?.map((e) => e == null ? null : Tag.fromJson(e as Map<String, dynamic>))
         ?.toList()
@@ -47,7 +46,8 @@ Story _$StoryFromJson(Map<String, dynamic> json) {
     ..localImages = (json['localImages'] as List)
         ?.map((e) =>
             e == null ? null : Picture.fromJson(e as Map<String, dynamic>))
-        ?.toList();
+        ?.toList()
+    ..isDeleted = json['is_deleted'] as num;
 }
 
 Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
@@ -75,7 +75,6 @@ Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
       'custom_address': instance.customAddress,
       'default_address': instance.defaultAddress,
       'desc': instance.desc,
-      'is_delete': instance.isDelete,
       'tags': instance.tags,
       'persons': instance.persons,
       'date': instance.date,
@@ -83,4 +82,5 @@ Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
       'isFromPicture': instance.isFromPicture,
       'coord_type': instance.coordType,
       'localImages': instance.localImages,
+      'is_deleted': instance.isDeleted,
     };

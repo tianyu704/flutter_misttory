@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
+import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/person_helper.dart';
+import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/helper/tag_helper.dart';
 import 'package:misstory/main.dart';
@@ -451,6 +453,33 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   Widget locationMapView(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        locationMapView1(context),
+        Positioned(
+          bottom: 10.0,
+          right: 8.0,
+           width: 45,
+          height: 45,
+          child: RaisedButton(
+            color: AppStyle.colors(context).colorBgPage,
+            colorBrightness: Brightness.dark,
+            splashColor: Colors.grey,
+            child: SvgPicture.asset(
+              "assets/images/icon_location_delete.svg",
+              width: 18,
+              height: 18,
+            ),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(45 / 2)),
+            onPressed: clickDeleteStory,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget locationMapView1(BuildContext context) {
     return SizedBox(
       height: 220,
       width: double.infinity,
@@ -783,7 +812,16 @@ class _EditPageState extends LifecycleState<EditPage> {
       setState(() {});
     }
   }
-
+  ///删除当前story
+  clickDeleteStory() async{
+    Story story = widget.story;
+    if (story.id != null) {
+      await StoryHelper().deleteTargetStoryWithStoryId(story.id);
+    }
+    await LocationHelper().deleteTargetLocationWithTime(story.createTime, story.updateTime);
+    debugPrint("删除完毕");
+    Navigator.pop(context,);
+  }
   ///保存编辑页面数据
   clickSave() async {
     //TODO:

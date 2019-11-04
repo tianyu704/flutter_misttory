@@ -134,6 +134,7 @@ class LocationHelper {
             reGeocodeResult.regeocodeAddress.streetNumber.street;
         mslocation.number =
             reGeocodeResult.regeocodeAddress.streetNumber.number;
+        mslocation.isDeleted = 0;
       }
 
       //location.altitude =
@@ -249,6 +250,7 @@ class LocationHelper {
         location.pictures = "${picture.id}";
         location.isFromPicture = 1;
       }
+      location.isDeleted = 0;
       print("===$location==");
       await FlutterOrmPlugin.saveOrm(
           DBManager.tableLocation, location.toJson());
@@ -303,7 +305,9 @@ class LocationHelper {
 
   /// 读取库中的全部数据
   Future<List> findAllLocations() async {
-    List result = await Query(DBManager.tableLocation).all();
+    List result = await Query(DBManager.tableLocation).whereByColumFilters([
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+    ]).all();
     if (result != null && result.length > 0) {
       List<Mslocation> list = [];
       result.reversed.forEach((item) =>
@@ -315,7 +319,9 @@ class LocationHelper {
 
   /// 查询最后一条Location
   Future<Mslocation> queryLastLocation() async {
-    Map result = await Query(DBManager.tableLocation).orderBy([
+    Map result = await Query(DBManager.tableLocation).whereByColumFilters([
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+    ]).orderBy([
       "time desc",
     ]).first();
     if (result != null && result.length > 0) {
@@ -326,7 +332,9 @@ class LocationHelper {
 
   /// 查询最早一条Location
   Future<Mslocation> queryOldestLocation() async {
-    Map result = await Query(DBManager.tableLocation).orderBy([
+    Map result = await Query(DBManager.tableLocation).whereByColumFilters([
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+    ]).orderBy([
       "time asc",
     ]).whereByColumFilters([
       WhereCondiction("errorCode", WhereCondictionType.IN, [0])
@@ -347,7 +355,8 @@ class LocationHelper {
     List result = await Query(DBManager.tableLocation)
         .orderBy(["time"]).whereByColumFilters([
       WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, time),
-      WhereCondiction("isFromPicture", WhereCondictionType.IS_NULL, true)
+      WhereCondiction("isFromPicture", WhereCondictionType.IS_NULL, true),
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
     ]).all();
     if (result != null && result.length > 0) {
       debugPrint("===========待更新条数${result.length}");
@@ -374,7 +383,9 @@ class LocationHelper {
     if (mslocation == null) {
       return null;
     }
-    Map result = await Query(DBManager.tableLocation).orderBy([
+    Map result = await Query(DBManager.tableLocation).whereByColumFilters([
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+    ]).orderBy([
       "time",
     ]).whereByColumFilters([
       WhereCondiction(
@@ -386,8 +397,9 @@ class LocationHelper {
     if (result != null && result.length > 0) {
       return Mslocation.fromJson(Map<String, dynamic>.from(result));
     } else {
-      Map r = await Query(DBManager.tableLocation)
-          .orderBy(["time desc"]).whereByColumFilters([
+      Map r = await Query(DBManager.tableLocation).whereByColumFilters([
+        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+      ]).orderBy(["time desc"]).whereByColumFilters([
         WhereCondiction(
             "time", WhereCondictionType.EQ_OR_LESS_THEN, mslocation.time)
       ]).first();
@@ -404,6 +416,15 @@ class LocationHelper {
     LatLng latLng1 = LatLng(location1.lat, location1.lon);
     LatLng latLng2 = LatLng(location2.lat, location2.lon);
     return await CalculateTools().calcDistance(latLng1, latLng2);
+  }
+
+  ///删除指定的Location 状态删除
+  Future deleteTargetLocationWithTime(num startTime, num endTime) async {
+    await Query(DBManager.tableLocation).whereByColumFilters([
+      WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, startTime),
+      WhereCondiction(
+          "updatetime", WhereCondictionType.EQ_OR_LESS_THEN, endTime)
+    ]).update({"is_deleted": 1});
   }
 
   ///删除图片生成的位置信息

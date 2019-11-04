@@ -66,9 +66,6 @@ class Story {
 
   String desc;
 
-  @JsonKey(name: "is_delete")
-  bool isDelete;
-
   List<Tag> tags;
 
   List<Person> persons;
@@ -83,6 +80,9 @@ class Story {
   String coordType;
 
   List<Picture> localImages;
+
+  @JsonKey(name: "is_deleted")
+  num isDeleted;
 
   factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
 

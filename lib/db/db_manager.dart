@@ -55,7 +55,7 @@ class DBManager {
     locationFields["isOffset"] = Field(FieldType.Boolean);
     locationFields["isFixLastLocation"] = Field(FieldType.Boolean);
     locationFields["coordType"] = Field(FieldType.Text);
-    locationFields["is_delete"] = Field(FieldType.Boolean);
+    locationFields["is_deleted"] = Field(FieldType.Real);
     locationFields["pictures"] = Field(FieldType.Text);
     locationFields["isFromPicture"] = Field(FieldType.Real);
 
@@ -86,7 +86,7 @@ class DBManager {
     storyFields["default_address"] = Field(FieldType.Text);
     storyFields["desc"] = Field(FieldType.Text);
     storyFields["interval_time"] = Field(FieldType.Real);
-    storyFields["is_delete"] = Field(FieldType.Boolean);
+    storyFields["is_deleted"] = Field(FieldType.Real);
     storyFields["pictures"] = Field(FieldType.Text);
     storyFields["isFromPicture"] = Field(FieldType.Real);
     storyFields["coord_type"] = Field(FieldType.Text);
@@ -119,7 +119,6 @@ class DBManager {
     pictureFields["creationDate"] = Field(FieldType.Real);
     pictureFields["isSynced"] = Field(FieldType.Real);
     pictureFields["path"] = Field(FieldType.Text);
-    locationFields["is_delete"] = Field(FieldType.Boolean);
 
     await FlutterOrmPlugin.createTable(dbName, tableLocation, locationFields);
     await FlutterOrmPlugin.createTable(dbName, tableStory, storyFields);

@@ -23,12 +23,12 @@
   "custom_address": "",
   "default_address": "",
   "desc": "",
-  "is_delete": true,
   "tags": "$[]tag",
   "persons": "$[]person",
   "date": "",
   "pictures": "",
   "isFromPicture": 0,
   "coord_type": "GCJ02",
-  "localImages": "$[]picture"
+  "localImages": "$[]picture",
+  "is_deleted":0
 }

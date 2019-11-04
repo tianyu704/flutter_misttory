@@ -106,6 +106,7 @@ flutter:
     - assets/images/
     - assets/images/icon_location_fill.svg
     - assets/images/icon_location_empty.svg
+    - assets/images/icon_location_delete.svg
     - assets/images/icon_remain_time.svg
     - assets/images/icon_search.svg
     - assets/images/icon_poi_item.svg

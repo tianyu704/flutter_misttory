@@ -70,12 +70,12 @@ class Mslocation {
 
   String coordType;
 
-  @JsonKey(name: "is_delete")
-  bool isDelete;
-
   String pictures;
 
   num isFromPicture;
+
+  @JsonKey(name: "is_deleted")
+  num isDeleted;
 
   factory Mslocation.fromJson(Map<String, dynamic> json) => _$MslocationFromJson(json);
 
