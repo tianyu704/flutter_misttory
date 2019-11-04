@@ -334,10 +334,19 @@ class _HomePageState extends LifecycleState<HomePage> {
             .then(
           (value) {
             if (value != null) {
-              Map<num, Story> stories = value[0];
-              if (stories != null && stories.length > 0) {
-                notifyStories(stories);
+              print("::::3:::");
+              if (value is Story) {
+                Story story = value;
+                notifyDeleteStory(story);
+                return ;
               }
+              if (value is Map) {
+                Map<num, Story> stories = value[0];
+                if (stories != null && stories.length > 0) {
+                  notifyStories(stories);
+                }
+              }
+
             }
           },
         );
@@ -349,10 +358,18 @@ class _HomePageState extends LifecycleState<HomePage> {
             .then(
           (value) {
             if (value != null) {
-              Map<num, Story> stories = value[0];
-              if (stories != null && stories.length > 0) {
-                notifyStories(stories);
+              if (value is Story) {
+                Story story = value;
+                notifyDeleteStory(story);
+                return;
               }
+              if (value is Map) {
+                Map<num, Story> stories = value[0];
+                if (stories != null && stories.length > 0) {
+                  notifyStories(stories);
+                }
+              }
+
             }
           },
         );
@@ -408,6 +425,16 @@ class _HomePageState extends LifecycleState<HomePage> {
       });
       if (mounted) {
         setState(() {});
+      }
+    }
+  }
+
+  notifyDeleteStory(Story story) {
+    if (_stories != null && _stories.length > 0) {
+      _stories.removeWhere((item) => item.id == story.id);
+       debugPrint("+++刷新删除完成++");
+      if (mounted) {
+        _refreshStory();
       }
     }
   }

@@ -820,7 +820,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
     await LocationHelper().deleteTargetLocationWithTime(story.createTime, story.updateTime);
     debugPrint("删除完毕");
-    Navigator.pop(context,);
+    Navigator.pop(context,story);
   }
   ///保存编辑页面数据
   clickSave() async {
