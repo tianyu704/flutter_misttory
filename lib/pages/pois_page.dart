@@ -2,7 +2,6 @@ import 'package:amap_base/amap_base.dart';
 import 'package:flutter/material.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:local_image_provider/local_image.dart';
-import 'package:local_image_provider/local_image_provider.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';

@@ -21,6 +21,9 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		E466A51C2359A0E400FF346E /* bridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E466A51B2359A0E400FF346E /* bridge.swift */; };
+		E4F2EF1E237292AA0077146B /* FlutterAuthRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = E4F2EF1D237292AA0077146B /* FlutterAuthRegistrant.m */; };
+		E4F2EF2A23729E750077146B /* MSLocationPermissionStrategy.m in Sources */ = {isa = PBXBuildFile; fileRef = E4F2EF2723729E750077146B /* MSLocationPermissionStrategy.m */; };
+		E4F2EF2E23729FEF0077146B /* MSPermissionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E4F2EF2D23729FEE0077146B /* MSPermissionManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -60,6 +63,14 @@
 		DBAECE74A0B59746D0D08A03 /* libPods-Runner.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Runner.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E466A51A2359A0E400FF346E /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		E466A51B2359A0E400FF346E /* bridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = bridge.swift; sourceTree = "<group>"; };
+		E4F2EF1C237292AA0077146B /* FlutterAuthRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlutterAuthRegistrant.h; sourceTree = "<group>"; };
+		E4F2EF1D237292AA0077146B /* FlutterAuthRegistrant.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterAuthRegistrant.m; sourceTree = "<group>"; };
+		E4F2EF2723729E750077146B /* MSLocationPermissionStrategy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSLocationPermissionStrategy.m; sourceTree = "<group>"; };
+		E4F2EF2823729E750077146B /* MSPermissionStrategy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPermissionStrategy.h; sourceTree = "<group>"; };
+		E4F2EF2923729E750077146B /* MSLocationPermissionStrategy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLocationPermissionStrategy.h; sourceTree = "<group>"; };
+		E4F2EF2B23729ECE0077146B /* MSPermissionHandlerEnums.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPermissionHandlerEnums.h; sourceTree = "<group>"; };
+		E4F2EF2C23729FEE0077146B /* MSPermissionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPermissionManager.h; sourceTree = "<group>"; };
+		E4F2EF2D23729FEE0077146B /* MSPermissionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPermissionManager.m; sourceTree = "<group>"; };
 		F8E607854CB8CB7683273C86 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -122,6 +133,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				E4F2EF2623729E750077146B /* LocationAuth */,
 				7AFFD8ED1D35381100E5BB4D /* AppDelegate.h */,
 				7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
@@ -131,6 +143,8 @@
 				97C146F11CF9000F007C117D /* Supporting Files */,
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
+				E4F2EF1C237292AA0077146B /* FlutterAuthRegistrant.h */,
+				E4F2EF1D237292AA0077146B /* FlutterAuthRegistrant.m */,
 				E466A51B2359A0E400FF346E /* bridge.swift */,
 				E466A51A2359A0E400FF346E /* Runner-Bridging-Header.h */,
 			);
@@ -151,6 +165,19 @@
 				DBAECE74A0B59746D0D08A03 /* libPods-Runner.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E4F2EF2623729E750077146B /* LocationAuth */ = {
+			isa = PBXGroup;
+			children = (
+				E4F2EF2C23729FEE0077146B /* MSPermissionManager.h */,
+				E4F2EF2D23729FEE0077146B /* MSPermissionManager.m */,
+				E4F2EF2B23729ECE0077146B /* MSPermissionHandlerEnums.h */,
+				E4F2EF2823729E750077146B /* MSPermissionStrategy.h */,
+				E4F2EF2923729E750077146B /* MSLocationPermissionStrategy.h */,
+				E4F2EF2723729E750077146B /* MSLocationPermissionStrategy.m */,
+			);
+			path = LocationAuth;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -321,9 +348,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E4F2EF1E237292AA0077146B /* FlutterAuthRegistrant.m in Sources */,
 				E466A51C2359A0E400FF346E /* bridge.swift in Sources */,
 				978B8F6F1D3862AE00F588F7 /* AppDelegate.m in Sources */,
+				E4F2EF2E23729FEF0077146B /* MSPermissionManager.m in Sources */,
 				97C146F31CF9000F007C117D /* main.m in Sources */,
+				E4F2EF2A23729E750077146B /* MSLocationPermissionStrategy.m in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

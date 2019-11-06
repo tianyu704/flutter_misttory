@@ -307,8 +307,6 @@ class LocationHelper {
     return -1;
   }
 
-  Future updateLocation() {}
-
   /// 更新Location时间
   Future<int> updateLocationTime(Mslocation lastLocation, Mslocation location,
       {Picture picture, LocationFromType itemType}) async {
@@ -367,22 +365,12 @@ class LocationHelper {
     return 0;
   }
 
-  /// 读取库中的全部数据
-  Future<List> findAllLocations() async {
-    List result = await Query(DBManager.tableMSLocation).all();
-    if (result != null && result.length > 0) {
-      List<Mslocation> list = [];
-      result.reversed.forEach((item) =>
-          list.add(Mslocation.fromJson(Map<String, dynamic>.from(item))));
-      return list;
-    }
-    return null;
-  }
-
   /// 查询最后一条Location
   Future<l.Location> queryLastLocation() async {
     Map result = await Query(DBManager.tableLocation).orderBy([
       "time desc",
+    ]).whereByColumFilters([
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
     ]).first();
     if (result != null && result.length > 0) {
       return l.Location.fromJson(Map<String, dynamic>.from(result));
@@ -392,9 +380,10 @@ class LocationHelper {
 
   /// 查询最早一条Location
   Future<Mslocation> queryOldestLocation() async {
-    Map result = await Query(DBManager.tableMSLocation).orderBy([
+    Map result = await Query(DBManager.tableLocation).orderBy([
       "time asc",
     ]).whereByColumFilters([
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1]),
       WhereCondiction("errorCode", WhereCondictionType.IN, [0])
     ]).first();
     if (result != null && result.length > 0) {
@@ -439,22 +428,24 @@ class LocationHelper {
     if (mslocation == null) {
       return null;
     }
-    Map result = await Query(DBManager.tableMSLocation).orderBy([
+    Map result = await Query(DBManager.tableLocation).orderBy([
       "time",
     ]).whereByColumFilters([
       WhereCondiction(
           "time", WhereCondictionType.EQ_OR_LESS_THEN, mslocation.time),
       WhereCondiction(
           "updatetime", WhereCondictionType.EQ_OR_MORE_THEN, mslocation.time),
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
     ]).first();
 
     if (result != null && result.length > 0) {
       return Mslocation.fromJson(Map<String, dynamic>.from(result));
     } else {
-      Map r = await Query(DBManager.tableMSLocation)
+      Map r = await Query(DBManager.tableLocation)
           .orderBy(["time desc"]).whereByColumFilters([
         WhereCondiction(
-            "time", WhereCondictionType.EQ_OR_LESS_THEN, mslocation.time)
+            "time", WhereCondictionType.EQ_OR_LESS_THEN, mslocation.time),
+        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
       ]).first();
       if (r != null) {
         return Mslocation.fromJson(Map<String, dynamic>.from(r));
@@ -515,6 +506,15 @@ class LocationHelper {
     return await CalculateTools().calcDistance(latLng1, latLng2);
   }
 
+  ///删除指定的Location 状态删除
+  Future deleteTargetLocationWithTime(num startTime, num endTime) async {
+    await Query(DBManager.tableLocation).whereByColumFilters([
+      WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, startTime),
+      WhereCondiction(
+          "updatetime", WhereCondictionType.EQ_OR_LESS_THEN, endTime)
+    ]).update({"is_deleted": 1});
+  }
+
   ///删除图片生成的位置信息
   Future deletePictureLocation() async {
 //    await Query(DBManager.tableLocation)
@@ -546,10 +546,12 @@ class LocationHelper {
       }
     }
   }
+
   ///清除Location表
   Future clearLocation() async {
     await Query(DBManager.tableLocation).delete();
   }
+
   /// 转换Mslocation
   l.Location switchLocation(Mslocation mslocation, {num time}) {
     if (mslocation != null) {
@@ -567,12 +569,13 @@ class LocationHelper {
     return null;
   }
 
-  Future createStoryByOldLocation()async{
-    List result =await Query(DBManager.tableMSLocation).orderBy(["time"]).all();
-    if(result !=null && result.length > 0){
+  Future createStoryByOldLocation() async {
+    List result =
+        await Query(DBManager.tableMSLocation).orderBy(["time"]).all();
+    if (result != null && result.length > 0) {
       Mslocation mslocation;
-      result.forEach((map){
-        mslocation = Mslocation.fromJson(Map<String,dynamic>.from(map));
+      result.forEach((map) {
+        mslocation = Mslocation.fromJson(Map<String, dynamic>.from(map));
         StoryHelper().createOrUpdateStory(mslocation);
       });
     }

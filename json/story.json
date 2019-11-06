@@ -23,7 +23,6 @@
   "custom_address": "",
   "default_address": "",
   "desc": "",
-  "is_delete": true,
   "tags": "$[]tag",
   "persons": "$[]person",
   "date": "",
@@ -31,5 +30,9 @@
   "isFromPicture": 0,
   "coord_type": "GCJ02",
   "localImages": "$[]picture",
+<<<<<<< HEAD
   "uuid": "adf89989adsfaf9098a0fa0s9df0"
+=======
+  "is_deleted":0
+>>>>>>> develop
 }

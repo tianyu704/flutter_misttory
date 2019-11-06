@@ -70,6 +70,7 @@ class DBManager {
     mslocationFields["coordType"] = Field(FieldType.Text);
     mslocationFields["is_delete"] = Field(FieldType.Boolean);
     mslocationFields["pictures"] = Field(FieldType.Text);
+    mslocationFields["is_deleted"] = Field(FieldType.Real);
     mslocationFields["isFromPicture"] = Field(FieldType.Real);
 
     ///故事表
@@ -100,6 +101,7 @@ class DBManager {
     storyFields["desc"] = Field(FieldType.Text);
     storyFields["interval_time"] = Field(FieldType.Real);
     storyFields["is_delete"] = Field(FieldType.Boolean);
+    storyFields["is_deleted"] = Field(FieldType.Real);
     storyFields["pictures"] = Field(FieldType.Text);
     storyFields["isFromPicture"] = Field(FieldType.Real);
     storyFields["coord_type"] = Field(FieldType.Text);
@@ -134,7 +136,6 @@ class DBManager {
     pictureFields["creationDate"] = Field(FieldType.Real);
     pictureFields["isSynced"] = Field(FieldType.Real);
     pictureFields["path"] = Field(FieldType.Text);
-    mslocationFields["is_delete"] = Field(FieldType.Boolean);
 
     await FlutterOrmPlugin.createTable(
         dbName, tableMSLocation, mslocationFields);

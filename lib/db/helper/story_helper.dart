@@ -154,7 +154,9 @@ class StoryHelper {
   Future<List<Story>> findAllStories() async {
     List result = await Query(DBManager.tableStory).whereByColumFilters([
       WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
-          LocationConfig.judgeUsefulLocation)
+          LocationConfig.judgeUsefulLocation),
+    WhereCondiction(
+        "is_deleted", WhereCondictionType.NOT_IN, [1])
     ]).all();
     List<Story> list = [];
 
@@ -176,7 +178,7 @@ class StoryHelper {
     List result = await Query(DBManager.tableStory)
         .orderBy(["create_time desc"])
         .whereBySql(
-            "update_time < ? and (isFromPicture = ? or interval_time >= ?)",
+            "update_time < ? and (isFromPicture = ? or interval_time >= ?) and is_deleted != 1",
             [time, 1, LocationConfig.interval])
         .limit(20)
         .all();
@@ -209,7 +211,9 @@ class StoryHelper {
       List result = await Query(DBManager.tableStory)
           .orderBy(["create_time"]).whereByColumFilters([
         WhereCondiction("create_time", WhereCondictionType.MORE_THEN,
-            checkedStories[0].createTime)
+            checkedStories[0].createTime),
+        WhereCondiction(
+            "is_deleted", WhereCondictionType.NOT_IN, [1])
       ]).all();
       if (result != null && result.length > 0) {
         for (Map item in result) {
@@ -306,7 +310,8 @@ class StoryHelper {
 
   /// 查询最后一条story
   Future<Story> queryLastStory() async {
-    Map result = await Query(DBManager.tableStory).orderBy([
+    Map result = await Query(DBManager.tableStory).whereByColumFilters([WhereCondiction(
+        "is_deleted", WhereCondictionType.NOT_IN, [1])]).orderBy([
       "create_time desc",
     ]).first();
     if (result != null && result.length > 0) {
@@ -317,7 +322,8 @@ class StoryHelper {
 
   /// 查询最早一条story
   Future<Story> queryOldestStory() async {
-    Map result = await Query(DBManager.tableStory).orderBy([
+    Map result = await Query(DBManager.tableStory).whereByColumFilters([WhereCondiction(
+        "is_deleted", WhereCondictionType.NOT_IN, [1])]).orderBy([
       "create_time asc",
     ]).first();
     if (result != null && result.length > 0) {
@@ -349,11 +355,13 @@ class StoryHelper {
 
   /// 查询足迹，相同的story算一个点
   Future<int> getFootprint(List<Story> list) async {
-    List list1 = await Query(DBManager.tableStory).needColums(
+    List list1 = await Query(DBManager.tableStory).whereByColumFilters([WhereCondiction(
+        "is_deleted", WhereCondictionType.NOT_IN, [1])]).needColums(
         ["default_address"]).groupBy(["default_address"]).whereByColumFilters([
       WhereCondiction("custom_address", WhereCondictionType.IS_NULL, true)
     ]).all();
-    List list2 = await Query(DBManager.tableStory).needColums(
+    List list2 = await Query(DBManager.tableStory).whereByColumFilters([WhereCondiction(
+        "is_deleted", WhereCondictionType.NOT_IN, [1])]).needColums(
         ["custom_address"]).groupBy(["custom_address"]).whereByColumFilters([
       WhereCondiction("custom_address", WhereCondictionType.IS_NULL, false)
     ]).all();
@@ -363,7 +371,9 @@ class StoryHelper {
     if (list != null && list.length > 0 && list[0].id == null) {
       List result = await Query(DBManager.tableStory).whereByColumFilters([
         WhereCondiction(
-            "custom_address", WhereCondictionType.IN, [list[0].defaultAddress])
+            "custom_address", WhereCondictionType.IN, [list[0].defaultAddress]),
+        WhereCondiction(
+            "is_deleted", WhereCondictionType.NOT_IN, [1])
       ]).all();
       if (result == null || result?.length == 0) {
         current = 1;
@@ -395,7 +405,7 @@ class StoryHelper {
     story.createTime = location.time;
     story.updateTime = location.updatetime ?? location.time;
     story.intervalTime = location.updatetime - location.time;
-    story.isDelete = false;
+    story.isDeleted = 0;
     story.coordType = location.coordType;
     story.defaultAddress = getDefaultAddress(story);
     story.isFromPicture = location.isFromPicture ?? 0;
@@ -566,12 +576,16 @@ class StoryHelper {
           "create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
       WhereCondiction("update_time", WhereCondictionType.EQ_OR_MORE_THEN,
           location.updatetime),
+      WhereCondiction(
+          "is_deleted", WhereCondictionType.NOT_IN, [1])
     ]).first();
     if (result == null) {
       result = await Query(DBManager.tableStory)
           .orderBy(["create_time desc"]).whereByColumFilters([
         WhereCondiction(
             "create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
+        WhereCondiction(
+            "is_deleted", WhereCondictionType.NOT_IN, [1])
       ]).first();
       if (result != null) {
         Story lastStory = Story.fromJson(Map<String, dynamic>.from(result));
@@ -680,6 +694,15 @@ class StoryHelper {
         .primaryKey([id]).update({"pictures": pictures});
     return true;
   }
+
+
+  ///删除指定的story 状态删除
+  Future deleteTargetStoryWithStoryId(num id) async {
+    await Query(DBManager.tableStory)
+        .primaryKey([id]).update({"is_deleted": 1});
+  }
+
+//
 
   /// 删除无用的story
   Future deleteUnUsefulStory() async {

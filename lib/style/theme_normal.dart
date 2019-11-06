@@ -64,7 +64,10 @@ class ThemeNormal extends ThemeBase {
   Color colorSwitch = Color(0xFF476BE1);
   @override
   Color colorVersionText = Color(0xFF999999);
-
+  @override
+  Color colorProgressBg =  Color(0xFFF1F3F8);
+  @override
+  Color colorProgressSubText =  Color(0x332A355B);
   /// images
   @override
   String imgHomeHeader = "assets/images/img_home_light.png";

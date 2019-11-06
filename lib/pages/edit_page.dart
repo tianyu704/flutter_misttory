@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
+import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/person_helper.dart';
+import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/helper/tag_helper.dart';
 import 'package:misstory/main.dart';
@@ -42,6 +44,13 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///备注
   TextEditingController _descTextFieldVC = TextEditingController();
   FocusNode _descFocusNode = new FocusNode();
+  ///自定义地址编辑
+  TextEditingController _addressTextFieldVC = TextEditingController();
+  FocusNode _addressFocusNode = new FocusNode();
+  ///是否切换编辑地址模式
+  bool isSwitchToEditAddress =  false;
+  ///手写初始的编辑地址
+  String lastHandleEditAddress = "我是上一次手写地址";
 
   ///搜索
   TextEditingController _searchVC = TextEditingController();
@@ -102,6 +111,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
     _descTextFieldVC.text =
         StringUtil.isNotEmpty(widget.story.desc) ? widget.story.desc : "";
+    _addressTextFieldVC.text = lastHandleEditAddress;
     _showTimeStr = DateFormat("MM月dd日 HH:mm").format(
         DateTime.fromMillisecondsSinceEpoch(widget.story.createTime.toInt()));
     _searchVC.addListener(() {
@@ -111,6 +121,9 @@ class _EditPageState extends LifecycleState<EditPage> {
 
     ///
     initData();
+    ///注册监听器
+    WidgetsBinding.instance.addObserver(this);
+
   }
 
   initData() async {
@@ -137,8 +150,24 @@ class _EditPageState extends LifecycleState<EditPage> {
     getPoi();
   }
 
+  @override///WidgetsBindingObserver 监听方法
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    print(MediaQuery.of(context).viewInsets.bottom);
+    if (MediaQuery.of(context).viewInsets.bottom > 0) {///键盘弹出状态
+      ///TODO:
+    } else {
+//      if (_addressFocusNode.is) {
+//        FocusScope.of(context).requestFocus(_addressFocusNode);
+//
+//      }
+    }
+  }
   @override
   void dispose() {
+    ///移除监听器
+    WidgetsBinding.instance.removeObserver(this);
+    ///
     _controller.dispose();
     _searchVC.dispose();
     _descTextFieldVC.dispose();
@@ -315,7 +344,7 @@ class _EditPageState extends LifecycleState<EditPage> {
       height: 48,
       width: double.infinity,
       child: Padding(
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.only(left: 10,right: 10),
         child: Row(
           //mainAxisAlignment: MainAxisAlignment.start,
           //crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,11 +359,29 @@ class _EditPageState extends LifecycleState<EditPage> {
                 height: 14,
               ),
             ),
+//            Offstage(
+//              offstage: !isSwitchToEditAddress,
+//              child: Expanded(
+//                child: Padding(
+//                  padding: EdgeInsets.only(left: 10, bottom: 1),
+//                  child: Text(getShowAddress(widget.story),
+//                      style: AppStyle.locationText14(context)),
+//                ),
+//              ),
+//            ),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.only(left: 10, bottom: 1),
-                child: Text(getShowAddress(widget.story),
-                    style: AppStyle.locationText14(context)),
+                child:  addressTextField(context),
+              ),
+            ),
+            SizedBox(
+              width: 44,
+              height: 44,
+              child: MaterialButton(
+                onPressed: handleStartEditAddress,
+                padding: EdgeInsets.all(0),
+                child: SvgPicture.asset("assets/images/icon_edit.svg"),
               ),
             ),
           ],
@@ -347,6 +394,47 @@ class _EditPageState extends LifecycleState<EditPage> {
 //      },
         );
   }
+
+  ///自定义地址编辑
+  Widget addressTextField(BuildContext context) {
+    return Container(
+//      constraints: BoxConstraints(
+//          minWidth: 80,
+//          maxWidth: 300
+//
+//      ),
+
+      child: TextField(
+        controller: _addressTextFieldVC,
+        focusNode: _addressFocusNode,
+        enabled: isSwitchToEditAddress,
+        minLines: 1,
+        maxLines: 2,
+        textInputAction: TextInputAction.done,
+        decoration: InputDecoration(
+          hintText: "",
+          contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AppStyle.colors(context).colorBgPage),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AppStyle.colors(context).colorBgPage),
+            ),
+            disabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AppStyle.colors(context).colorBgPage),
+            ),
+
+        ),
+        onEditingComplete: () {
+          finishedEditAddress();
+        },
+        style: AppStyle.locationText14(context),//输入文本的样式,
+
+      ),
+
+    );
+  }
+
 
   ///标签编辑
   Widget tagTextField(BuildContext context) {
@@ -451,6 +539,35 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   Widget locationMapView(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        locationMapView1(context),
+        Positioned(
+          bottom: 10.0,
+          right: 8.0,
+          width: 45,
+          height: 45,
+          child: RaisedButton(
+            color: AppStyle.colors(context).colorBgPage,
+            colorBrightness: Brightness.dark,
+            splashColor: Colors.grey,
+            child: SvgPicture.asset(
+              "assets/images/icon_location_delete.svg",
+              width: 18,
+              height: 18,
+            ),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(45 / 2)),
+            onPressed: () {
+              _showAlertView(context);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget locationMapView1(BuildContext context) {
     return SizedBox(
       height: 220,
       width: double.infinity,
@@ -587,6 +704,30 @@ class _EditPageState extends LifecycleState<EditPage> {
         ),
       ),
     );
+  }
+
+  handleStartEditAddress() {
+    String str = _addressTextFieldVC.text;
+    isSwitchToEditAddress = !isSwitchToEditAddress;
+
+    if (isSwitchToEditAddress) {
+      FocusScope.of(context).requestFocus(_addressFocusNode);
+      setState(() {});
+    } else {
+      finishedEditAddress();
+    }
+  }
+  finishedEditAddress() {
+    _addressFocusNode.unfocus();
+    String str = _addressTextFieldVC.text;
+    if (str.length > 0 ) {
+//      finishedAction(_tagTextFieldVC.text);
+//      _tagTextFieldVC.text = "";
+
+    } else {
+        _addressTextFieldVC.text = getShowAddress(widget.story);
+    }
+    setState(() {});
   }
 
   showEmptyWidget(BuildContext context, String title, bool isEnable) {
@@ -782,6 +923,47 @@ class _EditPageState extends LifecycleState<EditPage> {
       showTagList.add(name);
       setState(() {});
     }
+  }
+
+  void _showAlertView(BuildContext cxt) {
+    String title = "确认删除地点 ${getShowAddress(widget.story)} ？";
+    showCupertinoModalPopup<int>(
+        context: cxt,
+        builder: (cxt) {
+          var dialog = CupertinoActionSheet(
+            ///title: Text("This is Title"),
+            message: Text(title),
+            cancelButton: CupertinoActionSheetAction(
+                onPressed: () {
+                  Navigator.pop(cxt, 0);
+                },
+                child: Text("取消")),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                  onPressed: () {
+                    clickDeleteStory();
+                    Navigator.pop(cxt, 1);
+                  },
+                  child: Text(
+                    "删除",
+                    style: TextStyle(color: Colors.red),
+                  )),
+            ],
+          );
+          return dialog;
+        });
+  }
+
+  ///删除当前story
+  clickDeleteStory() async {
+    Story story = widget.story;
+    if (story.id != null) {
+      await StoryHelper().deleteTargetStoryWithStoryId(story.id);
+    }
+    await LocationHelper()
+        .deleteTargetLocationWithTime(story.createTime, story.updateTime);
+    debugPrint("删除完毕");
+    Navigator.pop(context, story);
   }
 
   ///保存编辑页面数据
