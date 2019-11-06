@@ -33,7 +33,8 @@ abstract class ThemeBase {
   Color colorArrowRight;
   Color colorSwitch;
   Color colorVersionText;
-
+  Color colorProgressBg;
+  Color colorProgressSubText;
   /// images
   String imgHomeHeader;
 }

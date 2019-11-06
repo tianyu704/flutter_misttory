@@ -21,6 +21,7 @@ import 'package:misstory/models/story.dart';
 import 'package:misstory/models/tag.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/string_util.dart';
+import 'package:misstory/widgets/loading_pictures_alert.dart';
 import 'package:misstory/widgets/my_appbar.dart';
 import 'package:misstory/widgets/tag_items_widget.dart';
 import 'package:misstory/net/http_manager.dart' as http;
@@ -472,7 +473,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             ),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(45 / 2)),
-            onPressed: (){
+            onPressed: () {
               _showAlertView(context);
             },
           ),
@@ -816,7 +817,6 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   void _showAlertView(BuildContext cxt) {
-
     String title = "确认删除地点 ${getShowAddress(widget.story)} ？";
     showCupertinoModalPopup<int>(
         context: cxt,
@@ -827,14 +827,18 @@ class _EditPageState extends LifecycleState<EditPage> {
             cancelButton: CupertinoActionSheetAction(
                 onPressed: () {
                   Navigator.pop(cxt, 0);
-                }, child: Text("取消")),
+                },
+                child: Text("取消")),
             actions: <Widget>[
               CupertinoActionSheetAction(
                   onPressed: () {
                     clickDeleteStory();
                     Navigator.pop(cxt, 1);
                   },
-                  child: Text("删除",style: TextStyle(color: Colors.red),)),
+                  child: Text(
+                    "删除",
+                    style: TextStyle(color: Colors.red),
+                  )),
             ],
           );
           return dialog;
