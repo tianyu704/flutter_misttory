@@ -1,11 +1,14 @@
 #include "AppDelegate.h"
 #include "GeneratedPluginRegistrant.h"
+#import "FlutterAuthRegistrant.h"
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [GeneratedPluginRegistrant registerWithRegistry:self];
+  FlutterViewController* controller = (FlutterViewController*)self.window.rootViewController;
+  [FlutterAuthRegistrant authRegistrant:controller];
   // Override point for customization after application launch.
       /*********应用kill以后基站定位唤醒*************/
     if ([launchOptions objectForKey:UIApplicationLaunchOptionsLocationKey]) {
