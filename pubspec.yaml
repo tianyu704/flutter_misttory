@@ -114,6 +114,9 @@ flutter:
     - assets/images/icon_edit.svg
     - assets/images/icon_back.svg
     - assets/images/icon_picture_process.svg
+      # images
+    - assets/images/
+    - assets/images/icon_loading_picture_star.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 

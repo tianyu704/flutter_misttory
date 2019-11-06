@@ -84,6 +84,7 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
   double deviceHeight;
   double dialogHeight;
   double progressNum = 0.001;
+  double roundWidth = 72;
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +152,7 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
                       ),
                     ),
                     Positioned(
-                      top: deviceHeight / 7 * 1.5,
+                      top: deviceHeight / 2 - dialogHeight / 2 - (roundWidth+ 22) / 2,
                       child: _defaultTopView(),
                     ),
                   ],
@@ -184,8 +185,8 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
   Widget _defaultIcon() {
     return SizedBox(
       child: SvgPicture.asset("assets/images/icon_picture_process.svg"),
-      width: deviceHeight / 7 / 2,
-      height: deviceHeight / 7 / 2,
+      width: roundWidth / 2,
+      height: roundWidth/ 2,
     );
   }
 
@@ -193,9 +194,15 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
     return Stack(
       alignment: AlignmentDirectional.center,
       children: <Widget>[
+        Container (
+          width: roundWidth + 29 * 2,
+          height: roundWidth+ 22,
+          child: Image.asset("assets/images/icon_loading_picture_star.png"),
+        ),
+
         Container(
-          width: deviceHeight / 7,
-          height: deviceHeight / 7,
+          width: roundWidth,
+          height: roundWidth,
           child: DecoratedBox(
               decoration: BoxDecoration(
                   gradient: RadialGradient(
@@ -204,7 +211,7 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
                       center: Alignment.topLeft,
                       radius: .98),
                   borderRadius: BorderRadius.all(
-                      Radius.circular(deviceHeight / 7 / 2.0)))),
+                      Radius.circular(roundWidth / 2.0)))),
         ),
         _defaultIcon(),
       ],
