@@ -1,22 +1,29 @@
 package com.admqr.misstory;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.admqr.misstory.db.LocationHelper;
 import com.admqr.misstory.model.MSLocation;
 import com.admqr.misstory.service.MainWorkService;
 import com.admqr.misstory.utils.JacksonUtil;
 import com.admqr.misstory.utils.LocationUtil;
+import com.admqr.misstory.utils.LogUtil;
 import com.shihoo.daemon.DaemonEnv;
 
 import java.util.List;
+import java.util.UUID;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
@@ -27,6 +34,9 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     //是否 任务完成, 不再需要服务运行? 最好使用SharePreference，注意要在同一进程中访问该属性
     public static boolean isCanStartWorkService;
     MethodChannel methodChannel;
+    public static int PERMISSION_LOCATION = 100;
+    public static int PERMISSION_STORAGE = 101;
+    MethodChannel.Result result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,14 +45,12 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         methodChannel = new MethodChannel(getFlutterView(), BuildConfig.APPLICATION_ID);
         methodChannel.setMethodCallHandler(this);
         startLive();
-//        if (!LocationUtil.hasPermission(this)) {
-//            LocationUtil.requestPermission(this);
-//        }
     }
 
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
+        this.result = result;
         if (methodCall.method.equals("query_location")) {
             List<MSLocation> locationList = LocationHelper.getInstance().getAllLocation();
             LocationHelper.getInstance().clearLocation();
@@ -51,7 +59,10 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
             } else {
                 result.success("");
             }
-        } else if(methodCall.method.equals("request_location_permission")){
+        } else if (methodCall.method.equals("request_location_permission")) {
+            requestLocationPermission(result);
+        } else if (methodCall.method.equals("request_storage_permission")) {
+            requestStoragePermission(result);
         }
     }
 
@@ -118,5 +129,45 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         }
     }
 
+    //申请定位权限
+    public void requestLocationPermission(MethodChannel.Result result) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            result.success("GRANTED");
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION},
+                    PERMISSION_LOCATION);
+        }
+    }
 
+    //申请存储读写权限
+    public void requestStoragePermission(MethodChannel.Result result) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            result.success("GRANTED");
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE},
+                    PERMISSION_STORAGE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_LOCATION) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                result.success("GRANTED");
+            } else {
+                result.success("DENIED");
+            }
+        } else if (requestCode == PERMISSION_STORAGE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                result.success("GRANTED");
+            } else {
+                result.success("DENIED");
+            }
+        }
+    }
 }

@@ -5,30 +5,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/pages/home_page.dart';
 import 'package:misstory/db/db_manager.dart';
-import 'package:misstory/pages/preloading_page.dart';
 import 'package:misstory/provider/theme_provider.dart';
 import 'package:misstory/utils/common_localization_delegate.dart';
 import 'package:provider/provider.dart';
 
 import 'constant.dart';
-import 'db/helper/picture_helper.dart';
 import 'db/local_storage.dart';
 import 'generated/i18n.dart';
 import 'style/app_style.dart';
-
-bool isStep;
 
 void main() async {
   /// 初始化数据库
   await DBManager.initDB();
   await AMap.init(Constant.iosMapKey);
 //  await StoryHelper().updateAllDefaultAddress();
-
-  ///TODO:此时就要求授权了 等产品逻辑具体化 再修改
-  isStep = (await LocalStorage.get(LocalStorage.isStep)) ?? false;
 //  await StoryHelper().clear();
 //  await PictureHelper().addPath();
 
@@ -76,8 +68,7 @@ class MyApp extends StatelessWidget {
       supportedLocales: S.delegate.supportedLocales,
       localeListResolutionCallback:
           S.delegate.listResolution(fallback: const Locale('zh', '')),
-      home: isStep ? HomePage() : PreLoadingPage(),
-//      home: PreLoadingPage(),
+      home: HomePage(),
     );
   }
 }

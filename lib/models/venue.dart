@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import "location.dart";
+import "flocation.dart";
 part 'venue.g.dart';
 
 @JsonSerializable()
@@ -10,7 +10,7 @@ class Venue {
 
   String name;
 
-  Location location;
+  Flocation location;
 
   String referralId;
 

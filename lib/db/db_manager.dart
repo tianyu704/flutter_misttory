@@ -11,53 +11,66 @@ import 'local_storage.dart';
 ///
 class DBManager {
   static final String dbName = "Misstory";
-  static final String tableLocation = "MSLocation";
+  static final String tableMSLocation = "MSLocation";
+  static final String tableLocation = "Location";
   static final String tableStory = "Story";
   static final String tablePerson = "Person";
   static final String tableTag = "Tag";
   static final String tablePicture = "Picture";
-  static final int dbVersion = 2;
+  static final int dbVersion = 4;
 
   ///初始化
   static initDB() async {
-    /// 位置信息表
+    /// 原始位置信息表
     Map<String, Field> locationFields = new Map<String, Field>();
-    locationFields["id"] =
-        Field(FieldType.Integer, primaryKey: true, autoIncrement: true);
+    locationFields["id"] = Field(FieldType.Text, primaryKey: true);
+    locationFields["time"] = Field(FieldType.Real);
+    locationFields["lat"] = Field(FieldType.Real);
+    locationFields["lon"] = Field(FieldType.Real);
     locationFields["altitude"] = Field(FieldType.Real);
+    locationFields["accuracy"] = Field(FieldType.Real);
+    locationFields["vertical_accuracy"] = Field(FieldType.Real);
     locationFields["speed"] = Field(FieldType.Real);
     locationFields["bearing"] = Field(FieldType.Real);
-    locationFields["citycode"] = Field(FieldType.Text);
-    locationFields["adcode"] = Field(FieldType.Text);
-    locationFields["country"] = Field(FieldType.Text);
-    locationFields["province"] = Field(FieldType.Text);
-    locationFields["city"] = Field(FieldType.Text);
-    locationFields["district"] = Field(FieldType.Text);
-    locationFields["road"] = Field(FieldType.Text);
-    locationFields["street"] = Field(FieldType.Text);
-    locationFields["number"] = Field(FieldType.Text);
-    locationFields["poiname"] = Field(FieldType.Text);
-    locationFields["errorCode"] = Field(FieldType.Integer);
-    locationFields["errorInfo"] = Field(FieldType.Text);
-    locationFields["locationType"] = Field(FieldType.Integer);
-    locationFields["locationDetail"] = Field(FieldType.Text);
-    locationFields["aoiname"] = Field(FieldType.Text);
-    locationFields["address"] = Field(FieldType.Text);
-    locationFields["poiid"] = Field(FieldType.Text);
-    locationFields["floor"] = Field(FieldType.Text);
-    locationFields["description"] = Field(FieldType.Text);
-    locationFields["time"] = Field(FieldType.Real);
-    locationFields["updatetime"] = Field(FieldType.Real);
-    locationFields["provider"] = Field(FieldType.Text);
-    locationFields["lon"] = Field(FieldType.Real);
-    locationFields["lat"] = Field(FieldType.Real);
-    locationFields["accuracy"] = Field(FieldType.Real);
-    locationFields["isOffset"] = Field(FieldType.Boolean);
-    locationFields["isFixLastLocation"] = Field(FieldType.Boolean);
-    locationFields["coordType"] = Field(FieldType.Text);
-    locationFields["is_delete"] = Field(FieldType.Boolean);
-    locationFields["pictures"] = Field(FieldType.Text);
-    locationFields["isFromPicture"] = Field(FieldType.Real);
+
+    /// 位置信息表
+    Map<String, Field> mslocationFields = new Map<String, Field>();
+    mslocationFields["id"] =
+        Field(FieldType.Integer, primaryKey: true, autoIncrement: true);
+    mslocationFields["altitude"] = Field(FieldType.Real);
+    mslocationFields["speed"] = Field(FieldType.Real);
+    mslocationFields["bearing"] = Field(FieldType.Real);
+    mslocationFields["citycode"] = Field(FieldType.Text);
+    mslocationFields["adcode"] = Field(FieldType.Text);
+    mslocationFields["country"] = Field(FieldType.Text);
+    mslocationFields["province"] = Field(FieldType.Text);
+    mslocationFields["city"] = Field(FieldType.Text);
+    mslocationFields["district"] = Field(FieldType.Text);
+    mslocationFields["road"] = Field(FieldType.Text);
+    mslocationFields["street"] = Field(FieldType.Text);
+    mslocationFields["number"] = Field(FieldType.Text);
+    mslocationFields["poiname"] = Field(FieldType.Text);
+    mslocationFields["errorCode"] = Field(FieldType.Integer);
+    mslocationFields["errorInfo"] = Field(FieldType.Text);
+    mslocationFields["locationType"] = Field(FieldType.Integer);
+    mslocationFields["locationDetail"] = Field(FieldType.Text);
+    mslocationFields["aoiname"] = Field(FieldType.Text);
+    mslocationFields["address"] = Field(FieldType.Text);
+    mslocationFields["poiid"] = Field(FieldType.Text);
+    mslocationFields["floor"] = Field(FieldType.Text);
+    mslocationFields["description"] = Field(FieldType.Text);
+    mslocationFields["time"] = Field(FieldType.Real);
+    mslocationFields["updatetime"] = Field(FieldType.Real);
+    mslocationFields["provider"] = Field(FieldType.Text);
+    mslocationFields["lon"] = Field(FieldType.Real);
+    mslocationFields["lat"] = Field(FieldType.Real);
+    mslocationFields["accuracy"] = Field(FieldType.Real);
+    mslocationFields["isOffset"] = Field(FieldType.Boolean);
+    mslocationFields["isFixLastLocation"] = Field(FieldType.Boolean);
+    mslocationFields["coordType"] = Field(FieldType.Text);
+    mslocationFields["is_delete"] = Field(FieldType.Boolean);
+    mslocationFields["pictures"] = Field(FieldType.Text);
+    mslocationFields["isFromPicture"] = Field(FieldType.Real);
 
     ///故事表
     Map<String, Field> storyFields = new Map<String, Field>();
@@ -90,6 +103,7 @@ class DBManager {
     storyFields["pictures"] = Field(FieldType.Text);
     storyFields["isFromPicture"] = Field(FieldType.Real);
     storyFields["coord_type"] = Field(FieldType.Text);
+    storyFields["uuid"] = Field(FieldType.Text);
 
     ///tag表
     Map<String, Field> tagFields = new Map<String, Field>();
@@ -110,6 +124,7 @@ class DBManager {
     ///picture表
     Map<String, Field> pictureFields = new Map<String, Field>();
     pictureFields["id"] = Field(FieldType.Text, primaryKey: true);
+    pictureFields["story_uuid"] = Field(FieldType.Text);
     pictureFields["story_id"] =
         Field(FieldType.Real, foreignKey: true, to: "${dbName}_$tableStory");
     pictureFields["lat"] = Field(FieldType.Real);
@@ -119,19 +134,21 @@ class DBManager {
     pictureFields["creationDate"] = Field(FieldType.Real);
     pictureFields["isSynced"] = Field(FieldType.Real);
     pictureFields["path"] = Field(FieldType.Text);
-    locationFields["is_delete"] = Field(FieldType.Boolean);
+    mslocationFields["is_delete"] = Field(FieldType.Boolean);
 
-    await FlutterOrmPlugin.createTable(dbName, tableLocation, locationFields);
+    await FlutterOrmPlugin.createTable(
+        dbName, tableMSLocation, mslocationFields);
     await FlutterOrmPlugin.createTable(dbName, tableStory, storyFields);
     await FlutterOrmPlugin.createTable(dbName, tableTag, tagFields);
     await FlutterOrmPlugin.createTable(dbName, tablePerson, personFields);
     await FlutterOrmPlugin.createTable(dbName, tablePicture, pictureFields);
+    await FlutterOrmPlugin.createTable(dbName, tableLocation, locationFields);
 
     dynamic oldVersion = await LocalStorage.get(LocalStorage.dbVersion);
     if (oldVersion == null) {
       oldVersion = 0;
     }
-    if (oldVersion == 0) {
+    if (oldVersion < 1) {
 //      print("xxxxxxxxxxxxxxx");
       ///处理更新数据库操作
       //新添加的字段附上默认值
@@ -143,8 +160,19 @@ class DBManager {
       await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
     }
 
-    if(oldVersion < dbVersion){
+    if (oldVersion < 2) {
       await StoryHelper().updateAllDefaultAddress();
+      await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
+    }
+//    await LocalStorage.saveInt(LocalStorage.dbVersion, 3);
+    if (oldVersion < 4) {
+      await PictureHelper().clear();
+      await StoryHelper().clear();
+      await LocationHelper().deletePictureLocation();
+      await LocalStorage.saveBool(LocalStorage.isStep, false);
+      await LocationHelper().separateOldLocation();
+      await LocationHelper().createStoryByOldLocation();
+      await StoryHelper().updateUUID();
       await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
     }
   }

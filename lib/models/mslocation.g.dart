@@ -42,7 +42,8 @@ Mslocation _$MslocationFromJson(Map<String, dynamic> json) {
     ..coordType = json['coordType'] as String
     ..isDelete = json['is_delete'] as bool
     ..pictures = json['pictures'] as String
-    ..isFromPicture = json['isFromPicture'] as num;
+    ..isFromPicture = json['isFromPicture'] as num
+    ..radius = json['radius'] as num;
 }
 
 Map<String, dynamic> _$MslocationToJson(Mslocation instance) =>
@@ -82,4 +83,5 @@ Map<String, dynamic> _$MslocationToJson(Mslocation instance) =>
       'is_delete': instance.isDelete,
       'pictures': instance.pictures,
       'isFromPicture': instance.isFromPicture,
+      'radius': instance.radius,
     };

@@ -6,5 +6,6 @@
   "lat" : 1.0,
   "lon" : 1.0,
   "path": "",
-  "isSynced" : 0
+  "isSynced" : 0,
+  "story_uuid": "adfasdfasdfasf"
 }

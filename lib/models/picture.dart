@@ -22,6 +22,8 @@ class Picture {
 
   num isSynced;
 
+  String storyUuid;
+
   factory Picture.fromJson(Map<String, dynamic> json) => _$PictureFromJson(json);
 
   Map<String, dynamic> toJson() => _$PictureToJson(this);

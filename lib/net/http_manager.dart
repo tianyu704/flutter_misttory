@@ -3,9 +3,9 @@ import 'dart:collection';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/constant.dart';
+import 'package:misstory/models/flocation.dart';
 import 'package:misstory/models/foursquare.dart';
 import 'package:misstory/models/latlonpoint.dart';
-import 'package:misstory/models/location.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/poilocation.dart';
 import 'package:misstory/models/venue.dart';
@@ -139,7 +139,7 @@ Future<Mslocation> requestLocation(Mslocation mslocation) async {
           mslocation.aoiname = venue.name;
           mslocation.poiname = venue.name;
           if (venue.location != null) {
-            Location location = venue.location;
+            Flocation location = venue.location;
             if (!StringUtil.isEmpty(location.country)) {
               mslocation.country = location.country;
             }

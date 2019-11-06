@@ -84,6 +84,8 @@ class Story {
 
   List<Picture> localImages;
 
+  String uuid;
+
   factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
 
   Map<String, dynamic> toJson() => _$StoryToJson(this);
