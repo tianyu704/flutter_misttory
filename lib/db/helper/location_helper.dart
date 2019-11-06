@@ -369,8 +369,6 @@ class LocationHelper {
   Future<l.Location> queryLastLocation() async {
     Map result = await Query(DBManager.tableLocation).orderBy([
       "time desc",
-    ]).whereByColumFilters([
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
     ]).first();
     if (result != null && result.length > 0) {
       return l.Location.fromJson(Map<String, dynamic>.from(result));
@@ -383,7 +381,6 @@ class LocationHelper {
     Map result = await Query(DBManager.tableLocation).orderBy([
       "time asc",
     ]).whereByColumFilters([
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1]),
       WhereCondiction("errorCode", WhereCondictionType.IN, [0])
     ]).first();
     if (result != null && result.length > 0) {
