@@ -8,35 +8,39 @@
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:amap_base/amap_base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 
 import 'package:misstory/main.dart';
+import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/picture.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/utils/calculate_util.dart';
+import 'package:uuid/uuid.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+//  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+//    // Build our app and trigger a frame.
+//    await tester.pumpWidget(MyApp());
+//
+//    // Verify that our counter starts at 0.
+//    expect(find.text('0'), findsOneWidget);
+//    expect(find.text('1'), findsNothing);
+//
+//    // Tap the '+' icon and trigger a frame.
+//    await tester.tap(find.byIcon(Icons.add));
+//    await tester.pump();
+//
+//    // Verify that our counter has incremented.
+//    expect(find.text('0'), findsNothing);
+//    expect(find.text('1'), findsOneWidget);
+//  });
 
   test("testa", () async {
     print("===");
-    print(await StoryHelper().getDistanceBetween1());
+//    print(await StoryHelper().getDistanceBetween1());
   });
 
   test("separate", () async {
@@ -77,18 +81,18 @@ void main() {
     print(a == b);
   });
 
-  test("remove", () {
-    List<String> a = ["a", "b", "c", "d", "e"];
-    for (String item in a) {
-      if (item == "a") {
-        a.remove(item);
-      }
-      if (item == "b") {
-        a.remove(item);
-      }
-    }
-    print(a);
-  });
+//  test("remove", () {
+//    List<String> a = ["a", "b", "c", "d", "e"];
+//    for (String item in a) {
+//      if (item == "a") {
+//        a.remove(item);
+//      }
+//      if (item == "b") {
+//        a.remove(item);
+//      }
+//    }
+//    print(a);
+//  });
   test("aaaa", () async {
 //    testa(0).then((v) {
 //      print("11$v");
@@ -123,6 +127,35 @@ void main() {
     p=picture;
     convert(picture);
     print(p.path);
+  });
+
+  test("distance",()async{
+    LatLng latLng1 = LatLng(39.841131,116.431685);
+    LatLng latLng2 = LatLng(39.839688,116.431654);
+    num m = DateTime.now().millisecondsSinceEpoch;
+    num a =await CalculateUtil.calculateLineDistance(latLng1, latLng2);
+//    num b =await CalculateUtil.calculateLineDistance(latLng1, latLng2);
+//    num c =await CalculateUtil.calculateLineDistance(latLng1, latLng2);
+//    num d =await CalculateUtil.calculateLineDistance(latLng1, latLng2);
+    print(DateTime.now().millisecondsSinceEpoch - m);
+    print(a);
+    //85305.78125
+  });
+
+  test("aa",(){
+    Mslocation mslocation = Mslocation();
+    print(1 != mslocation.isFromPicture);
+  });
+
+  test("uuid",(){
+    Uuid uuid = Uuid();
+    print(uuid.v1());
+    print(uuid.v1());
+    print(uuid.v1());
+    print(uuid.v4());
+    print(uuid.v4());
+    print(uuid.v4());
+    print(uuid.v4());
   });
 }
 

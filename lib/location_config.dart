@@ -4,7 +4,7 @@
 ///
 class LocationConfig {
   /// 判断2个点距离是否超出judgeDistanceNum
-  static final judgeDistanceNum = 5000;
+  static final judgeDistanceNum = 3000;
 
   /// 每隔interval毫秒定位一次
   static final interval = 60 * 1000 * 3;
@@ -20,4 +20,10 @@ class LocationConfig {
 
   /// poi搜索范围半径
   static final poiSearchInterval = 1000;
+
+  /// 图片经纬度半径,判断是否在同一位置
+  static final pictureRadius = 100;
+
+  /// 地点经纬度半径,判断是否在同一位置
+  static final locationRadius = 100;
 }

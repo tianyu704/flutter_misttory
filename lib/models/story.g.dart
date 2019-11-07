@@ -47,6 +47,7 @@ Story _$StoryFromJson(Map<String, dynamic> json) {
         ?.map((e) =>
             e == null ? null : Picture.fromJson(e as Map<String, dynamic>))
         ?.toList()
+    ..uuid = json['uuid'] as String
     ..isDeleted = json['is_deleted'] as num;
 }
 
@@ -82,5 +83,6 @@ Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
       'isFromPicture': instance.isFromPicture,
       'coord_type': instance.coordType,
       'localImages': instance.localImages,
+      'uuid': instance.uuid,
       'is_deleted': instance.isDeleted,
     };

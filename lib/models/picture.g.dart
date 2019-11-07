@@ -15,7 +15,8 @@ Picture _$PictureFromJson(Map<String, dynamic> json) {
     ..lat = json['lat'] as num
     ..lon = json['lon'] as num
     ..path = json['path'] as String
-    ..isSynced = json['isSynced'] as num;
+    ..isSynced = json['isSynced'] as num
+    ..storyUuid = json['story_uuid'] as String;
 }
 
 Map<String, dynamic> _$PictureToJson(Picture instance) => <String, dynamic>{
@@ -27,4 +28,5 @@ Map<String, dynamic> _$PictureToJson(Picture instance) => <String, dynamic>{
       'lon': instance.lon,
       'path': instance.path,
       'isSynced': instance.isSynced,
+      'story_uuid': instance.storyUuid,
     };

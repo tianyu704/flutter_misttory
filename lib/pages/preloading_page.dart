@@ -9,8 +9,7 @@ import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/local_storage.dart';
 import 'package:misstory/eventbus/event_bus_util.dart';
-import 'package:misstory/eventbus/refresh_after_pic_finish.dart';
-import 'package:misstory/eventbus/refresh_day.dart';
+import 'package:misstory/eventbus/refresh_progress.dart';
 import 'package:misstory/pages/home_page.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -29,18 +28,15 @@ class PreLoadingPage extends StatefulWidget {
 
 class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
   StreamSubscription _refreshSubscription;
-  StreamSubscription _refreshHomeSubscription;
   int count = 0;
-  bool _afterTimeFinish = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _refreshSubscription = EventBusUtil.listen<RefreshDay>((refreshDay) async {
+    _refreshSubscription = EventBusUtil.listen<RefreshProgress>((refreshDay) async {
       count++;
-      if (count > 50 && _afterTimeFinish) {
-        _afterTimeFinish = false;
+      if (count > 50) {
         LocalStorage.saveBool(LocalStorage.isStep, true);
         Navigator.of(context)
             .pushReplacement(MaterialPageRoute(builder: (context) {
@@ -48,24 +44,20 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
         }));
       }
     });
-    _refreshHomeSubscription =
-        EventBusUtil.listen<ConvertAfterPictureFinish>((refreshHome) async {
-      _afterTimeFinish = true;
-    });
     _createPictures();
   }
 
   _createPictures() async {
-    await PictureHelper().fetchAppSystemPicture();
+    await PictureHelper().checkSystemPicture();
     if (await PictureHelper().getPictureSyc() > 50) {
       LocalStorage.saveBool(LocalStorage.isStep, true);
       Navigator.of(context)
           .pushReplacement(MaterialPageRoute(builder: (context) {
         return HomePage();
       }));
-      await PictureHelper().convertPicturesToLocations();
+      await PictureHelper().checkUnSyncedPicture();
     } else {
-      await PictureHelper().convertPicturesToLocations();
+      await PictureHelper().checkUnSyncedPicture();
       if (mounted) {
         LocalStorage.saveBool(LocalStorage.isStep, true);
         Navigator.of(context)
@@ -74,8 +66,7 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
         }));
       }
     }
-    PermissionHandler()
-        .requestPermissions([PermissionGroup.locationAlways]);
+    PermissionHandler().requestPermissions([PermissionGroup.locationAlways]);
   }
 
   @override
@@ -116,7 +107,6 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
   void dispose() {
     // TODO: implement dispose
     _refreshSubscription.cancel();
-    _refreshHomeSubscription.cancel();
     super.dispose();
   }
 }

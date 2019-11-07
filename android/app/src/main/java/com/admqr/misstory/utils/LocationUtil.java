@@ -121,6 +121,7 @@ public class LocationUtil {
     private LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
+            LogUtil.d(TAG,JacksonUtil.getInstance().writeValueAsString(location));
             Log.d(TAG, "onLocationChanged:" + location.getLatitude() + "," + location.getLongitude());
             if (msLocationListener != null && location != null) {
 //                geocodeAddress = new GeocodeAddress();

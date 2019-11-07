@@ -81,6 +81,8 @@ class Story {
 
   List<Picture> localImages;
 
+  String uuid;
+
   @JsonKey(name: "is_deleted")
   num isDeleted;
 

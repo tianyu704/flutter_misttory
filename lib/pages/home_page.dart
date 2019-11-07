@@ -3,17 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_amap_location_plugin/amap_location_lib.dart' as amap;
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
-import 'package:intl/intl.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/eventbus/event_bus_util.dart';
-import 'package:misstory/eventbus/refresh_day.dart';
-import 'package:misstory/eventbus/refresh_after_pic_finish.dart';
+import 'package:misstory/eventbus/refresh_progress.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/coord_type.dart';
 import 'package:misstory/models/mslocation.dart';
@@ -21,8 +17,9 @@ import 'package:misstory/models/story.dart';
 import 'package:misstory/pages/pictures_page.dart';
 import 'package:misstory/pages/pois_page.dart';
 import 'package:misstory/style/app_style.dart';
+import 'package:misstory/utils/channel_util.dart';
 import 'package:misstory/utils/date_util.dart';
-import 'package:misstory/utils/string_util.dart';
+import 'package:misstory/utils/print_util.dart';
 import 'package:misstory/widgets/location_item.dart';
 import 'package:misstory/widgets/refresh_grouped_listview.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -56,36 +53,34 @@ class _HomePageState extends LifecycleState<HomePage> {
   bool _isDealWithLocation = false;
   Story _currentStory;
   StreamSubscription _refreshSubscription;
-  StreamSubscription _refreshHomeSubscription;
   bool hasBuild = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _syncPictures();
     _checkPermission();
     _startTimerRefresh();
-
-    _refreshSubscription = EventBusUtil.listen<RefreshDay>((refreshDay) async {
+    _refreshSubscription =
+        EventBusUtil.listen<RefreshProgress>((refreshProgress) async {
       _day = await StoryHelper().getStoryDays();
       _footprint = await StoryHelper().getFootprint(_storiesAll);
       _refreshController.loadComplete();
       if (mounted && hasBuild) {
         setState(() {});
       }
-    });
-
-    _refreshHomeSubscription =
-        EventBusUtil.listen<ConvertAfterPictureFinish>((refreshHome) async {
-      _refreshStory();
+      if (_isFirstLoad &&
+          (refreshProgress.finish() || refreshProgress.progress > 50)) {
+        _refreshStory();
+      }
     });
   }
 
   ///同步图片逻辑
   _syncPictures() async {
+    await PictureHelper().checkSystemPicture();
     if (!PictureHelper().isPictureConverting) {
-      PictureHelper().convertPicturesToLocations();
+      await PictureHelper().checkUnSyncedPicture();
     }
   }
 
@@ -102,13 +97,14 @@ class _HomePageState extends LifecycleState<HomePage> {
   ///刷新最新的story
   _refreshStory() async {
     await LocationHelper().saveLocation();
-    await LocationHelper().createStoryByLocation();
+//    await LocationHelper().createStoryByLocation();
     _currentStory = await StoryHelper().getCurrentStory();
     if (_isFirstLoad) {
-      _isFirstLoad = false;
-
       ///初次加载需要查询前20条数据
       _stories = await StoryHelper().queryMoreHistories();
+      if (_stories != null && _stories.length > 0) {
+        _isFirstLoad = false;
+      }
     } else {
       /// 刷新时获取最新的story
       _stories = await StoryHelper().checkLatestStory(_stories);
@@ -126,18 +122,11 @@ class _HomePageState extends LifecycleState<HomePage> {
     List<Story> temp = [];
     if (_currentStory != null) {
       if (_stories != null && _stories.length > 0) {
-        if (await StoryHelper().judgeSamePlace(_currentStory, _stories[0])) {
-          _stories[0].updateTime = DateTime.now().millisecondsSinceEpoch;
-          _stories[0].intervalTime =
-              _stories[0].updateTime - _stories[0].createTime;
-          _stories[0].pictures = _currentStory.pictures;
-          temp.addAll(_stories);
-        } else {
+        if (_currentStory.intervalTime < LocationConfig.interval &&
+            _currentStory.isFromPicture != 1) {
           temp.add(_currentStory);
-          temp.addAll(_stories);
         }
-        Story story = temp.removeAt(0);
-        temp.insertAll(0, await StoryHelper().separateStory(story));
+        temp.addAll(_stories);
       } else {
         temp.add(_currentStory);
       }
@@ -153,13 +142,17 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   ///加载更多
   _loadMore() async {
+    print("lllllllllllllllllllllllllllllllllllllll");
     if (_isLoading) {
       return;
     }
-    if (!_isLoading && _stories != null && _stories.length > 0) {
+    if (!_isLoading) {
       _isLoading = true;
-      List<Story> list = await StoryHelper()
-          .queryMoreHistories(time: _stories[_stories.length - 1].updateTime);
+      num time;
+      if (_stories != null && _stories.length > 0) {
+        time = _stories[_stories.length - 1].updateTime;
+      }
+      List<Story> list = await StoryHelper().queryMoreHistories(time: time);
       if (list != null && list.length > 0) {
         _stories.addAll(list);
         _refreshController.loadComplete();
@@ -176,25 +169,28 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   /// 检查权限
   void _checkPermission() async {
-//    print("=========start");
-//    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
-//    print("=========pass1");
-//    await PermissionHandler()
-//        .requestPermissions([PermissionGroup.locationAlways]);
-//    print("=========pass2");
-//    PermissionStatus permissionLocation = await PermissionHandler()
-//        .checkPermissionStatus(PermissionGroup.locationAlways);
-//    PermissionStatus permissionStorage = await PermissionHandler()
-//        .checkPermissionStatus(PermissionGroup.storage);
-//    print("=========$permissionLocation,$permissionStorage");
-//    if (Platform.isAndroid &&
-//        permissionLocation == PermissionStatus.granted &&
-//        permissionStorage == PermissionStatus.granted) {
-//      _initLocation();
-//    } else if (Platform.isIOS &&
-//        permissionLocation == PermissionStatus.granted) {
-      _initLocation();
-//    }
+    if (Platform.isAndroid) {
+      PrintUtil.debugPrint("=========start");
+      bool pass1 = await ChannelUtil().requestStoragePermission();
+      PrintUtil.debugPrint("=========$pass1");
+      bool pass2 = await ChannelUtil().requestLocationPermission();
+      PrintUtil.debugPrint("=========$pass2");
+      if (pass1) {
+        _syncPictures();
+      }
+      if (pass2) {
+        _initLocation();
+      }
+    } else {
+      _syncPictures();
+      await PermissionHandler()
+          .requestPermissions([PermissionGroup.locationAlways]);
+      PermissionStatus permissionLocation = await PermissionHandler()
+          .checkPermissionStatus(PermissionGroup.locationAlways);
+      if (permissionLocation == PermissionStatus.granted) {
+        _initLocation();
+      }
+    }
   }
 
   ///初始化并开始定位
@@ -308,11 +304,11 @@ class _HomePageState extends LifecycleState<HomePage> {
         TextSpan(
           children: [
             TextSpan(
-                text: " ${_day == 0 ? "1" : _day}",
+                text: " ${_day == 0 ? "-" : _day}",
                 style: AppStyle.primaryText28(context)),
             TextSpan(text: " 天 ", style: AppStyle.contentText16(context)),
             TextSpan(
-                text: "${_footprint == 0 ? "0" : _footprint}",
+                text: "${_footprint == 0 ? "-" : _footprint}",
                 style: AppStyle.primaryText28(context)),
             TextSpan(text: " 个足迹", style: AppStyle.contentText16(context)),
           ],
@@ -405,10 +401,10 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   Future refreshNewPictures() async {
-    await PictureHelper().fetchAppSystemPicture();
+    await PictureHelper().checkSystemPicture();
     await PictureHelper().checkPicture();
     if (!PictureHelper().isPictureConverting) {
-      await PictureHelper().convertPicturesAfterTime(0);
+      await PictureHelper().checkUnSyncedPicture();
     }
   }
 
@@ -444,7 +440,6 @@ class _HomePageState extends LifecycleState<HomePage> {
     // TODO: implement dispose
     _subscription.cancel();
     _refreshSubscription.cancel();
-    _refreshHomeSubscription.cancel();
     _aMapLocation.dispose();
     _refreshController.dispose();
     _timer?.cancel();

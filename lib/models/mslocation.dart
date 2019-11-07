@@ -74,6 +74,8 @@ class Mslocation {
 
   num isFromPicture;
 
+  num radius;
+
   @JsonKey(name: "is_deleted")
   num isDeleted;
 

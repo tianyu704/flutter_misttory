@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:event_bus/event_bus.dart';
-import 'package:misstory/eventbus/refresh_day.dart';
-import 'package:misstory/eventbus/refresh_after_pic_finish.dart';
+import 'package:misstory/eventbus/refresh_progress.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -10,13 +9,8 @@ import 'package:misstory/eventbus/refresh_after_pic_finish.dart';
 ///
 
 class EventBusUtil {
-
-  static fireRefreshDay() {
-    eventBus.fire(RefreshDay());
-  }
-
-  static fireConvertAfterPictureFinish() {
-    eventBus.fire(ConvertAfterPictureFinish());
+  static fireRefreshProgress(num total, num progress) {
+    eventBus.fire(RefreshProgress(total, progress));
   }
 
   static StreamSubscription<T> listen<T>(void onData(T event)) {

@@ -8,25 +8,25 @@ part of 'location.dart';
 
 Location _$LocationFromJson(Map<String, dynamic> json) {
   return Location()
-    ..address = json['address'] as String
+    ..id = json['id'] as String
+    ..time = json['time'] as num
     ..lat = json['lat'] as num
-    ..lng = json['lng'] as num
-    ..distance = json['distance'] as num
-    ..postalCode = json['postalCode'] as String
-    ..cc = json['cc'] as String
-    ..city = json['city'] as String
-    ..state = json['state'] as String
-    ..country = json['country'] as String;
+    ..lon = json['lon'] as num
+    ..altitude = json['altitude'] as num
+    ..accuracy = json['accuracy'] as num
+    ..verticalAccuracy = json['vertical_accuracy'] as num
+    ..speed = json['speed'] as num
+    ..bearing = json['bearing'] as num;
 }
 
 Map<String, dynamic> _$LocationToJson(Location instance) => <String, dynamic>{
-      'address': instance.address,
+      'id': instance.id,
+      'time': instance.time,
       'lat': instance.lat,
-      'lng': instance.lng,
-      'distance': instance.distance,
-      'postalCode': instance.postalCode,
-      'cc': instance.cc,
-      'city': instance.city,
-      'state': instance.state,
-      'country': instance.country,
+      'lon': instance.lon,
+      'altitude': instance.altitude,
+      'accuracy': instance.accuracy,
+      'vertical_accuracy': instance.verticalAccuracy,
+      'speed': instance.speed,
+      'bearing': instance.bearing,
     };

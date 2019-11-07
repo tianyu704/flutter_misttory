@@ -12,7 +12,7 @@ Venue _$VenueFromJson(Map<String, dynamic> json) {
     ..name = json['name'] as String
     ..location = json['location'] == null
         ? null
-        : Location.fromJson(json['location'] as Map<String, dynamic>)
+        : Flocation.fromJson(json['location'] as Map<String, dynamic>)
     ..referralId = json['referralId'] as String
     ..hasPerk = json['hasPerk'] as bool;
 }

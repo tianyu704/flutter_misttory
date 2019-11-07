@@ -6,23 +6,24 @@ part 'location.g.dart';
 class Location {
   Location();
 
-  String address;
+  String id;
+
+  num time;
 
   num lat;
 
-  num lng;
+  num lon;
 
-  num distance;
+  num altitude;
 
-  String postalCode;
+  num accuracy;
 
-  String cc;
+  @JsonKey(name: "vertical_accuracy")
+  num verticalAccuracy;
 
-  String city;
+  num speed;
 
-  String state;
-
-  String country;
+  num bearing;
 
   factory Location.fromJson(Map<String, dynamic> json) => _$LocationFromJson(json);
 

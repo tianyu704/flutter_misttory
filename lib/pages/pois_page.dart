@@ -2,13 +2,14 @@ import 'package:amap_base/amap_base.dart';
 import 'package:flutter/material.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:local_image_provider/local_image.dart';
-import 'package:local_image_provider/local_image_provider.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/local_storage.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/net/http_manager.dart' as http;
+import 'package:misstory/utils/channel_util.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -32,6 +33,48 @@ class _SearchPageState extends LifecycleState<SearchPage> {
   AMapSearch _aMapSearch = AMapSearch();
   List<LocalImage> images;
   String _result = "adfasfas";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    requestPermission();
+  }
+
+  requestPermission() async {
+    print("=========start");
+    bool allow1 = await ChannelUtil().requestLocationPermission();
+    if (allow1) {
+      print("=========granted1");
+    } else {
+      print("=========denied1");
+    }
+    bool allow2 = await ChannelUtil().requestStoragePermission();
+    if (allow2) {
+      print("=========granted2");
+    } else {
+      print("=========denied2");
+    }
+//    await PermissionHandler().requestPermissions(
+//        [PermissionGroup.storage, PermissionGroup.locationAlways]);
+    print("=========pass1");
+//    await PermissionHandler()
+//        .requestPermissions([PermissionGroup.locationAlways]);
+//    print("=========pass2");
+//    PermissionStatus permissionLocation = await PermissionHandler()
+//        .checkPermissionStatus(PermissionGroup.locationAlways);
+//    PermissionStatus permissionStorage = await PermissionHandler()
+//        .checkPermissionStatus(PermissionGroup.storage);
+//    print("=========$permissionLocation,$permissionStorage");
+//    if (Platform.isAndroid &&
+//        permissionLocation == PermissionStatus.granted &&
+//        permissionStorage == PermissionStatus.granted) {
+//      _syncPictures();
+//    } else if (Platform.isIOS &&
+//        permissionLocation == PermissionStatus.granted) {
+//      _syncPictures();
+//    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +147,16 @@ class _SearchPageState extends LifecycleState<SearchPage> {
 //                    }
                       },
                       child: Text("foursquare获取"),
+                    ),
+                    RaisedButton(
+                      onPressed: () async {
+                        LatLng latLng1 = LatLng(39.898923, 116.48666);
+                        LatLng latLng2 = LatLng(39.898923, 116.48566);
+                        num a = await CalculateTools()
+                            .calcDistance(latLng1, latLng2);
+                        print(a);
+                      },
+                      child: Text("计算距离"),
                     )
                   ],
                 ),
