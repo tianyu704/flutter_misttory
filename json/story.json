@@ -32,5 +32,6 @@
   "localImages": "$[]picture",
   "uuid": "adf89989adsfaf9098a0fa0s9df0",
   "is_deleted":0,
-  "write_address": "手动修改地址"
+  "write_address": "手动修改地址",
+  "radius": 100
 }

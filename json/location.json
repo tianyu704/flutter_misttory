@@ -7,5 +7,6 @@
   "accuracy": 30,
   "vertical_accuracy": 0.0,
   "speed": 1.23,
-  "bearing": 325.19608
+  "bearing": 325.19608,
+  "count": 1
 }

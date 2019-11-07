@@ -94,7 +94,7 @@ class PictureHelper {
       if (afterStory != null &&
           DateUtil.isSameDay(afterStory.createTime, p.creationDate) &&
           await CalculateUtil.calculatePictureDistance(afterStory, p) <
-              LocationConfig.pictureRadius) {
+              afterStory.radius) {
         afterStory.createTime = p.creationDate;
         await updatePictureStoryUuid(p.id, afterStory.uuid);
         await StoryHelper().updateStoryTimes(afterStory);
@@ -104,7 +104,7 @@ class PictureHelper {
         if (beforeStory != null &&
             DateUtil.isSameDay(beforeStory.updateTime, p.creationDate) &&
             await CalculateUtil.calculatePictureDistance(beforeStory, p) <
-                LocationConfig.pictureRadius) {
+                beforeStory.radius) {
           beforeStory.updateTime = p.creationDate;
           await updatePictureStoryUuid(p.id, beforeStory.uuid);
           await StoryHelper().updateStoryTimes(beforeStory);
@@ -129,6 +129,7 @@ class PictureHelper {
             mslocation.time = p.creationDate;
             mslocation.updatetime = p.creationDate;
             mslocation.provider = "lbs";
+            mslocation.accuracy = LocationConfig.pictureRadius;
 
             ///基于位置服务
             mslocation.coordType = "WGS84"; //默认WGS84坐标系

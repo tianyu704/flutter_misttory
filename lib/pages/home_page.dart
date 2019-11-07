@@ -139,9 +139,10 @@ class _HomePageState extends LifecycleState<HomePage> {
     List<Story> temp = [];
     if (_currentStory != null) {
       if (_stories != null && _stories.length > 0) {
-        if (_currentStory.intervalTime < LocationConfig.interval &&
-            _currentStory.isFromPicture != 1) {
+        if (_currentStory.uuid != _stories[0].uuid) {
           temp.add(_currentStory);
+        } else {
+          _stories[0] = _currentStory;
         }
         temp.addAll(_stories);
       } else {
@@ -465,5 +466,11 @@ class _HomePageState extends LifecycleState<HomePage> {
         builder: (BuildContext context) {
           return loadingAlert;
         });
+  }
+
+  @override
+  void onForeground() {
+    // TODO: implement onForeground
+    super.onForeground();
   }
 }

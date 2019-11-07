@@ -4,13 +4,16 @@ part 'latlonpoint.g.dart';
 
 @JsonSerializable()
 class Latlonpoint {
-  Latlonpoint();
+  Latlonpoint(this.latitude, this.longitude);
 
   num latitude;
 
   num longitude;
 
-  factory Latlonpoint.fromJson(Map<String, dynamic> json) => _$LatlonpointFromJson(json);
+  num radius;
+
+  factory Latlonpoint.fromJson(Map<String, dynamic> json) =>
+      _$LatlonpointFromJson(json);
 
   Map<String, dynamic> toJson() => _$LatlonpointToJson(this);
 }

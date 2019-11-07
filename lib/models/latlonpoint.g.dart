@@ -7,9 +7,8 @@ part of 'latlonpoint.dart';
 // **************************************************************************
 
 Latlonpoint _$LatlonpointFromJson(Map<String, dynamic> json) {
-  return Latlonpoint()
-    ..latitude = json['latitude'] as num
-    ..longitude = json['longitude'] as num;
+  return Latlonpoint(json['latitude'] as num, json['longitude'] as num)
+    ..radius = json['radius'] as num;
 }
 
 Map<String, dynamic> _$LatlonpointToJson(Latlonpoint instance) =>

@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 
 import 'package:misstory/main.dart';
+import 'package:misstory/models/latlonpoint.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/picture.dart';
 import 'package:misstory/models/story.dart';
@@ -125,16 +126,16 @@ void main() {
     Picture picture = Picture()
       ..id = "1"
       ..path = "1";
-    p=picture;
+    p = picture;
     convert(picture);
     print(p.path);
   });
 
-  test("distance",()async{
-    LatLng latLng1 = LatLng(39.841131,116.431685);
-    LatLng latLng2 = LatLng(39.839688,116.431654);
+  test("distance", () async {
+    Latlonpoint latLng1 = Latlonpoint(39.841131, 116.431685);
+    Latlonpoint latLng2 = Latlonpoint(39.839688, 116.431654);
     num m = DateTime.now().millisecondsSinceEpoch;
-    num a =await CalculateUtil.calculateLineDistance(latLng1, latLng2);
+    num a = await CalculateUtil.calculateLineDistance(latLng1, latLng2);
 //    num b =await CalculateUtil.calculateLineDistance(latLng1, latLng2);
 //    num c =await CalculateUtil.calculateLineDistance(latLng1, latLng2);
 //    num d =await CalculateUtil.calculateLineDistance(latLng1, latLng2);
@@ -143,12 +144,12 @@ void main() {
     //85305.78125
   });
 
-  test("aa",(){
+  test("aa", () {
     Mslocation mslocation = Mslocation();
     print(1 != mslocation.isFromPicture);
   });
 
-  test("uuid",(){
+  test("uuid", () {
     Uuid uuid = Uuid();
     print(uuid.v1());
     print(uuid.v1());
@@ -160,7 +161,7 @@ void main() {
   });
 }
 
-convert(Picture picture){
+convert(Picture picture) {
   Picture p = picture;
   p.path = "2";
 }

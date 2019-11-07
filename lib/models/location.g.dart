@@ -16,7 +16,8 @@ Location _$LocationFromJson(Map<String, dynamic> json) {
     ..accuracy = json['accuracy'] as num
     ..verticalAccuracy = json['vertical_accuracy'] as num
     ..speed = json['speed'] as num
-    ..bearing = json['bearing'] as num;
+    ..bearing = json['bearing'] as num
+    ..count = json["count"] as num;
 }
 
 Map<String, dynamic> _$LocationToJson(Location instance) => <String, dynamic>{
@@ -29,4 +30,5 @@ Map<String, dynamic> _$LocationToJson(Location instance) => <String, dynamic>{
       'vertical_accuracy': instance.verticalAccuracy,
       'speed': instance.speed,
       'bearing': instance.bearing,
+      'count': instance.count,
     };

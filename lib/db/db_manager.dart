@@ -17,7 +17,7 @@ class DBManager {
   static final String tablePerson = "Person";
   static final String tableTag = "Tag";
   static final String tablePicture = "Picture";
-  static final int dbVersion = 4;
+  static final int dbVersion = 5;
 
   ///初始化
   static initDB() async {
@@ -32,6 +32,7 @@ class DBManager {
     locationFields["vertical_accuracy"] = Field(FieldType.Real);
     locationFields["speed"] = Field(FieldType.Real);
     locationFields["bearing"] = Field(FieldType.Real);
+    locationFields["count"] = Field(FieldType.Real);
 
     /// 位置信息表
     Map<String, Field> mslocationFields = new Map<String, Field>();
@@ -107,6 +108,7 @@ class DBManager {
     storyFields["coord_type"] = Field(FieldType.Text);
     storyFields["uuid"] = Field(FieldType.Text);
     storyFields["write_address"] = Field(FieldType.Text);
+    storyFields["radius"] = Field(FieldType.Real);
 
     ///tag表
     Map<String, Field> tagFields = new Map<String, Field>();
@@ -175,6 +177,12 @@ class DBManager {
       await LocationHelper().separateOldLocation();
       await LocationHelper().createStoryByOldLocation();
       await StoryHelper().updateUUID();
+      await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
+    }
+
+    if (oldVersion < 5) {
+      await StoryHelper().updateRadius();
+      await LocationHelper().updateCount();
       await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
     }
   }

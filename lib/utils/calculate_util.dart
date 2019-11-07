@@ -1,5 +1,6 @@
 import 'package:amap_base/amap_base.dart';
 import 'package:misstory/models/coord_type.dart';
+import 'package:misstory/models/latlonpoint.dart';
 import 'dart:math';
 
 import 'package:misstory/models/mslocation.dart';
@@ -13,11 +14,11 @@ import 'package:misstory/models/story.dart';
 class CalculateUtil {
   static double calculateLatlngDistance(
       double lat1, double lng1, double lat2, double lng2) {
-    return calculateLineDistance(LatLng(lat1, lng1), LatLng(lat2, lng2));
+    return calculateLineDistance(
+        Latlonpoint(lat1, lng1), Latlonpoint(lat2, lng2));
   }
 
-  static Future<double> calculateStoriesDistance(
-      Story l1, Story l2) async {
+  static Future<double> calculateStoriesDistance(Story l1, Story l2) async {
     if (l1 != null && l2 != null) {
       LatLng latLng1;
       if (l1.coordType == CoordType.gps) {
@@ -33,13 +34,14 @@ class CalculateUtil {
       } else {
         latLng2 = LatLng(l2.lat, l2.lon);
       }
-      return calculateLineDistance(latLng1, latLng2);
+      return calculateLineDistance(
+          Latlonpoint(latLng1.latitude, latLng1.longitude),
+          Latlonpoint(latLng2.latitude, latLng2.longitude));
     }
     return 1000000;
   }
 
-  static Future<double> calculateStoryDistance(
-      Story l1, Mslocation l2) async {
+  static Future<double> calculateStoryDistance(Story l1, Mslocation l2) async {
     if (l1 != null && l2 != null) {
       LatLng latLng1;
       if (l1.coordType == CoordType.gps) {
@@ -55,13 +57,14 @@ class CalculateUtil {
       } else {
         latLng2 = LatLng(l2.lat, l2.lon);
       }
-      return calculateLineDistance(latLng1, latLng2);
+      return calculateLineDistance(
+          Latlonpoint(latLng1.latitude, latLng1.longitude),
+          Latlonpoint(latLng2.latitude, latLng2.longitude));
     }
     return 1000000;
   }
 
-  static Future<double> calculatePictureDistance(
-      Story l1, Picture p) async {
+  static Future<double> calculatePictureDistance(Story l1, Picture p) async {
     if (l1 != null && p != null) {
       LatLng latLng1;
       if (l1.coordType == CoordType.gps) {
@@ -72,12 +75,15 @@ class CalculateUtil {
       }
       LatLng latLng2 = await CalculateTools()
           .convertCoordinate(lat: p.lat, lon: p.lon, type: LatLngType.gps);
-      return calculateLineDistance(latLng1, latLng2);
+      return calculateLineDistance(
+          Latlonpoint(latLng1.latitude, latLng1.longitude),
+          Latlonpoint(latLng2.latitude, latLng2.longitude));
     }
     return 1000000;
   }
 
-  static double calculateLineDistance(LatLng latLng1, LatLng latLng2) {
+  static double calculateLineDistance(
+      Latlonpoint latLng1, Latlonpoint latLng2) {
     if (latLng1 != null && latLng2 != null) {
       try {
         double var2 = latLng1.longitude;
@@ -121,5 +127,28 @@ class CalculateUtil {
         return 0.0;
       }
     }
+  }
+
+  static Future<Latlonpoint> calculateCenterLatLon(
+      List<Latlonpoint> points) async {
+    if (points != null && points.length > 0) {
+      //以下为简化方法（400km以内）
+      int total = points.length;
+      double lat = 0, lon = 0;
+      for (Latlonpoint p in points) {
+        lat += p.latitude * pi / 180;
+        lon += p.longitude * pi / 180;
+      }
+      lat /= total;
+      lon /= total;
+      Latlonpoint latlonpoint = Latlonpoint(lat * 180 / pi, lon * 180 / pi);
+      num radius = 0;
+      for (Latlonpoint p in points) {
+        radius += calculateLineDistance(p, latlonpoint);
+      }
+      latlonpoint.radius = radius / total;
+      return latlonpoint;
+    }
+    return null;
   }
 }

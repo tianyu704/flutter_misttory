@@ -7,6 +7,7 @@ import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/db/db_manager.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/models/latlonpoint.dart';
 import 'package:misstory/models/location.dart' as l;
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/utils/channel_util.dart';
@@ -209,6 +210,9 @@ class LocationHelper {
           (lastLocation.lat != location.lat &&
               lastLocation.lon != location.lon)) {
         await createLocation(location);
+      } else {
+        lastLocation.count++;
+        await updateLocation(lastLocation);
       }
       return await StoryHelper().createOrUpdateStory(mslocation);
     }
@@ -218,11 +222,27 @@ class LocationHelper {
   /// 创建Location一条记录
   Future<int> createLocation(l.Location location) async {
     if (location != null) {
-      await FlutterOrmPlugin.saveOrm(
-          DBManager.tableLocation, location.toJson());
-      return 0;
+      if (!await existLocation(location)) {
+        await FlutterOrmPlugin.saveOrm(
+            DBManager.tableLocation, location.toJson());
+        return 0;
+      }
     }
     return -1;
+  }
+
+  Future<bool> existLocation(l.Location location) async {
+    List list = await Query(DBManager.tableLocation).whereByColumFilters([
+      WhereCondiction("time", WhereCondictionType.IN, [location.time])
+    ]).all();
+    return (list != null && list.length > 0);
+  }
+
+  Future updateLocation(l.Location location) async {
+    if (location != null) {
+      await Query(DBManager.tableLocation)
+          .primaryKey([location.id]).update({"count": location.count});
+    }
   }
 
 //  /// 更新Location时间
@@ -479,7 +499,8 @@ class LocationHelper {
         ..accuracy = mslocation.accuracy ?? 0
         ..verticalAccuracy = 0
         ..speed = mslocation.speed ?? 0
-        ..bearing = mslocation.bearing ?? 0;
+        ..bearing = mslocation.bearing ?? 0
+        ..count = 1;
     }
     return null;
   }
@@ -494,5 +515,38 @@ class LocationHelper {
         StoryHelper().createOrUpdateStory(mslocation);
       });
     }
+  }
+
+  Future updateCount() async {
+    List result = await Query(DBManager.tableLocation).needColums(["id"]).all();
+    if (result != null && result.length > 0) {
+      for (Map map in result) {
+        await Query(DBManager.tableStory)
+            .primaryKey([map["id"]]).update({"count": 1});
+      }
+    }
+  }
+
+  Future<List<Latlonpoint>> queryPoints(num startTime, num endTime) async {
+    List result = await Query(DBManager.tableLocation).whereByColumFilters([
+      WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, startTime),
+      WhereCondiction("time", WhereCondictionType.EQ_OR_LESS_THEN, endTime),
+    ]).all();
+    if (result != null && result.length > 0) {
+      List<Latlonpoint> list = [];
+      int count;
+      Latlonpoint latlonpoint;
+      num lat, lon;
+      for (Map map in result) {
+        count = (map["count"] as num).toInt();
+        lat = map["lat"] as num;
+        lon = map["lon"] as num;
+        for (int i = 0; i < count; i++) {
+          list.add(Latlonpoint(lat, lon));
+        }
+      }
+      return list;
+    }
+    return null;
   }
 }

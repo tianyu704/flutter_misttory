@@ -194,9 +194,7 @@ Future<List<Poilocation>> requestLocations({String latlon, String near}) async {
             poilocation = Poilocation()
               ..title = item.name
               ..snippet = item.location?.address
-              ..latLonPoint = (Latlonpoint()
-                ..latitude = item.location?.lat
-                ..longitude = item.location.lng);
+              ..latLonPoint = Latlonpoint(item.location?.lat,item.location.lng);
             poilocations.add(poilocation);
           });
           return poilocations;

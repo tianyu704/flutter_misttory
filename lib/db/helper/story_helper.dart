@@ -8,6 +8,7 @@ import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/coord_type.dart';
+import 'package:misstory/models/latlonpoint.dart';
 import 'package:misstory/models/picture.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/calculate_util.dart';
@@ -64,15 +65,37 @@ class StoryHelper {
 
   Future<int> updateStoryTimes(Story story) async {
     if (story != null) {
+      if (StringUtil.isEmpty(story.customAddress) && story.isFromPicture != 1) {
+        story = await calculateStoryLatLon(story);
+      }
       await Query(DBManager.tableStory).primaryKey([story.id]).update({
         "update_time": story.updateTime,
         "interval_time": story.updateTime - story.createTime,
-        "create_time": story.createTime
+        "create_time": story.createTime,
+        "lat": story.lat,
+        "lon": story.lon,
+        "radius": story.radius,
       });
       debugPrint("=================update story");
       return 0;
     }
     return -1;
+  }
+
+  Future<Story> calculateStoryLatLon(Story story) async {
+    if (story != null) {
+      List list = await LocationHelper()
+          .queryPoints(story.createTime, story.updateTime);
+      if (list != null) {
+        Latlonpoint point = await CalculateUtil.calculateCenterLatLon(list);
+        if (point != null) {
+          story.lat = point.latitude;
+          story.lon = point.longitude;
+          story.radius = point.radius;
+        }
+      }
+    }
+    return story;
   }
 
 //  Future updateStory(Mslocation location, Story story) async {
@@ -211,7 +234,9 @@ class StoryHelper {
           .orderBy(["create_time"]).whereByColumFilters([
         WhereCondiction("create_time", WhereCondictionType.MORE_THEN,
             checkedStories[0].createTime),
-        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1]),
+        WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
+            LocationConfig.interval)
       ]).all();
       if (result != null && result.length > 0) {
         for (Map item in result) {
@@ -219,11 +244,6 @@ class StoryHelper {
 //          checkedStories.insertAll(0, await separateStory(story));
           story.date = getShowTime(story.createTime);
           checkedStories.insert(0, story);
-        }
-      } else {
-        Story current = await getCurrentStory();
-        if (current != null) {
-          checkedStories[0] = current;
         }
       }
     }
@@ -419,6 +439,9 @@ class StoryHelper {
     story.defaultAddress = getDefaultAddress(story);
     story.isFromPicture = location.isFromPicture ?? 0;
     story.uuid = Uuid().v1();
+    story.radius = location.accuracy > LocationConfig.locationRadius
+        ? LocationConfig.locationRadius
+        : location.accuracy;
     //TODO:需要看相同的该地点是否有custom_address,有的话需要赋值
     return story;
   }
@@ -449,7 +472,7 @@ class StoryHelper {
       /// 经纬度相等/地址相等认为是同一个地点
       if ((location.lat == lastStory.lat && location.lon == lastStory.lon) ||
           (await CalculateUtil.calculateStoryDistance(lastStory, location) <
-              LocationConfig.locationRadius) ||
+              lastStory.radius) ||
           (lastStory.defaultAddress == getLocationDefaultAddress(location) &&
               await CalculateUtil.calculateStoryDistance(lastStory, location) <
                   LocationConfig.judgeDistanceNum)) {
@@ -714,6 +737,16 @@ class StoryHelper {
       for (Map map in result) {
         await Query(DBManager.tableStory)
             .primaryKey([map["id"]]).update({"uuid": uuid.v1()});
+      }
+    }
+  }
+
+  Future updateRadius() async {
+    List result = await Query(DBManager.tableStory).needColums(["id"]).all();
+    if (result != null && result.length > 0) {
+      for (Map map in result) {
+        await Query(DBManager.tableStory).primaryKey([map["id"]]).update(
+            {"radius": LocationConfig.locationRadius});
       }
     }
   }
