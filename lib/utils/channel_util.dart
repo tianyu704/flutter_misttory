@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -25,8 +27,11 @@ class ChannelUtil {
   }
 
   Future<bool> requestStoragePermission() async {
-    String result =
-        await _methodChannel.invokeMethod("request_storage_permission");
-    return result == "GRANTED";
+    if (Platform.isAndroid) {
+      String result =
+          await _methodChannel.invokeMethod("request_storage_permission");
+      return result == "GRANTED";
+    }
+    return true;
   }
 }
