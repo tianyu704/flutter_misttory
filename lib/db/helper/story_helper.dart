@@ -219,6 +219,7 @@ class StoryHelper {
         for (Map item in result) {
           Story story = Story.fromJson(Map<String, dynamic>.from(item));
 //          checkedStories.insertAll(0, await separateStory(story));
+          story.date = getShowTime(story.createTime);
           checkedStories.insert(0, story);
         }
       }

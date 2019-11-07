@@ -27,7 +27,7 @@ class DateUtil {
 
   /// 2019.7.12转换成7月12日星期三
   static String getMonthDayWeek(BuildContext context, String date) {
-    if (date.isEmpty) {
+    if (date != null && date.isEmpty) {
       return "";
     }
     List<String> dateList = date.split(".");
