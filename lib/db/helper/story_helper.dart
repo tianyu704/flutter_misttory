@@ -220,6 +220,11 @@ class StoryHelper {
           story.date = getShowTime(story.createTime);
           checkedStories.insert(0, story);
         }
+      } else {
+        Story current = await getCurrentStory();
+        if (current != null) {
+          checkedStories[0] = current;
+        }
       }
     }
     return checkedStories;
@@ -230,9 +235,11 @@ class StoryHelper {
     Story currentStory = await queryLastStory();
     if (currentStory != null) {
       currentStory.date = getShowTime(currentStory.createTime);
-      currentStory.updateTime = DateTime.now().millisecondsSinceEpoch;
-      currentStory.intervalTime =
-          currentStory.updateTime - currentStory.createTime;
+//      currentStory.updateTime = DateTime.now().millisecondsSinceEpoch;
+//      currentStory.intervalTime =
+//          currentStory.updateTime - currentStory.createTime;
+    } else {
+      return null;
     }
     return await checkStoryPictures(currentStory);
   }
