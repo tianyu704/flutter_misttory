@@ -22,6 +22,7 @@ class Picture {
 
   num isSynced;
 
+  @JsonKey(name: "story_uuid")
   String storyUuid;
 
   factory Picture.fromJson(Map<String, dynamic> json) => _$PictureFromJson(json);

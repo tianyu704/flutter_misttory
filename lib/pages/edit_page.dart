@@ -83,6 +83,8 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   ///
   String _showTimeStr = "";
+  ///之前的手写地址
+  String _perWriteAddress = "";
 
   ScrollController _scrollController = ScrollController();
 
@@ -108,6 +110,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
     _descTextFieldVC.text =
         StringUtil.isNotEmpty(widget.story.desc) ? widget.story.desc : "";
+    _perWriteAddress = StringUtil.isNotEmpty(widget.story.writeAddress) ? widget.story.writeAddress : "";
     _addressTextFieldVC.text = getShowAddress(widget.story);
     _showTimeStr = DateFormat("MM月dd日 HH:mm").format(
         DateTime.fromMillisecondsSinceEpoch(widget.story.createTime.toInt()));
@@ -118,9 +121,6 @@ class _EditPageState extends LifecycleState<EditPage> {
 
     ///
     initData();
-    ///注册监听器
-    WidgetsBinding.instance.addObserver(this);
-
   }
 
   initData() async {
@@ -147,24 +147,9 @@ class _EditPageState extends LifecycleState<EditPage> {
     getPoi();
   }
 
-  @override///WidgetsBindingObserver 监听方法
-  void didChangeMetrics() {
-    super.didChangeMetrics();
-    print(MediaQuery.of(context).viewInsets.bottom);
-    if (MediaQuery.of(context).viewInsets.bottom > 0) {///键盘弹出状态
-      ///TODO:
-    } else {
 
-
-      if (isSwitchToEditAddress) {
-       /// finishedEditAddress();
-      }
-    }
-  }
   @override
   void dispose() {
-    ///移除监听器
-    WidgetsBinding.instance.removeObserver(this);
     ///
     _controller.dispose();
     _searchVC.dispose();
@@ -698,7 +683,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                 ),
               ),
               Offstage(
-                offstage: widget.story.customAddress != poiName,///TODO:待补充判断
+                offstage: !isShowCheck(poiName),///TODO:待补充判断
                 child: Icon(Icons.done),
               )
             ],
@@ -709,9 +694,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   handleStartEditAddress() {
-    String str = _addressTextFieldVC.text;
     isSwitchToEditAddress = !isSwitchToEditAddress;
-
     if (isSwitchToEditAddress) {
       FocusScope.of(context).requestFocus(_addressFocusNode);
       setState(() {});
@@ -729,11 +712,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   updateEditAddress() {
     String str = _addressTextFieldVC.text;
-    if (str.length > 0 ) {
-//      finishedAction(_tagTextFieldVC.text);
-//      _tagTextFieldVC.text = "";
-
-    } else {
+    if (str.length <= 0 ) {
       _addressTextFieldVC.text = getShowAddress(widget.story);
     }
   }
@@ -891,6 +870,18 @@ class _EditPageState extends LifecycleState<EditPage> {
         ("China" == widget.story.country);
   }
 
+  bool isShowCheck(String poiName) {
+    if (pickPoiLocation != null &&
+        StringUtil.isNotEmpty(pickPoiLocation.title)) {
+      if (poiName == pickPoiLocation.title)
+      return true;
+    }
+    if (widget.story.customAddress == poiName) {
+      return true;
+    }
+    return false;
+  }
+
   clickPOI(Poilocation location) {
     pickPoiLocation = location;
     _currentLatLng =
@@ -1022,22 +1013,33 @@ class _EditPageState extends LifecycleState<EditPage> {
 //      }
 //    }
 
+    bool isWrite = isWriteAddressed(_addressTextFieldVC.text);
     ///自定义地点保存
     Map<num, Story> stories;
     if (pickPoiLocation != null &&
         StringUtil.isNotEmpty(pickPoiLocation.title)) {
-      //story.customAddress = pickPoiLocation.title;
-      story.customAddress = _addressTextFieldVC.text;
+      story.customAddress = pickPoiLocation.title;
       story.lat = pickPoiLocation.latLonPoint.latitude;
       story.lon = pickPoiLocation.latLonPoint.longitude;
+      if (isWrite) {
+        story.writeAddress = _addressTextFieldVC.text;
+      }
       stories = await StoryHelper().updateCustomAddress(story);
-
       ///存储该pick 点 如果没存过的话
+    } else {
+      if (isWrite) {
+        story.writeAddress = _addressTextFieldVC.text;
+        stories = await StoryHelper().updateCustomAddress(story);
+      }
     }
+    ///
     Navigator.pop(context, [stories]);
   }
 
   getShowAddress(Story story) {
+    if (StringUtil.isNotEmpty(_perWriteAddress)) {
+      return _perWriteAddress;
+    }
     if (pickPoiLocation != null &&
         StringUtil.isNotEmpty(pickPoiLocation.title)) {
       return pickPoiLocation.title;
@@ -1047,4 +1049,17 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
     return story.defaultAddress;
   }
+
+  bool isWriteAddressed(String str) {
+    if (StringUtil.isNotEmpty(str)) {
+      if (str != _perWriteAddress
+          && (pickPoiLocation != null && str != pickPoiLocation.title)
+          && str != widget.story.customAddress) {
+         return true;
+      }
+    }
+    return false;
+  }
+
+
 }

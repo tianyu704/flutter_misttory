@@ -86,6 +86,9 @@ class Story {
   @JsonKey(name: "is_deleted")
   num isDeleted;
 
+  @JsonKey(name: "write_address")
+  String writeAddress;
+
   factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
 
   Map<String, dynamic> toJson() => _$StoryToJson(this);
