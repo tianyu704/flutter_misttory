@@ -49,9 +49,6 @@ class _EditPageState extends LifecycleState<EditPage> {
   FocusNode _addressFocusNode = new FocusNode();
   ///是否切换编辑地址模式
   bool isSwitchToEditAddress =  false;
-  ///手写初始的编辑地址
-  String lastHandleEditAddress = "我是上一次手写地址";
-
   ///搜索
   TextEditingController _searchVC = TextEditingController();
   FocusNode _searchNode = new FocusNode();
@@ -111,7 +108,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
     _descTextFieldVC.text =
         StringUtil.isNotEmpty(widget.story.desc) ? widget.story.desc : "";
-    _addressTextFieldVC.text = lastHandleEditAddress;
+    _addressTextFieldVC.text = getShowAddress(widget.story);
     _showTimeStr = DateFormat("MM月dd日 HH:mm").format(
         DateTime.fromMillisecondsSinceEpoch(widget.story.createTime.toInt()));
     _searchVC.addListener(() {
@@ -157,10 +154,11 @@ class _EditPageState extends LifecycleState<EditPage> {
     if (MediaQuery.of(context).viewInsets.bottom > 0) {///键盘弹出状态
       ///TODO:
     } else {
-//      if (_addressFocusNode.is) {
-//        FocusScope.of(context).requestFocus(_addressFocusNode);
-//
-//      }
+
+
+      if (isSwitchToEditAddress) {
+       /// finishedEditAddress();
+      }
     }
   }
   @override
@@ -698,6 +696,10 @@ class _EditPageState extends LifecycleState<EditPage> {
                     ),
                   ],
                 ),
+              ),
+              Offstage(
+                offstage: widget.story.customAddress != poiName,///TODO:待补充判断
+                child: Icon(Icons.done),
               )
             ],
           ),
@@ -718,17 +720,24 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
   }
   finishedEditAddress() {
+    isSwitchToEditAddress = false;
     _addressFocusNode.unfocus();
+    print("******");
+    updateEditAddress();
+    setState(() {});
+  }
+
+  updateEditAddress() {
     String str = _addressTextFieldVC.text;
     if (str.length > 0 ) {
 //      finishedAction(_tagTextFieldVC.text);
 //      _tagTextFieldVC.text = "";
 
     } else {
-        _addressTextFieldVC.text = getShowAddress(widget.story);
+      _addressTextFieldVC.text = getShowAddress(widget.story);
     }
-    setState(() {});
   }
+
 
   showEmptyWidget(BuildContext context, String title, bool isEnable) {
     return SliverToBoxAdapter(
@@ -890,6 +899,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     _controller.addMarker(MarkerOptions(
       position: _currentLatLng,
     ));
+    _addressTextFieldVC.text = getShowAddress(widget.story);
     setState(() {});
   }
 
@@ -1016,7 +1026,8 @@ class _EditPageState extends LifecycleState<EditPage> {
     Map<num, Story> stories;
     if (pickPoiLocation != null &&
         StringUtil.isNotEmpty(pickPoiLocation.title)) {
-      story.customAddress = pickPoiLocation.title;
+      //story.customAddress = pickPoiLocation.title;
+      story.customAddress = _addressTextFieldVC.text;
       story.lat = pickPoiLocation.latLonPoint.latitude;
       story.lon = pickPoiLocation.latLonPoint.longitude;
       stories = await StoryHelper().updateCustomAddress(story);
