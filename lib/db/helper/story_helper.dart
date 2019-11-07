@@ -155,8 +155,7 @@ class StoryHelper {
     List result = await Query(DBManager.tableStory).whereByColumFilters([
       WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
           LocationConfig.judgeUsefulLocation),
-    WhereCondiction(
-        "is_deleted", WhereCondictionType.NOT_IN, [1])
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
     ]).all();
     List<Story> list = [];
 
@@ -212,13 +211,13 @@ class StoryHelper {
           .orderBy(["create_time"]).whereByColumFilters([
         WhereCondiction("create_time", WhereCondictionType.MORE_THEN,
             checkedStories[0].createTime),
-        WhereCondiction(
-            "is_deleted", WhereCondictionType.NOT_IN, [1])
+        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
       ]).all();
       if (result != null && result.length > 0) {
         for (Map item in result) {
           Story story = Story.fromJson(Map<String, dynamic>.from(item));
 //          checkedStories.insertAll(0, await separateStory(story));
+          story.date = getShowTime(story.createTime);
           checkedStories.insert(0, story);
         }
       }
@@ -310,8 +309,9 @@ class StoryHelper {
 
   /// 查询最后一条story
   Future<Story> queryLastStory() async {
-    Map result = await Query(DBManager.tableStory).whereByColumFilters([WhereCondiction(
-        "is_deleted", WhereCondictionType.NOT_IN, [1])]).orderBy([
+    Map result = await Query(DBManager.tableStory).whereByColumFilters([
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+    ]).orderBy([
       "create_time desc",
     ]).first();
     if (result != null && result.length > 0) {
@@ -322,8 +322,9 @@ class StoryHelper {
 
   /// 查询最早一条story
   Future<Story> queryOldestStory() async {
-    Map result = await Query(DBManager.tableStory).whereByColumFilters([WhereCondiction(
-        "is_deleted", WhereCondictionType.NOT_IN, [1])]).orderBy([
+    Map result = await Query(DBManager.tableStory).whereByColumFilters([
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+    ]).orderBy([
       "create_time asc",
     ]).first();
     if (result != null && result.length > 0) {
@@ -355,14 +356,16 @@ class StoryHelper {
 
   /// 查询足迹，相同的story算一个点
   Future<int> getFootprint(List<Story> list) async {
-    List list1 = await Query(DBManager.tableStory).whereByColumFilters([WhereCondiction(
-        "is_deleted", WhereCondictionType.NOT_IN, [1])]).needColums(
-        ["default_address"]).groupBy(["default_address"]).whereByColumFilters([
+    List list1 = await Query(DBManager.tableStory).whereByColumFilters([
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+    ]).needColums(["default_address"]).groupBy(
+        ["default_address"]).whereByColumFilters([
       WhereCondiction("custom_address", WhereCondictionType.IS_NULL, true)
     ]).all();
-    List list2 = await Query(DBManager.tableStory).whereByColumFilters([WhereCondiction(
-        "is_deleted", WhereCondictionType.NOT_IN, [1])]).needColums(
-        ["custom_address"]).groupBy(["custom_address"]).whereByColumFilters([
+    List list2 = await Query(DBManager.tableStory).whereByColumFilters([
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+    ]).needColums(["custom_address"]).groupBy(
+        ["custom_address"]).whereByColumFilters([
       WhereCondiction("custom_address", WhereCondictionType.IS_NULL, false)
     ]).all();
     int current = 0;
@@ -372,8 +375,7 @@ class StoryHelper {
       List result = await Query(DBManager.tableStory).whereByColumFilters([
         WhereCondiction(
             "custom_address", WhereCondictionType.IN, [list[0].defaultAddress]),
-        WhereCondiction(
-            "is_deleted", WhereCondictionType.NOT_IN, [1])
+        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
       ]).all();
       if (result == null || result?.length == 0) {
         current = 1;
@@ -421,6 +423,15 @@ class StoryHelper {
         : story.poiName;
   }
 
+  /// 获取默认address
+  String getLocationDefaultAddress(Mslocation mslocation) {
+    return StringUtil.isEmpty(mslocation.poiname)
+        ? (StringUtil.isEmpty(mslocation.address)
+            ? mslocation.aoiname
+            : mslocation.address)
+        : mslocation.poiname;
+  }
+
   /// 根据Location创建或更新Story
   Future<int> createOrUpdateStory(Mslocation location) async {
     if (location == null) {
@@ -432,7 +443,7 @@ class StoryHelper {
       if ((location.lat == lastStory.lat && location.lon == lastStory.lon) ||
           (await CalculateUtil.calculateStoryDistance(lastStory, location) <
               LocationConfig.locationRadius) ||
-          (lastStory.address == location.address &&
+          (lastStory.defaultAddress == getLocationDefaultAddress(location) &&
               await CalculateUtil.calculateStoryDistance(lastStory, location) <
                   LocationConfig.judgeDistanceNum)) {
         lastStory.updateTime = location.updatetime;
@@ -576,16 +587,14 @@ class StoryHelper {
           "create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
       WhereCondiction("update_time", WhereCondictionType.EQ_OR_MORE_THEN,
           location.updatetime),
-      WhereCondiction(
-          "is_deleted", WhereCondictionType.NOT_IN, [1])
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
     ]).first();
     if (result == null) {
       result = await Query(DBManager.tableStory)
           .orderBy(["create_time desc"]).whereByColumFilters([
         WhereCondiction(
             "create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
-        WhereCondiction(
-            "is_deleted", WhereCondictionType.NOT_IN, [1])
+        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
       ]).first();
       if (result != null) {
         Story lastStory = Story.fromJson(Map<String, dynamic>.from(result));
@@ -694,7 +703,6 @@ class StoryHelper {
         .primaryKey([id]).update({"pictures": pictures});
     return true;
   }
-
 
   ///删除指定的story 状态删除
   Future deleteTargetStoryWithStoryId(num id) async {
