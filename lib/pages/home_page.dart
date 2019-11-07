@@ -423,6 +423,7 @@ class _HomePageState extends LifecycleState<HomePage> {
           item.lon = stories[item.id].lon;
           item.customAddress = stories[item.id].customAddress;
           item.desc = stories[item.id].desc;
+          item.writeAddress = stories[item.id].writeAddress;
         }
       });
       if (mounted) {

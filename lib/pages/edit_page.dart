@@ -1007,7 +1007,15 @@ class _EditPageState extends LifecycleState<EditPage> {
 //        isFlag = true;
 //      }
 //    }
-
+    if (_addressFocusNode.hasFocus) {
+      isSwitchToEditAddress = false;
+      _addressFocusNode.unfocus();
+      String str = _addressTextFieldVC.text;
+      if (StringUtil.isEmpty(str)) {
+        _addressTextFieldVC.text = getShowAddress(widget.story);
+      }
+    }
+    //
     bool isWrite = isWriteAddressed(_addressTextFieldVC.text);
     ///自定义地点保存
     Map<num, Story> stories;
@@ -1019,14 +1027,15 @@ class _EditPageState extends LifecycleState<EditPage> {
       if (isWrite) {
         story.writeAddress = _addressTextFieldVC.text;
       }
-      stories = await StoryHelper().updateCustomAddress(story);
+      stories = await StoryHelper().updateCustomWriteAddress(story);
       ///存储该pick 点 如果没存过的话
     } else {
       if (isWrite) {
         story.writeAddress = _addressTextFieldVC.text;
-        stories = await StoryHelper().updateCustomAddress(story);
+        stories = await StoryHelper().updateCustomWriteAddress(story);
       }
     }
+    print("${isWrite} ${story.writeAddress}");
     ///
     Navigator.pop(context, [stories]);
   }
@@ -1046,11 +1055,14 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   bool isWriteAddressed(String str) {
+
     if (StringUtil.isNotEmpty(str)) {
-      if (str != _perWriteAddress
-          && (pickPoiLocation != null && str != pickPoiLocation.title)
-          && str != widget.story.customAddress) {
-         return true;
+      if (str == _perWriteAddress) return false;
+      if (pickPoiLocation == null) {
+        return true;
+      } else {
+        if (str != pickPoiLocation.title)
+          return true;
       }
     }
     return false;

@@ -96,8 +96,8 @@ class StoryHelper {
 //    }
 //  }
 
-  /// 更新story地点
-  Future<Map<num, Story>> updateCustomAddress(Story story) async {
+  /// 更新story地点 customAddress writeAddress
+  Future<Map<num, Story>> updateCustomWriteAddress(Story story) async {
     if (story != null) {
 //      await Query(DBManager.tableStory).primaryKey([story.id]).update(
 //          {"custom_address": story.customAddress});
@@ -118,7 +118,8 @@ class StoryHelper {
             await Query(DBManager.tableStory).primaryKey([item["id"]]).update({
               "custom_address": story.customAddress,
               "lon": story.lon,
-              "lat": story.lat
+              "lat": story.lat,
+              "write_address":story.writeAddress,
             });
             stories[item["id"]] =
                 Story.fromJson(Map<String, dynamic>.from(item));

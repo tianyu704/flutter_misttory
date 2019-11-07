@@ -78,9 +78,7 @@ class LocationItem extends StatelessWidget {
                                   child: Padding(
                                     padding: EdgeInsets.only(left: 10),
                                     child: Text(
-                                      StringUtil.isEmpty(story.customAddress)
-                                          ? story.defaultAddress
-                                          : story.customAddress,
+                                      getShowAddressText(story),
                                       maxLines: 2,
                                       style: AppStyle.mainText14(context,
                                           weight: FontWeight.bold),
@@ -179,5 +177,15 @@ class LocationItem extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(10)));
         break;
     }
+  }
+
+  getShowAddressText(Story story) {
+    if (StringUtil.isNotEmpty(story.writeAddress)) {
+      return story.writeAddress;
+    }
+    if (StringUtil.isNotEmpty(story.customAddress)) {
+      return story.customAddress;
+    }
+    return story.defaultAddress;
   }
 }
