@@ -33,6 +33,7 @@ class DBManager {
     locationFields["speed"] = Field(FieldType.Real);
     locationFields["bearing"] = Field(FieldType.Real);
     locationFields["count"] = Field(FieldType.Real);
+    locationFields["coord_type"] = Field(FieldType.Text);
 
     /// 位置信息表
     Map<String, Field> mslocationFields = new Map<String, Field>();

@@ -500,7 +500,8 @@ class LocationHelper {
         ..verticalAccuracy = 0
         ..speed = mslocation.speed ?? 0
         ..bearing = mslocation.bearing ?? 0
-        ..count = 1;
+        ..count = 1
+        ..coordType = mslocation.coordType;
     }
     return null;
   }
@@ -535,7 +536,6 @@ class LocationHelper {
     if (result != null && result.length > 0) {
       List<Latlonpoint> list = [];
       int count;
-      Latlonpoint latlonpoint;
       num lat, lon;
       for (Map map in result) {
         count = (map["count"] as num).toInt();
