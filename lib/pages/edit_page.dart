@@ -706,17 +706,12 @@ class _EditPageState extends LifecycleState<EditPage> {
     isSwitchToEditAddress = false;
     _addressFocusNode.unfocus();
     print("******");
-    updateEditAddress();
-    setState(() {});
-  }
-
-  updateEditAddress() {
     String str = _addressTextFieldVC.text;
-    if (str.length <= 0 ) {
+    if (StringUtil.isEmpty(str)) {
       _addressTextFieldVC.text = getShowAddress(widget.story);
     }
+    setState(() {});
   }
-
 
   showEmptyWidget(BuildContext context, String title, bool isEnable) {
     return SliverToBoxAdapter(
@@ -873,8 +868,11 @@ class _EditPageState extends LifecycleState<EditPage> {
   bool isShowCheck(String poiName) {
     if (pickPoiLocation != null &&
         StringUtil.isNotEmpty(pickPoiLocation.title)) {
-      if (poiName == pickPoiLocation.title)
-      return true;
+      if (poiName == pickPoiLocation.title) {
+          return true;
+      } else {
+         return false;
+      }
     }
     if (widget.story.customAddress == poiName) {
       return true;
@@ -890,7 +888,9 @@ class _EditPageState extends LifecycleState<EditPage> {
     _controller.addMarker(MarkerOptions(
       position: _currentLatLng,
     ));
-    _addressTextFieldVC.text = getShowAddress(widget.story);
+    if (StringUtil.isEmpty(_perWriteAddress)){
+      _addressTextFieldVC.text = getShowAddress(widget.story);
+    }
     setState(() {});
   }
 
@@ -927,7 +927,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   void _showAlertView(BuildContext cxt) {
-    String title = "确认删除地点 ${getShowAddress(widget.story)} ？";
+    String title = "确认删除地点 ${_addressTextFieldVC.text} ？";
     showCupertinoModalPopup<int>(
         context: cxt,
         builder: (cxt) {
@@ -971,11 +971,6 @@ class _EditPageState extends LifecycleState<EditPage> {
   clickSave() async {
     //TODO:
     Story story = widget.story;
-    if (story.id == null) {
-      //TODO:创建一条story
-      story.id = await StoryHelper().createStory(story);
-    }
-
     ///备注保存
     story.desc = _descTextFieldVC.text ?? "";
     await StoryHelper().updateStoryDesc(story);
