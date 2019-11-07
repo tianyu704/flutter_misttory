@@ -8,6 +8,7 @@ import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/db/local_storage.dart';
 import 'package:misstory/eventbus/event_bus_util.dart';
 import 'package:misstory/eventbus/refresh_progress.dart';
 import 'package:misstory/location_config.dart';
@@ -20,6 +21,7 @@ import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/channel_util.dart';
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/print_util.dart';
+import 'package:misstory/widgets/loading_pictures_alert.dart';
 import 'package:misstory/widgets/location_item.dart';
 import 'package:misstory/widgets/refresh_grouped_listview.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -54,6 +56,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   Story _currentStory;
   StreamSubscription _refreshSubscription;
   bool hasBuild = false;
+  LoadingPicturesAlert loadingAlert;
 
   @override
   void initState() {
@@ -70,14 +73,28 @@ class _HomePageState extends LifecycleState<HomePage> {
         setState(() {});
       }
       if (_isFirstLoad &&
-          (refreshProgress.finish() || refreshProgress.progress > 50)) {
+          (refreshProgress.finish() || refreshProgress.count > 50)) {
         _refreshStory();
+      }
+      if (loadingAlert != null) {
+        loadingAlert.updateProgress(refreshProgress.progress());
+        if (refreshProgress.count > 50) {
+          loadingAlert.enableClick(true);
+        }
+        if (refreshProgress.finish()) {
+          loadingAlert.dismiss();
+          LocalStorage.saveBool(LocalStorage.isStep, true);
+        }
       }
     });
   }
 
   ///同步图片逻辑
   _syncPictures() async {
+    bool isStep = await LocalStorage.get(LocalStorage.isStep) ?? false;
+    if (!isStep) {
+      _showLoadingAlertView(context);
+    }
     await PictureHelper().checkSystemPicture();
     if (!PictureHelper().isPictureConverting) {
       await PictureHelper().checkUnSyncedPicture();
@@ -169,27 +186,18 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   /// 检查权限
   void _checkPermission() async {
-    if (Platform.isAndroid) {
-      PrintUtil.debugPrint("=========start");
-      bool pass1 = await ChannelUtil().requestStoragePermission();
-      PrintUtil.debugPrint("=========$pass1");
-      bool pass2 = await ChannelUtil().requestLocationPermission();
-      PrintUtil.debugPrint("=========$pass2");
-      if (pass1) {
-        _syncPictures();
-      }
-      if (pass2) {
-        _initLocation();
-      }
-    } else {
+    PrintUtil.debugPrint("=========start");
+    bool pass1 = await ChannelUtil().requestStoragePermission();
+    PrintUtil.debugPrint("=========$pass1");
+    bool pass2 = await ChannelUtil().requestLocationPermission();
+    PrintUtil.debugPrint("=========$pass2");
+    if (pass1) {
       _syncPictures();
-      await PermissionHandler()
-          .requestPermissions([PermissionGroup.locationAlways]);
-      PermissionStatus permissionLocation = await PermissionHandler()
-          .checkPermissionStatus(PermissionGroup.locationAlways);
-      if (permissionLocation == PermissionStatus.granted) {
-        _initLocation();
-      }
+    }
+    if (pass2) {
+      _initLocation();
+    } else {
+      ///TODO 提示开启定位权限
     }
   }
 
@@ -334,7 +342,7 @@ class _HomePageState extends LifecycleState<HomePage> {
               if (value is Story) {
                 Story story = value;
                 notifyDeleteStory(story);
-                return ;
+                return;
               }
               if (value is Map) {
                 Map<num, Story> stories = value[0];
@@ -342,7 +350,6 @@ class _HomePageState extends LifecycleState<HomePage> {
                   notifyStories(stories);
                 }
               }
-
             }
           },
         );
@@ -365,7 +372,6 @@ class _HomePageState extends LifecycleState<HomePage> {
                   notifyStories(stories);
                 }
               }
-
             }
           },
         );
@@ -428,7 +434,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   notifyDeleteStory(Story story) {
     if (_stories != null && _stories.length > 0) {
       _stories.removeWhere((item) => item.id == story.id);
-       debugPrint("+++刷新删除完成++");
+      debugPrint("+++刷新删除完成++");
       if (mounted) {
         _refreshStory();
       }
@@ -444,5 +450,20 @@ class _HomePageState extends LifecycleState<HomePage> {
     _refreshController.dispose();
     _timer?.cancel();
     super.dispose();
+  }
+
+  void _showLoadingAlertView(BuildContext cxt) {
+    loadingAlert = LoadingPicturesAlert(
+      alertTitle: richTitle("初次使用需根据您的相册\n为您生成时间轴", context),
+      alertSubtitle: richSubtitle("此过程大概需要3～5分钟", context),
+      cancelProgressBlock: () {
+        LocalStorage.saveBool(LocalStorage.isStep, true);
+      },
+    );
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return loadingAlert;
+        });
   }
 }

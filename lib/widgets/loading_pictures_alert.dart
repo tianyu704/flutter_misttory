@@ -70,7 +70,21 @@ class LoadingPicturesAlert extends StatefulWidget {
   _LoadingPicturesAlertState _state;
 
   updateProgress(double progress) {
-    _state.updateProgress(progress);
+    if (_state != null) {
+      _state.updateProgress(progress);
+    }
+  }
+
+  enableClick(bool enable) {
+    if (_state != null) {
+      _state.enableClick(enable);
+    }
+  }
+
+  dismiss() {
+    if (_state != null) {
+      _state.dismiss();
+    }
   }
 
   createState() {
@@ -85,6 +99,7 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
   double dialogHeight;
   double progressNum = 0.001;
   double roundWidth = 72;
+  bool _enable = false;
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +167,9 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
                       ),
                     ),
                     Positioned(
-                      top: deviceHeight / 2 - dialogHeight / 2 - (roundWidth+ 22) / 2,
+                      top: deviceHeight / 2 -
+                          dialogHeight / 2 -
+                          (roundWidth + 22) / 2,
                       child: _defaultTopView(),
                     ),
                   ],
@@ -186,7 +203,7 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
     return SizedBox(
       child: SvgPicture.asset("assets/images/icon_picture_process.svg"),
       width: roundWidth / 2,
-      height: roundWidth/ 2,
+      height: roundWidth / 2,
     );
   }
 
@@ -194,12 +211,11 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
     return Stack(
       alignment: AlignmentDirectional.center,
       children: <Widget>[
-        Container (
+        Container(
           width: roundWidth + 29 * 2,
-          height: roundWidth+ 22,
+          height: roundWidth + 22,
           child: Image.asset("assets/images/icon_loading_picture_star.png"),
         ),
-
         Container(
           width: roundWidth,
           height: roundWidth,
@@ -210,8 +226,8 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
                       colors: [Color(0xFF4580FC), Color(0xFF565BEA)],
                       center: Alignment.topLeft,
                       radius: .98),
-                  borderRadius: BorderRadius.all(
-                      Radius.circular(roundWidth / 2.0)))),
+                  borderRadius:
+                      BorderRadius.all(Radius.circular(roundWidth / 2.0)))),
         ),
         _defaultIcon(),
       ],
@@ -232,16 +248,17 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
       height: 50,
       child: FlatButton(
         child: Text(
-          "暂时跳过",
-          style: TextStyle(
-              color: AppStyle.colors(context).colorPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w400),
+          "后台生成",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
         ),
-        onPressed: () {
-          widget.cancelProgressBlock();
-          //Navigator.pop(context);
-        },
+        onPressed: _enable
+            ? () {
+                widget.cancelProgressBlock();
+                dismiss();
+              }
+            : null,
+        disabledTextColor: AppStyle.colors(context).colorCancelText,
+        textColor: AppStyle.colors(context).colorPrimary,
       ),
     );
   }
@@ -256,6 +273,20 @@ class _LoadingPicturesAlertState extends State<LoadingPicturesAlert> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  enableClick(bool enable) {
+    if (mounted) {
+      if (_enable != enable) {
+        setState(() {
+          _enable = enable;
+        });
+      }
+    }
+  }
+
+  dismiss() {
+    if (mounted) Navigator.pop(context);
   }
 }
 

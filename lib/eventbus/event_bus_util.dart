@@ -9,8 +9,8 @@ import 'package:misstory/eventbus/refresh_progress.dart';
 ///
 
 class EventBusUtil {
-  static fireRefreshProgress(num total, num progress) {
-    eventBus.fire(RefreshProgress(total, progress));
+  static fireRefreshProgress(num total, num count) {
+    eventBus.fire(RefreshProgress(total, count));
   }
 
   static StreamSubscription<T> listen<T>(void onData(T event)) {

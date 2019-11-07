@@ -5,12 +5,16 @@ import 'package:flutter/material.dart';
 /// Date: 2019-10-26
 ///
 class RefreshProgress {
-  RefreshProgress(this.total, this.progress);
+  RefreshProgress(this.total, this.count);
 
   num total;
-  num progress;
+  num count;
 
-  bool finish(){
-    return total == progress;
+  bool finish() {
+    return total == count;
+  }
+
+  double progress() {
+    return (count ?? 0).toDouble() / total ?? 1;
   }
 }
