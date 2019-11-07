@@ -51,10 +51,11 @@ void main() {
 //    Story story = Story()
 //      ..createTime = 1570758432968
 //      ..updateTime = 1570759933269;
-    List<Story> list = await StoryHelper().separateStory(story);
-    list.forEach((item) {
-      print(item.toJson());
-    });
+
+//    List<Story> list = await StoryHelper().separateStory(story);
+//    list.forEach((item) {
+//      print(item.toJson());
+//    });
   });
 
   test("insert", () {

@@ -43,24 +43,24 @@ class StoryHelper {
     return -1;
   }
 
-  /// 更新story时间
-  Future updateStoryTime(Mslocation location, Story story) async {
-    if (location != null && story != null) {
-      if (location.time < story.createTime) {
-        story.createTime = location.time;
-      }
-      if (location.updatetime > story.updateTime) {
-        story.updateTime = location.updatetime;
-      }
-      num interval = story.updateTime - story.createTime;
-      await Query(DBManager.tableStory).primaryKey([story.id]).update({
-        "update_time": story.updateTime,
-        "interval_time": interval,
-        "create_time": story.createTime
-      });
-      debugPrint("=================update story time");
-    }
-  }
+//  /// 更新story时间
+//  Future updateStoryTime(Mslocation location, Story story) async {
+//    if (location != null && story != null) {
+//      if (location.time < story.createTime) {
+//        story.createTime = location.time;
+//      }
+//      if (location.updatetime > story.updateTime) {
+//        story.updateTime = location.updatetime;
+//      }
+//      num interval = story.updateTime - story.createTime;
+//      await Query(DBManager.tableStory).primaryKey([story.id]).update({
+//        "update_time": story.updateTime,
+//        "interval_time": interval,
+//        "create_time": story.createTime
+//      });
+//      debugPrint("=================update story time");
+//    }
+//  }
 
   Future<int> updateStoryTimes(Story story) async {
     if (story != null) {
@@ -150,24 +150,24 @@ class StoryHelper {
     return false;
   }
 
-  /// 读取库中的全部数据
-  Future<List<Story>> findAllStories() async {
-    List result = await Query(DBManager.tableStory).whereByColumFilters([
-      WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
-          LocationConfig.judgeUsefulLocation),
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
-    ]).all();
-    List<Story> list = [];
-
-    if (result != null && result.length > 0) {
-      result = result.reversed.toList();
-      for (Map item in result) {
-        Story story = Story.fromJson(Map<String, dynamic>.from(item));
-        list.addAll(await separateStory(story));
-      }
-    }
-    return list;
-  }
+//  /// 读取库中的全部数据
+//  Future<List<Story>> findAllStories() async {
+//    List result = await Query(DBManager.tableStory).whereByColumFilters([
+//      WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
+//          LocationConfig.judgeUsefulLocation),
+//      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+//    ]).all();
+//    List<Story> list = [];
+//
+//    if (result != null && result.length > 0) {
+//      result = result.reversed.toList();
+//      for (Map item in result) {
+//        Story story = Story.fromJson(Map<String, dynamic>.from(item));
+//        list.addAll(await separateStory(story));
+//      }
+//    }
+//    return list;
+//  }
 
   /// 根据给定time查询time-day到time之间的story
   Future<List<Story>> queryMoreHistories({num time}) async {
@@ -242,63 +242,63 @@ class StoryHelper {
     return story;
   }
 
-  /// 判断story是否在同一天，不在同一天就分割成多天
-  Future<List<Story>> separateStory(Story story) async {
-    ///找到Picture
-    List<Picture> pictures =
-        await PictureHelper().queryPicturesByUuid(story.uuid);
-
-    List<Story> list = [];
-    DateTime dateTime1 =
-        DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
-    DateTime dateTime2 =
-        DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
-    DateTime day1 = DateTime(dateTime1.year, dateTime1.month, dateTime1.day);
-    DateTime day2 = DateTime(dateTime2.year, dateTime2.month, dateTime2.day);
-    if (day1.isAtSameMomentAs(day2) || story.isFromPicture == 1) {
-      story.date = getShowTime(story.createTime);
-      story.localImages = [];
-      if (pictures != null && pictures.length > 0) {
-        for (Picture picture in pictures) {
-          if (DateUtil.isSameDay(picture.creationDate, story.createTime)) {
-            story.localImages.add(picture);
-          }
-        }
-      }
-      list.add(story);
-      return list;
-    } else {
-      Map<String, dynamic> map = story.toJson();
-      Story story1;
-      int intervalDay = day2.difference(day1).inDays;
-      DateTime day;
-      for (num i = 0; i <= intervalDay; i++) {
-        story1 = Story.fromJson(map);
-        day = DateTime.fromMillisecondsSinceEpoch(day1.millisecondsSinceEpoch);
-        if (i == 0) {
-          story1.updateTime = day.add(Duration(days: 1)).millisecondsSinceEpoch;
-        } else if (i == intervalDay) {
-          story1.createTime = day2.millisecondsSinceEpoch;
-        } else {
-          story1.createTime = day.add(Duration(days: i)).millisecondsSinceEpoch;
-          story1.updateTime =
-              day.add(Duration(days: i + 1)).millisecondsSinceEpoch;
-        }
-        story1.date = getShowTime(story1.createTime);
-        story1.intervalTime = story1.updateTime - story1.createTime;
-        if (pictures != null && pictures.length > 0) {
-          story1.localImages = [];
-          for (Picture p in pictures) {
-            if (DateUtil.isSameDay(p.creationDate, story1.createTime)) {
-              story1.localImages.add(p);
-            }
-          }
-        }
-        list.add(story1);
-      }
-      return list.reversed.toList();
-    }
-  }
+//  /// 判断story是否在同一天，不在同一天就分割成多天
+//  Future<List<Story>> separateStory(Story story) async {
+//    ///找到Picture
+//    List<Picture> pictures =
+//        await PictureHelper().queryPicturesByUuid(story.uuid);
+//
+//    List<Story> list = [];
+//    DateTime dateTime1 =
+//        DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
+//    DateTime dateTime2 =
+//        DateTime.fromMillisecondsSinceEpoch(story.updateTime.toInt());
+//    DateTime day1 = DateTime(dateTime1.year, dateTime1.month, dateTime1.day);
+//    DateTime day2 = DateTime(dateTime2.year, dateTime2.month, dateTime2.day);
+//    if (day1.isAtSameMomentAs(day2) || story.isFromPicture == 1) {
+//      story.date = getShowTime(story.createTime);
+//      story.localImages = [];
+//      if (pictures != null && pictures.length > 0) {
+//        for (Picture picture in pictures) {
+//          if (DateUtil.isSameDay(picture.creationDate, story.createTime)) {
+//            story.localImages.add(picture);
+//          }
+//        }
+//      }
+//      list.add(story);
+//      return list;
+//    } else {
+//      Map<String, dynamic> map = story.toJson();
+//      Story story1;
+//      int intervalDay = day2.difference(day1).inDays;
+//      DateTime day;
+//      for (num i = 0; i <= intervalDay; i++) {
+//        story1 = Story.fromJson(map);
+//        day = DateTime.fromMillisecondsSinceEpoch(day1.millisecondsSinceEpoch);
+//        if (i == 0) {
+//          story1.updateTime = day.add(Duration(days: 1)).millisecondsSinceEpoch;
+//        } else if (i == intervalDay) {
+//          story1.createTime = day2.millisecondsSinceEpoch;
+//        } else {
+//          story1.createTime = day.add(Duration(days: i)).millisecondsSinceEpoch;
+//          story1.updateTime =
+//              day.add(Duration(days: i + 1)).millisecondsSinceEpoch;
+//        }
+//        story1.date = getShowTime(story1.createTime);
+//        story1.intervalTime = story1.updateTime - story1.createTime;
+//        if (pictures != null && pictures.length > 0) {
+//          story1.localImages = [];
+//          for (Picture p in pictures) {
+//            if (DateUtil.isSameDay(p.creationDate, story1.createTime)) {
+//              story1.localImages.add(p);
+//            }
+//          }
+//        }
+//        list.add(story1);
+//      }
+//      return list.reversed.toList();
+//    }
+//  }
 
   ///获取展示的时间 2019.09.23
   String getShowTime(num timeStr) {
@@ -320,18 +320,18 @@ class StoryHelper {
     return null;
   }
 
-  /// 查询最早一条story
-  Future<Story> queryOldestStory() async {
-    Map result = await Query(DBManager.tableStory).whereByColumFilters([
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
-    ]).orderBy([
-      "create_time asc",
-    ]).first();
-    if (result != null && result.length > 0) {
-      return Story.fromJson(Map<String, dynamic>.from(result));
-    }
-    return null;
-  }
+//  /// 查询最早一条story
+//  Future<Story> queryOldestStory() async {
+//    Map result = await Query(DBManager.tableStory).whereByColumFilters([
+//      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+//    ]).orderBy([
+//      "create_time asc",
+//    ]).first();
+//    if (result != null && result.length > 0) {
+//      return Story.fromJson(Map<String, dynamic>.from(result));
+//    }
+//    return null;
+//  }
 
   /// 查询记录的天数
   Future<int> getStoryDays() async {
@@ -454,101 +454,62 @@ class StoryHelper {
     } else {
       return await createStory(createStoryWithLocation(location));
     }
+  }
 
-//    //找到location是否处于某个Story内
-//    Story targetStory =
-//        await StoryHelper().findTargetStory(location.time, location.updatetime);
-//    if (targetStory != null) {
-//      //存在Story就把location直接放入Story中
-//      targetStory.pictures =
-//          mergePictures(location.pictures, targetStory.pictures);
-//      await StoryHelper()
-//          .updateStoryPictures(targetStory.id, targetStory.pictures);
-//    } else {
-//      //不存在story，需要把Location生成Story或合并到某个Story中
-//      Story afterStory = await findAfterStory(location.time);
-//      if (afterStory != null &&
-//          DateUtil.isSameDay(afterStory.createTime, location.time) &&
-//          ((await CalculateUtil.calculateStoryDistance(afterStory, location) <
-//                  LocationConfig.locationRadius) ||
-//              (afterStory.poiName == location.poiname &&
-//                  await CalculateUtil.calculateStoryDistance(
-//                          afterStory, location) <
-//                      LocationConfig.judgeDistanceNum))) {
-//        updateStory(location, afterStory);
+//  ///坐标点更新故事或创建故事
+//  Future<void> judgeLocation(Mslocation location,
+//      {LocationFromType itemType = LocationFromType.normal}) async {
+//    if (location != null &&
+//        location.errorCode == 0 &&
+//        StringUtil.isNotEmpty(location.address)) {
+//      Story story;
+//      if (LocationFromType.before == itemType) {
+//        story = await queryOldestStory();
+//        if (story != null &&
+//            !DateUtil.isSameDay(story.createTime, location.time)) {
+//          return await createStory(createStoryWithLocation(location));
+//        }
+//      } else if (LocationFromType.after == itemType) {
+//        story = await findTargetStoryWithLocation(location);
 //      } else {
-//        Story beforeStory = await findBeforeStory(location.updatetime);
-//        if (beforeStory != null &&
-//            DateUtil.isSameDay(beforeStory.updateTime, location.updatetime) &&
-//            ((await CalculateUtil.calculateStoryDistance(
-//                        beforeStory, location) <
-//                    LocationConfig.locationRadius) ||
-//                (beforeStory.poiName == location.poiname &&
-//                    await CalculateUtil.calculateStoryDistance(
-//                            beforeStory, location) <
-//                        LocationConfig.judgeDistanceNum))) {
-//          updateStory(location, beforeStory);
-//        } else {
-//          createStory(createStoryWithLocation(location));
+//        story = await queryLastStory();
+//        if (story.isFromPicture == 1) {
+//          return await createStory(createStoryWithLocation(location));
 //        }
 //      }
+//      if (story != null) {
+//        if (location.aoiname == story.aoiName) {
+//          if (location.poiname == story.poiName) {
+//            if (location.address == story.address) {
+//              await updateStoryTime(location, story);
+//            } else {
+//              if (await getDistanceBetween(location, story) >
+//                  LocationConfig.judgeDistanceNum) {
+//                debugPrint("======>create1");
+//                await createStory(createStoryWithLocation(location));
+//              } else {
+//                await updateStoryTime(location, story);
+//              }
+//            }
+//          } else {
+//            if (await getDistanceBetween(location, story) >
+//                LocationConfig.judgeDistanceNum) {
+//              debugPrint("======>create2");
+//              await createStory(createStoryWithLocation(location));
+//            } else {
+//              await updateStoryTime(location, story);
+//            }
+//          }
+//        } else {
+//          debugPrint("======>create3");
+//          await createStory(createStoryWithLocation(location));
+//        }
+//      } else {
+//        debugPrint("======>create4");
+//        await createStory(createStoryWithLocation(location));
+//      }
 //    }
-  }
-
-  ///坐标点更新故事或创建故事
-  Future<void> judgeLocation(Mslocation location,
-      {LocationFromType itemType = LocationFromType.normal}) async {
-    if (location != null &&
-        location.errorCode == 0 &&
-        StringUtil.isNotEmpty(location.address)) {
-      Story story;
-      if (LocationFromType.before == itemType) {
-        story = await queryOldestStory();
-        if (story != null &&
-            !DateUtil.isSameDay(story.createTime, location.time)) {
-          return await createStory(createStoryWithLocation(location));
-        }
-      } else if (LocationFromType.after == itemType) {
-        story = await findTargetStoryWithLocation(location);
-      } else {
-        story = await queryLastStory();
-        if (story.isFromPicture == 1) {
-          return await createStory(createStoryWithLocation(location));
-        }
-      }
-      if (story != null) {
-        if (location.aoiname == story.aoiName) {
-          if (location.poiname == story.poiName) {
-            if (location.address == story.address) {
-              await updateStoryTime(location, story);
-            } else {
-              if (await getDistanceBetween(location, story) >
-                  LocationConfig.judgeDistanceNum) {
-                debugPrint("======>create1");
-                await createStory(createStoryWithLocation(location));
-              } else {
-                await updateStoryTime(location, story);
-              }
-            }
-          } else {
-            if (await getDistanceBetween(location, story) >
-                LocationConfig.judgeDistanceNum) {
-              debugPrint("======>create2");
-              await createStory(createStoryWithLocation(location));
-            } else {
-              await updateStoryTime(location, story);
-            }
-          }
-        } else {
-          debugPrint("======>create3");
-          await createStory(createStoryWithLocation(location));
-        }
-      } else {
-        debugPrint("======>create4");
-        await createStory(createStoryWithLocation(location));
-      }
-    }
-  }
+//  }
 
   ///坐标点转化成story(即创建或更新)
 
@@ -564,50 +525,50 @@ class StoryHelper {
 //    }
 //  }
 
-  Future<bool> judgeSamePlace(Story story1, Story story2) async {
-    if ((story1.lat == story2.lat && story1.lon == story2.lon) ||
-        await CalculateUtil.calculateStoriesDistance(story1, story2) <
-            LocationConfig.locationRadius ||
-        (story1.address == story2.address &&
-            await CalculateUtil.calculateStoriesDistance(story1, story2) <
-                LocationConfig.judgeDistanceNum)) {
-      return true;
-    }
-    return false;
-  }
+//  Future<bool> judgeSamePlace(Story story1, Story story2) async {
+//    if ((story1.lat == story2.lat && story1.lon == story2.lon) ||
+//        await CalculateUtil.calculateStoriesDistance(story1, story2) <
+//            LocationConfig.locationRadius ||
+//        (story1.address == story2.address &&
+//            await CalculateUtil.calculateStoriesDistance(story1, story2) <
+//                LocationConfig.judgeDistanceNum)) {
+//      return true;
+//    }
+//    return false;
+//  }
 
-  ///根据坐标点查找对应story
-  Future<Story> findTargetStoryWithLocation(Mslocation location) async {
-    if (location == null) {
-      return null;
-    }
-    Map result;
-    result = await Query(DBManager.tableStory).whereByColumFilters([
-      WhereCondiction(
-          "create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
-      WhereCondiction("update_time", WhereCondictionType.EQ_OR_MORE_THEN,
-          location.updatetime),
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
-    ]).first();
-    if (result == null) {
-      result = await Query(DBManager.tableStory)
-          .orderBy(["create_time desc"]).whereByColumFilters([
-        WhereCondiction(
-            "create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
-        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
-      ]).first();
-      if (result != null) {
-        Story lastStory = Story.fromJson(Map<String, dynamic>.from(result));
-        if (lastStory.updateTime >= location.time) {
-          return lastStory;
-        }
-      }
-    }
-    if (result != null) {
-      return Story.fromJson(Map<String, dynamic>.from(result));
-    }
-    return null;
-  }
+//  ///根据坐标点查找对应story
+//  Future<Story> findTargetStoryWithLocation(Mslocation location) async {
+//    if (location == null) {
+//      return null;
+//    }
+//    Map result;
+//    result = await Query(DBManager.tableStory).whereByColumFilters([
+//      WhereCondiction(
+//          "create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
+//      WhereCondiction("update_time", WhereCondictionType.EQ_OR_MORE_THEN,
+//          location.updatetime),
+//      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+//    ]).first();
+//    if (result == null) {
+//      result = await Query(DBManager.tableStory)
+//          .orderBy(["create_time desc"]).whereByColumFilters([
+//        WhereCondiction(
+//            "create_time", WhereCondictionType.EQ_OR_LESS_THEN, location.time),
+//        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+//      ]).first();
+//      if (result != null) {
+//        Story lastStory = Story.fromJson(Map<String, dynamic>.from(result));
+//        if (lastStory.updateTime >= location.time) {
+//          return lastStory;
+//        }
+//      }
+//    }
+//    if (result != null) {
+//      return Story.fromJson(Map<String, dynamic>.from(result));
+//    }
+//    return null;
+//  }
 
   ///根据坐标点查找对应story
   Future<Story> findTargetStory(num startTime, num endTime) async {
@@ -647,32 +608,32 @@ class StoryHelper {
     return null;
   }
 
-  Future<void> deleteMisstory() async {
+//  Future<void> deleteMisstory() async {
 //    Story story = await queryLastStory();
 //    await Query(DBManager.tableStory).primaryKey([story.id]).delete();
 //    await Query(DBManager.tableStory).delete();
-  }
+//  }
 
-  ///求值：两个坐标点的距离
-  Future<double> getDistanceBetween(Mslocation location, Story story) async {
-    LatLng latLng1 = LatLng(location.lat, location.lon);
-    LatLng latLng2 = LatLng(story.lat, story.lon);
-    return await CalculateTools().calcDistance(latLng1, latLng2);
-  }
+//  ///求值：两个坐标点的距离
+//  Future<double> getDistanceBetween(Mslocation location, Story story) async {
+//    LatLng latLng1 = LatLng(location.lat, location.lon);
+//    LatLng latLng2 = LatLng(story.lat, story.lon);
+//    return await CalculateTools().calcDistance(latLng1, latLng2);
+//  }
 
-  ///求值：两个坐标点的距离
-  Future<double> getDistanceBetweenStory(Story location, Story story) async {
-    LatLng latLng1 = LatLng(location.lat, location.lon);
-    LatLng latLng2 = LatLng(story.lat, story.lon);
-    return await CalculateTools().calcDistance(latLng1, latLng2);
-  }
+//  ///求值：两个坐标点的距离
+//  Future<double> getDistanceBetweenStory(Story location, Story story) async {
+//    LatLng latLng1 = LatLng(location.lat, location.lon);
+//    LatLng latLng2 = LatLng(story.lat, story.lon);
+//    return await CalculateTools().calcDistance(latLng1, latLng2);
+//  }
 
-  Future<double> getDistanceBetween1() async {
-    LatLng latLng1 = LatLng(30.94507622612847, 120.89830213758681);
-    LatLng latLng2 = LatLng(30.94544731987847, 120.89528781467014);
-    return await CalculateTools().calcDistance(latLng1, latLng2);
-//    return await CalculateUtil.calculateLineDistance(latLng1, latLng2);
-  }
+//  Future<double> getDistanceBetween1() async {
+//    LatLng latLng1 = LatLng(30.94507622612847, 120.89830213758681);
+//    LatLng latLng2 = LatLng(30.94544731987847, 120.89528781467014);
+//    return await CalculateTools().calcDistance(latLng1, latLng2);
+////    return await CalculateUtil.calculateLineDistance(latLng1, latLng2);
+//  }
 
   /// 给库中数据默认上default_address
   Future updateAllDefaultAddress() async {
@@ -697,12 +658,12 @@ class StoryHelper {
     }
   }
 
-  ///更新图片
-  Future updateStoryPictures(num id, String pictures) async {
-    await Query(DBManager.tableStory)
-        .primaryKey([id]).update({"pictures": pictures});
-    return true;
-  }
+//  ///更新图片
+//  Future updateStoryPictures(num id, String pictures) async {
+//    await Query(DBManager.tableStory)
+//        .primaryKey([id]).update({"pictures": pictures});
+//    return true;
+//  }
 
   ///删除指定的story 状态删除
   Future deleteTargetStoryWithStoryId(num id) async {
