@@ -119,8 +119,8 @@ class StoryHelper {
 //    }
 //  }
 
-  /// 更新story地点
-  Future<Map<num, Story>> updateCustomAddress(Story story) async {
+  /// 更新story地点 customAddress writeAddress
+  Future<Map<num, Story>> updateCustomWriteAddress(Story story) async {
     if (story != null) {
 //      await Query(DBManager.tableStory).primaryKey([story.id]).update(
 //          {"custom_address": story.customAddress});
@@ -129,7 +129,6 @@ class StoryHelper {
             "default_address", WhereCondictionType.IN, [story.defaultAddress])
       ]).all();
       LatLng latLng1 = LatLng(story.lat, story.lon);
-
       if (list != null && list.length > 0) {
         Map<num, Story> stories = Map<num, Story>();
         LatLng latLng2;
@@ -138,10 +137,12 @@ class StoryHelper {
           num distance = await CalculateTools().calcDistance(latLng1, latLng2);
           if (distance < LocationConfig.poiSearchInterval) {
             item["custom_address"] = story.customAddress;
+            item["write_address"] = story.writeAddress;
             await Query(DBManager.tableStory).primaryKey([item["id"]]).update({
               "custom_address": story.customAddress,
               "lon": story.lon,
-              "lat": story.lat
+              "lat": story.lat,
+              "write_address": story.writeAddress,
             });
             stories[item["id"]] =
                 Story.fromJson(Map<String, dynamic>.from(item));
@@ -412,7 +413,7 @@ class StoryHelper {
   }
 
   /// 根据Location创建story
-  Story createStoryWithLocation(Mslocation location) {
+  Future<Story> createStoryWithLocation(Mslocation location) async {
     Story story = Story();
     story.lat = location.lat;
     story.lon = location.lon;
@@ -442,8 +443,39 @@ class StoryHelper {
     story.radius = location.accuracy > LocationConfig.locationRadius
         ? LocationConfig.locationRadius
         : location.accuracy;
-    //TODO:需要看相同的该地点是否有custom_address,有的话需要赋值
+    //TODO:需要看相同的该地点是否有custom_address,write_address,有的话需要赋值
+    Story targetStory = await findSamePointStory(story);
+    if (targetStory != null) {
+      story.writeAddress = targetStory.writeAddress;
+      if (StringUtil.isNotEmpty(targetStory.customAddress)) {
+        ///此处认为用户选择过的点是准确的，所以更新经纬度
+        story.customAddress = targetStory.customAddress;
+        story.lat = targetStory.lat;
+        story.lon = targetStory.lon;
+      }
+    }
     return story;
+  }
+
+  ///根据当前story查库中相同地点的一个targetStory对象
+  Future<Story> findSamePointStory(Story story) async {
+    List list = await Query(DBManager.tableStory).whereBySql(
+        "default_address = ? and (custom_address IS NOT NULL or write_address IS NOT NULL)",
+        [story.defaultAddress]).all();
+    LatLng latLng1 = LatLng(story.lat, story.lon);
+    if (list != null && list.length > 0) {
+      LatLng latLng2;
+      for (Map item in list) {
+        latLng2 = LatLng(item["lat"], item["lon"]);
+        num distance = await CalculateTools().calcDistance(latLng1, latLng2);
+        if (distance < LocationConfig.poiSearchInterval) {
+          Story targetStory =
+              Story.fromJson(Map<String, dynamic>.from(list.first));
+          return targetStory;
+        }
+      }
+    }
+    return null;
   }
 
   /// 获取默认address
@@ -479,10 +511,10 @@ class StoryHelper {
         lastStory.updateTime = location.updatetime;
         return await updateStoryTimes(lastStory);
       } else {
-        return await createStory(createStoryWithLocation(location));
+        return await createStory(await createStoryWithLocation(location));
       }
     } else {
-      return await createStory(createStoryWithLocation(location));
+      return await createStory(await createStoryWithLocation(location));
     }
   }
 
@@ -497,14 +529,14 @@ class StoryHelper {
 //        story = await queryOldestStory();
 //        if (story != null &&
 //            !DateUtil.isSameDay(story.createTime, location.time)) {
-//          return await createStory(createStoryWithLocation(location));
+//          return await createStory(await createStoryWithLocation(location));
 //        }
 //      } else if (LocationFromType.after == itemType) {
 //        story = await findTargetStoryWithLocation(location);
 //      } else {
 //        story = await queryLastStory();
 //        if (story.isFromPicture == 1) {
-//          return await createStory(createStoryWithLocation(location));
+//          return await createStory(await createStoryWithLocation(location));
 //        }
 //      }
 //      if (story != null) {
@@ -516,7 +548,7 @@ class StoryHelper {
 //              if (await getDistanceBetween(location, story) >
 //                  LocationConfig.judgeDistanceNum) {
 //                debugPrint("======>create1");
-//                await createStory(createStoryWithLocation(location));
+//                await createStory(await createStoryWithLocation(location));
 //              } else {
 //                await updateStoryTime(location, story);
 //              }
@@ -525,18 +557,18 @@ class StoryHelper {
 //            if (await getDistanceBetween(location, story) >
 //                LocationConfig.judgeDistanceNum) {
 //              debugPrint("======>create2");
-//              await createStory(createStoryWithLocation(location));
+//              await createStory(await createStoryWithLocation(location));
 //            } else {
 //              await updateStoryTime(location, story);
 //            }
 //          }
 //        } else {
 //          debugPrint("======>create3");
-//          await createStory(createStoryWithLocation(location));
+//          await createStory(await createStoryWithLocation(location));
 //        }
 //      } else {
 //        debugPrint("======>create4");
-//        await createStory(createStoryWithLocation(location));
+//        await createStory(await createStoryWithLocation(location));
 //      }
 //    }
 //  }
@@ -547,7 +579,7 @@ class StoryHelper {
 //      Mslocation lastLocation, Mslocation location) async {
 //    Story story = await findTargetStoryWithLocation(lastLocation);
 //    if (story == null) {
-//      await createStory(createStoryWithLocation(location));
+//      await createStory(await createStoryWithLocation(location));
 //      print("story 创建 ${location.aoiname}");
 //    } else {
 //      await updateStoryTime(location, story);

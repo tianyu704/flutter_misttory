@@ -21,6 +21,7 @@ import 'package:misstory/models/story.dart';
 import 'package:misstory/models/tag.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/string_util.dart';
+import 'package:misstory/widgets/loading_dialog.dart';
 import 'package:misstory/widgets/my_appbar.dart';
 import 'package:misstory/widgets/tag_items_widget.dart';
 import 'package:misstory/net/http_manager.dart' as http;
@@ -44,11 +45,14 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///备注
   TextEditingController _descTextFieldVC = TextEditingController();
   FocusNode _descFocusNode = new FocusNode();
+
   ///自定义地址编辑
   TextEditingController _addressTextFieldVC = TextEditingController();
   FocusNode _addressFocusNode = new FocusNode();
+
   ///是否切换编辑地址模式
-  bool isSwitchToEditAddress =  false;
+  bool isSwitchToEditAddress = false;
+
   ///搜索
   TextEditingController _searchVC = TextEditingController();
   FocusNode _searchNode = new FocusNode();
@@ -83,8 +87,12 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   ///
   String _showTimeStr = "";
+
   ///之前的手写地址
   String _perWriteAddress = "";
+
+  ///正在保存中。。。
+  bool isSaving = false;
 
   ScrollController _scrollController = ScrollController();
 
@@ -110,7 +118,9 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
     _descTextFieldVC.text =
         StringUtil.isNotEmpty(widget.story.desc) ? widget.story.desc : "";
-    _perWriteAddress = StringUtil.isNotEmpty(widget.story.writeAddress) ? widget.story.writeAddress : "";
+    _perWriteAddress = StringUtil.isNotEmpty(widget.story.writeAddress)
+        ? widget.story.writeAddress
+        : "";
     _addressTextFieldVC.text = getShowAddress(widget.story);
     _showTimeStr = DateFormat("MM月dd日 HH:mm").format(
         DateTime.fromMillisecondsSinceEpoch(widget.story.createTime.toInt()));
@@ -147,7 +157,6 @@ class _EditPageState extends LifecycleState<EditPage> {
     getPoi();
   }
 
-
   @override
   void dispose() {
     ///
@@ -181,7 +190,9 @@ class _EditPageState extends LifecycleState<EditPage> {
         ),
         rightText: MaterialButton(
           padding: EdgeInsets.all(0),
-          onPressed: clickSave,
+          onPressed: () async {
+            await clickSave();
+          },
           child: Text('保存', style: AppStyle.navSaveText(context)),
           shape: CircleBorder(
             side: BorderSide(
@@ -327,7 +338,7 @@ class _EditPageState extends LifecycleState<EditPage> {
       height: 48,
       width: double.infinity,
       child: Padding(
-        padding: EdgeInsets.only(left: 10,right: 10),
+        padding: EdgeInsets.only(left: 10, right: 10),
         child: Row(
           //mainAxisAlignment: MainAxisAlignment.start,
           //crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,7 +366,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             Expanded(
               child: Padding(
                 padding: EdgeInsets.only(left: 10, bottom: 1),
-                child:  addressTextField(context),
+                child: addressTextField(context),
               ),
             ),
             SizedBox(
@@ -397,27 +408,23 @@ class _EditPageState extends LifecycleState<EditPage> {
         decoration: InputDecoration(
           hintText: "",
           contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: AppStyle.colors(context).colorBgPage),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: AppStyle.colors(context).colorBgPage),
-            ),
-            disabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: AppStyle.colors(context).colorBgPage),
-            ),
-
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: AppStyle.colors(context).colorBgPage),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: AppStyle.colors(context).colorBgPage),
+          ),
+          disabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: AppStyle.colors(context).colorBgPage),
+          ),
         ),
         onEditingComplete: () {
           finishedEditAddress();
         },
-        style: AppStyle.locationText14(context),//输入文本的样式,
-
+        style: AppStyle.locationText14(context), //输入文本的样式,
       ),
-
     );
   }
-
 
   ///标签编辑
   Widget tagTextField(BuildContext context) {
@@ -683,7 +690,9 @@ class _EditPageState extends LifecycleState<EditPage> {
                 ),
               ),
               Offstage(
-                offstage: !isShowCheck(poiName),///TODO:待补充判断
+                offstage: !isShowCheck(poiName),
+
+                ///TODO:待补充判断
                 child: Icon(Icons.done),
               )
             ],
@@ -702,21 +711,17 @@ class _EditPageState extends LifecycleState<EditPage> {
       finishedEditAddress();
     }
   }
+
   finishedEditAddress() {
     isSwitchToEditAddress = false;
     _addressFocusNode.unfocus();
     print("******");
-    updateEditAddress();
-    setState(() {});
-  }
-
-  updateEditAddress() {
     String str = _addressTextFieldVC.text;
-    if (str.length <= 0 ) {
+    if (StringUtil.isEmpty(str)) {
       _addressTextFieldVC.text = getShowAddress(widget.story);
     }
+    setState(() {});
   }
-
 
   showEmptyWidget(BuildContext context, String title, bool isEnable) {
     return SliverToBoxAdapter(
@@ -873,8 +878,11 @@ class _EditPageState extends LifecycleState<EditPage> {
   bool isShowCheck(String poiName) {
     if (pickPoiLocation != null &&
         StringUtil.isNotEmpty(pickPoiLocation.title)) {
-      if (poiName == pickPoiLocation.title)
-      return true;
+      if (poiName == pickPoiLocation.title) {
+        return true;
+      } else {
+        return false;
+      }
     }
     if (widget.story.customAddress == poiName) {
       return true;
@@ -890,7 +898,9 @@ class _EditPageState extends LifecycleState<EditPage> {
     _controller.addMarker(MarkerOptions(
       position: _currentLatLng,
     ));
-    _addressTextFieldVC.text = getShowAddress(widget.story);
+    if (StringUtil.isEmpty(_perWriteAddress)) {
+      _addressTextFieldVC.text = getShowAddress(widget.story);
+    }
     setState(() {});
   }
 
@@ -927,7 +937,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   void _showAlertView(BuildContext cxt) {
-    String title = "确认删除地点 ${getShowAddress(widget.story)} ？";
+    String title = "确认删除地点 ${_addressTextFieldVC.text} ？";
     showCupertinoModalPopup<int>(
         context: cxt,
         builder: (cxt) {
@@ -970,11 +980,23 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///保存编辑页面数据
   clickSave() async {
     //TODO:
+    if (isSaving) return;
+
+    isSaving = true;
+
+    LoadingDialog loading = LoadingDialog(
+      outsideDismiss: false,
+      loadingText: "保存中...",
+    );
+    showDialog(
+
+        context: context,
+        barrierDismissible: false,
+        builder: (_) {
+          return loading;
+        });
+    await Future.delayed(Duration(milliseconds: 500));
     Story story = widget.story;
-    if (story.id == null) {
-      //TODO:创建一条story
-      story.id = await StoryHelper().createStory(story);
-    }
 
     ///备注保存
     story.desc = _descTextFieldVC.text ?? "";
@@ -1012,8 +1034,17 @@ class _EditPageState extends LifecycleState<EditPage> {
 //        isFlag = true;
 //      }
 //    }
-
+    if (_addressFocusNode.hasFocus) {
+      isSwitchToEditAddress = false;
+      _addressFocusNode.unfocus();
+      String str = _addressTextFieldVC.text;
+      if (StringUtil.isEmpty(str)) {
+        _addressTextFieldVC.text = getShowAddress(widget.story);
+      }
+    }
+    //
     bool isWrite = isWriteAddressed(_addressTextFieldVC.text);
+
     ///自定义地点保存
     Map<num, Story> stories;
     if (pickPoiLocation != null &&
@@ -1024,16 +1055,28 @@ class _EditPageState extends LifecycleState<EditPage> {
       if (isWrite) {
         story.writeAddress = _addressTextFieldVC.text;
       }
-      stories = await StoryHelper().updateCustomAddress(story);
+      stories = await StoryHelper().updateCustomWriteAddress(story);
+
       ///存储该pick 点 如果没存过的话
     } else {
       if (isWrite) {
         story.writeAddress = _addressTextFieldVC.text;
-        stories = await StoryHelper().updateCustomAddress(story);
+        stories = await StoryHelper().updateCustomWriteAddress(story);
       }
     }
-    ///
-    Navigator.pop(context, [stories]);
+
+    ///进度消失
+    await loading.handleDismiss();
+    print("${stories}");
+
+    ///返回
+    if (stories != null && stories.length > 0) {
+      Navigator.pop(context, [stories]);
+    } else {
+      print("222");
+      Navigator.pop(context);
+    }
+    isSaving = false;
   }
 
   getShowAddress(Story story) {
@@ -1052,14 +1095,13 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   bool isWriteAddressed(String str) {
     if (StringUtil.isNotEmpty(str)) {
-      if (str != _perWriteAddress
-          && (pickPoiLocation != null && str != pickPoiLocation.title)
-          && str != widget.story.customAddress) {
-         return true;
+      if (str == _perWriteAddress) return false;
+      if (pickPoiLocation == null) {
+        return true;
+      } else {
+        if (str != pickPoiLocation.title) return true;
       }
     }
     return false;
   }
-
-
 }

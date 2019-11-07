@@ -225,7 +225,7 @@ class PictureHelper {
                 await updatePictureStoryUuid(p.id, beforeStory.uuid);
                 await StoryHelper().updateStoryTimes(beforeStory);
               } else {
-                Story story = StoryHelper().createStoryWithLocation(mslocation);
+                Story story = await StoryHelper().createStoryWithLocation(mslocation);
                 await StoryHelper().createStory(story);
                 await updatePictureStoryUuid(p.id, story.uuid);
               }

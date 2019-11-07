@@ -339,13 +339,12 @@ class _HomePageState extends LifecycleState<HomePage> {
             .then(
           (value) {
             if (value != null) {
-              print("::::3:::");
               if (value is Story) {
                 Story story = value;
                 notifyDeleteStory(story);
                 return;
               }
-              if (value is Map) {
+              if (value is List && value.length > 0) {
                 Map<num, Story> stories = value[0];
                 if (stories != null && stories.length > 0) {
                   notifyStories(stories);
@@ -367,7 +366,7 @@ class _HomePageState extends LifecycleState<HomePage> {
                 notifyDeleteStory(story);
                 return;
               }
-              if (value is Map) {
+              if (value is List && value.length > 0)  {
                 Map<num, Story> stories = value[0];
                 if (stories != null && stories.length > 0) {
                   notifyStories(stories);
@@ -420,12 +419,15 @@ class _HomePageState extends LifecycleState<HomePage> {
     if (_storiesAll != null && _storiesAll.length > 0) {
       _storiesAll.forEach((item) {
         if (stories.containsKey(item.id)) {
+          //print("${stories[item.id].writeAddress}");
           item.lat = stories[item.id].lat;
           item.lon = stories[item.id].lon;
           item.customAddress = stories[item.id].customAddress;
           item.desc = stories[item.id].desc;
+          item.writeAddress = stories[item.id].writeAddress;
         }
       });
+      print(":::${stories.length}:::");
       if (mounted) {
         setState(() {});
       }
