@@ -106,7 +106,6 @@ class StoryHelper {
             "default_address", WhereCondictionType.IN, [story.defaultAddress])
       ]).all();
       LatLng latLng1 = LatLng(story.lat, story.lon);
-
       if (list != null && list.length > 0) {
         Map<num, Story> stories = Map<num, Story>();
         LatLng latLng2;
@@ -115,6 +114,7 @@ class StoryHelper {
           num distance = await CalculateTools().calcDistance(latLng1, latLng2);
           if (distance < LocationConfig.poiSearchInterval) {
             item["custom_address"] = story.customAddress;
+            item["write_address"] =  story.writeAddress;
             await Query(DBManager.tableStory).primaryKey([item["id"]]).update({
               "custom_address": story.customAddress,
               "lon": story.lon,
