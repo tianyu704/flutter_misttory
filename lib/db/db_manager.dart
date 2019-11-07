@@ -106,6 +106,7 @@ class DBManager {
     storyFields["isFromPicture"] = Field(FieldType.Real);
     storyFields["coord_type"] = Field(FieldType.Text);
     storyFields["uuid"] = Field(FieldType.Text);
+    storyFields["write_address"] = Field(FieldType.Text);
 
     ///tag表
     Map<String, Field> tagFields = new Map<String, Field>();
