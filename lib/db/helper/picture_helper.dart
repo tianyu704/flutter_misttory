@@ -246,47 +246,47 @@ class PictureHelper {
         .primaryKey([id]).update({"story_uuid": uuid});
   }
 
-  fetchAppSystemPicture() async {
-    List picList = await queryPictureConverted();
-
-    Picture beforeP =
-        picList != null && picList.length > 0 ? picList.last : null;
-    Picture afterP =
-        picList != null && picList.length > 0 ? picList.first : null;
-    num time = 0;
-    if (beforeP != null) {
-      time = beforeP.creationDate;
-    }
-    await LocalImageProvider().initialize();
-    num start = DateTime.now().millisecondsSinceEpoch;
-    List<LocalImage> list = [];
-    List<LocalImage> afterList = [];
-    if (time == 0) {
-      list = await LocalImageProvider().findAfterTime();
-    } else {
-      afterList =
-          await LocalImageProvider().findAfterTime(time: afterP.creationDate);
-      //list =   await LocalImageProvider().findBeforeTime(time: time);
-    }
-    //debugPrint("======查询到${list?.length}张照片，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
-    if (afterList != null && afterList.length > 0) {
-      print("===${afterList.length}==${afterP.creationDate}===");
-      for (LocalImage image in afterList) {
-        if (!(await PictureHelper().isExistPictureWithId(image.id))) {
-          await createPicture(createPictureModelWithLocalImage(image));
-        }
-      }
-    }
-    if (list != null && list.length > 0) {
-      for (LocalImage image in list) {
-        if (!(await PictureHelper().isExistPictureWithId(image.id))) {
-          await createPicture(createPictureModelWithLocalImage(image));
-        }
-      }
-    }
-    debugPrint(
-        " 存储完Picture表，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
-  }
+//  fetchAppSystemPicture() async {
+//    List picList = await queryPictureConverted();
+//
+//    Picture beforeP =
+//        picList != null && picList.length > 0 ? picList.last : null;
+//    Picture afterP =
+//        picList != null && picList.length > 0 ? picList.first : null;
+//    num time = 0;
+//    if (beforeP != null) {
+//      time = beforeP.creationDate;
+//    }
+//    await LocalImageProvider().initialize();
+//    num start = DateTime.now().millisecondsSinceEpoch;
+//    List<LocalImage> list = [];
+//    List<LocalImage> afterList = [];
+//    if (time == 0) {
+//      list = await LocalImageProvider().findAfterTime();
+//    } else {
+//      afterList =
+//          await LocalImageProvider().findAfterTime(time: afterP.creationDate);
+//      //list =   await LocalImageProvider().findBeforeTime(time: time);
+//    }
+//    //debugPrint("======查询到${list?.length}张照片，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
+//    if (afterList != null && afterList.length > 0) {
+//      print("===${afterList.length}==${afterP.creationDate}===");
+//      for (LocalImage image in afterList) {
+//        if (!(await PictureHelper().isExistPictureWithId(image.id))) {
+//          await createPicture(createPictureModelWithLocalImage(image));
+//        }
+//      }
+//    }
+//    if (list != null && list.length > 0) {
+//      for (LocalImage image in list) {
+//        if (!(await PictureHelper().isExistPictureWithId(image.id))) {
+//          await createPicture(createPictureModelWithLocalImage(image));
+//        }
+//      }
+//    }
+//    debugPrint(
+//        " 存储完Picture表，用时${DateTime.now().millisecondsSinceEpoch - start}毫秒");
+//  }
 
   Picture createPictureModelWithLocalImage(LocalImage image) {
     Picture p = Picture();
@@ -303,14 +303,14 @@ class PictureHelper {
     return p;
   }
 
-  Future<Picture> queryPictureById(String id) async {
-    Map result =
-        await Query(DBManager.tablePicture).whereBySql("id = ?", [id]).first();
-    if (result != null) {
-      return Picture.fromJson(Map<String, dynamic>.from(result));
-    }
-    return null;
-  }
+//  Future<Picture> queryPictureById(String id) async {
+//    Map result =
+//        await Query(DBManager.tablePicture).whereBySql("id = ?", [id]).first();
+//    if (result != null) {
+//      return Picture.fromJson(Map<String, dynamic>.from(result));
+//    }
+//    return null;
+//  }
 
   /// 创建Picture 并存库
   Future<bool> createPicture(Picture p) async {
@@ -332,26 +332,26 @@ class PictureHelper {
     return false;
   }
 
-  ///按主键查询数据库中是否存在该条数据
-  Future<bool> isExistPictureWithId(String id) async {
-    Map result =
-        await Query(DBManager.tablePicture).whereBySql("id = ?", [id]).first();
-    if (result != null) {
-      return true;
-    }
-    return false;
-  }
+//  ///按主键查询数据库中是否存在该条数据
+//  Future<bool> isExistPictureWithId(String id) async {
+//    Map result =
+//        await Query(DBManager.tablePicture).whereBySql("id = ?", [id]).first();
+//    if (result != null) {
+//      return true;
+//    }
+//    return false;
+//  }
 
-  /// 查询存储在picture表中最早一条数据
-  Future<Picture> queryOldestPicture() async {
-    Map result = await Query(DBManager.tablePicture).orderBy([
-      "creationDate",
-    ]).first();
-    if (result != null && result.length > 0) {
-      return Picture.fromJson(Map<String, dynamic>.from(result));
-    }
-    return null;
-  }
+//  /// 查询存储在picture表中最早一条数据
+//  Future<Picture> queryOldestPicture() async {
+//    Map result = await Query(DBManager.tablePicture).orderBy([
+//      "creationDate",
+//    ]).first();
+//    if (result != null && result.length > 0) {
+//      return Picture.fromJson(Map<String, dynamic>.from(result));
+//    }
+//    return null;
+//  }
 
 //  ///📌查询并转化picture为location
 //  Future<bool> convertPicturesToLocations() async {
@@ -400,72 +400,72 @@ class PictureHelper {
 //    }
 //  }
 
-  ///📌查询未转化为location的图片集合
-  ///从指定时间到当前的未同步的全部图片集合
-  Future<List> findPicturesAfterTime(num time) async {
-    List result;
-    if (time == 0) {
-      result = await Query(DBManager.tablePicture)
-          .orderBy(["creationDate"]).whereByColumFilters([
-        WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
-      ]).all();
-    } else {
-      result = await Query(DBManager.tablePicture)
-          .orderBy(["creationDate"]).whereByColumFilters([
-        WhereCondiction(
-            "creationDate", WhereCondictionType.EQ_OR_MORE_THEN, time),
-        WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
-      ]).all();
-    }
-    List<Picture> list = [];
-    if (result != null && result.length > 0) {
-      result.forEach((item) {
-        Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
-        list.add(p);
-      });
-      return list;
-    }
-    return null;
-  }
+//  ///📌查询未转化为location的图片集合
+//  ///从指定时间到当前的未同步的全部图片集合
+//  Future<List> findPicturesAfterTime(num time) async {
+//    List result;
+//    if (time == 0) {
+//      result = await Query(DBManager.tablePicture)
+//          .orderBy(["creationDate"]).whereByColumFilters([
+//        WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
+//      ]).all();
+//    } else {
+//      result = await Query(DBManager.tablePicture)
+//          .orderBy(["creationDate"]).whereByColumFilters([
+//        WhereCondiction(
+//            "creationDate", WhereCondictionType.EQ_OR_MORE_THEN, time),
+//        WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
+//      ]).all();
+//    }
+//    List<Picture> list = [];
+//    if (result != null && result.length > 0) {
+//      result.forEach((item) {
+//        Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
+//        list.add(p);
+//      });
+//      return list;
+//    }
+//    return null;
+//  }
 
-  ///从最早的到到指定时间的未同步的全部图片集合
-  Future<List> findPicturesBeforeTime(num time) async {
-    if (time == 0) {
-      time = DateTime.now().millisecondsSinceEpoch;
-    }
-    List result = await Query(DBManager.tablePicture)
-        .orderBy(["creationDate desc"]).whereByColumFilters([
-      WhereCondiction("creationDate", WhereCondictionType.LESS_THEN, time),
-      WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
-    ]).all();
+//  ///从最早的到到指定时间的未同步的全部图片集合
+//  Future<List> findPicturesBeforeTime(num time) async {
+//    if (time == 0) {
+//      time = DateTime.now().millisecondsSinceEpoch;
+//    }
+//    List result = await Query(DBManager.tablePicture)
+//        .orderBy(["creationDate desc"]).whereByColumFilters([
+//      WhereCondiction("creationDate", WhereCondictionType.LESS_THEN, time),
+//      WhereCondiction("isSynced", WhereCondictionType.IN, [0]),
+//    ]).all();
+//
+//    List<Picture> list = [];
+//    if (result != null && result.length > 0) {
+//      result.forEach((item) {
+//        Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
+//        list.add(p);
+//      });
+//      return list;
+//    }
+//    return null;
+//  }
 
-    List<Picture> list = [];
-    if (result != null && result.length > 0) {
-      result.forEach((item) {
-        Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
-        list.add(p);
-      });
-      return list;
-    }
-    return null;
-  }
-
-  ///查询已转化图片的集合：目的是拿到最大最小时间
-  Future<List> queryPictureConverted() async {
-    List result = await Query(DBManager.tablePicture)
-        .orderBy(["creationDate desc"]).whereByColumFilters([
-      WhereCondiction("isSynced", WhereCondictionType.IN, [1]),
-    ]).all();
-    List<Picture> list = [];
-    if (result != null && result.length > 0) {
-      result.forEach((item) {
-        Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
-        list.add(p);
-      });
-      return list;
-    }
-    return null;
-  }
+//  ///查询已转化图片的集合：目的是拿到最大最小时间
+//  Future<List> queryPictureConverted() async {
+//    List result = await Query(DBManager.tablePicture)
+//        .orderBy(["creationDate desc"]).whereByColumFilters([
+//      WhereCondiction("isSynced", WhereCondictionType.IN, [1]),
+//    ]).all();
+//    List<Picture> list = [];
+//    if (result != null && result.length > 0) {
+//      result.forEach((item) {
+//        Picture p = Picture.fromJson(Map<String, dynamic>.from(item));
+//        list.add(p);
+//      });
+//      return list;
+//    }
+//    return null;
+//  }
 
   Future<List> queryUnSyncedPictures() async {
     List result = await Query(DBManager.tablePicture)
@@ -493,10 +493,10 @@ class PictureHelper {
     return true;
   }
 
-  Future<bool> hasCreatePicture() async {
-    Map result = await Query(DBManager.tablePicture).first();
-    return result != null;
-  }
+//  Future<bool> hasCreatePicture() async {
+//    Map result = await Query(DBManager.tablePicture).first();
+//    return result != null;
+//  }
 
   /// 把图片的path添加上
   Future addPath() async {

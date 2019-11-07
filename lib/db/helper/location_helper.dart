@@ -211,88 +211,6 @@ class LocationHelper {
         await createLocation(location);
       }
       return await StoryHelper().createOrUpdateStory(mslocation);
-//
-//      Mslocation lastLocation = await queryLastLocation();
-//      if (lastLocation == null || lastLocation.isFromPicture == 1) {
-////        return await createLocation(location);
-//      } else {
-//        num distance = await CalculateUtil.calculateLocationDistance(
-//            location, lastLocation);
-//        if (distance < LocationConfig.locationRadius) {
-//          return await updateLocationTime(lastLocation, location);
-//        } else {
-//          if (distance < LocationConfig.judgeDistanceNum &&
-//              location.poiname == lastLocation.poiname &&
-//              location.aoiname == lastLocation.aoiname) {
-//            return await updateLocationTime(lastLocation, location);
-//          } else {
-////            return await createLocation(location);
-//          }
-//        }
-//      }
-
-//      Mslocation lastLocation;
-//      if (LocationFromType.before == itemType) {
-//        lastLocation = await queryOldestLocation();
-//        if (lastLocation != null &&
-//            !DateUtil.isSameDay(lastLocation.time, location.time)) {
-//          return await createLocation(location,
-//              picture: picture, itemType: itemType);
-//        }
-//      } else if (LocationFromType.after == itemType) {
-//        lastLocation = await findTargetLocationWithPicture(location);
-//        if (lastLocation == null) {
-//          lastLocation = await queryLastLocation();
-//          if (lastLocation.updatetime > location.time) {
-//            lastLocation = null;
-//          }
-//        } else {
-//          return await updateLocationTime(lastLocation, location,
-//              picture: picture, itemType: itemType);
-//        }
-//      } else {
-//        lastLocation = await queryLastLocation();
-//        if (lastLocation.isFromPicture == 1) {
-//          return await createLocation(location);
-//        }
-//      }
-//      if (lastLocation == null) {
-//        return await createLocation(location,
-//            picture: picture, itemType: itemType);
-//      } else if (lastLocation.lon == location.lon &&
-//          lastLocation.lat == location.lat) {
-//        return await updateLocationTime(lastLocation, location,
-//            picture: picture, itemType: itemType);
-//      } else {
-//        if (lastLocation.aoiname == location.aoiname) {
-//          if (location.aoiname == null &&
-//              lastLocation.poiname != location.poiname) {
-//            return await createLocation(location,
-//                picture: picture, itemType: itemType);
-//          } else {
-//            if (await getDistanceBetween(location, lastLocation) >
-//                LocationConfig.judgeDistanceNum) {
-//              return await createLocation(location,
-//                  picture: picture, itemType: itemType);
-//            } else {
-//              return await updateLocationTime(lastLocation, location,
-//                  picture: picture, itemType: itemType);
-//            }
-//          }
-//        } else if (lastLocation.poiname == location.poiname) {
-//          if (await getDistanceBetween(location, lastLocation) >
-//              LocationConfig.judgeDistanceNum) {
-//            return await createLocation(location,
-//                picture: picture, itemType: itemType);
-//          } else {
-//            return await updateLocationTime(lastLocation, location,
-//                picture: picture, itemType: itemType);
-//          }
-//        } else {
-//          return await createLocation(location,
-//              picture: picture, itemType: itemType);
-//        }
-//      }
     }
     return -1;
   }
@@ -307,63 +225,63 @@ class LocationHelper {
     return -1;
   }
 
-  /// 更新Location时间
-  Future<int> updateLocationTime(Mslocation lastLocation, Mslocation location,
-      {Picture picture, LocationFromType itemType}) async {
-    num id = lastLocation.id;
-    if (location != null) {
-      if (picture == null) {
-        await Query(DBManager.tableMSLocation)
-            .primaryKey([id]).update({"updatetime": location.updatetime});
-      } else {
-        String str;
-        if (StringUtil.isEmpty(lastLocation.pictures)) {
-          str = "${picture.id}";
-        } else {
-          str = "${lastLocation.pictures},${picture.id}";
-        }
-        lastLocation.pictures = str;
-        location.pictures = str;
+//  /// 更新Location时间
+//  Future<int> updateLocationTime(Mslocation lastLocation, Mslocation location,
+//      {Picture picture, LocationFromType itemType}) async {
+//    num id = lastLocation.id;
+//    if (location != null) {
+//      if (picture == null) {
+//        await Query(DBManager.tableMSLocation)
+//            .primaryKey([id]).update({"updatetime": location.updatetime});
+//      } else {
+//        String str;
+//        if (StringUtil.isEmpty(lastLocation.pictures)) {
+//          str = "${picture.id}";
+//        } else {
+//          str = "${lastLocation.pictures},${picture.id}";
+//        }
+//        lastLocation.pictures = str;
+//        location.pictures = str;
+//
+//        ///为了更新story的pictures
+//        num startTime = (location.time < lastLocation.time)
+//            ? location.time
+//            : lastLocation.time;
+//        num updateTime = (location.updatetime > lastLocation.updatetime)
+//            ? location.updatetime
+//            : lastLocation.updatetime;
+//        lastLocation.time = startTime;
+//        lastLocation.updatetime = updateTime;
+//        await Query(DBManager.tableMSLocation).primaryKey([id]).update(
+//            {"time": startTime, "updatetime": updateTime, "pictures": str});
+//        await StoryHelper().judgeLocation(lastLocation, itemType: itemType);
+//        print("xxXX");
+//        await PictureHelper().updatePictureStatus(picture);
+//      }
+//      debugPrint("执行p 转 l中 更新l。。。。。$itemType");
+//      return 0;
+//    }
+//    return -1;
+//  }
 
-        ///为了更新story的pictures
-        num startTime = (location.time < lastLocation.time)
-            ? location.time
-            : lastLocation.time;
-        num updateTime = (location.updatetime > lastLocation.updatetime)
-            ? location.updatetime
-            : lastLocation.updatetime;
-        lastLocation.time = startTime;
-        lastLocation.updatetime = updateTime;
-        await Query(DBManager.tableMSLocation).primaryKey([id]).update(
-            {"time": startTime, "updatetime": updateTime, "pictures": str});
-        await StoryHelper().judgeLocation(lastLocation, itemType: itemType);
-        print("xxXX");
-        await PictureHelper().updatePictureStatus(picture);
-      }
-      debugPrint("执行p 转 l中 更新l。。。。。$itemType");
-      return 0;
-    }
-    return -1;
-  }
-
-  /// 更新Location
-  Future<int> updateLocationPictures(
-      Mslocation location, Picture picture) async {
-    if (location != null && picture != null) {
-      if (StringUtil.isEmpty(location.pictures)) {
-        location.pictures = picture.id;
-      } else {
-        location.pictures = "${location.pictures},${picture.id}";
-      }
-      await Query(DBManager.tableMSLocation).primaryKey([location.id]).update({
-        "pictures": location.pictures,
-        "time": location.time,
-        "updatetime": location.updatetime
-      });
-      return 1;
-    }
-    return 0;
-  }
+//  /// 更新Location
+//  Future<int> updateLocationPictures(
+//      Mslocation location, Picture picture) async {
+//    if (location != null && picture != null) {
+//      if (StringUtil.isEmpty(location.pictures)) {
+//        location.pictures = picture.id;
+//      } else {
+//        location.pictures = "${location.pictures},${picture.id}";
+//      }
+//      await Query(DBManager.tableMSLocation).primaryKey([location.id]).update({
+//        "pictures": location.pictures,
+//        "time": location.time,
+//        "updatetime": location.updatetime
+//      });
+//      return 1;
+//    }
+//    return 0;
+//  }
 
   /// 查询最后一条Location
   Future<l.Location> queryLastLocation() async {
@@ -376,18 +294,18 @@ class LocationHelper {
     return null;
   }
 
-  /// 查询最早一条Location
-  Future<Mslocation> queryOldestLocation() async {
-    Map result = await Query(DBManager.tableLocation).orderBy([
-      "time asc",
-    ]).whereByColumFilters([
-      WhereCondiction("errorCode", WhereCondictionType.IN, [0])
-    ]).first();
-    if (result != null && result.length > 0) {
-      return Mslocation.fromJson(Map<String, dynamic>.from(result));
-    }
-    return null;
-  }
+//  /// 查询最早一条Location
+//  Future<Mslocation> queryOldestLocation() async {
+//    Map result = await Query(DBManager.tableLocation).orderBy([
+//      "time asc",
+//    ]).whereByColumFilters([
+//      WhereCondiction("errorCode", WhereCondictionType.IN, [0])
+//    ]).first();
+//    if (result != null && result.length > 0) {
+//      return Mslocation.fromJson(Map<String, dynamic>.from(result));
+//    }
+//    return null;
+//  }
 
 //  ///把库中的数据生成story，根据最后一条story的updateTime以后的数据生成
 //  Future<void> createStoryByLocation() async {
@@ -419,98 +337,98 @@ class LocationHelper {
 //    }
 //  }
 
-  ///根据Picture查找对应Location
-  Future<Mslocation> findTargetLocationWithPicture(
-      Mslocation mslocation) async {
-    if (mslocation == null) {
-      return null;
-    }
-    Map result = await Query(DBManager.tableLocation).orderBy([
-      "time",
-    ]).whereByColumFilters([
-      WhereCondiction(
-          "time", WhereCondictionType.EQ_OR_LESS_THEN, mslocation.time),
-      WhereCondiction(
-          "updatetime", WhereCondictionType.EQ_OR_MORE_THEN, mslocation.time),
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
-    ]).first();
+//  ///根据Picture查找对应Location
+//  Future<Mslocation> findTargetLocationWithPicture(
+//      Mslocation mslocation) async {
+//    if (mslocation == null) {
+//      return null;
+//    }
+//    Map result = await Query(DBManager.tableLocation).orderBy([
+//      "time",
+//    ]).whereByColumFilters([
+//      WhereCondiction(
+//          "time", WhereCondictionType.EQ_OR_LESS_THEN, mslocation.time),
+//      WhereCondiction(
+//          "updatetime", WhereCondictionType.EQ_OR_MORE_THEN, mslocation.time),
+//      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+//    ]).first();
+//
+//    if (result != null && result.length > 0) {
+//      return Mslocation.fromJson(Map<String, dynamic>.from(result));
+//    } else {
+//      Map r = await Query(DBManager.tableLocation)
+//          .orderBy(["time desc"]).whereByColumFilters([
+//        WhereCondiction(
+//            "time", WhereCondictionType.EQ_OR_LESS_THEN, mslocation.time),
+//        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+//      ]).first();
+//      if (r != null) {
+//        return Mslocation.fromJson(Map<String, dynamic>.from(r));
+//      }
+//    }
+//    return null;
+//  }
 
-    if (result != null && result.length > 0) {
-      return Mslocation.fromJson(Map<String, dynamic>.from(result));
-    } else {
-      Map r = await Query(DBManager.tableLocation)
-          .orderBy(["time desc"]).whereByColumFilters([
-        WhereCondiction(
-            "time", WhereCondictionType.EQ_OR_LESS_THEN, mslocation.time),
-        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
-      ]).first();
-      if (r != null) {
-        return Mslocation.fromJson(Map<String, dynamic>.from(r));
-      }
-    }
-    return null;
-  }
+//  ///根据Picture查找对应Location
+//  Future<Mslocation> findTargetLocation(num startTime, num endTime) async {
+//    Map result = await Query(DBManager.tableMSLocation).orderBy([
+//      "time",
+//    ]).whereByColumFilters([
+//      WhereCondiction("time", WhereCondictionType.EQ_OR_LESS_THEN, startTime),
+//      WhereCondiction(
+//          "updatetime", WhereCondictionType.EQ_OR_MORE_THEN, endTime),
+//    ]).first();
+//
+//    if (result != null && result.length > 0) {
+//      return Mslocation.fromJson(Map<String, dynamic>.from(result));
+//    }
+//    return null;
+//  }
 
-  ///根据Picture查找对应Location
-  Future<Mslocation> findTargetLocation(num startTime, num endTime) async {
-    Map result = await Query(DBManager.tableMSLocation).orderBy([
-      "time",
-    ]).whereByColumFilters([
-      WhereCondiction("time", WhereCondictionType.EQ_OR_LESS_THEN, startTime),
-      WhereCondiction(
-          "updatetime", WhereCondictionType.EQ_OR_MORE_THEN, endTime),
-    ]).first();
+//  ///根据time查找对应Location
+//  Future<Mslocation> findAfterLocation(num time) async {
+//    Map result = await Query(DBManager.tableMSLocation).orderBy([
+//      "time",
+//    ]).whereByColumFilters([
+//      WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, time)
+//    ]).first();
+//
+//    if (result != null && result.length > 0) {
+//      return Mslocation.fromJson(Map<String, dynamic>.from(result));
+//    }
+//    return null;
+//  }
 
-    if (result != null && result.length > 0) {
-      return Mslocation.fromJson(Map<String, dynamic>.from(result));
-    }
-    return null;
-  }
+//  ///根据time查找对应Location
+//  Future<Mslocation> findBeforeLocation(num time) async {
+//    Map result = await Query(DBManager.tableMSLocation).orderBy([
+//      "updatetime desc",
+//    ]).whereByColumFilters([
+//      WhereCondiction("updatetime", WhereCondictionType.EQ_OR_LESS_THEN, time)
+//    ]).first();
+//
+//    if (result != null && result.length > 0) {
+//      return Mslocation.fromJson(Map<String, dynamic>.from(result));
+//    }
+//    return null;
+//  }
 
-  ///根据time查找对应Location
-  Future<Mslocation> findAfterLocation(num time) async {
-    Map result = await Query(DBManager.tableMSLocation).orderBy([
-      "time",
-    ]).whereByColumFilters([
-      WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, time)
-    ]).first();
+//  ///求值：两个坐标点的距离
+//  Future<double> getDistanceBetween(
+//      Mslocation location1, Mslocation location2) async {
+//    LatLng latLng1 = LatLng(location1.lat, location1.lon);
+//    LatLng latLng2 = LatLng(location2.lat, location2.lon);
+//    return await CalculateTools().calcDistance(latLng1, latLng2);
+//  }
 
-    if (result != null && result.length > 0) {
-      return Mslocation.fromJson(Map<String, dynamic>.from(result));
-    }
-    return null;
-  }
-
-  ///根据time查找对应Location
-  Future<Mslocation> findBeforeLocation(num time) async {
-    Map result = await Query(DBManager.tableMSLocation).orderBy([
-      "updatetime desc",
-    ]).whereByColumFilters([
-      WhereCondiction("updatetime", WhereCondictionType.EQ_OR_LESS_THEN, time)
-    ]).first();
-
-    if (result != null && result.length > 0) {
-      return Mslocation.fromJson(Map<String, dynamic>.from(result));
-    }
-    return null;
-  }
-
-  ///求值：两个坐标点的距离
-  Future<double> getDistanceBetween(
-      Mslocation location1, Mslocation location2) async {
-    LatLng latLng1 = LatLng(location1.lat, location1.lon);
-    LatLng latLng2 = LatLng(location2.lat, location2.lon);
-    return await CalculateTools().calcDistance(latLng1, latLng2);
-  }
-
-  ///删除指定的Location 状态删除
-  Future deleteTargetLocationWithTime(num startTime, num endTime) async {
-    await Query(DBManager.tableLocation).whereByColumFilters([
-      WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, startTime),
-      WhereCondiction(
-          "updatetime", WhereCondictionType.EQ_OR_LESS_THEN, endTime)
-    ]).update({"is_deleted": 1});
-  }
+//  ///删除指定的Location 状态删除
+//  Future deleteTargetLocationWithTime(num startTime, num endTime) async {
+//    await Query(DBManager.tableLocation).whereByColumFilters([
+//      WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, startTime),
+//      WhereCondiction(
+//          "updatetime", WhereCondictionType.EQ_OR_LESS_THEN, endTime)
+//    ]).update({"is_deleted": 1});
+//  }
 
   ///删除图片生成的位置信息
   Future deletePictureLocation() async {

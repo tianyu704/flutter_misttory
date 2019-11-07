@@ -960,8 +960,8 @@ class _EditPageState extends LifecycleState<EditPage> {
     if (story.id != null) {
       await StoryHelper().deleteTargetStoryWithStoryId(story.id);
     }
-    await LocationHelper()
-        .deleteTargetLocationWithTime(story.createTime, story.updateTime);
+//    await LocationHelper()
+//        .deleteTargetLocationWithTime(story.createTime, story.updateTime);
     debugPrint("删除完毕");
     Navigator.pop(context, story);
   }
