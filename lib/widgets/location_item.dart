@@ -16,8 +16,10 @@ class LocationItem extends StatelessWidget {
   final TItem<Story> item;
   final Function onPressCard;
   final Function onPressPicture;
+  final Function onTapMore;
 
-  LocationItem(this.item, {this.onPressCard, this.onPressPicture});
+  LocationItem(this.item,
+      {this.onPressCard, this.onPressPicture, this.onTapMore});
 
   @override
   Widget build(BuildContext context) {
@@ -47,25 +49,44 @@ class LocationItem extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      SizedBox(
-                        width: 56,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 2),
-                          child: Text(
-                            "$date",
-                            style: AppStyle.mainText14(context),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          SizedBox(
+                            width: 50,
+                            child: Padding(
+                              padding: EdgeInsets.only(top: 2),
+                              child: Text(
+                                "$date",
+                                style: AppStyle.mainText14(context),
+                              ),
+                            ),
                           ),
-                        ),
+                          Offstage(
+                            offstage: !(story.others != null &&
+                                story.others.length > 2),
+                            child: GestureDetector(
+                              onTap: onTapMore,
+                              child: SizedBox(
+                                width: 35,
+                                child: Icon(
+                                  Icons.more_vert,
+                                  color: AppStyle.colors(context).colorDescText,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
                                 Padding(
-                                  padding: EdgeInsets.only(top: 3),
+                                  padding: EdgeInsets.only(top: 0),
                                   child: SvgPicture.asset(
                                     (StringUtil.isEmpty(story.customAddress) &&
                                             StringUtil.isEmpty(
@@ -81,7 +102,8 @@ class LocationItem extends StatelessWidget {
                                     padding: EdgeInsets.only(left: 10),
                                     child: Text(
                                       getShowAddressText(story),
-                                      maxLines: 2,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: AppStyle.mainText14(context,
                                           weight: FontWeight.bold),
                                     ),

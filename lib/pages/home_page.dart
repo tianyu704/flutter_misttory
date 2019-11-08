@@ -29,6 +29,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:misstory/net/http_manager.dart' as http;
 import '../constant.dart';
+import 'detail_page.dart';
 import 'edit_page.dart';
 
 ///
@@ -383,6 +384,12 @@ class _HomePageState extends LifecycleState<HomePage> {
             }
           },
         );
+      },
+      onTapMore: () {
+        if (item.tElement.others != null && item.tElement.others.length > 0) {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => DetailPage(item.tElement.others)));
+        }
       },
     );
   }

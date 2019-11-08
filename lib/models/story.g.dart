@@ -50,7 +50,11 @@ Story _$StoryFromJson(Map<String, dynamic> json) {
     ..uuid = json['uuid'] as String
     ..isDeleted = json['is_deleted'] as num
     ..writeAddress = json['write_address'] as String
-    ..radius = json['radius'] as num;
+    ..radius = json['radius'] as num
+    ..others = (json['others'] as List)
+        ?.map(
+            (e) => e == null ? null : Story.fromJson(e as Map<String, dynamic>))
+        ?.toList();
 }
 
 Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
@@ -89,4 +93,5 @@ Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
       'is_deleted': instance.isDeleted,
       'write_address': instance.writeAddress,
       'radius': instance.radius,
+      'others': instance.others,
     };

@@ -207,8 +207,20 @@ class StoryHelper {
         .all();
     List<Story> list = [];
     if (result != null && result.length > 0) {
-      for (Map item in result) {
-        Story story = Story.fromJson(Map<String, dynamic>.from(item));
+      int count = result.length;
+      Story story;
+      Story story2;
+      for (int i = 0; i < count; i++) {
+        story = Story.fromJson(Map<String, dynamic>.from(result[i]));
+        if (story.isFromPicture != 1) {
+          if (i == count - 1) {
+            story2 = await findBeforeShowStory(story.createTime);
+          } else {
+            story2 = Story.fromJson(Map<String, dynamic>.from(result[i + 1]));
+          }
+          story.others = await findBetweenStories(
+              story.createTime, story2?.createTime ?? 0);
+        }
         story.date = getShowTime(story.createTime);
 //        list.addAll(await separateStory(story));
         list.add(await checkStoryPictures(story));
@@ -256,9 +268,15 @@ class StoryHelper {
     Story currentStory = await queryLastStory();
     if (currentStory != null) {
       currentStory.date = getShowTime(currentStory.createTime);
+      if (currentStory.isFromPicture != 1) {
+        Story before = await findBeforeShowStory(currentStory.createTime);
+        currentStory.others = await findBetweenStories(
+            currentStory.createTime, before?.createTime ?? 0);
+      }
 //      currentStory.updateTime = DateTime.now().millisecondsSinceEpoch;
 //      currentStory.intervalTime =
 //          currentStory.updateTime - currentStory.createTime;
+
     } else {
       return null;
     }
@@ -646,11 +664,31 @@ class StoryHelper {
     return null;
   }
 
+  ///根据坐标点查找对应story
+  Future<List<Story>> findBetweenStories(num bigTime, num smallTime) async {
+    List result = await Query(DBManager.tableStory)
+        .orderBy(["create_time desc"]).whereByColumFilters([
+      WhereCondiction(
+          "create_time", WhereCondictionType.EQ_OR_MORE_THEN, smallTime),
+      WhereCondiction(
+          "create_time", WhereCondictionType.EQ_OR_LESS_THEN, bigTime),
+    ]).all();
+    if (result != null && result.length > 0) {
+      List<Story> list = [];
+      for (Map map in result) {
+        list.add(Story.fromJson(Map<String, dynamic>.from(map)));
+      }
+      return list;
+    }
+    return null;
+  }
+
   ///根据时间查找对应story
   Future<Story> findAfterStory(num time) async {
     Map result = await Query(DBManager.tableStory)
         .orderBy(["create_time"]).whereByColumFilters([
       WhereCondiction("create_time", WhereCondictionType.EQ_OR_MORE_THEN, time),
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1]),
     ]).first();
     if (result != null && result.length > 0) {
       return Story.fromJson(Map<String, dynamic>.from(result));
@@ -663,6 +701,22 @@ class StoryHelper {
     Map result = await Query(DBManager.tableStory)
         .orderBy(["update_time desc"]).whereByColumFilters([
       WhereCondiction("update_time", WhereCondictionType.EQ_OR_LESS_THEN, time),
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1]),
+    ]).first();
+    if (result != null && result.length > 0) {
+      return Story.fromJson(Map<String, dynamic>.from(result));
+    }
+    return null;
+  }
+
+  ///根据时间查找对应story
+  Future<Story> findBeforeShowStory(num time) async {
+    Map result = await Query(DBManager.tableStory)
+        .orderBy(["create_time desc"]).whereByColumFilters([
+      WhereCondiction("create_time", WhereCondictionType.LESS_THEN, time),
+      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1]),
+      WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
+          LocationConfig.interval),
     ]).first();
     if (result != null && result.length > 0) {
       return Story.fromJson(Map<String, dynamic>.from(result));

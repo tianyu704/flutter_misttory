@@ -50,7 +50,7 @@ class MyAppbar extends PreferredSize {
                                   ),
                                   shape: CircleBorder(
                                     side: BorderSide(
-                                      color: Colors.white,
+                                      color: Colors.transparent,
                                     ),
                                   ),
                                   onPressed: () {

@@ -91,6 +91,8 @@ class Story {
 
   num radius;
 
+  List<Story> others;
+
   factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
 
   Map<String, dynamic> toJson() => _$StoryToJson(this);
