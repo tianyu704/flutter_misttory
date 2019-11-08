@@ -44,14 +44,16 @@ class _DetailPage extends LifecycleState<DetailPage> {
   }
 
   _initLatLngList() async {
-//    for (Story story in widget.stories) {
-//      _latLngList.add(LatLng(story.lat, story.lon));
+    await Future.delayed(Duration(milliseconds: 500), () {
+      for (Story story in widget.stories) {
+        _latLngList.add(LatLng(story.lat, story.lon));
+      }
+    });
+//    List<Latlonpoint> points = await LocationHelper().queryPoints(
+//        _stories[_stories.length - 1].createTime, _stories[0].createTime);
+//    for (Latlonpoint point in points) {
+//      _latLngList.add(LatLng(point.latitude, point.longitude));
 //    }
-    List<Latlonpoint> points = await LocationHelper().queryPoints(
-        _stories[_stories.length - 1].createTime, _stories[0].createTime);
-    for (Latlonpoint point in points) {
-      _latLngList.add(LatLng(point.latitude, point.longitude));
-    }
     _polylineOptions = PolylineOptions(
       latLngList: _latLngList,
       width: 30,
@@ -177,7 +179,9 @@ class _DetailPage extends LifecycleState<DetailPage> {
           ));
           _controller.setMyLocationStyle(_myLocationStyle);
 //          _controller.setZoomLevel(17);
-          if (_latLngList != null && _latLngList.length > 0) {
+          if (_polylineOptions != null &&
+              _latLngList != null &&
+              _latLngList.length > 0) {
             _controller?.addPolyline(_polylineOptions);
             _controller?.zoomToSpan(_latLngList);
           }

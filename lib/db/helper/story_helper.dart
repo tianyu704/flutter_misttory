@@ -118,7 +118,7 @@ class StoryHelper {
 //  }
 
   /// 更新story地点 customAddress writeAddress
-  Future<Map<num, Story>> updateCustomWriteAddress(Story story,
+  Future updateCustomWriteAddress(Story story,
       {bool updateCustom = false}) async {
     if (story != null) {
 //      await Query(DBManager.tableStory).primaryKey([story.id]).update(
@@ -150,7 +150,6 @@ class StoryHelper {
       ]).all();
 
       if (list != null && list.length > 0) {
-        Map<num, Story> stories = Map<num, Story>();
         LatLng latLng2;
         story = await calculateRadius(story);
         for (Map item in list) {
@@ -167,14 +166,10 @@ class StoryHelper {
               "write_address": story.writeAddress,
               "radius": story.radius,
             });
-            stories[item["id"]] =
-                Story.fromJson(Map<String, dynamic>.from(item));
           }
         }
-        return stories;
       }
     }
-    return null;
   }
 
   /// 更新story的经纬度
@@ -922,8 +917,8 @@ class StoryHelper {
     if (result != null && result.length > 0) {
       Uuid uuid = Uuid();
       for (Map map in result) {
-        await Query(DBManager.tableStory)
-            .primaryKey([map["id"]]).update({"uuid": uuid.v1()});
+        await Query(DBManager.tableStory).primaryKey([map["id"]]).update(
+            {"uuid": uuid.v1(), "is_deleted": 0});
       }
     }
   }
