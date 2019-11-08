@@ -8,12 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
-import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/person_helper.dart';
-import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/helper/tag_helper.dart';
-import 'package:misstory/main.dart';
 import 'package:misstory/models/coord_type.dart';
 import 'package:misstory/models/person.dart';
 import 'package:misstory/models/poilocation.dart';
@@ -25,7 +22,6 @@ import 'package:misstory/widgets/loading_dialog.dart';
 import 'package:misstory/widgets/my_appbar.dart';
 import 'package:misstory/widgets/tag_items_widget.dart';
 import 'package:misstory/net/http_manager.dart' as http;
-//import 'package:fluttertoast/fluttertoast.dart';
 
 import '../location_config.dart';
 
@@ -971,15 +967,13 @@ class _EditPageState extends LifecycleState<EditPage> {
     if (story.id != null) {
       await StoryHelper().deleteTargetStoryWithStoryId(story.id);
     }
-//    await LocationHelper()
-//        .deleteTargetLocationWithTime(story.createTime, story.updateTime);
-    debugPrint("删除完毕");
-    Navigator.pop(context, story);
+    Navigator.pop(context, true);
   }
 
   ///保存编辑页面数据
   clickSave() async {
     //TODO:
+    bool needRefresh = false;
     if (isSaving) return;
 
     isSaving = true;
@@ -989,7 +983,6 @@ class _EditPageState extends LifecycleState<EditPage> {
       loadingText: "保存中...",
     );
     showDialog(
-
         context: context,
         barrierDismissible: false,
         builder: (_) {
@@ -999,8 +992,11 @@ class _EditPageState extends LifecycleState<EditPage> {
     Story story = widget.story;
 
     ///备注保存
-    story.desc = _descTextFieldVC.text ?? "";
-    await StoryHelper().updateStoryDesc(story);
+    if (story.desc != _descTextFieldVC.text) {
+      story.desc = _descTextFieldVC.text ?? "";
+      await StoryHelper().updateStoryDesc(story);
+      needRefresh = true;
+    }
 
 //    ///标签保存
 //    for (String name in addTagList) {
@@ -1046,7 +1042,6 @@ class _EditPageState extends LifecycleState<EditPage> {
     bool isWrite = isWriteAddressed(_addressTextFieldVC.text);
 
     ///自定义地点保存
-    Map<num, Story> stories;
     if (pickPoiLocation != null &&
         StringUtil.isNotEmpty(pickPoiLocation.title)) {
       story.customAddress = pickPoiLocation.title;
@@ -1055,27 +1050,23 @@ class _EditPageState extends LifecycleState<EditPage> {
       if (isWrite) {
         story.writeAddress = _addressTextFieldVC.text;
       }
-      stories = await StoryHelper().updateCustomWriteAddress(story);
+      await StoryHelper().updateCustomWriteAddress(story, updateCustom: true);
+      needRefresh = true;
 
       ///存储该pick 点 如果没存过的话
     } else {
       if (isWrite) {
         story.writeAddress = _addressTextFieldVC.text;
-        stories = await StoryHelper().updateCustomWriteAddress(story);
+        await StoryHelper().updateCustomWriteAddress(story);
+        needRefresh = true;
       }
     }
 
     ///进度消失
     await loading.handleDismiss();
-    print("${stories}");
 
     ///返回
-    if (stories != null && stories.length > 0) {
-      Navigator.pop(context, [stories]);
-    } else {
-      print("222");
-      Navigator.pop(context);
-    }
+    Navigator.pop(context, needRefresh);
     isSaving = false;
   }
 

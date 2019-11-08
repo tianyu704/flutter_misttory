@@ -10,6 +10,8 @@ import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/location_item.dart';
 import 'package:misstory/widgets/my_appbar.dart';
 
+import 'edit_page.dart';
+
 ///
 /// Create by Hugo.Guo
 /// Date: 2019-11-08
@@ -31,11 +33,13 @@ class _DetailPage extends LifecycleState<DetailPage> {
   MyLocationStyle _myLocationStyle;
   PolylineOptions _polylineOptions;
   List<LatLng> _latLngList = [];
+  List<Story> _stories;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _stories = widget.stories;
     _initLatLngList();
   }
 
@@ -44,8 +48,7 @@ class _DetailPage extends LifecycleState<DetailPage> {
 //      _latLngList.add(LatLng(story.lat, story.lon));
 //    }
     List<Latlonpoint> points = await LocationHelper().queryPoints(
-        widget.stories[widget.stories.length - 1].createTime,
-        widget.stories[0].createTime);
+        _stories[_stories.length - 1].createTime, _stories[0].createTime);
     for (Latlonpoint point in points) {
       _latLngList.add(LatLng(point.latitude, point.longitude));
     }
@@ -99,29 +102,52 @@ class _DetailPage extends LifecycleState<DetailPage> {
           DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
       date = DateFormat("HH:mm").format(dateTime);
     }
-    return Container(
-      padding: EdgeInsets.all(15),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          Text(
-            date,
-            style: AppStyle.mainText14(context),
-          ),
-          SizedBox(
-            width: 15,
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              getShowAddressText(story),
+    return InkWell(
+      child: Container(
+        padding: EdgeInsets.all(15),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            Text(
+              date,
               style: AppStyle.mainText14(context),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-        ],
+            SizedBox(
+              width: 15,
+            ),
+            Expanded(
+              flex: 1,
+              child: Text(
+                getShowAddressText(story),
+                style: AppStyle.mainText14(context),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
+      onTap: () {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => EditPage(story)))
+            .then(
+          (value) {
+            if (value != null) {
+              if (value is Story) {
+                Story story = value;
+                notifyDeleteStory(story);
+                return;
+              }
+              if (value is List && value.length > 0) {
+                Map<num, Story> stories = value[0];
+                if (stories != null && stories.length > 0) {
+                  notifyStories(stories);
+                }
+              }
+            }
+          },
+        );
+      },
     );
   }
 
@@ -166,6 +192,35 @@ class _DetailPage extends LifecycleState<DetailPage> {
         ),
       ),
     );
+  }
+
+  ///从编辑页面返回后的刷新
+  notifyStories(Map<num, Story> stories) {
+    if (_stories != null && _stories.length > 0) {
+      _stories.forEach((item) {
+        if (stories.containsKey(item.id)) {
+          //print("${stories[item.id].writeAddress}");
+          item.lat = stories[item.id].lat;
+          item.lon = stories[item.id].lon;
+          item.customAddress = stories[item.id].customAddress;
+          item.desc = stories[item.id].desc;
+          item.writeAddress = stories[item.id].writeAddress;
+        }
+      });
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
+  notifyDeleteStory(Story story) {
+    if (_stories != null && _stories.length > 0) {
+      _stories.removeWhere((item) => item.id == story.id);
+      debugPrint("+++刷新删除完成++");
+      if (mounted) {
+        setState(() {});
+      }
+    }
   }
 
   getShowAddressText(Story story) {

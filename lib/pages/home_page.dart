@@ -345,50 +345,20 @@ class _HomePageState extends LifecycleState<HomePage> {
         Navigator.of(context)
             .push(MaterialPageRoute(
                 builder: (context) => EditPage(item.tElement)))
-            .then(
-          (value) {
-            if (value != null) {
-              if (value is Story) {
-                Story story = value;
-                notifyDeleteStory(story);
-                return;
-              }
-              if (value is List && value.length > 0) {
-                Map<num, Story> stories = value[0];
-                if (stories != null && stories.length > 0) {
-                  notifyStories(stories);
-                }
-              }
-            }
-          },
-        );
+            .then(_notifyStories);
       },
       onPressPicture: () {
         Navigator.of(context)
             .push(MaterialPageRoute(
                 builder: (context) => PicturesPage(item.tElement)))
-            .then(
-          (value) {
-            if (value != null) {
-              if (value is Story) {
-                Story story = value;
-                notifyDeleteStory(story);
-                return;
-              }
-              if (value is List && value.length > 0) {
-                Map<num, Story> stories = value[0];
-                if (stories != null && stories.length > 0) {
-                  notifyStories(stories);
-                }
-              }
-            }
-          },
-        );
+            .then(_notifyStories);
       },
       onTapMore: () {
         if (item.tElement.others != null && item.tElement.others.length > 0) {
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => DetailPage(item.tElement.others)));
+          Navigator.of(context)
+              .push(MaterialPageRoute(
+                  builder: (context) => DetailPage(item.tElement.others)))
+              .then(_notifyStories);
         }
       },
     );
@@ -429,32 +399,14 @@ class _HomePageState extends LifecycleState<HomePage> {
     }
   }
 
-  ///从编辑页面返回后的刷新
-  notifyStories(Map<num, Story> stories) {
-    if (_storiesAll != null && _storiesAll.length > 0) {
-      _storiesAll.forEach((item) {
-        if (stories.containsKey(item.id)) {
-          //print("${stories[item.id].writeAddress}");
-          item.lat = stories[item.id].lat;
-          item.lon = stories[item.id].lon;
-          item.customAddress = stories[item.id].customAddress;
-          item.desc = stories[item.id].desc;
-          item.writeAddress = stories[item.id].writeAddress;
+  _notifyStories(value) async {
+    if (value != null && value is bool && value) {
+      if (_stories != null && _stories.length > 0) {
+        _stories = await StoryHelper()
+            .findAfterStories(_stories[_stories.length - 1].createTime);
+        if (mounted) {
+          _refreshStory();
         }
-      });
-      print(":::${stories.length}:::");
-      if (mounted) {
-        setState(() {});
-      }
-    }
-  }
-
-  notifyDeleteStory(Story story) {
-    if (_stories != null && _stories.length > 0) {
-      _stories.removeWhere((item) => item.id == story.id);
-      debugPrint("+++刷新删除完成++");
-      if (mounted) {
-        _refreshStory();
       }
     }
   }

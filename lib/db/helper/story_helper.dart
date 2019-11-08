@@ -3,16 +3,13 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:intl/intl.dart';
-import 'package:local_image_provider/local_image_provider.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/coord_type.dart';
 import 'package:misstory/models/latlonpoint.dart';
-import 'package:misstory/models/picture.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/utils/calculate_util.dart';
-import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:uuid/uuid.dart';
 import '../db_manager.dart';
@@ -65,9 +62,8 @@ class StoryHelper {
 
   Future<int> updateStoryTimes(Story story) async {
     if (story != null) {
-      if (StringUtil.isEmpty(story.customAddress) && story.isFromPicture != 1) {
-        story = await calculateStoryLatLon(story);
-      }
+      story = await calculateRadius(story);
+//      story = await calculateStoryLatLon(story);
       await Query(DBManager.tableStory).primaryKey([story.id]).update({
         "update_time": story.updateTime,
         "interval_time": story.updateTime - story.createTime,
@@ -83,14 +79,16 @@ class StoryHelper {
   }
 
   Future<Story> calculateStoryLatLon(Story story) async {
-    if (story != null) {
+    if (story != null && story.isFromPicture != 1) {
       List list = await LocationHelper()
           .queryPoints(story.createTime, story.updateTime);
       if (list != null) {
         Latlonpoint point = await CalculateUtil.calculateCenterLatLon(list);
         if (point != null) {
-          story.lat = point.latitude;
-          story.lon = point.longitude;
+          if (StringUtil.isEmpty(story.customAddress)) {
+            story.lat = point.latitude;
+            story.lon = point.longitude;
+          }
           story.radius = point.radius;
         }
       }
@@ -120,29 +118,54 @@ class StoryHelper {
 //  }
 
   /// 更新story地点 customAddress writeAddress
-  Future<Map<num, Story>> updateCustomWriteAddress(Story story) async {
+  Future<Map<num, Story>> updateCustomWriteAddress(Story story,
+      {bool updateCustom = false}) async {
     if (story != null) {
 //      await Query(DBManager.tableStory).primaryKey([story.id]).update(
 //          {"custom_address": story.customAddress});
+      LatLng latLng1 = LatLng(story.lat, story.lon);
+      if (updateCustom) {
+        List result = await Query(DBManager.tableStory).whereByColumFilters([
+          WhereCondiction(
+              "custom_address", WhereCondictionType.IN, [story.customAddress]),
+          WhereCondiction("write_address", WhereCondictionType.IS_NULL, false),
+        ]).all();
+        if (result != null && result.length > 0) {
+          LatLng latLng2;
+          for (Map item in result) {
+            latLng2 = LatLng(item["lat"], item["lon"]);
+            num distance =
+                await CalculateTools().calcDistance(latLng1, latLng2);
+            if (distance < LocationConfig.poiSearchInterval) {
+              story.writeAddress = item["write_address"] as String;
+              break;
+            }
+          }
+        }
+      }
+
       List list = await Query(DBManager.tableStory).whereByColumFilters([
         WhereCondiction(
             "default_address", WhereCondictionType.IN, [story.defaultAddress])
       ]).all();
-      LatLng latLng1 = LatLng(story.lat, story.lon);
+
       if (list != null && list.length > 0) {
         Map<num, Story> stories = Map<num, Story>();
         LatLng latLng2;
+        story = await calculateRadius(story);
         for (Map item in list) {
           latLng2 = LatLng(item["lat"], item["lon"]);
           num distance = await CalculateTools().calcDistance(latLng1, latLng2);
           if (distance < LocationConfig.poiSearchInterval) {
             item["custom_address"] = story.customAddress;
             item["write_address"] = story.writeAddress;
+            item["radius"] = story.radius;
             await Query(DBManager.tableStory).primaryKey([item["id"]]).update({
               "custom_address": story.customAddress,
               "lon": story.lon,
               "lat": story.lat,
               "write_address": story.writeAddress,
+              "radius": story.radius,
             });
             stories[item["id"]] =
                 Story.fromJson(Map<String, dynamic>.from(item));
@@ -192,6 +215,40 @@ class StoryHelper {
 //    }
 //    return list;
 //  }
+
+  ///查找某个时间之后的stories
+  Future<List<Story>> findAfterStories(num time) async {
+    if (time == null) {
+      time = 0;
+    }
+    List result = await Query(DBManager.tableStory).orderBy([
+      "create_time desc"
+    ]).whereBySql(
+        "create_time >= ? and (isFromPicture = ? or interval_time >= ?) and is_deleted != 1",
+        [time, 1, LocationConfig.interval]).all();
+    List<Story> list = [];
+    if (result != null && result.length > 0) {
+      int count = result.length;
+      Story story;
+      Story story2;
+      for (int i = 0; i < count; i++) {
+        story = Story.fromJson(Map<String, dynamic>.from(result[i]));
+        if (story.isFromPicture != 1) {
+          if (i == count - 1) {
+            story2 = await findBeforeShowStory(story.createTime);
+          } else {
+            story2 = Story.fromJson(Map<String, dynamic>.from(result[i + 1]));
+          }
+          story.others = await findBetweenStories(
+              story.createTime, story2?.createTime ?? 0);
+        }
+        story.date = getShowTime(story.createTime);
+//        list.addAll(await separateStory(story));
+        list.add(await checkStoryPictures(story));
+      }
+    }
+    return list;
+  }
 
   /// 根据给定time查询time-day到time之间的story
   Future<List<Story>> queryMoreHistories({num time}) async {
@@ -475,6 +532,29 @@ class StoryHelper {
     return story;
   }
 
+  Future<Story> calculateRadius(Story story) async {
+    List<Story> stories = await findSamePointStories(story);
+    if (stories != null && stories.length > 0) {
+      List<Latlonpoint> points = [];
+      List<Latlonpoint> temp = [];
+      for (Story s in stories) {
+        temp = await LocationHelper().queryPoints(s.createTime, s.updateTime);
+        if (temp != null) {
+          points.addAll(temp);
+        }
+      }
+      Latlonpoint point = await CalculateUtil.calculateCenterLatLon(points);
+      if (point != null) {
+        story.radius = point.radius;
+        if (StringUtil.isEmpty(story.customAddress)) {
+          story.lat = point.latitude;
+          story.lon = point.longitude;
+        }
+      }
+    }
+    return story;
+  }
+
   ///根据当前story查库中相同地点的一个targetStory对象
   Future<Story> findSamePointStory(Story story) async {
     List list = await Query(DBManager.tableStory).whereBySql(
@@ -492,6 +572,27 @@ class StoryHelper {
           return targetStory;
         }
       }
+    }
+    return null;
+  }
+
+  ///根据当前story查库中相同地点的story集合
+  Future<List<Story>> findSamePointStories(Story story) async {
+    List list = await Query(DBManager.tableStory).whereBySql(
+        "default_address = ? and isFromPicture != 1",
+        [story.defaultAddress]).all();
+    LatLng latLng1 = LatLng(story.lat, story.lon);
+    if (list != null && list.length > 0) {
+      LatLng latLng2;
+      List<Story> stories = [];
+      for (Map item in list) {
+        latLng2 = LatLng(item["lat"], item["lon"]);
+        num distance = await CalculateTools().calcDistance(latLng1, latLng2);
+        if (distance < LocationConfig.poiSearchInterval) {
+          stories.add(Story.fromJson(Map<String, dynamic>.from(list.first)));
+        }
+      }
+      return stories;
     }
     return null;
   }
