@@ -33,22 +33,19 @@ PODS:
   - MJExtension (3.2.0)
   - path_provider (0.0.1):
     - Flutter
-  - permission_handler (3.3.0):
-    - Flutter
   - shared_preferences (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - amap_base (from `.symlinks/plugins/amap_base/ios`)
   - curl (~> 1.0.0)
-  - Flutter (from `.symlinks/flutter/ios`)
+  - Flutter (from `.symlinks/flutter/ios-release`)
   - flutter_amap_location_plugin (from `.symlinks/plugins/flutter_amap_location_plugin/ios`)
   - flutter_luakit_plugin (from `.symlinks/plugins/flutter_luakit_plugin/ios`)
   - flutter_orm_plugin (from `.symlinks/plugins/flutter_orm_plugin/ios`)
   - local_image_provider (from `.symlinks/plugins/local_image_provider/ios`)
   - LuakitPod (~> 1.0.24)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
-  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
 SPEC REPOS:
@@ -68,7 +65,7 @@ EXTERNAL SOURCES:
   amap_base:
     :path: ".symlinks/plugins/amap_base/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios"
+    :path: ".symlinks/flutter/ios-release"
   flutter_amap_location_plugin:
     :path: ".symlinks/plugins/flutter_amap_location_plugin/ios"
   flutter_luakit_plugin:
@@ -79,8 +76,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/local_image_provider/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
-  permission_handler:
-    :path: ".symlinks/plugins/permission_handler/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
 
@@ -100,7 +95,6 @@ SPEC CHECKSUMS:
   LuakitPod: d6806a7bbeba3fd77cc64f08253b73722905a7a1
   MJExtension: e22bed65fdcd38e957242982b7384f2984c9088e
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
-  permission_handler: 67637977b227d62d46bfbf524f335f8568de5a73
   shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
 
 PODFILE CHECKSUM: c7f10f7ecbf0c33bc40c1e044e4fcb2a97e49d07

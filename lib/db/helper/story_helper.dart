@@ -768,6 +768,7 @@ class StoryHelper {
           "create_time", WhereCondictionType.EQ_OR_MORE_THEN, smallTime),
       WhereCondiction(
           "create_time", WhereCondictionType.EQ_OR_LESS_THEN, bigTime),
+      WhereCondiction("isFromPicture", WhereCondictionType.NOT_IN, [1]),
     ]).all();
     if (result != null && result.length > 0) {
       List<Story> list = [];
@@ -813,6 +814,7 @@ class StoryHelper {
       WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1]),
       WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
           LocationConfig.interval),
+      WhereCondiction("isFromPicture", WhereCondictionType.NOT_IN, [1]),
     ]).first();
     if (result != null && result.length > 0) {
       return Story.fromJson(Map<String, dynamic>.from(result));
