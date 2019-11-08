@@ -24,6 +24,7 @@ import 'package:misstory/utils/print_util.dart';
 import 'package:misstory/widgets/loading_pictures_alert.dart';
 import 'package:misstory/widgets/location_item.dart';
 import 'package:misstory/widgets/refresh_grouped_listview.dart';
+import 'package:misstory/widgets/scroll_top_button.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:misstory/net/http_manager.dart' as http;
@@ -49,6 +50,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   StreamSubscription _subscription;
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+  ScrollController _scrollController = ScrollController();
   int _day = 0, _footprint = 0;
   Timer _timer;
   bool _isFirstLoad = true;
@@ -287,7 +289,12 @@ class _HomePageState extends LifecycleState<HomePage> {
         backgroundColor: AppStyle.colors(context).colorBgPage,
         elevation: 0,
       ),
-      body: _storyListWidget(context),
+      body: Stack(
+        children: <Widget>[
+          _storyListWidget(context),
+          ScrollTopButton(20, 20, _scrollController),
+        ],
+      ),
     );
   }
 
@@ -302,6 +309,7 @@ class _HomePageState extends LifecycleState<HomePage> {
       groupBuilder: (BuildContext context, String name) =>
           _groupSectionWidget(context, name),
       onLoading: _loadMore,
+      scrollController: _scrollController,
     );
   }
 
@@ -366,7 +374,7 @@ class _HomePageState extends LifecycleState<HomePage> {
                 notifyDeleteStory(story);
                 return;
               }
-              if (value is List && value.length > 0)  {
+              if (value is List && value.length > 0) {
                 Map<num, Story> stories = value[0];
                 if (stories != null && stories.length > 0) {
                   notifyStories(stories);

@@ -67,7 +67,9 @@ class LocationItem extends StatelessWidget {
                                 Padding(
                                   padding: EdgeInsets.only(top: 3),
                                   child: SvgPicture.asset(
-                                    StringUtil.isEmpty(story.customAddress)
+                                    (StringUtil.isEmpty(story.customAddress) &&
+                                            StringUtil.isEmpty(
+                                                story.writeAddress))
                                         ? "assets/images/icon_location_empty.svg"
                                         : "assets/images/icon_location_fill.svg",
                                     width: 14,

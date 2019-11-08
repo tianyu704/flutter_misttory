@@ -17,6 +17,7 @@ class RefreshGroupedListView<TElement, TGroup> extends StatelessWidget {
   final GroupFunction<TElement, TGroup> groupBy;
   final ListBuilderFunction<TItem<TElement>> listBuilder;
   final GroupBuilderFunction<TGroup> groupBuilder;
+  final ScrollController scrollController;
 
   final List<dynamic> _flattenedList = List();
   final RefreshController controller;
@@ -27,7 +28,8 @@ class RefreshGroupedListView<TElement, TGroup> extends StatelessWidget {
       @required this.groupBy,
       @required this.listBuilder,
       @required this.groupBuilder,
-      this.onLoading}) {
+      this.onLoading,
+      this.scrollController}) {
     _flattenedList
         .addAll(Grouper<TElement, TGroup>().groupList(collection, groupBy));
   }
@@ -79,6 +81,7 @@ class RefreshGroupedListView<TElement, TGroup> extends StatelessWidget {
         },
         itemCount: _flattenedList.length,
         physics: BouncingScrollPhysics(),
+        controller: scrollController,
       ),
     );
   }
