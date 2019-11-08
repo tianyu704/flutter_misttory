@@ -40,6 +40,7 @@ class LocationItem extends StatelessWidget {
       child: InkWell(
         child: Column(
           mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Padding(
               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
@@ -62,20 +63,20 @@ class LocationItem extends StatelessWidget {
                               ),
                             ),
                           ),
-                          Offstage(
-                            offstage: !(story.others != null &&
-                                story.others.length > 2),
-                            child: GestureDetector(
-                              onTap: onTapMore,
-                              child: SizedBox(
-                                width: 35,
-                                child: Icon(
-                                  Icons.more_vert,
-                                  color: AppStyle.colors(context).colorDescText,
-                                ),
-                              ),
-                            ),
-                          ),
+//                          Offstage(
+//                            offstage: !(story.others != null &&
+//                                story.others.length > 2),
+//                            child: GestureDetector(
+//                              onTap: onTapMore,
+//                              child: SizedBox(
+//                                width: 35,
+//                                child: Icon(
+//                                  Icons.more_vert,
+//                                  color: AppStyle.colors(context).colorDescText,
+//                                ),
+//                              ),
+//                            ),
+//                          ),
                         ],
                       ),
                       Expanded(
@@ -162,15 +163,37 @@ class LocationItem extends StatelessWidget {
                 ],
               ),
             ),
-            Offstage(
-              offstage: item.position == ItemPosition.END ||
-                  item.position == ItemPosition.ALL,
-              child: Container(
-                height: 1,
-                margin: EdgeInsets.symmetric(horizontal: 16),
-                width: double.infinity,
-                color: AppStyle.colors(context).colorLine,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                SizedBox(width: 16),
+                Offstage(
+                  offstage: !(story.others != null && story.others.length > 2),
+                  child: GestureDetector(
+                    onTap: onTapMore,
+                    child: SizedBox(
+                      width:35,
+                      child: Icon(
+                        Icons.more_vert,
+                        color: AppStyle.colors(context).colorDescText,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Offstage(
+                    offstage: item.position == ItemPosition.END ||
+                        item.position == ItemPosition.ALL,
+                    child: Container(
+                      margin: EdgeInsets.only(right: 16),
+                      height: 1,
+                      width: double.infinity,
+                      color: AppStyle.colors(context).colorLine,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

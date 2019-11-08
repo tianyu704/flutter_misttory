@@ -12,7 +12,6 @@ import 'package:misstory/eventbus/event_bus_util.dart';
 import 'package:misstory/eventbus/refresh_progress.dart';
 import 'package:misstory/pages/home_page.dart';
 import 'package:misstory/style/app_style.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -66,7 +65,6 @@ class _PreLoadingPageState extends LifecycleState<PreLoadingPage> {
         }));
       }
     }
-    PermissionHandler().requestPermissions([PermissionGroup.locationAlways]);
   }
 
   @override

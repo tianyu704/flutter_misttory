@@ -9,7 +9,6 @@ import 'package:misstory/db/local_storage.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/net/http_manager.dart' as http;
 import 'package:misstory/utils/channel_util.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 ///
 /// Create by Hugo.Guo

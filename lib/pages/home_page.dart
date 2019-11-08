@@ -25,7 +25,6 @@ import 'package:misstory/widgets/loading_pictures_alert.dart';
 import 'package:misstory/widgets/location_item.dart';
 import 'package:misstory/widgets/refresh_grouped_listview.dart';
 import 'package:misstory/widgets/scroll_top_button.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:misstory/net/http_manager.dart' as http;
 import '../constant.dart';
