@@ -98,6 +98,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
     ///数据初始化
     _currentLatLng = LatLng(widget.story.lat, widget.story.lon);
+    print(_currentLatLng.toJson());
     if (widget.story.coordType == "WGS84") {
       CalculateTools()
           .convertCoordinate(

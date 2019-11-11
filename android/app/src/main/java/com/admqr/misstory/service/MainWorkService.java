@@ -185,7 +185,7 @@ public class MainWorkService extends AbsWorkService {
                 option.setOnceLocation(true);
                 option.setOnceLocationLatest(true);
 //            option.setGeoLanguage(AMapLocationClientOption.GeoLanguage.EN);
-                option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+                option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Battery_Saving);
                 mLocationClient.setLocationOption(option);
                 mLocationClient.startLocation();
 //                    Observable.timer(30, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {

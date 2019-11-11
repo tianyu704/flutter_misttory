@@ -613,13 +613,17 @@ class StoryHelper {
     if (location == null) {
       return -1;
     }
+    String address = getLocationDefaultAddress(location);
+    if (StringUtil.isEmpty(address)) {
+      return -1;
+    }
     Story lastStory = await queryLastStory();
     if (lastStory != null) {
       /// 经纬度相等/地址相等认为是同一个地点
       if ((location.lat == lastStory.lat && location.lon == lastStory.lon) ||
           (await CalculateUtil.calculateStoryDistance(lastStory, location) <
               lastStory.radius) ||
-          (lastStory.defaultAddress == getLocationDefaultAddress(location) &&
+          (lastStory.defaultAddress == address &&
               await CalculateUtil.calculateStoryDistance(lastStory, location) <
                   LocationConfig.judgeDistanceNum)) {
         lastStory.updateTime = location.updatetime;
