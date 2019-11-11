@@ -31,9 +31,11 @@ class DetailPage extends StatefulWidget {
 class _DetailPage extends LifecycleState<DetailPage> {
   AMapController _controller;
   MyLocationStyle _myLocationStyle;
-  PolylineOptions _polylineOptions;
+
+//  PolylineOptions _polylineOptions;
   List<LatLng> _latLngList = [];
   List<Story> _stories;
+  List<MarkerOptions> _markerOptions = [];
 
   @override
   void initState() {
@@ -44,29 +46,39 @@ class _DetailPage extends LifecycleState<DetailPage> {
   }
 
   _initLatLngList() async {
-    await Future.delayed(Duration(milliseconds: 500), () {
-      for (Story story in widget.stories) {
-        _latLngList.add(LatLng(story.lat, story.lon));
-      }
-    });
-//    List<Latlonpoint> points = await LocationHelper().queryPoints(
-//        _stories[_stories.length - 1].createTime, _stories[0].createTime);
-//    for (Latlonpoint point in points) {
-//      _latLngList.add(LatLng(point.latitude, point.longitude));
-//    }
-    _polylineOptions = PolylineOptions(
-      latLngList: _latLngList,
-      width: 30,
-      color: AppStyle.colors(context).colorPrimary,
-      isUseTexture: true,
-      isUseGradient: true,
-      isDottedLine: true,
-      isGeodesic: true,
-      dottedLineType: PolylineOptions.DOTTED_LINE_TYPE_CIRCLE,
-      lineJoinType: PolylineOptions.LINE_JOIN_ROUND,
-      lineCapType: PolylineOptions.LINE_CAP_TYPE_ARROW,
-    );
-    _controller?.addPolyline(_polylineOptions);
+//    await Future.delayed(Duration(milliseconds: 500), () {
+//      LatLng latLng;
+//      for (Story story in widget.stories) {
+//        latLng = LatLng(story.lat, story.lon);
+//        _latLngList.add(latLng);
+//        _markerOptions
+//            .add(MarkerOptions(position: latLng));
+//      }
+//    });
+    List<Latlonpoint> points = await LocationHelper().queryPoints(
+        _stories[_stories.length - 1].createTime, _stories[0].createTime);
+    LatLng latLng;
+    for (Latlonpoint point in points) {
+      latLng = LatLng(point.latitude, point.longitude);
+      _latLngList.add(latLng);
+      _markerOptions.add(MarkerOptions(position: latLng));
+    }
+//    _polylineOptions = PolylineOptions(
+//      latLngList: _latLngList,
+//      width: 30,
+//      color: AppStyle
+//          .colors(context)
+//          .colorPrimary,
+//      isUseTexture: true,
+//      isUseGradient: true,
+//      isDottedLine: true,
+//      isGeodesic: true,
+//      dottedLineType: PolylineOptions.DOTTED_LINE_TYPE_CIRCLE,
+//      lineJoinType: PolylineOptions.LINE_JOIN_ROUND,
+//      lineCapType: PolylineOptions.LINE_CAP_TYPE_ARROW,
+//    );
+//    _controller?.addPolyline(_polylineOptions);
+    _controller?.addMarkers(_markerOptions);
     _controller?.zoomToSpan(_latLngList);
   }
 
@@ -179,10 +191,11 @@ class _DetailPage extends LifecycleState<DetailPage> {
           ));
           _controller.setMyLocationStyle(_myLocationStyle);
 //          _controller.setZoomLevel(17);
-          if (_polylineOptions != null &&
+          if (_markerOptions != null &&
               _latLngList != null &&
               _latLngList.length > 0) {
-            _controller?.addPolyline(_polylineOptions);
+//            _controller?.addPolyline(_polylineOptions);
+            _controller.addMarkers(_markerOptions);
             _controller?.zoomToSpan(_latLngList);
           }
         },
