@@ -17,7 +17,8 @@ class DBManager {
   static final String tablePerson = "Person";
   static final String tableTag = "Tag";
   static final String tablePicture = "Picture";
-  static final int dbVersion = 5;
+  static final String tableConfirmPoi = "ConfirmPoi";
+  static final int dbVersion = 6;
 
   ///初始化
   static initDB() async {
@@ -110,6 +111,7 @@ class DBManager {
     storyFields["uuid"] = Field(FieldType.Text);
     storyFields["write_address"] = Field(FieldType.Text);
     storyFields["radius"] = Field(FieldType.Real);
+    storyFields["is_merged"] = Field(FieldType.Real);
 
     ///tag表
     Map<String, Field> tagFields = new Map<String, Field>();
@@ -184,6 +186,11 @@ class DBManager {
     if (oldVersion < 5) {
       await StoryHelper().updateRadius();
       await LocationHelper().updateCount();
+      await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
+    }
+
+    if (oldVersion < 6) {
+      await StoryHelper().updateMerged();
       await LocalStorage.saveInt(LocalStorage.dbVersion, dbVersion);
     }
   }

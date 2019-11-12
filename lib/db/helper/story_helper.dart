@@ -34,8 +34,8 @@ class StoryHelper {
   /// 创建story
   Future createStory(Story story) async {
     if (story != null) {
-      print("======创建story！");
       await FlutterOrmPlugin.saveOrm(DBManager.tableStory, story.toJson());
+      print("======创建story！");
       return 0;
     }
     return -1;
@@ -146,12 +146,12 @@ class StoryHelper {
 
       List list = await Query(DBManager.tableStory).whereByColumFilters([
         WhereCondiction(
-            "default_address", WhereCondictionType.IN, [story.defaultAddress])
+            "default_address", WhereCondictionType.IN, [story.defaultAddress]),
       ]).all();
 
       if (list != null && list.length > 0) {
         LatLng latLng2;
-        story = await calculateRadius(story);
+//        story = await calculateRadius(story);
         for (Map item in list) {
           latLng2 = LatLng(item["lat"], item["lon"]);
           num distance = await CalculateTools().calcDistance(latLng1, latLng2);
@@ -166,10 +166,83 @@ class StoryHelper {
               "write_address": story.writeAddress,
               "radius": story.radius,
             });
+            await mergeStory(item["id"] as num);
           }
         }
       }
     }
+  }
+
+  Future mergeStory(num storyId) async {
+    List<Story> stories = [];
+    Story story = await queryById(storyId);
+    if (story != null && story.isDeleted == 0 && story.isMerged != 1) {
+      stories.add(story);
+      Story afterStory = await findAfterStory(story.updateTime, equal: false);
+      while (afterStory != null) {
+        if ((afterStory.lat == story.lat && afterStory.lon == story.lon) ||
+            ((afterStory.writeAddress == story.writeAddress ||
+                    afterStory.customAddress == story.customAddress) &&
+                await CalculateUtil.calculateStoriesDistance(
+                        story, afterStory) <
+                    LocationConfig.poiSearchInterval)) {
+          story.updateTime = afterStory.updateTime;
+          story.customAddress = afterStory.customAddress ?? story.customAddress;
+          story.writeAddress = afterStory.writeAddress ?? story.writeAddress;
+          story.desc = afterStory.desc ?? story.desc;
+          stories.add(afterStory);
+          afterStory = await findAfterStory(story.updateTime, equal: false);
+        } else {
+          afterStory = null;
+        }
+      }
+      Story beforeStory = await findBeforeStory(story.createTime, equal: false);
+      while (beforeStory != null) {
+        if ((beforeStory.lat == story.lat && beforeStory.lon == story.lon) ||
+            ((beforeStory.writeAddress == story.writeAddress ||
+                    beforeStory.customAddress == story.customAddress) &&
+                await CalculateUtil.calculateStoriesDistance(
+                        story, beforeStory) <
+                    LocationConfig.poiSearchInterval)) {
+          story.createTime = beforeStory.createTime;
+          story.customAddress =
+              beforeStory.customAddress ?? story.customAddress;
+          story.writeAddress = beforeStory.writeAddress ?? story.writeAddress;
+          story.desc = beforeStory.desc ?? story.desc;
+          stories.add(beforeStory);
+          beforeStory =
+              await findBeforeStory(beforeStory.createTime, equal: false);
+        } else {
+          beforeStory = null;
+        }
+      }
+      if (stories != null && stories.length > 1) {
+        for (Story s in stories) {
+          await updateStoryDelete(s.id, 2);
+        }
+        story.id = null;
+        story.intervalTime = story.updateTime - story.createTime;
+        story.isMerged = 1;
+        story.uuid = Uuid().v1();
+        story = await calculateRadius(story);
+        await createStory(story);
+      }
+    }
+  }
+
+  Future<Story> queryById(num storyId) async {
+    if (storyId != null) {
+      Map map = await Query(DBManager.tableStory).primaryKey([storyId]).first();
+      if (map != null && map.length > 0) {
+        return Story.fromJson(Map<String, dynamic>.from(map));
+      }
+    }
+    return null;
+  }
+
+  Future updateStoryDelete(num id, num delete) async {
+    await Query(DBManager.tableStory)
+        .primaryKey([id]).update({"is_deleted": delete});
   }
 
   /// 更新story的经纬度
@@ -219,7 +292,7 @@ class StoryHelper {
     List result = await Query(DBManager.tableStory).orderBy([
       "create_time desc"
     ]).whereBySql(
-        "create_time >= ? and (isFromPicture = ? or interval_time >= ?) and is_deleted != 1",
+        "create_time >= ? and (isFromPicture = ? or interval_time >= ?) and is_deleted = 0",
         [time, 1, LocationConfig.interval]).all();
     List<Story> list = [];
     if (result != null && result.length > 0) {
@@ -253,7 +326,7 @@ class StoryHelper {
     List result = await Query(DBManager.tableStory)
         .orderBy(["create_time desc"])
         .whereBySql(
-            "update_time < ? and (isFromPicture = ? or interval_time >= ?) and is_deleted != 1",
+            "update_time < ? and (isFromPicture = ? or interval_time >= ?) and is_deleted = 0",
             [time, 1, LocationConfig.interval])
         .limit(20)
         .all();
@@ -299,7 +372,7 @@ class StoryHelper {
           .orderBy(["create_time"]).whereByColumFilters([
         WhereCondiction("create_time", WhereCondictionType.MORE_THEN,
             checkedStories[0].createTime),
-        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1]),
+        WhereCondiction("is_deleted", WhereCondictionType.IN, [0]),
         WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
             LocationConfig.interval)
       ]).all();
@@ -407,13 +480,12 @@ class StoryHelper {
 
   /// 查询最后一条story
   Future<Story> queryLastStory() async {
-    Map result = await Query(DBManager.tableStory).whereByColumFilters([
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
-    ]).orderBy([
-      "create_time desc",
-    ]).first();
+    List result = await Query(DBManager.tableStory)
+        .orderBy(["create_time desc"]).whereByColumFilters([
+      WhereCondiction("is_deleted", WhereCondictionType.IN, [0])
+    ]).all();
     if (result != null && result.length > 0) {
-      return Story.fromJson(Map<String, dynamic>.from(result));
+      return Story.fromJson(Map<String, dynamic>.from(result[0]));
     }
     return null;
   }
@@ -421,7 +493,7 @@ class StoryHelper {
 //  /// 查询最早一条story
 //  Future<Story> queryOldestStory() async {
 //    Map result = await Query(DBManager.tableStory).whereByColumFilters([
-//      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+//      WhereCondiction("is_deleted", WhereCondictionType.IN, [0])
 //    ]).orderBy([
 //      "create_time asc",
 //    ]).first();
@@ -455,13 +527,13 @@ class StoryHelper {
   /// 查询足迹，相同的story算一个点
   Future<int> getFootprint(List<Story> list) async {
     List list1 = await Query(DBManager.tableStory).whereByColumFilters([
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+      WhereCondiction("is_deleted", WhereCondictionType.IN, [0])
     ]).needColums(["default_address"]).groupBy(
         ["default_address"]).whereByColumFilters([
       WhereCondiction("custom_address", WhereCondictionType.IS_NULL, true)
     ]).all();
     List list2 = await Query(DBManager.tableStory).whereByColumFilters([
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+      WhereCondiction("is_deleted", WhereCondictionType.IN, [0])
     ]).needColums(["custom_address"]).groupBy(
         ["custom_address"]).whereByColumFilters([
       WhereCondiction("custom_address", WhereCondictionType.IS_NULL, false)
@@ -473,7 +545,7 @@ class StoryHelper {
       List result = await Query(DBManager.tableStory).whereByColumFilters([
         WhereCondiction(
             "custom_address", WhereCondictionType.IN, [list[0].defaultAddress]),
-        WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1])
+        WhereCondiction("is_deleted", WhereCondictionType.IN, [0])
       ]).all();
       if (result == null || result?.length == 0) {
         current = 1;
@@ -510,6 +582,7 @@ class StoryHelper {
     story.defaultAddress = getDefaultAddress(story);
     story.isFromPicture = location.isFromPicture ?? 0;
     story.uuid = Uuid().v1();
+    story.isMerged = 0;
     story.radius = location.accuracy > LocationConfig.locationRadius
         ? LocationConfig.locationRadius
         : location.accuracy;
@@ -552,6 +625,9 @@ class StoryHelper {
 
   ///根据当前story查库中相同地点的一个targetStory对象
   Future<Story> findSamePointStory(Story story) async {
+    if (story == null || StringUtil.isEmpty(story.defaultAddress)) {
+      return null;
+    }
     List list = await Query(DBManager.tableStory).whereBySql(
         "default_address = ? and (custom_address IS NOT NULL or write_address IS NOT NULL)",
         [story.defaultAddress]).all();
@@ -573,9 +649,14 @@ class StoryHelper {
 
   ///根据当前story查库中相同地点的story集合
   Future<List<Story>> findSamePointStories(Story story) async {
-    List list = await Query(DBManager.tableStory).whereBySql(
-        "default_address = ? and isFromPicture != 1",
-        [story.defaultAddress]).all();
+    String sql = "default_address = ? and isFromPicture != 1";
+    List args = [story.defaultAddress];
+    if (!StringUtil.isEmpty(story.customAddress)) {
+      sql =
+          "(default_address = ? or custom_address = ?) and isFromPicture != 1";
+      args = [story.defaultAddress, story.customAddress];
+    }
+    List list = await Query(DBManager.tableStory).whereBySql(sql, args).all();
     LatLng latLng1 = LatLng(story.lat, story.lon);
     if (list != null && list.length > 0) {
       LatLng latLng2;
@@ -617,7 +698,9 @@ class StoryHelper {
     if (StringUtil.isEmpty(address)) {
       return -1;
     }
+    Story currentStory = await createStoryWithLocation(location);
     Story lastStory = await queryLastStory();
+    Story sameStory = await findSamePointStory(currentStory);
     if (lastStory != null) {
       /// 经纬度相等/地址相等认为是同一个地点
       if ((location.lat == lastStory.lat && location.lon == lastStory.lon) ||
@@ -625,14 +708,19 @@ class StoryHelper {
               lastStory.radius) ||
           (lastStory.defaultAddress == address &&
               await CalculateUtil.calculateStoryDistance(lastStory, location) <
-                  LocationConfig.judgeDistanceNum)) {
+                  LocationConfig.judgeDistanceNum) ||
+          (sameStory != null &&
+              (sameStory.customAddress == lastStory.customAddress ||
+                  sameStory.writeAddress == lastStory.writeAddress) &&
+              await CalculateUtil.calculateStoryDistance(lastStory, location) <
+                  LocationConfig.poiSearchInterval)) {
         lastStory.updateTime = location.updatetime;
         return await updateStoryTimes(lastStory);
       } else {
-        return await createStory(await createStoryWithLocation(location));
+        return await createStory(currentStory);
       }
     } else {
-      return await createStory(await createStoryWithLocation(location));
+      return await createStory(currentStory);
     }
   }
 
@@ -773,6 +861,7 @@ class StoryHelper {
       WhereCondiction(
           "create_time", WhereCondictionType.EQ_OR_LESS_THEN, bigTime),
       WhereCondiction("isFromPicture", WhereCondictionType.NOT_IN, [1]),
+      WhereCondiction("is_deleted", WhereCondictionType.IN, [0]),
     ]).all();
     if (result != null && result.length > 0) {
       List<Story> list = [];
@@ -785,11 +874,16 @@ class StoryHelper {
   }
 
   ///根据时间查找对应story
-  Future<Story> findAfterStory(num time) async {
+  Future<Story> findAfterStory(num time, {bool equal = true}) async {
     Map result = await Query(DBManager.tableStory)
         .orderBy(["create_time"]).whereByColumFilters([
-      WhereCondiction("create_time", WhereCondictionType.EQ_OR_MORE_THEN, time),
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1]),
+      WhereCondiction(
+          "create_time",
+          equal
+              ? WhereCondictionType.EQ_OR_MORE_THEN
+              : WhereCondictionType.MORE_THEN,
+          time),
+      WhereCondiction("is_deleted", WhereCondictionType.IN, [0]),
     ]).first();
     if (result != null && result.length > 0) {
       return Story.fromJson(Map<String, dynamic>.from(result));
@@ -798,11 +892,16 @@ class StoryHelper {
   }
 
   ///根据时间查找对应story
-  Future<Story> findBeforeStory(num time) async {
+  Future<Story> findBeforeStory(num time, {bool equal = true}) async {
     Map result = await Query(DBManager.tableStory)
         .orderBy(["update_time desc"]).whereByColumFilters([
-      WhereCondiction("update_time", WhereCondictionType.EQ_OR_LESS_THEN, time),
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1]),
+      WhereCondiction(
+          "update_time",
+          equal
+              ? WhereCondictionType.EQ_OR_LESS_THEN
+              : WhereCondictionType.LESS_THEN,
+          time),
+      WhereCondiction("is_deleted", WhereCondictionType.IN, [0]),
     ]).first();
     if (result != null && result.length > 0) {
       return Story.fromJson(Map<String, dynamic>.from(result));
@@ -815,7 +914,7 @@ class StoryHelper {
     Map result = await Query(DBManager.tableStory)
         .orderBy(["create_time desc"]).whereByColumFilters([
       WhereCondiction("create_time", WhereCondictionType.LESS_THEN, time),
-      WhereCondiction("is_deleted", WhereCondictionType.NOT_IN, [1]),
+      WhereCondiction("is_deleted", WhereCondictionType.IN, [0]),
       WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
           LocationConfig.interval),
       WhereCondiction("isFromPicture", WhereCondictionType.NOT_IN, [1]),
@@ -935,6 +1034,16 @@ class StoryHelper {
       for (Map map in result) {
         await Query(DBManager.tableStory).primaryKey([map["id"]]).update(
             {"radius": LocationConfig.locationRadius});
+      }
+    }
+  }
+
+  Future updateMerged() async {
+    List result = await Query(DBManager.tableStory).needColums(["id"]).all();
+    if (result != null && result.length > 0) {
+      for (Map map in result) {
+        await Query(DBManager.tableStory)
+            .primaryKey([map["id"]]).update({"is_merged": 0});
       }
     }
   }

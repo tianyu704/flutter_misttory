@@ -34,5 +34,6 @@
   "is_deleted":0,
   "write_address": "手动修改地址",
   "radius": 100,
-  "others": "$[]story"
+  "others": "$[]story",
+  "is_merged": 1
 }

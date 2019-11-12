@@ -54,7 +54,8 @@ Story _$StoryFromJson(Map<String, dynamic> json) {
     ..others = (json['others'] as List)
         ?.map(
             (e) => e == null ? null : Story.fromJson(e as Map<String, dynamic>))
-        ?.toList();
+        ?.toList()
+    ..isMerged = json['is_merged'] as num;
 }
 
 Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
@@ -94,4 +95,5 @@ Map<String, dynamic> _$StoryToJson(Story instance) => <String, dynamic>{
       'write_address': instance.writeAddress,
       'radius': instance.radius,
       'others': instance.others,
+      'is_merged': instance.isMerged,
     };

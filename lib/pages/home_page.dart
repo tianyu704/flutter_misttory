@@ -162,7 +162,6 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   ///加载更多
   _loadMore() async {
-    print("lllllllllllllllllllllllllllllllllllllll");
     if (_isLoading) {
       return;
     }

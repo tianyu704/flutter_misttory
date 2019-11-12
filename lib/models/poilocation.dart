@@ -8,7 +8,20 @@ class Poilocation {
 
   num id;
 
-  num storyId;
+  @JsonKey(name: "story_uuid")
+  String storyUuid;
+
+  String adName;
+
+  String businessArea;
+
+  String cityCode;
+
+  String cityName;
+
+  String provinceCode;
+
+  String provinceName;
 
   num distance;
 
@@ -23,6 +36,10 @@ class Poilocation {
   String typeDes;
 
   Latlonpoint latLonPoint;
+
+  num lat;
+
+  num lon;
 
   factory Poilocation.fromJson(Map<String, dynamic> json) => _$PoilocationFromJson(json);
 

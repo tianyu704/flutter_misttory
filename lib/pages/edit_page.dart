@@ -850,6 +850,7 @@ class _EditPageState extends LifecycleState<EditPage> {
       List list = [];
       poiResult.pois
           .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
+      print(poiResult.pois[0].toString());
       poiPreList = list;
     } else {
       poiPreList = await http.requestLocations(

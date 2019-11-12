@@ -93,6 +93,9 @@ class Story {
 
   List<Story> others;
 
+  @JsonKey(name: "is_merged")
+  num isMerged;
+
   factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
 
   Map<String, dynamic> toJson() => _$StoryToJson(this);
