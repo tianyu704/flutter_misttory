@@ -250,6 +250,13 @@ class PictureHelper {
         .primaryKey([id]).update({"story_uuid": uuid});
   }
 
+  /// 更新Picture的storyId
+  Future updatePictureUuid(String oldUuid, String uuid) async {
+    await Query(DBManager.tablePicture).whereByColumFilters([
+      WhereCondiction("story_uuid", WhereCondictionType.IN, [oldUuid])
+    ]).update({"story_uuid": uuid});
+  }
+
 //  fetchAppSystemPicture() async {
 //    List picList = await queryPictureConverted();
 //

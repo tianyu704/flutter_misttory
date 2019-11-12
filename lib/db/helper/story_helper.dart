@@ -217,15 +217,17 @@ class StoryHelper {
         }
       }
       if (stories != null && stories.length > 1) {
+        Story newStory = Story.fromJson(story.toJson());
+        newStory.id = null;
+        newStory.intervalTime = story.updateTime - story.createTime;
+        newStory.isMerged = 1;
+        newStory.uuid = Uuid().v1();
         for (Story s in stories) {
           await updateStoryDelete(s.id, 2);
+          await PictureHelper().updatePictureUuid(s.uuid, newStory.uuid);
         }
-        story.id = null;
-        story.intervalTime = story.updateTime - story.createTime;
-        story.isMerged = 1;
-        story.uuid = Uuid().v1();
-        story = await calculateRadius(story);
-        await createStory(story);
+        newStory = await calculateRadius(newStory);
+        await createStory(newStory);
       }
     }
   }
@@ -857,9 +859,9 @@ class StoryHelper {
     List result = await Query(DBManager.tableStory)
         .orderBy(["create_time desc"]).whereByColumFilters([
       WhereCondiction(
-          "create_time", WhereCondictionType.EQ_OR_MORE_THEN, smallTime),
+          "create_time", WhereCondictionType.MORE_THEN, smallTime),
       WhereCondiction(
-          "create_time", WhereCondictionType.EQ_OR_LESS_THEN, bigTime),
+          "create_time", WhereCondictionType.LESS_THEN, bigTime),
       WhereCondiction("isFromPicture", WhereCondictionType.NOT_IN, [1]),
       WhereCondiction("is_deleted", WhereCondictionType.IN, [0]),
     ]).all();
