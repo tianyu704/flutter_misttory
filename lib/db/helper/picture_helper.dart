@@ -138,9 +138,7 @@ class PictureHelper {
             mslocation.isFromPicture = 1;
             mslocation.pictures = p.id;
 
-            if (reGeocodeResult == null ||
-                reGeocodeResult.regeocodeAddress == null ||
-                StringUtil.isEmpty(reGeocodeResult.regeocodeAddress.country)) {
+            if (!isInChina(reGeocodeResult)) {
               mslocation = await http.requestLocation(mslocation);
               if (mslocation == null) {
                 print("p 转 l 获取地理位置失败！！！！");
@@ -242,6 +240,15 @@ class PictureHelper {
       }
     }
     return 1;
+  }
+
+  bool isInChina(ReGeocodeResult reGeocodeResult) {
+    return reGeocodeResult != null &&
+        reGeocodeResult.regeocodeAddress != null &&
+        (reGeocodeResult.regeocodeAddress.country == "中国" ||
+            reGeocodeResult.regeocodeAddress.country == "China") &&
+        ((reGeocodeResult.regeocodeAddress.pois?.length ?? 0) > 0 ||
+            (reGeocodeResult.regeocodeAddress.aois?.length ?? 0) > 0);
   }
 
   /// 更新Picture的storyId

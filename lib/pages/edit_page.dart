@@ -579,7 +579,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             isZoomControlsEnabled: false,
           ));
           _controller.setMyLocationStyle(_myLocationStyle);
-          _controller.setZoomLevel(10);
+          _controller.setZoomLevel(15);
         },
         amapOptions: AMapOptions(
           compassEnabled: false,
@@ -587,7 +587,7 @@ class _EditPageState extends LifecycleState<EditPage> {
           logoPosition: LOGO_POSITION_BOTTOM_CENTER,
           camera: CameraPosition(
             target: _currentLatLng,
-            zoom: 10,
+            zoom: 15,
           ),
         ),
       ),

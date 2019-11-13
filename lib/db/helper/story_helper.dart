@@ -651,6 +651,9 @@ class StoryHelper {
 
   ///根据当前story查库中相同地点的story集合
   Future<List<Story>> findSamePointStories(Story story) async {
+    if(StringUtil.isEmpty(story.defaultAddress)){
+      return null;
+    }
     String sql = "default_address = ? and isFromPicture != 1";
     List args = [story.defaultAddress];
     if (!StringUtil.isEmpty(story.customAddress)) {

@@ -56,7 +56,7 @@ class _DetailPage extends LifecycleState<DetailPage> {
 //      }
 //    });
     List<Latlonpoint> points = await LocationHelper().queryPoints(
-        _stories[_stories.length - 1].createTime, _stories[0].createTime);
+        _stories[_stories.length - 1].createTime, _stories[0].updateTime);
     LatLng latLng;
     for (Latlonpoint point in points) {
       latLng = LatLng(point.latitude, point.longitude);
@@ -181,6 +181,7 @@ class _DetailPage extends LifecycleState<DetailPage> {
             strokeColor: Color(0x662196F3),
             radiusFillColor: Color(0x662196F3),
             showMyLocation: false,
+            showsAccuracyRing: true,
 
             ///false 否则不能显示目标地点为中心点
           );

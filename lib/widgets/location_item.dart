@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/pages/detail_page.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/date_util.dart';
 import 'package:misstory/utils/string_util.dart';
@@ -57,9 +58,16 @@ class LocationItem extends StatelessWidget {
                             width: 50,
                             child: Padding(
                               padding: EdgeInsets.only(top: 2),
-                              child: Text(
-                                "$date",
-                                style: AppStyle.mainText14(context),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) =>
+                                          DetailPage([story])));
+                                },
+                                child: Text(
+                                  "$date",
+                                  style: AppStyle.mainText14(context),
+                                ),
                               ),
                             ),
                           ),
@@ -168,11 +176,11 @@ class LocationItem extends StatelessWidget {
               children: <Widget>[
                 SizedBox(width: 16),
                 Offstage(
-                  offstage: !(story.others != null && story.others.length > 2),
+                  offstage: !(story.others != null && story.others.length > 0),
                   child: GestureDetector(
                     onTap: onTapMore,
                     child: SizedBox(
-                      width:35,
+                      width: 35,
                       child: Icon(
                         Icons.more_vert,
                         color: AppStyle.colors(context).colorDescText,
