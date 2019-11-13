@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "369005440251",
+    "firebase_url": "https://misstory.firebaseio.com",
+    "project_id": "misstory",
+    "storage_bucket": "misstory.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369005440251:android:e38dbe7b67ca3d9003d45e",
+        "android_client_info": {
+          "package_name": "com.admqr.misstory"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "369005440251-vl2gk4rjkic0htgbstv9l8h40v8c6j6b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADouUzqY47otsO-M_c935Jzjrc4KK5-LQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "369005440251-vl2gk4rjkic0htgbstv9l8h40v8c6j6b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
