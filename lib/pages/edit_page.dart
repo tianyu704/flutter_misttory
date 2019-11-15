@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:amap_base/amap_base.dart';
 import 'package:amap_base/src/search/model/poi_result.dart';
 import 'package:amap_base/src/search/model/poi_search_query.dart';
+import 'package:amap_base/src/search/model/poi_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -80,7 +81,6 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   ///选择了推荐的点
   Poilocation pickPoiLocation;
-
   ///
   String _showTimeStr = "";
 
@@ -686,9 +686,9 @@ class _EditPageState extends LifecycleState<EditPage> {
                   ],
                 ),
               ),
+              Text("${p.distance}m"),
               Offstage(
                 offstage: !isShowCheck(poiName),
-
                 ///TODO:待补充判断
                 child: Icon(Icons.done),
               )
@@ -858,8 +858,38 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
     if (!isSearching) {
       poiList = poiPreList;
+      if (mounted) {
+        setState(() {});
+      }
       isPoiFirstLoad = false;
+      ///
       if (poiList != null && poiList.length > 0) {
+        if (pickPoiLocation == null) {
+
+
+
+          Poilocation poILocation = Poilocation();
+          if (StringUtil.isEmpty(widget.story.customAddress)) {
+            poILocation.title = widget.story.defaultAddress;
+            poILocation.snippet = widget.story.defaultAddress;
+          } else {
+            poILocation.title = widget.story.customAddress;
+            poILocation.snippet = widget.story.customAddress;
+          }
+          poILocation.lat =  widget.story.lat;
+          poILocation.lon = widget.story.lon;
+          poILocation.distance = 0;
+          for (Poilocation p in poiList) {
+            if (p.title == poILocation.title) {
+              pickPoiLocation = p;
+              break;
+            }
+          }
+          if (pickPoiLocation == null) {
+            pickPoiLocation = poILocation;
+            poiList.insert(0, poILocation);
+          }
+        }
         if (mounted) {
           setState(() {});
         }
@@ -1047,8 +1077,8 @@ class _EditPageState extends LifecycleState<EditPage> {
     if (pickPoiLocation != null &&
         StringUtil.isNotEmpty(pickPoiLocation.title)) {
       story.customAddress = pickPoiLocation.title;
-      story.lat = pickPoiLocation.latLonPoint.latitude;
-      story.lon = pickPoiLocation.latLonPoint.longitude;
+      story.lat = pickPoiLocation.lat;
+      story.lon = pickPoiLocation.lon;
       if (isWrite) {
         story.writeAddress = _addressTextFieldVC.text;
       }

@@ -27,6 +27,7 @@ PODS:
     - LuakitPod (>= 1.0.24)
   - flutter_orm_plugin (0.0.1):
     - Flutter
+    - LuakitPod (>= 1.0.24)
   - local_image_provider (0.0.1):
     - Flutter
   - LuakitPod (1.0.24)
@@ -39,7 +40,7 @@ PODS:
 DEPENDENCIES:
   - amap_base (from `.symlinks/plugins/amap_base/ios`)
   - curl (~> 1.0.0)
-  - Flutter (from `.symlinks/flutter/ios-release`)
+  - Flutter (from `.symlinks/flutter/ios`)
   - flutter_amap_location_plugin (from `.symlinks/plugins/flutter_amap_location_plugin/ios`)
   - flutter_luakit_plugin (from `.symlinks/plugins/flutter_luakit_plugin/ios`)
   - flutter_orm_plugin (from `.symlinks/plugins/flutter_orm_plugin/ios`)
@@ -65,7 +66,7 @@ EXTERNAL SOURCES:
   amap_base:
     :path: ".symlinks/plugins/amap_base/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios-release"
+    :path: ".symlinks/flutter/ios"
   flutter_amap_location_plugin:
     :path: ".symlinks/plugins/flutter_amap_location_plugin/ios"
   flutter_luakit_plugin:
@@ -90,7 +91,7 @@ SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_amap_location_plugin: f46c35452fd1c14b2deee046393dbbb03de73009
   flutter_luakit_plugin: b7bfad980dd10394ced46336643de78b999f80fd
-  flutter_orm_plugin: f62fd453ff96deb4962cde4a00294a9bd684c974
+  flutter_orm_plugin: d0e44188e60e1598276acd74aba91802aa063cdc
   local_image_provider: dce3592c21eaa668e5a2fff03cb6c9e53a60dff2
   LuakitPod: d6806a7bbeba3fd77cc64f08253b73722905a7a1
   MJExtension: e22bed65fdcd38e957242982b7384f2984c9088e
