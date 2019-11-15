@@ -865,14 +865,22 @@ class _EditPageState extends LifecycleState<EditPage> {
       ///
       if (poiList != null && poiList.length > 0) {
         if (pickPoiLocation == null) {
+
+
+
           Poilocation poILocation = Poilocation();
-          poILocation.title = getShowAddress(widget.story);
-          poILocation.snippet = widget.story.defaultAddress;
+          if (StringUtil.isEmpty(widget.story.customAddress)) {
+            poILocation.title = widget.story.defaultAddress;
+            poILocation.snippet = widget.story.defaultAddress;
+          } else {
+            poILocation.title = widget.story.customAddress;
+            poILocation.snippet = widget.story.customAddress;
+          }
           poILocation.lat =  widget.story.lat;
           poILocation.lon = widget.story.lon;
           poILocation.distance = 0;
           for (Poilocation p in poiList) {
-            if (p.title == poILocation.title) {
+            if (p.title == p.title) {
               pickPoiLocation = p;
               break;
             }
