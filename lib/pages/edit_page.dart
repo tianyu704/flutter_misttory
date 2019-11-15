@@ -880,7 +880,7 @@ class _EditPageState extends LifecycleState<EditPage> {
           poILocation.lon = widget.story.lon;
           poILocation.distance = 0;
           for (Poilocation p in poiList) {
-            if (p.title == p.title) {
+            if (p.title == poILocation.title) {
               pickPoiLocation = p;
               break;
             }
