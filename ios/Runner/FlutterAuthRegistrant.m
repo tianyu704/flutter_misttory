@@ -10,6 +10,7 @@
 #import <Flutter/Flutter.h>
 #import <CoreLocation/CoreLocation.h>
 #import "MSPermissionManager.h"
+#import "BlessLocationHelper.h"
 @implementation FlutterAuthRegistrant
 
 + (void)authRegistrant:(id)vc
@@ -32,7 +33,14 @@
                     result(@"DENIED");
                 }
             }];
+            return ;
         }
+//        if ([@"current_location" isEqualToString:call.method]) {
+//            BlessLocationHelper *bless = [[BlessLocationHelper alloc]init];
+//            [bless startLocationWithSuccess:^(CLLocation * _Nonnull) {
+//                
+//            }];
+//        }
     }];
 }
 
