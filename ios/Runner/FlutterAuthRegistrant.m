@@ -10,7 +10,7 @@
 #import <Flutter/Flutter.h>
 #import <CoreLocation/CoreLocation.h>
 #import "MSPermissionManager.h"
-#import "BlessLocationHelper.h"
+#import "BlessLocationManager.h"
 @implementation FlutterAuthRegistrant
 
 + (void)authRegistrant:(id)vc
@@ -35,12 +35,12 @@
             }];
             return ;
         }
-//        if ([@"current_location" isEqualToString:call.method]) {
-//            BlessLocationHelper *bless = [[BlessLocationHelper alloc]init];
-//            [bless startLocationWithSuccess:^(CLLocation * _Nonnull) {
-//                
-//            }];
-//        }
+        if ([@"current_location" isEqualToString:call.method]) {//获取一次定位
+            BlessLocationManager *bless = [[BlessLocationManager alloc]init];
+            [bless startLocationWithSuccess:^(NSString * _Nonnull locationJsonString) {
+                result(locationJsonString);
+            }];
+        }
     }];
 }
 

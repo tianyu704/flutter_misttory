@@ -21,7 +21,7 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		E466A51C2359A0E400FF346E /* bridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E466A51B2359A0E400FF346E /* bridge.swift */; };
-		E4A35E5B2383FEE200AEE3EC /* BlessLocationHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = E4A35E5A2383FEE200AEE3EC /* BlessLocationHelper.m */; };
+		E4A35E5B2383FEE200AEE3EC /* BlessLocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E4A35E5A2383FEE200AEE3EC /* BlessLocationManager.m */; };
 		E4F2EF1E237292AA0077146B /* FlutterAuthRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = E4F2EF1D237292AA0077146B /* FlutterAuthRegistrant.m */; };
 		E4F2EF2A23729E750077146B /* MSLocationPermissionStrategy.m in Sources */ = {isa = PBXBuildFile; fileRef = E4F2EF2723729E750077146B /* MSLocationPermissionStrategy.m */; };
 		E4F2EF2E23729FEF0077146B /* MSPermissionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E4F2EF2D23729FEE0077146B /* MSPermissionManager.m */; };
@@ -64,8 +64,8 @@
 		DBAECE74A0B59746D0D08A03 /* libPods-Runner.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Runner.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E466A51A2359A0E400FF346E /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		E466A51B2359A0E400FF346E /* bridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = bridge.swift; sourceTree = "<group>"; };
-		E4A35E592383FEE200AEE3EC /* BlessLocationHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlessLocationHelper.h; sourceTree = "<group>"; };
-		E4A35E5A2383FEE200AEE3EC /* BlessLocationHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BlessLocationHelper.m; sourceTree = "<group>"; };
+		E4A35E592383FEE200AEE3EC /* BlessLocationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlessLocationManager.h; sourceTree = "<group>"; };
+		E4A35E5A2383FEE200AEE3EC /* BlessLocationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BlessLocationManager.m; sourceTree = "<group>"; };
 		E4F2EF1C237292AA0077146B /* FlutterAuthRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlutterAuthRegistrant.h; sourceTree = "<group>"; };
 		E4F2EF1D237292AA0077146B /* FlutterAuthRegistrant.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterAuthRegistrant.m; sourceTree = "<group>"; };
 		E4F2EF2723729E750077146B /* MSLocationPermissionStrategy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSLocationPermissionStrategy.m; sourceTree = "<group>"; };
@@ -174,8 +174,8 @@
 		E4A35E582383FEB000AEE3EC /* LocationGPS */ = {
 			isa = PBXGroup;
 			children = (
-				E4A35E592383FEE200AEE3EC /* BlessLocationHelper.h */,
-				E4A35E5A2383FEE200AEE3EC /* BlessLocationHelper.m */,
+				E4A35E592383FEE200AEE3EC /* BlessLocationManager.h */,
+				E4A35E5A2383FEE200AEE3EC /* BlessLocationManager.m */,
 			);
 			path = LocationGPS;
 			sourceTree = "<group>";
@@ -363,7 +363,7 @@
 			files = (
 				E4F2EF1E237292AA0077146B /* FlutterAuthRegistrant.m in Sources */,
 				E466A51C2359A0E400FF346E /* bridge.swift in Sources */,
-				E4A35E5B2383FEE200AEE3EC /* BlessLocationHelper.m in Sources */,
+				E4A35E5B2383FEE200AEE3EC /* BlessLocationManager.m in Sources */,
 				978B8F6F1D3862AE00F588F7 /* AppDelegate.m in Sources */,
 				E4F2EF2E23729FEF0077146B /* MSPermissionManager.m in Sources */,
 				97C146F31CF9000F007C117D /* main.m in Sources */,

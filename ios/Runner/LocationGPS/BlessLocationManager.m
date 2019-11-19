@@ -1,17 +1,17 @@
 //
-//  BlessLocationHelper.m
+//  BlessLocationManager.m
 //  flutter_amap_location_plugin
 //
 //  Created by HF on 2019/9/28.
 //
 
-#import "BlessLocationHelper.h"
+#import "BlessLocationManager.h"
 //#import <CoreLocation/CoreLocation.h>
 
-@interface BlessLocationHelper  () <CLLocationManagerDelegate>
+@interface BlessLocationManager  () <CLLocationManagerDelegate>
 
 @property (nonatomic, strong) CLLocationManager *locationManager;
- @property (nonatomic, copy) void(^success )(CLLocation *location);
+ @property (nonatomic, copy) void(^success )(NSString *locationJsonString);
 @property (nonatomic, assign) CLLocationDistance distanceFilter;
 @property(assign, nonatomic) CLLocationAccuracy desiredAccuracy;
 //
@@ -20,7 +20,7 @@
 
 @end
 
-@implementation BlessLocationHelper
+@implementation BlessLocationManager
 
 - (instancetype)initWithFilter:(CLLocationDistance)filter accuracy:(CLLocationAccuracy)accuracy
 {
@@ -78,7 +78,7 @@
 
  
 
-- (void)startLocationWithSuccess:(void(^)(CLLocation *))success
+- (void)startLocationWithSuccess:(void(^)(NSString *locationJsonString))success
 {
     self.success = success;
 }
@@ -112,10 +112,78 @@
        }
     self.lastLocation  = myLocation;
     if (self.success) {
-        self.success(myLocation);
+        self.success([self getJsonStringWithLocation:myLocation]);
     }
 }
 
+- (NSString *)getJsonStringWithLocation:(CLLocation *)location
+{
+/**
+ 
+ String id;
+
+ num time;
+
+ num lat;
+
+ num lon;
+
+ num altitude;
+
+ num accuracy;
+
+ @JsonKey(name: "vertical_accuracy")
+ num verticalAccuracy;
+
+ num speed;
+
+ num bearing;
+
+////// num count;
+
+ @JsonKey(name: "coord_type")
+ */
+     
+    NSDictionary *dic = @{
+        @"id":[[NSUUID UUID] UUIDString],
+        @"time":@([self getDateTimeTOMilliSeconds:location.timestamp]),
+        @"lat":@(location.coordinate.latitude),
+        @"lon":@(location.coordinate.longitude),
+        @"altitude":@(location.altitude),
+        @"accuracy":@(location.horizontalAccuracy),
+        @"vertical_accuracy":@(location.verticalAccuracy),
+        @"speed":@(location.speed),
+        @"bearing":@(location.course),
+        @"coord_type":@"WGS84"//默认gps坐标
+    };
+    
+    return [self convertJSONWithDic:dic];
+}
+
+//字典转JSON
+- (NSString *)convertJSONWithDic:(NSDictionary *)dic {
+    NSError *err;
+    NSData *data = [NSJSONSerialization dataWithJSONObject:dic options:NSJSONWritingPrettyPrinted error:&err];
+    if (err) {
+        return @"字典转JSON出错";
+    }
+    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+}
+ 
+//JSON转字典
++(NSDictionary *)convertDicWithJSON:(NSString *)jsonStr {
+    if (jsonStr.length == 0) {
+        return nil;
+    }
+    NSError *err;
+    NSData *jsondata = [jsonStr dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:jsondata options:NSJSONReadingMutableContainers error:&err];
+    if (err) {
+        return nil;
+    }
+    
+    return dic;
+}
 - (NSTimeInterval)getSecondsFromStarTime:(NSDate *)starTime andInsertEndTime:(NSDate *)endTime {
     
     NSDate* startDate = starTime;
@@ -124,5 +192,11 @@
     return time;
 }
 
+- (long long)getDateTimeTOMilliSeconds:(NSDate *)datetime
+{
+    NSTimeInterval interval = [datetime timeIntervalSince1970];
+    long long totalMilliseconds = interval*1000 ;
+    return totalMilliseconds;
+}
 
 @end

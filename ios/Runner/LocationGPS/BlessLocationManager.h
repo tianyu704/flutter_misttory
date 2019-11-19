@@ -1,5 +1,5 @@
 //
-//  BlessLocationHelper.h
+//  BlessLocationManager.h
 //  flutter_amap_location_plugin
 //
 //  Created by HF on 2019/9/28.
@@ -10,11 +10,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface BlessLocationHelper : NSObject
+@interface BlessLocationManager : NSObject
 
 - (instancetype)initWithFilter:(CLLocationDistance)filter accuracy:(CLLocationAccuracy)accuracy;
 
-- (void)startLocationWithSuccess:(void(^)(CLLocation *))success;
+- (void)startLocationWithSuccess:(void(^)(NSString *locationJsonString))success;
 
 @end
 
