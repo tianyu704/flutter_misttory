@@ -40,7 +40,7 @@ PODS:
 DEPENDENCIES:
   - amap_base (from `.symlinks/plugins/amap_base/ios`)
   - curl (~> 1.0.0)
-  - Flutter (from `.symlinks/flutter/ios`)
+  - Flutter (from `.symlinks/flutter/ios-release`)
   - flutter_amap_location_plugin (from `.symlinks/plugins/flutter_amap_location_plugin/ios`)
   - flutter_luakit_plugin (from `.symlinks/plugins/flutter_luakit_plugin/ios`)
   - flutter_orm_plugin (from `.symlinks/plugins/flutter_orm_plugin/ios`)
@@ -66,7 +66,7 @@ EXTERNAL SOURCES:
   amap_base:
     :path: ".symlinks/plugins/amap_base/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios"
+    :path: ".symlinks/flutter/ios-release"
   flutter_amap_location_plugin:
     :path: ".symlinks/plugins/flutter_amap_location_plugin/ios"
   flutter_luakit_plugin:
