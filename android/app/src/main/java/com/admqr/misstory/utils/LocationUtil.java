@@ -106,12 +106,12 @@ public class LocationUtil {
         }
         String locationProvider = "";
         List<String> providers = locationManager.getProviders(true);
-        if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
-            //如果是网络定位
-            locationProvider = LocationManager.NETWORK_PROVIDER;
-        } else if (providers.contains(LocationManager.GPS_PROVIDER)) {
+        if (providers.contains(LocationManager.GPS_PROVIDER)) {
             //如果是GPS定位
             locationProvider = LocationManager.GPS_PROVIDER;
+        } else if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+            //如果是网络定位
+            locationProvider = LocationManager.NETWORK_PROVIDER;
         } else {
             Toast.makeText(context, "Please Open Your GPS or Location Service", Toast.LENGTH_SHORT).show();
         }
@@ -121,18 +121,18 @@ public class LocationUtil {
     private LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            LogUtil.d(TAG,JacksonUtil.getInstance().writeValueAsString(location));
+//            LogUtil.d(TAG, JacksonUtil.getInstance().writeValueAsString(location));
             Log.d(TAG, "onLocationChanged:" + location.getLatitude() + "," + location.getLongitude());
             if (msLocationListener != null && location != null) {
 //                geocodeAddress = new GeocodeAddress();
 //                geocodeAddress.execute(location);
-//                msLocationListener.onLocationChanged(location);
-                HttpRequest.getInstance().requestLocation(location.getLatitude() + "," + location.getLongitude(), new StringCallback() {
-                    @Override
-                    public void onSuccess(Response<String> response) {
-
-                    }
-                });
+                msLocationListener.onLocationChanged(location);
+//                HttpRequest.getInstance().requestLocation(location.getLatitude() + "," + location.getLongitude(), new StringCallback() {
+//                    @Override
+//                    public void onSuccess(Response<String> response) {
+//
+//                    }
+//                });
             }
             if (location != null) {
                 stop();

@@ -6,6 +6,7 @@ import androidx.multidex.MultiDex;
 
 import com.admqr.misstory.service.MainWorkService;
 import com.admqr.misstory.utils.ApkHelper;
+import com.admqr.misstory.utils.CrashHandler;
 import com.lzy.okgo.OkGo;
 import com.shihoo.daemon.ForegroundNotificationUtils;
 import com.shihoo.daemon.watch.WatchProcessPrefHelper;
@@ -19,6 +20,7 @@ public class App extends FlutterApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        CrashHandler.instance.init();
         createDataBase();
         OkGo.getInstance().init(this).setRetryCount(1);
         MultiDex.install(this);

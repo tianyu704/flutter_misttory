@@ -14,7 +14,9 @@ import android.os.Bundle;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.admqr.misstory.db.LocationDataHelper;
 import com.admqr.misstory.db.LocationHelper;
+import com.admqr.misstory.model.LocationData;
 import com.admqr.misstory.model.MSLocation;
 import com.admqr.misstory.service.MainWorkService;
 import com.admqr.misstory.utils.JacksonUtil;
@@ -51,7 +53,17 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
         this.result = result;
-        if (methodCall.method.equals("query_location")) {
+        if (methodCall.method.equals("query_location_data")) {
+            List<LocationData> locationList = LocationDataHelper.getInstance().getAllLocation();
+            LocationDataHelper.getInstance().clearLocation();
+            if (locationList != null && locationList.size() > 0) {
+                result.success(JacksonUtil.getInstance().writeValueAsString(locationList));
+            } else {
+                result.success("");
+            }
+        }else if(methodCall.method.equals("current_location")){
+
+        } else if (methodCall.method.equals("query_location")) {
             List<MSLocation> locationList = LocationHelper.getInstance().getAllLocation();
             LocationHelper.getInstance().clearLocation();
             if (locationList != null && locationList.size() > 0) {

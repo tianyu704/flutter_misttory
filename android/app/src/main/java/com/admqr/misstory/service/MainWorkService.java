@@ -3,6 +3,7 @@ package com.admqr.misstory.service;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -11,7 +12,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.admqr.misstory.MainActivity;
+import com.admqr.misstory.db.LocationDataHelper;
 import com.admqr.misstory.db.LocationHelper;
+import com.admqr.misstory.model.LocationData;
 import com.admqr.misstory.model.LocationResult;
 import com.admqr.misstory.model.MSLocation;
 import com.admqr.misstory.net.HttpRequest;
@@ -25,6 +28,7 @@ import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
 import com.shihoo.daemon.work.AbsWorkService;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -92,6 +96,71 @@ public class MainWorkService extends AbsWorkService {
 
     @Override
     public void startWork() {
+//        initAMap();
+        initNative();
+    }
+
+    public void initNative() {
+        if (locationUtil == null) {
+            locationUtil = new LocationUtil(MainWorkService.this);
+            locationUtil.setMsLocationListener(location -> {
+//                Log.d(TAG, JacksonUtil.getInstance().writeValueAsString(location));
+                LocationData locationData = new LocationData();
+                locationData.setAccuracy(location.getAccuracy());
+                locationData.setAltitude(location.getAltitude());
+                locationData.setLat(location.getLatitude());
+                locationData.setLon(location.getLongitude());
+                locationData.setBearing(location.getBearing());
+                locationData.setId(UUID.randomUUID().toString());
+                locationData.setSpeed(location.getSpeed());
+                locationData.setTime(location.getTime());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    locationData.setVerticalAccuracy(location.getVerticalAccuracyMeters());
+                }
+                LocationDataHelper.getInstance().createLocation(locationData);
+            });
+            handler.removeMessages(1);
+            handler.sendEmptyMessageDelayed(1, 10 * 1000);
+        }
+    }
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+//            Log.d(TAG, msg.what + "==" + mLocationClient.isStarted());
+            if (msg.what == 0 && mLocationClient != null) {
+                mLocationClient.stopLocation();
+                AMapLocationClientOption option = new AMapLocationClientOption();
+//                    option.setInterval(1000 * 60 * 3);
+                option.setDeviceModeDistanceFilter(100);
+                option.setMockEnable(false);
+                option.setOnceLocation(true);
+                option.setOnceLocationLatest(true);
+//            option.setGeoLanguage(AMapLocationClientOption.GeoLanguage.EN);
+                option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Battery_Saving);
+                mLocationClient.setLocationOption(option);
+                mLocationClient.startLocation();
+//                    Observable.timer(30, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
+//                        @Override
+//                        public void accept(Long aLong) throws Exception {
+//                            mLocationClient.startLocation();
+//                        }
+//                    });
+                handler.sendEmptyMessageDelayed(0, 3 * 60 * 1000);
+            } else if (msg.what == 1) {
+                Log.d(TAG, " -- 1分钟执行一次.... ");
+                if (locationUtil.isStarted()) {
+                    locationUtil.stop();
+                }
+                locationUtil.start();
+                handler.sendEmptyMessageDelayed(1, 3 * 60 * 1000);
+            }
+
+        }
+    };
+
+    public void initAMap() {
         if (mLocationClient == null) {
             mLocationClient = new AMapLocationClient(this);
             //设置定位回调监听
@@ -151,151 +220,6 @@ public class MainWorkService extends AbsWorkService {
             handler.removeMessages(0);
             handler.sendEmptyMessageDelayed(0, 30 * 1000);
         }
-
-//        if (locationUtil == null) {
-//            locationUtil = new LocationUtil(MainWorkService.this);
-//            locationUtil.setMsLocationListener(location -> {
-//                Log.d(TAG, JacksonUtil.getInstance().writeValueAsString(location));
-//            });
-//            handler.sendEmptyMessageDelayed(1, 10 * 1000);
-//        }
-
-//        mDisposable = Observable
-//                .interval(10, 60, TimeUnit.SECONDS)
-//                //取消任务时取消定时唤醒
-//                .doOnDispose(() -> {
-//                    Log.d(TAG, " -- doOnDispose ---  取消订阅 .... ");
-//                }).subscribeOn(Schedulers.io())
-//                .subscribe(c -> {
-//
-//                });
     }
 
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-//            Log.d(TAG, msg.what + "==" + mLocationClient.isStarted());
-            if (msg.what == 0 && mLocationClient != null) {
-                mLocationClient.stopLocation();
-                AMapLocationClientOption option = new AMapLocationClientOption();
-//                    option.setInterval(1000 * 60 * 3);
-                option.setDeviceModeDistanceFilter(100);
-                option.setMockEnable(false);
-                option.setOnceLocation(true);
-                option.setOnceLocationLatest(true);
-//            option.setGeoLanguage(AMapLocationClientOption.GeoLanguage.EN);
-                option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Battery_Saving);
-                mLocationClient.setLocationOption(option);
-                mLocationClient.startLocation();
-//                    Observable.timer(30, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
-//                        @Override
-//                        public void accept(Long aLong) throws Exception {
-//                            mLocationClient.startLocation();
-//                        }
-//                    });
-                handler.sendEmptyMessageDelayed(0, 3 * 60 * 1000);
-            } else if (msg.what == 1) {
-                Log.d(TAG, " -- 1分钟执行一次.... ");
-                if (locationUtil.isStarted()) {
-                    locationUtil.stop();
-                }
-                locationUtil.start();
-                handler.sendEmptyMessageDelayed(1, 60 * 1000);
-            }
-
-        }
-    };
-
-
-    //创建一条Location
-    public void createLocation(SQLiteDatabase db, AMapLocation aMapLocation) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("altitude", aMapLocation.getAltitude());
-        contentValues.put("speed", aMapLocation.getSpeed());
-        contentValues.put("bearing", aMapLocation.getBearing());
-        contentValues.put("citycode", aMapLocation.getCityCode());
-        contentValues.put("adcode", aMapLocation.getAdCode());
-        contentValues.put("country", aMapLocation.getCountry());
-        contentValues.put("province", aMapLocation.getProvince());
-        contentValues.put("city", aMapLocation.getCity());
-        contentValues.put("district", aMapLocation.getDistrict());
-        contentValues.put("road", aMapLocation.getRoad());
-        contentValues.put("street", aMapLocation.getStreet());
-        contentValues.put("number", aMapLocation.getStreetNum());
-        contentValues.put("poiname", aMapLocation.getPoiName());
-        contentValues.put("errorCode", aMapLocation.getErrorCode());
-        contentValues.put("errorInfo", aMapLocation.getErrorInfo());
-        contentValues.put("locationType", aMapLocation.getLocationType());
-        contentValues.put("locationDetail", aMapLocation.getLocationDetail());
-        contentValues.put("aoiname", aMapLocation.getAoiName());
-        contentValues.put("address", aMapLocation.getAddress());
-        contentValues.put("poiid", aMapLocation.getBuildingId());
-        contentValues.put("floor", aMapLocation.getFloor());
-        contentValues.put("description", aMapLocation.getDescription());
-        contentValues.put("time", aMapLocation.getTime());
-        contentValues.put("updatetime", aMapLocation.getTime());
-        contentValues.put("provider", aMapLocation.getProvider());
-        contentValues.put("lon", aMapLocation.getLongitude());
-        contentValues.put("lat", aMapLocation.getLatitude());
-        contentValues.put("accuracy", aMapLocation.getAccuracy());
-        contentValues.put("isOffset", aMapLocation.isOffset());
-        contentValues.put("isFixLastLocation", aMapLocation.isFixLastLocation());
-        contentValues.put("coordType", aMapLocation.getCoordType());
-        contentValues.put("is_delete", false);
-        db.insert("MSLocation", null, contentValues);
-        Log.d(TAG, "create success!!!!!!");
-    }
-
-    //计算距离
-    public float getDistanceBetween(AMapLocation location, MSLocation msLocation) {
-        LatLng latLng1 = new LatLng(location.getLatitude(), location.getLongitude());
-        LatLng latLng2 = new LatLng(msLocation.getLat(), msLocation.getLon());
-        float distance = calculateLineDistance(latLng1, latLng2);
-        Log.d(TAG, "distance is " + distance + " !!!!!!");
-        return distance;
-    }
-
-    //计算两点之间距离
-    public static float calculateLineDistance(LatLng var0, LatLng var1) {
-        if (var0 != null && var1 != null) {
-            try {
-                double var2 = var0.getLongitude();
-                double var4 = var0.getLatitude();
-                double var6 = var1.getLongitude();
-                double var8 = var1.getLatitude();
-                var2 *= 0.01745329251994329D;
-                var4 *= 0.01745329251994329D;
-                var6 *= 0.01745329251994329D;
-                var8 *= 0.01745329251994329D;
-                double var10 = Math.sin(var2);
-                double var12 = Math.sin(var4);
-                double var14 = Math.cos(var2);
-                double var16 = Math.cos(var4);
-                double var18 = Math.sin(var6);
-                double var20 = Math.sin(var8);
-                double var22 = Math.cos(var6);
-                double var24 = Math.cos(var8);
-                double[] var28 = new double[3];
-                double[] var29 = new double[3];
-                var28[0] = var16 * var14;
-                var28[1] = var16 * var10;
-                var28[2] = var12;
-                var29[0] = var24 * var22;
-                var29[1] = var24 * var18;
-                var29[2] = var20;
-                return (float) (Math.asin(Math.sqrt((var28[0] - var29[0]) * (var28[0] - var29[0]) + (var28[1] - var29[1]) * (var28[1] - var29[1]) + (var28[2] - var29[2]) * (var28[2] - var29[2])) / 2.0D) * 1.27420015798544E7D);
-            } catch (Throwable var26) {
-                var26.printStackTrace();
-                return 0.0F;
-            }
-        } else {
-            try {
-                throw new Exception("非法坐标值");
-            } catch (Exception var27) {
-                var27.printStackTrace();
-                return 0.0F;
-            }
-        }
-    }
 }
