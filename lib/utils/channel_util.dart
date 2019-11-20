@@ -1,10 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:misstory/models/location.dart';
-import 'package:misstory/utils/string_util.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -21,19 +17,6 @@ class ChannelUtil {
 
   Future<String> queryLocation() async {
     return await _methodChannel.invokeMethod("query_location");
-  }
-
-  Future<Location> getCurrentLocation() async {
-    String result = await _methodChannel.invokeMethod("current_location");
-    if (!StringUtil.isEmpty(result)) {
-      Map map = json.decode(result);
-      return Location.fromJson(Map<String, dynamic>.from(map));
-    }
-    return null;
-  }
-
-  Future<String> queryLocationData() async {
-    return await _methodChannel.invokeMethod("query_location_data");
   }
 
   Future<bool> requestLocationPermission() async {

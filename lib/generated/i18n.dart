@@ -21,10 +21,42 @@ class S implements WidgetsLocalizations {
   @override
   TextDirection get textDirection => TextDirection.ltr;
 
+  String get appName => "Misstory";
+  String get friday => "Friday";
+  String get monday => "Monday";
+  String get saturday => "Saturday";
+  String get sunday => "Sunday";
+  String get thursday => "Thursday";
+  String get tuesday => "Tuesday";
+  String get wednesday => "Wednesday";
 }
 
 class $en extends S {
   const $en();
+}
+
+class $zh extends S {
+  const $zh();
+
+  @override
+  TextDirection get textDirection => TextDirection.ltr;
+
+  @override
+  String get sunday => "星期日";
+  @override
+  String get saturday => "星期六";
+  @override
+  String get tuesday => "星期二";
+  @override
+  String get appName => "点书";
+  @override
+  String get wednesday => "星期三";
+  @override
+  String get thursday => "星期四";
+  @override
+  String get friday => "星期五";
+  @override
+  String get monday => "星期一";
 }
 
 class GeneratedLocalizationsDelegate extends LocalizationsDelegate<S> {
@@ -33,6 +65,7 @@ class GeneratedLocalizationsDelegate extends LocalizationsDelegate<S> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale("en", ""),
+      Locale("zh", ""),
     ];
   }
 
@@ -59,6 +92,9 @@ class GeneratedLocalizationsDelegate extends LocalizationsDelegate<S> {
       switch (lang) {
         case "en":
           S.current = const $en();
+          return SynchronousFuture<S>(S.current);
+        case "zh":
+          S.current = const $zh();
           return SynchronousFuture<S>(S.current);
         default:
           // NO-OP.

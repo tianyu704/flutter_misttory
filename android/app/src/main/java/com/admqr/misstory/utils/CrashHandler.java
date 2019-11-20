@@ -29,6 +29,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         //退出程序
         //这里由于是我们自己处理的异常，必须手动退出程序，不然系统出一只处于crash等待状态
         android.os.Process.killProcess(android.os.Process.myPid());
+        LogUtil.e("CrashHandler",ex.getMessage());
         System.exit(1);
     }
 

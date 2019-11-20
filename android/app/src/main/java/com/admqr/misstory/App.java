@@ -20,7 +20,7 @@ public class App extends FlutterApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        CrashHandler.instance.init();
+//        CrashHandler.instance.init();
         createDataBase();
         OkGo.getInstance().init(this).setRetryCount(1);
         MultiDex.install(this);
@@ -31,7 +31,6 @@ public class App extends FlutterApplication {
         if (BuildConfig.APPLICATION_ID.equals(processName)) {
             // 主进程 进行一些其他的操作
             Log.d("wsh-daemon", "启动主进程");
-
         } else if ((BuildConfig.APPLICATION_ID + ":work").equals(processName)) {
             Log.d("wsh-daemon", "启动了工作进程");
         } else if ((BuildConfig.APPLICATION_ID + ":watch").equals(processName)) {

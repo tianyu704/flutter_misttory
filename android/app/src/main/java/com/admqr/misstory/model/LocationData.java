@@ -35,6 +35,9 @@ public class LocationData extends RealmObject implements Serializable {
 
     private float bearing;
 
+    @JsonProperty(value = "coord_type")
+    private String coordType;
+
     public String getId() {
         return id;
     }
@@ -105,5 +108,13 @@ public class LocationData extends RealmObject implements Serializable {
 
     public void setBearing(float bearing) {
         this.bearing = bearing;
+    }
+
+    public String getCoordType() {
+        return coordType;
+    }
+
+    public void setCoordType(String coordType) {
+        this.coordType = coordType;
     }
 }

@@ -14,6 +14,7 @@ import android.util.Log;
 import com.admqr.misstory.MainActivity;
 import com.admqr.misstory.db.LocationDataHelper;
 import com.admqr.misstory.db.LocationHelper;
+import com.admqr.misstory.eventbus.EventUtil;
 import com.admqr.misstory.model.LocationData;
 import com.admqr.misstory.model.LocationResult;
 import com.admqr.misstory.model.MSLocation;
@@ -38,7 +39,7 @@ import me.yohom.amapbase.search.LatLng;
 
 
 public class MainWorkService extends AbsWorkService {
-    static final String TAG = "native db========>";
+    static final String TAG = LogUtil.makeLogTag(MainWorkService.class);
     private Disposable mDisposable;
     private long mSaveDataStamp;
     AMapLocationClient mLocationClient;
@@ -103,21 +104,10 @@ public class MainWorkService extends AbsWorkService {
     public void initNative() {
         if (locationUtil == null) {
             locationUtil = new LocationUtil(MainWorkService.this);
-            locationUtil.setMsLocationListener(location -> {
+            locationUtil.setMsLocationListener(locationData -> {
 //                Log.d(TAG, JacksonUtil.getInstance().writeValueAsString(location));
-                LocationData locationData = new LocationData();
-                locationData.setAccuracy(location.getAccuracy());
-                locationData.setAltitude(location.getAltitude());
-                locationData.setLat(location.getLatitude());
-                locationData.setLon(location.getLongitude());
-                locationData.setBearing(location.getBearing());
-                locationData.setId(UUID.randomUUID().toString());
-                locationData.setSpeed(location.getSpeed());
-                locationData.setTime(location.getTime());
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    locationData.setVerticalAccuracy(location.getVerticalAccuracyMeters());
-                }
                 LocationDataHelper.getInstance().createLocation(locationData);
+                EventUtil.postLocationEvent(locationData);
             });
             handler.removeMessages(1);
             handler.sendEmptyMessageDelayed(1, 10 * 1000);
@@ -147,14 +137,14 @@ public class MainWorkService extends AbsWorkService {
 //                            mLocationClient.startLocation();
 //                        }
 //                    });
-                handler.sendEmptyMessageDelayed(0, 3 * 60 * 1000);
+                handler.sendEmptyMessageDelayed(0, LocationUtil.interval);
             } else if (msg.what == 1) {
-                Log.d(TAG, " -- 1分钟执行一次.... ");
+                Log.d(TAG, LocationUtil.interval / 60 / 1000 + " 分钟执行一次.... ");
                 if (locationUtil.isStarted()) {
                     locationUtil.stop();
                 }
                 locationUtil.start();
-                handler.sendEmptyMessageDelayed(1, 3 * 60 * 1000);
+                handler.sendEmptyMessageDelayed(1, LocationUtil.interval);
             }
 
         }

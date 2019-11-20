@@ -20,6 +20,7 @@ import 'package:misstory/pages/pois_page.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/channel_util.dart';
 import 'package:misstory/utils/date_util.dart';
+import 'package:misstory/utils/location_channel.dart';
 import 'package:misstory/utils/print_util.dart';
 import 'package:misstory/widgets/loading_pictures_alert.dart';
 import 'package:misstory/widgets/location_item.dart';
@@ -249,7 +250,15 @@ class _HomePageState extends LifecycleState<HomePage> {
       distanceFilter: LocationConfig.distanceFilter,
       isOnceLocation: true,
     );
-    await _aMapLocation?.start(options);
+    _aMapLocation?.start(options);
+
+    LocationChannel().start();
+    LocationChannel().onLocationChanged.listen((location) {
+      PrintUtil.debugPrint("获取到原生定位信息-----${location.toJson()}");
+    });
+    LocationChannel().getCurrentLocation().then((location) {
+      PrintUtil.debugPrint("获取一次原生定位信息-----${location.toJson()}");
+    });
   }
 
   ///请求一次定位

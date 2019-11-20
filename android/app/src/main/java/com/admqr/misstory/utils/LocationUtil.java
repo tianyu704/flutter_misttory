@@ -10,6 +10,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,12 +19,14 @@ import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.admqr.misstory.model.LocationData;
 import com.admqr.misstory.net.HttpRequest;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by hugo on 2019-10-30
@@ -35,6 +38,8 @@ public class LocationUtil {
     private LocationManager locationManager;
     private MSLocationListener msLocationListener;
     private boolean isStarted = false;
+    public static int interval = 3 * 60 * 1000;
+    public static int distance = 10;
     GeocodeAddress geocodeAddress;
 
     public LocationUtil(Context context) {
@@ -55,6 +60,22 @@ public class LocationUtil {
             return;
         }
         Log.d(TAG, "start");
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            String provider = getProvider();
+            if (!TextUtils.isEmpty(provider)) {
+                isStarted = true;
+                locationManager.requestLocationUpdates(getProvider(), 0, distance, locationListener);
+            }
+        }
+    }
+
+    public void startOnce(MSLocationListener msLocationListener) {
+        if (locationManager == null) {
+            return;
+        }
+        this.msLocationListener = msLocationListener;
+        Log.d(TAG, "startOnce");
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             String provider = getProvider();
@@ -124,9 +145,22 @@ public class LocationUtil {
 //            LogUtil.d(TAG, JacksonUtil.getInstance().writeValueAsString(location));
             Log.d(TAG, "onLocationChanged:" + location.getLatitude() + "," + location.getLongitude());
             if (msLocationListener != null && location != null) {
+                LocationData locationData = new LocationData();
+                locationData.setAccuracy(location.getAccuracy());
+                locationData.setAltitude(location.getAltitude());
+                locationData.setLat(location.getLatitude());
+                locationData.setLon(location.getLongitude());
+                locationData.setBearing(location.getBearing());
+                locationData.setId(UUID.randomUUID().toString());
+                locationData.setSpeed(location.getSpeed());
+                locationData.setTime(location.getTime());
+                locationData.setCoordType("WGS84");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    locationData.setVerticalAccuracy(location.getVerticalAccuracyMeters());
+                }
+                msLocationListener.onLocationChanged(locationData);
 //                geocodeAddress = new GeocodeAddress();
 //                geocodeAddress.execute(location);
-                msLocationListener.onLocationChanged(location);
 //                HttpRequest.getInstance().requestLocation(location.getLatitude() + "," + location.getLongitude(), new StringCallback() {
 //                    @Override
 //                    public void onSuccess(Response<String> response) {
@@ -263,6 +297,6 @@ public class LocationUtil {
     }
 
     public interface MSLocationListener {
-        void onLocationChanged(Location location);
+        void onLocationChanged(LocationData location);
     }
 }

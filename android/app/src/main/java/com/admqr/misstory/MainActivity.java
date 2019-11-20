@@ -11,11 +11,14 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.MainThread;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.admqr.misstory.db.LocationDataHelper;
 import com.admqr.misstory.db.LocationHelper;
+import com.admqr.misstory.eventbus.EventUtil;
+import com.admqr.misstory.eventbus.LocationEvent;
 import com.admqr.misstory.model.LocationData;
 import com.admqr.misstory.model.MSLocation;
 import com.admqr.misstory.service.MainWorkService;
@@ -23,6 +26,9 @@ import com.admqr.misstory.utils.JacksonUtil;
 import com.admqr.misstory.utils.LocationUtil;
 import com.admqr.misstory.utils.LogUtil;
 import com.shihoo.daemon.DaemonEnv;
+
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,27 +39,40 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity implements MethodChannel.MethodCallHandler {
+    static final String TAG = LogUtil.makeLogTag(MainActivity.class);
     //是否 任务完成, 不再需要服务运行? 最好使用SharePreference，注意要在同一进程中访问该属性
     public static boolean isCanStartWorkService;
     MethodChannel methodChannel;
     public static int PERMISSION_LOCATION = 100;
     public static int PERMISSION_STORAGE = 101;
     MethodChannel.Result result;
+    LocationUtil locationUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         GeneratedPluginRegistrant.registerWith(this);
-        methodChannel = new MethodChannel(getFlutterView(), BuildConfig.APPLICATION_ID);
+        methodChannel = new MethodChannel(getFlutterView(), "com.admqr.misstory");
         methodChannel.setMethodCallHandler(this);
-        startLive();
+        locationUtil = new LocationUtil(this);
     }
 
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
         this.result = result;
-        if (methodCall.method.equals("query_location_data")) {
+        if (methodCall.method.equals("start_location")) {
+            int interval = methodCall.argument("interval");
+            int distanceFilter = methodCall.argument("distanceFilter");
+            if (interval != 0) {
+                LocationUtil.interval = interval;
+            }
+            LocationUtil.distance = distanceFilter;
+            LogUtil.d(TAG, interval + "-----" + distanceFilter);
+            startLive();
+        } else if (methodCall.method.equals("stop_location")) {
+            stopLive();
+        } else if (methodCall.method.equals("query_location_data")) {
             List<LocationData> locationList = LocationDataHelper.getInstance().getAllLocation();
             LocationDataHelper.getInstance().clearLocation();
             if (locationList != null && locationList.size() > 0) {
@@ -61,8 +80,8 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
             } else {
                 result.success("");
             }
-        }else if(methodCall.method.equals("current_location")){
-
+        } else if (methodCall.method.equals("current_location")) {
+            onceLocation(result);
         } else if (methodCall.method.equals("query_location")) {
             List<MSLocation> locationList = LocationHelper.getInstance().getAllLocation();
             LocationHelper.getInstance().clearLocation();
@@ -82,6 +101,17 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         DaemonEnv.sendStartWorkBroadcast(this);
         isCanStartWorkService = true;
         DaemonEnv.startServiceSafely(MainActivity.this, MainWorkService.class);
+    }
+
+    public void stopLive() {
+        DaemonEnv.sendStopWorkBroadcast(this);
+        isCanStartWorkService = false;
+    }
+
+    public void onceLocation(MethodChannel.Result result) {
+        locationUtil.startOnce(location -> {
+            result.success(JacksonUtil.getInstance().writeValueAsString(location));
+        });
     }
 
 //    //防止华为机型未加入白名单时按返回键回到桌面再锁屏后几秒钟进程被杀
@@ -173,13 +203,35 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
                 result.success("GRANTED");
             } else {
                 result.success("DENIED");
+                requestLocationPermission(result);
             }
         } else if (requestCode == PERMISSION_STORAGE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 result.success("GRANTED");
             } else {
                 result.success("DENIED");
+                requestStoragePermission(result);
             }
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onLocationEvent(LocationEvent event) {
+        if (methodChannel != null) {
+            String json = JacksonUtil.getInstance().writeValueAsString(event.locationData);
+            methodChannel.invokeMethod("locationListener", json);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventUtil.register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventUtil.unregister(this);
     }
 }
