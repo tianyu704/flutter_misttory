@@ -13,6 +13,8 @@
 #import "BlessLocationManager.h"
 #include "AppDelegate.h"
 
+FlutterMethodChannel *_channel;
+
 @implementation FlutterAuthRegistrant
 
 + (void)authRegistrant:(id)vc
@@ -20,7 +22,7 @@
     FlutterMethodChannel* batteryChannel = [FlutterMethodChannel
                                             methodChannelWithName:@"com.admqr.misstory"
                                             binaryMessenger:vc];
-    __weak typeof(FlutterMethodChannel *)weakChannel = batteryChannel;
+   _channel = batteryChannel;
     ///channel
     MSPermissionManager *manager = [[MSPermissionManager alloc]init];
     [batteryChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
@@ -40,22 +42,24 @@
         } else {
             AppDelegate *app = (AppDelegate *)[UIApplication sharedApplication].delegate;
             if ([@"start_location" isEqualToString:call.method]) {
-                NSString *jsonStr = call.arguments[@"options"];
-                if (jsonStr) {
-                    NSData *jsonData = [jsonStr dataUsingEncoding:NSUTF8StringEncoding];
-                    NSDictionary *params = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
-//                    double num = [params[@"interval"]doubleValue];//单次定位间隔时间毫秒
+                if (call.arguments) {
+                    
+                    NSDictionary *params = call.arguments;
+                    double num = [params[@"interval"]doubleValue];//单次定位间隔时间毫秒
+                    num = num/1000;//转second
 //                    double desiredAccuracy = [params[@"locationMode"] doubleValue];
                     double distanceFilter = [params[@"distanceFilter"]doubleValue];
-                    app.blessManager  = [[BlessLocationManager alloc]initWithFilter:distanceFilter accuracy:kCLLocationAccuracyHundredMeters];
+                    app.blessManager  = [[BlessLocationManager alloc]initWithFilter:distanceFilter accuracy:kCLLocationAccuracyHundredMeters timeCycle:num / 2];
                 } else {
                     app.blessManager = [[BlessLocationManager alloc]init];
                 }
                 [app.blessManager startLocationWithSuccess:^(NSString * _Nonnull locationJsonString) {
-                    [weakChannel invokeMethod:@"locationListener" arguments:locationJsonString];
+                    [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
                 }];
             } else if ([@"current_location" isEqualToString:call.method]) {//获取一次定位
-                result(app.blessManager.getCurrentLocationString);
+                [app.blessManager onceLocationWithSuccess:^(NSString * _Nonnull locationJsonString) {
+                    result(locationJsonString);
+                }];
             } else if ([@"stop_location" isEqualToString:call.method]) {
                 [app.blessManager stop];
                 result(@"停止定位");

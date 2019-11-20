@@ -12,12 +12,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface BlessLocationManager : NSObject
 
-- (instancetype)initWithFilter:(CLLocationDistance)filter accuracy:(CLLocationAccuracy)accuracy;
+- (instancetype)initWithFilter:(CLLocationDistance)filter accuracy:(CLLocationAccuracy)accuracy timeCycle:(double)timeCycle;
 
 - (void)startLocationWithSuccess:(void(^)(NSString *locationJsonString))success;
-//- (void)onceLocationWithSuccess:(void(^)(NSString *locationJsonString))onceSuccess;
+- (void)onceLocationWithSuccess:(void(^)(NSString *locationJsonString))onceSuccess;
 - (void)stop;
-- (NSString *)getCurrentLocationString;
 
 @end
 
