@@ -1,4 +1,5 @@
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
+import 'package:misstory/db/helper/location_db_helper.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/amap_poi.dart';
 import 'package:misstory/models/latlon_range.dart';
@@ -46,9 +47,20 @@ class TimelineHelper {
     }
   }
 
+  ///更新Timeline
   Future<int> updateTimeline(Timeline timeline) async {
     if (timeline != null) {
+      List<Timeline> timelines = await querySameTimeline(timeline.sameId);
+      List<Latlonpoint> points = [];
+      for (Timeline t in timelines) {
+        points.addAll(
+            await LocationDBHelper().queryPoints(t.startTime, t.endTime));
+      }
+      Latlonpoint latlonpoint =
+          await CalculateUtil.calculateCenterLatLon(points);
+      if (latlonpoint.radius > timeline.radius) {
 
+      }
     }
     return -1;
   }
@@ -203,5 +215,24 @@ class TimelineHelper {
   Future deleteTimeline(Timeline timeline) async {
     await Query(DBManager.tableTimeline)
         .primaryKey([timeline.uuid]).update({"is_delete": 1});
+  }
+
+  /// 查找same_id相同的TimeLine
+  Future<List<Timeline>> querySameTimeline(String sameId) async {
+    List list = await Query(DBManager.tableTimeline)
+        .orderBy(["start_time desc"])
+        .whereByColumFilters([
+          WhereCondiction("same_id", WhereCondictionType.IN, [sameId])
+        ])
+        .limit(5)
+        .all();
+    if (list != null && list.length > 0) {
+      List<Timeline> timelines = [];
+      for (Map map in list) {
+        timelines.add(Timeline.fromJson(Map<String, dynamic>.from(map)));
+      }
+      return timelines;
+    }
+    return null;
   }
 }

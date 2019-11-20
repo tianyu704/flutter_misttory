@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/db/helper/timeline_helper.dart';
 import 'package:misstory/models/amap_poi.dart';
+import 'package:misstory/models/latlonpoint.dart';
 import 'package:misstory/models/location.dart';
 import 'package:misstory/models/poilocation.dart';
 import 'package:misstory/utils/location_channel.dart';
@@ -77,5 +78,28 @@ class LocationDBHelper {
     await createLocation(location);
     await TimelineHelper().createOrUpdateTimeline(location);
     return 0;
+  }
+
+
+  Future<List<Latlonpoint>> queryPoints(num startTime, num endTime) async {
+    List result = await Query(DBManager.tableLocation).whereByColumFilters([
+      WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, startTime),
+      WhereCondiction("time", WhereCondictionType.EQ_OR_LESS_THEN, endTime),
+    ]).all();
+    if (result != null && result.length > 0) {
+      List<Latlonpoint> list = [];
+      int count;
+      num lat, lon;
+      for (Map map in result) {
+        count = (map["count"] as num).toInt();
+        lat = map["lat"] as num;
+        lon = map["lon"] as num;
+        for (int i = 0; i < count; i++) {
+          list.add(Latlonpoint(lat, lon));
+        }
+      }
+      return list;
+    }
+    return null;
   }
 }
