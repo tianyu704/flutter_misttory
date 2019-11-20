@@ -11,12 +11,14 @@
 @interface BlessLocationManager  () <CLLocationManagerDelegate>
 
 @property (nonatomic, strong) CLLocationManager *locationManager;
- @property (nonatomic, copy) void(^success )(NSString *locationJsonString);
+@property (nonatomic, copy) void(^success )(NSString *locationJsonString);
+@property (nonatomic, copy) void(^onceSuccess )(NSString *locationJsonString);
 @property (nonatomic, assign) CLLocationDistance distanceFilter;
 @property(assign, nonatomic) CLLocationAccuracy desiredAccuracy;
 //
 @property (nonatomic, strong) CLLocation *lastLocation;
 @property (nonatomic, strong) NSDate *lastDate;
+@property (nonatomic, assign) BOOL isFirstComein;
 
 @end
 
@@ -73,14 +75,30 @@
         //支持被kill掉以后能够后台自动重启
         //后台自动唤醒
         [self.locationManager startMonitoringSignificantLocationChanges];
+        self.isFirstComein = true;
     }
 }
 
- 
+
+- (NSString *)getCurrentLocationString
+{
+    if (!self.lastLocation) return @"";
+    return [self getJsonStringWithLocation:self.lastLocation];
+}
+
+- (void)onceLocationWithSuccess:(void(^)(NSString *locationJsonString))onceSuccess
+{
+    self.onceSuccess = onceSuccess;
+}
 
 - (void)startLocationWithSuccess:(void(^)(NSString *locationJsonString))success
 {
     self.success = success;
+}
+
+- (void)stop
+{
+    [self.locationManager stopUpdatingLocation];
 }
 
 #pragma mark - location manager delegate
@@ -111,6 +129,13 @@
           // NSLog(@"%@======",@(distance));
        }
     self.lastLocation  = myLocation;
+    if (self.isFirstComein) {
+        self.isFirstComein = false;
+        if (self.onceSuccess) {
+            self.onceSuccess([self getJsonStringWithLocation:myLocation]);
+        }
+        return;
+    }
     if (self.success) {
         self.success([self getJsonStringWithLocation:myLocation]);
     }

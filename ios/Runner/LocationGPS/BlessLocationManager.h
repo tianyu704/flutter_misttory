@@ -15,6 +15,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithFilter:(CLLocationDistance)filter accuracy:(CLLocationAccuracy)accuracy;
 
 - (void)startLocationWithSuccess:(void(^)(NSString *locationJsonString))success;
+//- (void)onceLocationWithSuccess:(void(^)(NSString *locationJsonString))onceSuccess;
+- (void)stop;
+- (NSString *)getCurrentLocationString;
 
 @end
 
