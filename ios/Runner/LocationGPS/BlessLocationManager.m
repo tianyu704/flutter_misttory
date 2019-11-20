@@ -1,12 +1,12 @@
-//
-//  BlessLocationManager.m
-//  flutter_amap_location_plugin
-//
-//  Created by HF on 2019/9/28.
-//
+    //
+    //  BlessLocationManager.m
+    //  flutter_amap_location_plugin
+    //
+    //  Created by HF on 2019/9/28.
+    //
 
 #import "BlessLocationManager.h"
-//#import <CoreLocation/CoreLocation.h>
+    //#import <CoreLocation/CoreLocation.h>
 
 @interface BlessLocationManager  () <CLLocationManagerDelegate>
 
@@ -15,21 +15,22 @@
 @property (nonatomic, copy) void(^onceSuccess )(NSString *locationJsonString);
 @property (nonatomic, assign) CLLocationDistance distanceFilter;
 @property(assign, nonatomic) CLLocationAccuracy desiredAccuracy;
-//
+@property(assign, nonatomic) double timeCycleNum;
+    //
 @property (nonatomic, strong) CLLocation *lastLocation;
 @property (nonatomic, strong) NSDate *lastDate;
-@property (nonatomic, assign) BOOL isFirstComein;
 
 @end
 
 @implementation BlessLocationManager
 
-- (instancetype)initWithFilter:(CLLocationDistance)filter accuracy:(CLLocationAccuracy)accuracy
+- (instancetype)initWithFilter:(CLLocationDistance)filter accuracy:(CLLocationAccuracy)accuracy timeCycle:(double)timeCycle
 {
     self = [super init];
     if (!self)  return nil;
     self.distanceFilter = filter;
     self.desiredAccuracy = accuracy;
+    self.timeCycleNum = timeCycle > 0 ? timeCycle : 5;
     [self commonInit];
     return self;
 }
@@ -40,6 +41,7 @@
     if (!self)  return nil;
     self.distanceFilter = kCLDistanceFilterNone;
     self.desiredAccuracy = kCLLocationAccuracyNearestTenMeters;
+    self.timeCycleNum = 5;//五秒一获取定位
     [self commonInit];
     return self;
 }
@@ -61,8 +63,8 @@
     [self auth];
     if ([self locationServicesEnabled]) {
         self.locationManager.delegate = self;
-        //默认开启了授权
-        //NSLog(@"请开启定位:设置 > 隐私 > 位置 > 定位服务");
+            //默认开启了授权
+            //NSLog(@"请开启定位:设置 > 隐私 > 位置 > 定位服务");
         if (@available(iOS 9.0, *)) {
             [self.locationManager setAllowsBackgroundLocationUpdates:YES];
         } else {
@@ -72,18 +74,10 @@
         self.locationManager.desiredAccuracy =  self.desiredAccuracy;
         self.locationManager.distanceFilter = self.distanceFilter;
         [self.locationManager startUpdatingLocation];
-        //支持被kill掉以后能够后台自动重启
-        //后台自动唤醒
+            //支持被kill掉以后能够后台自动重启
+            //后台自动唤醒
         [self.locationManager startMonitoringSignificantLocationChanges];
-        self.isFirstComein = true;
     }
-}
-
-
-- (NSString *)getCurrentLocationString
-{
-    if (!self.lastLocation) return @"";
-    return [self getJsonStringWithLocation:self.lastLocation];
 }
 
 - (void)onceLocationWithSuccess:(void(^)(NSString *locationJsonString))onceSuccess
@@ -105,70 +99,78 @@
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations
 {
+    bool isWright = YES;
     if (self.lastDate) {
-           long t = [self getSecondsFromStarTime:self.lastDate andInsertEndTime:[NSDate date]];
-           if (t < 5) {
-               NSLog(@"时间太短了 不记录");
-               return;
-           }
-       }
-       self.lastDate = [NSDate date];
-       //
-       CLLocation *myLocation = locations.firstObject;
-       for (CLLocation *l in locations) {
-           if (myLocation.horizontalAccuracy < l.horizontalAccuracy) {
-               myLocation = l;
-           }
-       }
-       if (self.lastLocation) {
-           double distance = [myLocation distanceFromLocation:self.lastLocation];
-           if (distance < 2) {
-               NSLog(@"太近了 不记录");
-              // return;
-           }
-          // NSLog(@"%@======",@(distance));
-       }
-    self.lastLocation  = myLocation;
-    if (self.isFirstComein) {
-        self.isFirstComein = false;
-        if (self.onceSuccess) {
-            self.onceSuccess([self getJsonStringWithLocation:myLocation]);
+        long t = [self getSecondsFromStarTime:self.lastDate andInsertEndTime:[NSDate date]];
+        if (t < self.timeCycleNum) {
+            isWright = NO;
+            //NSLog(@"时间太短了 %@ < %@不记录",@(t),@(self.timeCycleNum));
         }
-        return;
     }
-    if (self.success) {
-        self.success([self getJsonStringWithLocation:myLocation]);
+    //获取当前最大精度坐标
+    CLLocation *myLocation = locations.firstObject;
+    for (CLLocation *l in locations) {
+        if (myLocation.horizontalAccuracy < l.horizontalAccuracy) {
+            myLocation = l;
+        }
     }
+    //更新历史最大精度坐标
+    if (!self.lastLocation || (self.lastLocation && self.lastLocation.horizontalAccuracy < myLocation.horizontalAccuracy)) {
+        self.lastLocation = myLocation;
+    }
+    if (self.onceSuccess) {
+        NSString *jsonStr = [self getJsonStringWithLocation:myLocation];
+        self.onceSuccess(jsonStr);
+        self.onceSuccess = nil;
+    }
+    if (isWright) {
+        self.lastDate = [NSDate date];
+        if (self.success) {
+            NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation];
+            self.success(jsonStr);
+        }
+        self.lastLocation = nil;
+    }
+    
+    
+//    if (self.lastLocation) {
+//        double distance = [myLocation distanceFromLocation:self.lastLocation];
+//        if (distance < 2) {
+//            NSLog(@"太近了 不记录");
+//                // return;
+//        }
+//        NSLog(@"%@======",@(distance));
+//    }
 }
 
 - (NSString *)getJsonStringWithLocation:(CLLocation *)location
 {
-/**
- 
- String id;
-
- num time;
-
- num lat;
-
- num lon;
-
- num altitude;
-
- num accuracy;
-
- @JsonKey(name: "vertical_accuracy")
- num verticalAccuracy;
-
- num speed;
-
- num bearing;
-
-////// num count;
-
- @JsonKey(name: "coord_type")
- */
+    /**
      
+     String id;
+     
+     num time;
+     
+     num lat;
+     
+     num lon;
+     
+     num altitude;
+     
+     num accuracy;
+     
+     @JsonKey(name: "vertical_accuracy")
+     num verticalAccuracy;
+     
+     num speed;
+     
+     num bearing;
+     
+     ////// num count;
+     
+     @JsonKey(name: "coord_type")
+     */
+    
     NSDictionary *dic = @{
         @"id":[[NSUUID UUID] UUIDString],
         @"time":@([self getDateTimeTOMilliSeconds:location.timestamp]),
@@ -185,7 +187,7 @@
     return [self convertJSONWithDic:dic];
 }
 
-//字典转JSON
+    //字典转JSON
 - (NSString *)convertJSONWithDic:(NSDictionary *)dic {
     NSError *err;
     NSData *data = [NSJSONSerialization dataWithJSONObject:dic options:NSJSONWritingPrettyPrinted error:&err];
@@ -194,8 +196,8 @@
     }
     return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 }
- 
-//JSON转字典
+
+    //JSON转字典
 +(NSDictionary *)convertDicWithJSON:(NSString *)jsonStr {
     if (jsonStr.length == 0) {
         return nil;
