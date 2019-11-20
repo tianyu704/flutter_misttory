@@ -1,5 +1,6 @@
 import 'package:amap_base/amap_base.dart';
 import 'package:misstory/models/coord_type.dart';
+import 'package:misstory/models/latlon_range.dart';
 import 'package:misstory/models/latlonpoint.dart';
 import 'dart:math';
 
@@ -148,6 +149,32 @@ class CalculateUtil {
       }
       latlonpoint.radius = radius / total;
       return latlonpoint;
+    }
+    return null;
+  }
+
+  static LatlonRange getRange(Latlonpoint latlon) {
+    if (latlon != null) {
+      LatlonRange latlonRange = LatlonRange();
+      num latR = latlon.radius / 111.2 * 0.001;
+      num lonR = latlon.radius / 85.37 * 0.001;
+      latlonRange.minLat = latlon.latitude - latR;
+      latlonRange.maxLat = latlon.latitude + latR;
+      latlonRange.minLon = latlon.longitude - lonR;
+      latlonRange.maxLon = latlon.longitude + lonR;
+      if (latlonRange.minLat < -90) {
+        latlonRange.minLat = -90.000000;
+      }
+      if (latlonRange.maxLat > 90) {
+        latlonRange.maxLat = 90.000000;
+      }
+      if (latlonRange.minLon < -180) {
+        latlonRange.minLon = -180.000000;
+      }
+      if (latlonRange.maxLon > 180) {
+        latlonRange.maxLon = 180.000000;
+      }
+      return latlonRange;
     }
     return null;
   }
