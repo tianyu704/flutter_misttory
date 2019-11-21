@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:misstory/models/picture.dart';
 
 part 'timeline.g.dart';
 
@@ -72,6 +73,11 @@ class Timeline {
 
   @JsonKey(name: "same_id")
   String sameId;
+
+  ///以下为附加字段不存入数据库,显示时使用
+  String date;
+
+  List<Picture> pictures;
 
   factory Timeline.fromJson(Map<String, dynamic> json) => _$TimelineFromJson(json);
 

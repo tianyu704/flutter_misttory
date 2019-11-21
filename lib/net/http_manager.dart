@@ -166,7 +166,7 @@ Future<Mslocation> requestLocation(Mslocation mslocation) async {
 }
 
 /// 获取地点信息
-Future<List<Poilocation>> requestLocations({String latlon, String near}) async {
+Future<List<AmapPoi>> requestLocations({String latlon, String near}) async {
   if (StringUtil.isNotEmpty(latlon)) {
     try {
       Response response = await Dio().get(
@@ -190,17 +190,18 @@ Future<List<Poilocation>> requestLocations({String latlon, String near}) async {
             foursquare.response != null &&
             foursquare.response.venues != null &&
             foursquare.response.venues.length > 0) {
-          List<Poilocation> poilocations = [];
-          Poilocation poilocation;
+          List<AmapPoi> amapPois = [];
+          AmapPoi amapPoi;
           foursquare.response.venues.forEach((item) {
-            poilocation = Poilocation()
-              ..title = item.name
-              ..snippet = item.location?.address
-              ..latLonPoint =
-                  Latlonpoint(item.location?.lat, item.location.lng);
-            poilocations.add(poilocation);
+            amapPoi = AmapPoi()
+              ..id = item.id
+              ..name = item.name
+              ..distance = "${item?.location?.distance}"
+              ..address = item.location?.address
+              ..location = "${item.location.lng},${item.location?.lat}";
+            amapPois.add(amapPoi);
           });
-          return poilocations;
+          return amapPois;
         }
       }
     } on DioError catch (e) {

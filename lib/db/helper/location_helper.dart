@@ -538,12 +538,12 @@ class LocationHelper {
       int count;
       num lat, lon;
       for (Map map in result) {
-        count = (map["count"] as num).toInt();
+//        count = (map["count"] as num).toInt();
         lat = map["lat"] as num;
         lon = map["lon"] as num;
-        for (int i = 0; i < count; i++) {
+//        for (int i = 0; i < count; i++) {
           list.add(Latlonpoint(lat, lon));
-        }
+//        }
       }
       return list;
     }

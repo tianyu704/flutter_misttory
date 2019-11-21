@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/models/picture.dart' as model;
 import 'package:misstory/models/story.dart';
+import 'package:misstory/models/timeline.dart';
 import 'package:misstory/pages/picture_view_page.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/date_util.dart';
@@ -20,9 +21,9 @@ import 'edit_page.dart';
 /// Date: 2019-10-21
 ///
 class PicturesPage extends StatefulWidget {
-  final Story story;
+  final Timeline timeline;
 
-  PicturesPage(this.story);
+  PicturesPage(this.timeline);
 
   @override
   State<StatefulWidget> createState() {
@@ -32,7 +33,7 @@ class PicturesPage extends StatefulWidget {
 }
 
 class _PicturesPage extends LifecycleState<PicturesPage> {
-  Story _story;
+  Timeline _timeline;
   String _address = "";
   String _title = "";
   double width;
@@ -48,11 +49,11 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
   }
 
   initData() async {
-    _story = widget.story;
-    if (_story != null) {
-      _title = DateUtil.getMonthDayHourMin(_story.createTime);
+    _timeline = widget.timeline;
+    if (_timeline != null) {
+      _title = DateUtil.getMonthDayHourMin(_timeline.startTime);
       _address =
-          "${StringUtil.isEmpty(_story.customAddress) ? _story.defaultAddress : _story.customAddress}，${_story.city ?? ""}${_story.district ?? ""}";
+          "${StringUtil.isEmpty(_timeline.customAddress) ? _timeline.poiName : _timeline.customAddress}，${_timeline.city ?? ""}${_timeline.district ?? ""}";
       setState(() {});
     }
   }
@@ -129,7 +130,7 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
                 onPressed: () {
                   Navigator.of(context)
                       .push(MaterialPageRoute(
-                          builder: (context) => EditPage(_story)))
+                          builder: (context) => EditPage(_timeline)))
                       .then(
                     (value) {
                       _result = value;
@@ -156,14 +157,14 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
           mainAxisSpacing: 4),
       itemBuilder: _buildItem,
       scrollDirection: Axis.vertical,
-      itemCount: widget.story?.localImages?.length ?? 0,
+      itemCount: widget.timeline?.pictures?.length ?? 0,
       padding: EdgeInsets.all(10),
     );
   }
 
   ///图片子元素
   Widget _buildItem(context, index) {
-    model.Picture image = widget.story?.localImages[index];
+    model.Picture image = widget.timeline?.pictures[index];
     return Hero(
       tag: image.id,
       child: PictureWidget(
@@ -175,7 +176,7 @@ class _PicturesPage extends LifecycleState<PicturesPage> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => PictureViewPage(
-                widget.story?.localImages,
+                widget.timeline?.pictures,
                 _title,
                 _address,
                 position: index,

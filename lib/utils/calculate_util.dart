@@ -15,6 +15,9 @@ import 'package:misstory/models/story.dart';
 class CalculateUtil {
   static double calculateLatlngDistance(
       double lat1, double lng1, double lat2, double lng2) {
+    if (lat1 == null || lng1 == null || lat2 == null || lng2 == null) {
+      return double.infinity;
+    }
     return calculateLineDistance(
         Latlonpoint(lat1, lng1), Latlonpoint(lat2, lng2));
   }
@@ -39,7 +42,7 @@ class CalculateUtil {
           Latlonpoint(latLng1.latitude, latLng1.longitude),
           Latlonpoint(latLng2.latitude, latLng2.longitude));
     }
-    return 1000000;
+    return double.infinity;
   }
 
   static Future<double> calculateStoryDistance(Story l1, Mslocation l2) async {
@@ -62,7 +65,7 @@ class CalculateUtil {
           Latlonpoint(latLng1.latitude, latLng1.longitude),
           Latlonpoint(latLng2.latitude, latLng2.longitude));
     }
-    return 1000000;
+    return double.infinity;
   }
 
   static Future<double> calculatePictureDistance(Story l1, Picture p) async {
@@ -80,7 +83,7 @@ class CalculateUtil {
           Latlonpoint(latLng1.latitude, latLng1.longitude),
           Latlonpoint(latLng2.latitude, latLng2.longitude));
     }
-    return 1000000;
+    return double.infinity;
   }
 
   static double calculateLineDistance(
@@ -132,6 +135,9 @@ class CalculateUtil {
 
   static Future<Latlonpoint> calculateCenterLatLon(
       List<Latlonpoint> points) async {
+    if (points != null && points.length == 1) {
+      return points[0]..radius = 0;
+    }
     if (points != null && points.length > 0) {
       //以下为简化方法（400km以内）
       int total = points.length;

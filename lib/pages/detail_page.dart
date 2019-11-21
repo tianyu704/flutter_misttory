@@ -5,6 +5,7 @@ import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/models/latlonpoint.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/models/timeline.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/location_item.dart';
@@ -17,9 +18,9 @@ import 'edit_page.dart';
 /// Date: 2019-11-08
 ///
 class DetailPage extends StatefulWidget {
-  final List<Story> stories;
+  final List<Timeline> timelines;
 
-  DetailPage(this.stories);
+  DetailPage(this.timelines);
 
   @override
   State<StatefulWidget> createState() {
@@ -34,14 +35,14 @@ class _DetailPage extends LifecycleState<DetailPage> {
 
 //  PolylineOptions _polylineOptions;
   List<LatLng> _latLngList = [];
-  List<Story> _stories;
+  List<Timeline> _timelines;
   List<MarkerOptions> _markerOptions = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _stories = widget.stories;
+    _timelines = widget.timelines;
     _initLatLngList();
   }
 
@@ -56,7 +57,7 @@ class _DetailPage extends LifecycleState<DetailPage> {
 //      }
 //    });
     List<Latlonpoint> points = await LocationHelper().queryPoints(
-        _stories[_stories.length - 1].createTime, _stories[0].updateTime);
+        _timelines[_timelines.length - 1].startTime, _timelines[0].endTime);
     LatLng latLng;
     for (Latlonpoint point in points) {
       latLng = LatLng(point.latitude, point.longitude);
@@ -100,7 +101,7 @@ class _DetailPage extends LifecycleState<DetailPage> {
             flex: 1,
             child: ListView.builder(
               itemBuilder: _buildItem,
-              itemCount: widget.stories?.length ?? 0,
+              itemCount: widget.timelines?.length ?? 0,
             ),
           ),
         ],
@@ -109,11 +110,11 @@ class _DetailPage extends LifecycleState<DetailPage> {
   }
 
   Widget _buildItem(BuildContext context, int index) {
-    Story story = widget.stories[index];
+    Timeline timeline = widget.timelines[index];
     String date = "";
-    if (story?.createTime != null && story.createTime != 0) {
+    if (timeline?.startTime != null && timeline.startTime != 0) {
       DateTime dateTime =
-          DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
+          DateTime.fromMillisecondsSinceEpoch(timeline.startTime.toInt());
       date = DateFormat("HH:mm").format(dateTime);
     }
     return InkWell(
@@ -132,7 +133,7 @@ class _DetailPage extends LifecycleState<DetailPage> {
             Expanded(
               flex: 1,
               child: Text(
-                getShowAddressText(story),
+                getShowAddressText(timeline),
                 style: AppStyle.mainText14(context),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -143,19 +144,19 @@ class _DetailPage extends LifecycleState<DetailPage> {
       ),
       onTap: () {
         Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => EditPage(story)))
+            .push(MaterialPageRoute(builder: (context) => EditPage(timeline)))
             .then(
           (value) {
             if (value != null) {
-              if (value is Story) {
-                Story story = value;
-                notifyDeleteStory(story);
+              if (value is Timeline) {
+                Timeline timeline = value;
+                notifyDeleteStory(timeline);
                 return;
               }
               if (value is List && value.length > 0) {
-                Map<num, Story> stories = value[0];
-                if (stories != null && stories.length > 0) {
-                  notifyStories(stories);
+                Map<num, Timeline> timelines = value[0];
+                if (timelines != null && timelines.length > 0) {
+                  notifyStories(timelines);
                 }
               }
             }
@@ -213,16 +214,16 @@ class _DetailPage extends LifecycleState<DetailPage> {
   }
 
   ///从编辑页面返回后的刷新
-  notifyStories(Map<num, Story> stories) {
-    if (_stories != null && _stories.length > 0) {
-      _stories.forEach((item) {
-        if (stories.containsKey(item.id)) {
+  notifyStories(Map<num, Timeline> timelines) {
+    if (_timelines != null && _timelines.length > 0) {
+      _timelines.forEach((item) {
+        if (timelines.containsKey(item.uuid)) {
           //print("${stories[item.id].writeAddress}");
-          item.lat = stories[item.id].lat;
-          item.lon = stories[item.id].lon;
-          item.customAddress = stories[item.id].customAddress;
-          item.desc = stories[item.id].desc;
-          item.writeAddress = stories[item.id].writeAddress;
+          item.lat = timelines[item.uuid].lat;
+          item.lon = timelines[item.uuid].lon;
+          item.customAddress = timelines[item.uuid].customAddress;
+          item.desc = timelines[item.uuid].desc;
+          item.customAddress = timelines[item.uuid].customAddress;
         }
       });
       if (mounted) {
@@ -231,9 +232,9 @@ class _DetailPage extends LifecycleState<DetailPage> {
     }
   }
 
-  notifyDeleteStory(Story story) {
-    if (_stories != null && _stories.length > 0) {
-      _stories.removeWhere((item) => item.id == story.id);
+  notifyDeleteStory(Timeline timeline) {
+    if (_timelines != null && _timelines.length > 0) {
+      _timelines.removeWhere((item) => item.uuid == timeline.uuid);
       debugPrint("+++刷新删除完成++");
       if (mounted) {
         setState(() {});
@@ -241,13 +242,13 @@ class _DetailPage extends LifecycleState<DetailPage> {
     }
   }
 
-  getShowAddressText(Story story) {
-    if (StringUtil.isNotEmpty(story.writeAddress)) {
-      return story.writeAddress;
+  getShowAddressText(Timeline timeline) {
+//    if (StringUtil.isNotEmpty(timeline.writeAddress)) {
+//      return timeline.writeAddress;
+//    }
+    if (StringUtil.isNotEmpty(timeline.customAddress)) {
+      return timeline.customAddress;
     }
-    if (StringUtil.isNotEmpty(story.customAddress)) {
-      return story.customAddress;
-    }
-    return story.defaultAddress;
+    return timeline.poiName;
   }
 }

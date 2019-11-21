@@ -25,22 +25,6 @@ class LocationDBHelper {
 
   LocationDBHelper._internal();
 
-  ///从Android Realm数据库中读出Location并存储
-  Future saveLocation() async {
-    if (Platform.isAndroid) {
-      String jsonString = await LocationChannel().queryLocationData();
-      if (StringUtil.isNotEmpty(jsonString)) {
-        List items = json.decode(jsonString);
-        debugPrint("---->${items.length}个位置信息");
-        for (Map item in items) {
-          Location location =
-              Location.fromJson(Map<String, dynamic>.from(item));
-          await createLocation(location);
-        }
-      }
-    }
-  }
-
   /// 创建Location一条记录
   Future<int> createLocation(Location location) async {
     if (location != null) {
@@ -74,32 +58,51 @@ class LocationDBHelper {
 
   ///每次获取到新定位时，先检查原生数据库中数据再处理本次的数据
   Future saveNewLocation(Location location) async {
-    await saveLocation();
-    await createLocation(location);
-    await TimelineHelper().createOrUpdateTimeline(location);
+    if (Platform.isAndroid) {
+      String jsonString = await LocationChannel().queryLocationData();
+      if (StringUtil.isNotEmpty(jsonString)) {
+        List items = json.decode(jsonString);
+        debugPrint("---->${items.length}个位置信息");
+        for (Map item in items) {
+          Location l = Location.fromJson(Map<String, dynamic>.from(item));
+          await saveLocation(l);
+        }
+      }
+    }
+    await saveLocation(location);
     return 0;
   }
 
+  ///
+  Future saveLocation(Location location) async {
+    await createLocation(location);
+    String timelineId = await TimelineHelper().createOrUpdateTimeline(location);
+    if (StringUtil.isNotEmpty(timelineId)) {
+      location.timelineId = timelineId;
+      await updateLocationTimelineId(location);
+    }
+  }
 
-  Future<List<Latlonpoint>> queryPoints(num startTime, num endTime) async {
+  ///更新timeline_id
+  Future updateLocationTimelineId(Location location) async {
+    await Query(DBManager.tableLocation)
+        .primaryKey([location.id]).update({"timeline_id": location.timelineId});
+  }
+
+  Future<List<Latlonpoint>> queryPoints(String timelineId) async {
     List result = await Query(DBManager.tableLocation).whereByColumFilters([
-      WhereCondiction("time", WhereCondictionType.EQ_OR_MORE_THEN, startTime),
-      WhereCondiction("time", WhereCondictionType.EQ_OR_LESS_THEN, endTime),
+      WhereCondiction("timeline_id", WhereCondictionType.IN, [timelineId]),
     ]).all();
     if (result != null && result.length > 0) {
       List<Latlonpoint> list = [];
-      int count;
       num lat, lon;
       for (Map map in result) {
-        count = (map["count"] as num).toInt();
         lat = map["lat"] as num;
         lon = map["lon"] as num;
-        for (int i = 0; i < count; i++) {
-          list.add(Latlonpoint(lat, lon));
-        }
+        list.add(Latlonpoint(lat, lon));
       }
       return list;
     }
-    return null;
+    return [];
   }
 }

@@ -71,4 +71,11 @@ class DateUtil {
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(millis.toInt());
     return DateFormat("M月d日 HH:mm").format(dateTime);
   }
+
+  ///获取展示的时间 2019.09.23
+  static String getShowTime(num timeStr) {
+    DateTime time = DateTime.fromMillisecondsSinceEpoch(timeStr.toInt());
+    String newTime = DateFormat("yyyy.MM.dd").format(time);
+    return newTime;
+  }
 }

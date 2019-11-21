@@ -30,6 +30,9 @@ class Location {
   @JsonKey(name: "coord_type")
   String coordType;
 
+  @JsonKey(name: "timeline_id")
+  String timelineId;
+
   factory Location.fromJson(Map<String, dynamic> json) => _$LocationFromJson(json);
 
   Map<String, dynamic> toJson() => _$LocationToJson(this);

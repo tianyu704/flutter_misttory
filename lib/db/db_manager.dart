@@ -35,6 +35,7 @@ class DBManager {
     locationFields["bearing"] = Field(FieldType.Real);
     locationFields["count"] = Field(FieldType.Real);
     locationFields["coord_type"] = Field(FieldType.Text);
+    locationFields["timeline_id"] = Field(FieldType.Text);
 
     /// 位置信息表
     Map<String, Field> mslocationFields = new Map<String, Field>();

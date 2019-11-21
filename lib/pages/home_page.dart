@@ -9,6 +9,7 @@ import 'package:misstory/db/helper/location_db_helper.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/db/helper/timeline_helper.dart';
 import 'package:misstory/db/local_storage.dart';
 import 'package:misstory/eventbus/event_bus_util.dart';
 import 'package:misstory/eventbus/refresh_progress.dart';
@@ -16,6 +17,7 @@ import 'package:misstory/location_config.dart';
 import 'package:misstory/models/coord_type.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/models/timeline.dart';
 import 'package:misstory/pages/pictures_page.dart';
 import 'package:misstory/pages/pois_page.dart';
 import 'package:misstory/style/app_style.dart';
@@ -46,8 +48,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends LifecycleState<HomePage> {
-  List<Story> _stories = List<Story>();
-  List<Story> _storiesAll = List<Story>();
+  List<Timeline> _timelines = List<Timeline>();
+  List<Timeline> _timelineAll = List<Timeline>();
   amap.AMapLocation _aMapLocation;
   StreamSubscription _subscription;
   RefreshController _refreshController =
@@ -57,7 +59,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   Timer _timer;
   bool _isFirstLoad = true;
   bool _isDealWithLocation = false;
-  Story _currentStory;
+  Timeline _currentTimeline;
   StreamSubscription _refreshSubscription;
   bool hasBuild = false;
   LoadingPicturesAlert loadingAlert;
@@ -70,8 +72,8 @@ class _HomePageState extends LifecycleState<HomePage> {
     _startTimerRefresh();
     _refreshSubscription =
         EventBusUtil.listen<RefreshProgress>((refreshProgress) async {
-      _day = await StoryHelper().getStoryDays();
-      _footprint = await StoryHelper().getFootprint(_storiesAll);
+      _day = await TimelineHelper().getStoryDays();
+      _footprint = await TimelineHelper().getFootprint();
       _refreshController.loadComplete();
       if (mounted && hasBuild) {
         setState(() {});
@@ -119,20 +121,20 @@ class _HomePageState extends LifecycleState<HomePage> {
   _refreshStory() async {
     await LocationHelper().saveLocation();
 //    await LocationHelper().createStoryByLocation();
-    _currentStory = await StoryHelper().getCurrentStory();
+    _currentTimeline = await TimelineHelper().getCurrentStory();
     if (_isFirstLoad) {
       ///初次加载需要查询前20条数据
-      _stories = await StoryHelper().queryMoreHistories();
-      if (_stories != null && _stories.length > 0) {
+      _timelines = await TimelineHelper().queryMoreHistories();
+      if (_timelines != null && _timelines.length > 0) {
         _isFirstLoad = false;
       }
     } else {
       /// 刷新时获取最新的story
-      _stories = await StoryHelper().checkLatestStory(_stories);
+      _timelines = await TimelineHelper().checkLatestStory(_timelines);
     }
     await _mergeStories();
-    _day = await StoryHelper().getStoryDays();
-    _footprint = await StoryHelper().getFootprint(_storiesAll);
+    _day = await TimelineHelper().getStoryDays();
+    _footprint = await TimelineHelper().getFootprint();
     if (mounted) {
       setState(() {});
     }
@@ -140,24 +142,24 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   /// 合并_currentStory和_stories
   _mergeStories() async {
-    List<Story> temp = [];
-    if (_currentStory != null) {
-      if (_stories != null && _stories.length > 0) {
-        if (_currentStory.uuid != _stories[0].uuid) {
-          temp.add(_currentStory);
+    List<Timeline> temp = [];
+    if (_currentTimeline != null) {
+      if (_timelines != null && _timelines.length > 0) {
+        if (_currentTimeline.uuid != _timelines[0].uuid) {
+          temp.add(_currentTimeline);
         } else {
-          _stories[0] = _currentStory;
+          _timelines[0] = _currentTimeline;
         }
-        temp.addAll(_stories);
+        temp.addAll(_timelines);
       } else {
-        temp.add(_currentStory);
+        temp.add(_currentTimeline);
       }
     } else {
-      if (_stories != null && _stories.length > 0) {
-        temp.addAll(_stories);
+      if (_timelines != null && _timelines.length > 0) {
+        temp.addAll(_timelines);
       }
     }
-    _storiesAll = temp;
+    _timelineAll = temp;
   }
 
   bool _isLoading = false;
@@ -170,12 +172,12 @@ class _HomePageState extends LifecycleState<HomePage> {
     if (!_isLoading) {
       _isLoading = true;
       num time;
-      if (_stories != null && _stories.length > 0) {
-        time = _stories[_stories.length - 1].updateTime;
+      if (_timelines != null && _timelines.length > 0) {
+        time = _timelines[_timelines.length - 1].endTime;
       }
-      List<Story> list = await StoryHelper().queryMoreHistories(time: time);
+      List<Timeline> list = await TimelineHelper().queryMoreHistories(time: time);
       if (list != null && list.length > 0) {
-        _stories.addAll(list);
+        _timelines.addAll(list);
         _refreshController.loadComplete();
       } else {
         _refreshController.loadNoData();
@@ -253,7 +255,9 @@ class _HomePageState extends LifecycleState<HomePage> {
     );
     _aMapLocation?.start(options);
 
-    LocationChannel().start();
+    LocationChannel().start(
+        interval: LocationConfig.interval,
+        distanceFilter: LocationConfig.distanceFilter);
     LocationChannel().onLocationChanged.listen((location) {
       PrintUtil.debugPrint("获取到原生定位信息-----${location.toJson()}");
       LocationDBHelper().saveNewLocation(location);
@@ -311,11 +315,11 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   ///分组设置卡片布局
   Widget _storyListWidget(BuildContext context) {
-    return RefreshGroupedListView<Story, String>(
+    return RefreshGroupedListView<Timeline, String>(
       _refreshController,
-      collection: _storiesAll,
-      groupBy: (Story g) => g.date,
-      listBuilder: (BuildContext context, TItem<Story> item) =>
+      collection: _timelineAll,
+      groupBy: (Timeline g) => g.date,
+      listBuilder: (BuildContext context, TItem<Timeline> item) =>
           _buildCardItem(context, item),
       groupBuilder: (BuildContext context, String name) =>
           _groupSectionWidget(context, name),
@@ -348,7 +352,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   ///展示定位的卡片
-  Widget _buildCardItem(context, TItem<Story> item) {
+  Widget _buildCardItem(context, TItem<Timeline> item) {
     return LocationItem(
       item,
       onPressCard: () {
@@ -364,12 +368,12 @@ class _HomePageState extends LifecycleState<HomePage> {
             .then(_notifyStories);
       },
       onTapMore: () {
-        if (item.tElement.others != null && item.tElement.others.length > 0) {
-          Navigator.of(context)
-              .push(MaterialPageRoute(
-                  builder: (context) => DetailPage(item.tElement.others)))
-              .then(_notifyStories);
-        }
+//        if (item.tElement.others != null && item.tElement.others.length > 0) {
+//          Navigator.of(context)
+//              .push(MaterialPageRoute(
+//                  builder: (context) => DetailPage(item.tElement.others)))
+//              .then(_notifyStories);
+//        }
       },
     );
   }
@@ -411,9 +415,9 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   _notifyStories(value) async {
     if (value != null && value is bool && value) {
-      if (_stories != null && _stories.length > 0) {
-        _stories = await StoryHelper()
-            .findAfterStories(_stories[_stories.length - 1].createTime);
+      if (_timelines != null && _timelines.length > 0) {
+        _timelines = await TimelineHelper()
+            .findAfterStories(_timelines[_timelines.length - 1].startTime);
         if (mounted) {
           _refreshStory();
         }

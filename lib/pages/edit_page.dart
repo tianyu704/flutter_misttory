@@ -12,11 +12,14 @@ import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/person_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/helper/tag_helper.dart';
+import 'package:misstory/db/helper/timeline_helper.dart';
+import 'package:misstory/models/amap_poi.dart';
 import 'package:misstory/models/coord_type.dart';
 import 'package:misstory/models/person.dart';
 import 'package:misstory/models/poilocation.dart';
 import 'package:misstory/models/story.dart';
 import 'package:misstory/models/tag.dart';
+import 'package:misstory/models/timeline.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/loading_dialog.dart';
@@ -27,9 +30,9 @@ import 'package:misstory/net/http_manager.dart' as http;
 import '../location_config.dart';
 
 class EditPage extends StatefulWidget {
-  final Story story;
+  final Timeline timeline;
 
-  EditPage(this.story);
+  EditPage(this.timeline);
 
   @override
   State<StatefulWidget> createState() {
@@ -72,15 +75,16 @@ class _EditPageState extends LifecycleState<EditPage> {
   List deleteTagList = [];
 
   ///推荐的地点
-  List poiList = [];
-  List poiPreList = [];
+  List<AmapPoi> poiList = [];
+  List<AmapPoi> poiPreList = [];
   bool isSearching = false;
   bool isPoiNone = false;
   bool isPoiSearchNone = false;
   bool isPoiFirstLoad = true;
 
   ///选择了推荐的点
-  Poilocation pickPoiLocation;
+  AmapPoi pickPoi;
+
   ///
   String _showTimeStr = "";
 
@@ -97,30 +101,30 @@ class _EditPageState extends LifecycleState<EditPage> {
     super.initState();
 
     ///数据初始化
-    _currentLatLng = LatLng(widget.story.lat, widget.story.lon);
+    _currentLatLng = LatLng(widget.timeline.lat, widget.timeline.lon);
     print(_currentLatLng.toJson());
-    if (widget.story.coordType == "WGS84") {
-      CalculateTools()
-          .convertCoordinate(
-              lat: widget.story.lat,
-              lon: widget.story.lon,
-              type: LatLngType.gps)
-          .then((v) {
-        _currentLatLng = v;
-        _controller?.clearMarkers();
-        _controller?.addMarker(MarkerOptions(
-          position: _currentLatLng,
-        ));
-      });
-    }
+//    if (widget.timeline.coordType == "WGS84") {
+    CalculateTools()
+        .convertCoordinate(
+            lat: widget.timeline.lat,
+            lon: widget.timeline.lon,
+            type: LatLngType.gps)
+        .then((v) {
+      _currentLatLng = v;
+      _controller?.clearMarkers();
+      _controller?.addMarker(MarkerOptions(
+        position: _currentLatLng,
+      ));
+    });
+//    }
     _descTextFieldVC.text =
-        StringUtil.isNotEmpty(widget.story.desc) ? widget.story.desc : "";
-    _perWriteAddress = StringUtil.isNotEmpty(widget.story.writeAddress)
-        ? widget.story.writeAddress
+        StringUtil.isNotEmpty(widget.timeline.desc) ? widget.timeline.desc : "";
+    _perWriteAddress = StringUtil.isNotEmpty(widget.timeline.customAddress)
+        ? widget.timeline.customAddress
         : "";
-    _addressTextFieldVC.text = getShowAddress(widget.story);
+    _addressTextFieldVC.text = getShowAddress(widget.timeline);
     _showTimeStr = DateFormat("MM月dd日 HH:mm").format(
-        DateTime.fromMillisecondsSinceEpoch(widget.story.createTime.toInt()));
+        DateTime.fromMillisecondsSinceEpoch(widget.timeline.startTime.toInt()));
     _searchVC.addListener(() {
       print(_searchVC.text);
       handleSearchAction();
@@ -132,25 +136,25 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   initData() async {
     ///
-    num storyId = widget.story.id;
-    personCacheList = await PersonHelper().queryPersonsByStoryId(storyId);
-    if (personCacheList != null && personCacheList.length > 0) {
-      for (Person person in personCacheList) {
-        if (StringUtil.isNotEmpty(person.name)) {
-          showPeopleList.add(person.name);
-          peoplePreList.add(person.name);
-        }
-      }
-    }
-    tagCacheList = await TagHelper().queryTagsByStoryId(storyId);
-    if (tagCacheList != null && tagCacheList.length > 0) {
-      for (Tag tag in tagCacheList) {
-        if (StringUtil.isNotEmpty(tag.tagName)) {
-          showTagList.add(tag.tagName);
-          tagPreList.add(tag.tagName);
-        }
-      }
-    }
+    String uuid = widget.timeline.uuid;
+//    personCacheList = await PersonHelper().queryPersonsByStoryId(uuid);
+//    if (personCacheList != null && personCacheList.length > 0) {
+//      for (Person person in personCacheList) {
+//        if (StringUtil.isNotEmpty(person.name)) {
+//          showPeopleList.add(person.name);
+//          peoplePreList.add(person.name);
+//        }
+//      }
+//    }
+//    tagCacheList = await TagHelper().queryTagsByStoryId(uuid);
+//    if (tagCacheList != null && tagCacheList.length > 0) {
+//      for (Tag tag in tagCacheList) {
+//        if (StringUtil.isNotEmpty(tag.tagName)) {
+//          showTagList.add(tag.tagName);
+//          tagPreList.add(tag.tagName);
+//        }
+//      }
+//    }
     getPoi();
   }
 
@@ -343,7 +347,7 @@ class _EditPageState extends LifecycleState<EditPage> {
             Padding(
               padding: EdgeInsets.only(top: 0),
               child: SvgPicture.asset(
-                StringUtil.isEmpty(widget.story.customAddress)
+                StringUtil.isEmpty(widget.timeline.customAddress)
                     ? "assets/images/icon_location_empty.svg"
                     : "assets/images/icon_location_fill.svg",
                 width: 14,
@@ -643,9 +647,9 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   Widget poiCell(int index) {
-    Poilocation p = poiList[index];
-    String poiName = p.title;
-    String subName = StringUtil.isNotEmpty(p.snippet) ? p.snippet : "";
+    AmapPoi p = poiList[index];
+    String poiId = p.id;
+    String subName = StringUtil.isNotEmpty(p.address) ? p.address : "";
     return Padding(
       padding: EdgeInsets.only(bottom: index == poiList.length - 1 ? 37 : 0),
       child: InkWell(
@@ -671,7 +675,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                     Padding(
                       padding: EdgeInsets.only(left: 10, top: 8),
                       child: Text(
-                        poiName,
+                        p.name,
                         maxLines: 2,
                         style: AppStyle.locationText14(context),
                       ),
@@ -688,7 +692,8 @@ class _EditPageState extends LifecycleState<EditPage> {
               ),
               Text("${p.distance}m"),
               Offstage(
-                offstage: !isShowCheck(poiName),
+                offstage: !isShowCheck(poiId),
+
                 ///TODO:待补充判断
                 child: Icon(Icons.done),
               )
@@ -715,7 +720,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     print("******");
     String str = _addressTextFieldVC.text;
     if (StringUtil.isEmpty(str)) {
-      _addressTextFieldVC.text = getShowAddress(widget.story);
+      _addressTextFieldVC.text = getShowAddress(widget.timeline);
     }
     setState(() {});
   }
@@ -787,31 +792,15 @@ class _EditPageState extends LifecycleState<EditPage> {
       return;
     }
     if (isInChina()) {
-      LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
-      PoiResult poiResult = await AMapSearch().searchPoiBound(
-        PoiSearchQuery(
-          query: searchText,
-          location: latLng,
-
-          /// iOS必须
-          searchBound: SearchBound(
-            center: latLng,
-            range: LocationConfig.poiSearchInterval,
-
-            ///兴趣点范围阈值📌
-          ),
-
-          /// Android必须
-        ),
-      );
-      List list = [];
-      poiResult.pois
-          .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
-      poiList = list;
+      poiList = await http.requestAMapPois(
+          lat: widget.timeline.lat,
+          lon: widget.timeline.lon,
+          radius: LocationConfig.poiSearchInterval);
     } else {
       print("start......");
       poiList = await http.requestLocations(
-          latlon: "${widget.story.lat}, ${widget.story.lon}", near: searchText);
+          latlon: "${widget.timeline.lat}, ${widget.timeline.lon}",
+          near: searchText);
     }
 
     if (poiList != null && poiList.length > 0) {
@@ -830,31 +819,13 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
 
     if (isInChina()) {
-      LatLng latLng = LatLng(widget.story.lat, widget.story.lon);
-      PoiResult poiResult = await AMapSearch().searchPoiBound(
-        PoiSearchQuery(
-          query: "",
-          location: latLng,
-
-          /// iOS必须
-          searchBound: SearchBound(
-            center: latLng,
-            range: LocationConfig.poiSearchInterval,
-
-            ///兴趣点范围阈值📌TODO：暂定1000m
-          ),
-
-          /// Android必须
-        ),
-      );
-      List list = [];
-      poiResult.pois
-          .forEach((item) => list.add(Poilocation.fromJson(item.toJson())));
-      print(poiResult.pois[0].toString());
-      poiPreList = list;
+      poiList = await http.requestAMapPois(
+          lat: widget.timeline.lat,
+          lon: widget.timeline.lon,
+          radius: LocationConfig.poiSearchInterval);
     } else {
       poiPreList = await http.requestLocations(
-          latlon: "${widget.story.lat}, ${widget.story.lon}");
+          latlon: "${widget.timeline.lat}, ${widget.timeline.lon}");
     }
     if (!isSearching) {
       poiList = poiPreList;
@@ -862,32 +833,30 @@ class _EditPageState extends LifecycleState<EditPage> {
         setState(() {});
       }
       isPoiFirstLoad = false;
+
       ///
       if (poiList != null && poiList.length > 0) {
-        if (pickPoiLocation == null) {
-
-
-
-          Poilocation poILocation = Poilocation();
-          if (StringUtil.isEmpty(widget.story.customAddress)) {
-            poILocation.title = widget.story.defaultAddress;
-            poILocation.snippet = widget.story.defaultAddress;
+        if (pickPoi == null) {
+          AmapPoi amapPoi = AmapPoi();
+          if (StringUtil.isEmpty(widget.timeline.customAddress)) {
+            amapPoi.name = widget.timeline.poiName;
+            amapPoi.address = widget.timeline.poiAddress;
           } else {
-            poILocation.title = widget.story.customAddress;
-            poILocation.snippet = widget.story.customAddress;
+            amapPoi.name = widget.timeline.customAddress;
+            amapPoi.address = widget.timeline.poiAddress;
           }
-          poILocation.lat =  widget.story.lat;
-          poILocation.lon = widget.story.lon;
-          poILocation.distance = 0;
-          for (Poilocation p in poiList) {
-            if (p.title == poILocation.title) {
-              pickPoiLocation = p;
+          amapPoi.id = widget.timeline.poiId;
+          amapPoi.location = widget.timeline.poiLocation;
+          amapPoi.distance = widget.timeline.distance;
+          for (AmapPoi p in poiList) {
+            if (p.id == amapPoi.id) {
+              pickPoi = p;
               break;
             }
           }
-          if (pickPoiLocation == null) {
-            pickPoiLocation = poILocation;
-            poiList.insert(0, poILocation);
+          if (pickPoi == null) {
+            pickPoi = amapPoi;
+            poiList.insert(0, amapPoi);
           }
         }
         if (mounted) {
@@ -898,36 +867,41 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   bool isInChina() {
-    return (CoordType.aMap == widget.story.coordType) ||
-        ("中国" == widget.story.country) ||
-        ("China" == widget.story.country);
+    return ("中国" == widget.timeline.country) ||
+        ("China" == widget.timeline.country);
   }
 
-  bool isShowCheck(String poiName) {
-    if (pickPoiLocation != null &&
-        StringUtil.isNotEmpty(pickPoiLocation.title)) {
-      if (poiName == pickPoiLocation.title) {
+  bool isShowCheck(String poiId) {
+    if (pickPoi != null && StringUtil.isNotEmpty(pickPoi.id)) {
+      if (poiId == pickPoi.id) {
         return true;
       } else {
         return false;
       }
     }
-    if (widget.story.customAddress == poiName) {
+    if (widget.timeline.customAddress == poiId) {
       return true;
     }
     return false;
   }
 
-  clickPOI(Poilocation location) {
-    pickPoiLocation = location;
-    _currentLatLng =
-        LatLng(location.latLonPoint.latitude, location.latLonPoint.longitude);
+  clickPOI(AmapPoi amapPoi) {
+    pickPoi = amapPoi;
+    if (StringUtil.isNotEmpty(amapPoi.location)) {
+      List lonlat = amapPoi.location.split(",");
+      if (lonlat.length >= 2) {
+        double lat = double.tryParse(lonlat[1]);
+        double lon = double.tryParse(lonlat[0]);
+        _currentLatLng = LatLng(lat, lon);
+      }
+    }
+
     _controller.clearMarkers();
     _controller.addMarker(MarkerOptions(
       position: _currentLatLng,
     ));
     if (StringUtil.isEmpty(_perWriteAddress)) {
-      _addressTextFieldVC.text = getShowAddress(widget.story);
+      _addressTextFieldVC.text = getShowAddress(widget.timeline);
     }
     setState(() {});
   }
@@ -995,9 +969,9 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   ///删除当前story
   clickDeleteStory() async {
-    Story story = widget.story;
-    if (story.id != null) {
-      await StoryHelper().deleteTargetStoryWithStoryId(story.id);
+    Timeline timeline = widget.timeline;
+    if (timeline.uuid != null) {
+      await TimelineHelper().deleteTimeline(timeline);
     }
     Navigator.pop(context, true);
   }
@@ -1021,12 +995,12 @@ class _EditPageState extends LifecycleState<EditPage> {
           return loading;
         });
     await Future.delayed(Duration(milliseconds: 500));
-    Story story = widget.story;
+    Timeline timeline = widget.timeline;
 
     ///备注保存
-    if (story.desc != _descTextFieldVC.text) {
-      story.desc = _descTextFieldVC.text ?? "";
-      await StoryHelper().updateStoryDesc(story);
+    if (timeline.desc != _descTextFieldVC.text) {
+      timeline.desc = _descTextFieldVC.text ?? "";
+      await TimelineHelper().updateTimelineDesc(timeline);
       needRefresh = true;
     }
 
@@ -1067,29 +1041,29 @@ class _EditPageState extends LifecycleState<EditPage> {
       _addressFocusNode.unfocus();
       String str = _addressTextFieldVC.text;
       if (StringUtil.isEmpty(str)) {
-        _addressTextFieldVC.text = getShowAddress(widget.story);
+        _addressTextFieldVC.text = getShowAddress(widget.timeline);
       }
     }
     //
     bool isWrite = isWriteAddressed(_addressTextFieldVC.text);
 
     ///自定义地点保存
-    if (pickPoiLocation != null &&
-        StringUtil.isNotEmpty(pickPoiLocation.title)) {
-      story.customAddress = pickPoiLocation.title;
-      story.lat = pickPoiLocation.lat;
-      story.lon = pickPoiLocation.lon;
+    if (pickPoi != null && StringUtil.isNotEmpty(pickPoi.name)) {
+      timeline.customAddress = pickPoi.name;
+      timeline.poiAddress = pickPoi.address;
+      timeline.poiLocation = "${pickPoi.location},GCJ02";
       if (isWrite) {
-        story.writeAddress = _addressTextFieldVC.text;
+        timeline.customAddress = _addressTextFieldVC.text;
       }
-      await StoryHelper().updateCustomWriteAddress(story, updateCustom: true);
+//      await TimelineHelper()
+//          .updateCustomWriteAddress(timeline, updateCustom: true);
       needRefresh = true;
 
       ///存储该pick 点 如果没存过的话
     } else {
       if (isWrite) {
-        story.writeAddress = _addressTextFieldVC.text;
-        await StoryHelper().updateCustomWriteAddress(story);
+        timeline.customAddress = _addressTextFieldVC.text;
+//        await TimelineHelper().updateCustomWriteAddress(timeline);
         needRefresh = true;
       }
     }
@@ -1102,27 +1076,26 @@ class _EditPageState extends LifecycleState<EditPage> {
     isSaving = false;
   }
 
-  getShowAddress(Story story) {
+  getShowAddress(Timeline timeline) {
     if (StringUtil.isNotEmpty(_perWriteAddress)) {
       return _perWriteAddress;
     }
-    if (pickPoiLocation != null &&
-        StringUtil.isNotEmpty(pickPoiLocation.title)) {
-      return pickPoiLocation.title;
+    if (pickPoi != null && StringUtil.isNotEmpty(pickPoi.name)) {
+      return pickPoi.name;
     }
-    if (StringUtil.isNotEmpty(story.customAddress)) {
-      return story.customAddress;
+    if (StringUtil.isNotEmpty(timeline.customAddress)) {
+      return timeline.customAddress;
     }
-    return story.defaultAddress;
+    return timeline.poiName;
   }
 
   bool isWriteAddressed(String str) {
     if (StringUtil.isNotEmpty(str)) {
       if (str == _perWriteAddress) return false;
-      if (pickPoiLocation == null) {
+      if (pickPoi == null) {
         return true;
       } else {
-        if (str != pickPoiLocation.title) return true;
+        if (str != pickPoi.name) return true;
       }
     }
     return false;

@@ -171,6 +171,11 @@ void main() {
     num a = await CalculateUtil.calculateLineDistance(latlonpoint, latLng2);
     print(a);
   });
+
+  test("pase",()async{
+    String a = '11.23332';
+    print(double.tryParse(a));
+  });
 }
 
 convert(Picture picture) {

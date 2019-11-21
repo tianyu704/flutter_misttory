@@ -33,7 +33,12 @@ Timeline _$TimelineFromJson(Map<String, dynamic> json) {
     ..isDelete = json['is_delete'] as num
     ..isFromPicture = json['is_from_picture'] as num
     ..needUpdatePoi = json['need_update_poi'] as num
-    ..sameId = json['same_id'] as String;
+    ..sameId = json['same_id'] as String
+    ..date = json['date'] as String
+    ..pictures = (json['pictures'] as List)
+        ?.map((e) =>
+            e == null ? null : Picture.fromJson(e as Map<String, dynamic>))
+        ?.toList();
 }
 
 Map<String, dynamic> _$TimelineToJson(Timeline instance) => <String, dynamic>{
@@ -63,4 +68,6 @@ Map<String, dynamic> _$TimelineToJson(Timeline instance) => <String, dynamic>{
       'is_from_picture': instance.isFromPicture,
       'need_update_poi': instance.needUpdatePoi,
       'same_id': instance.sameId,
+      'date': instance.date,
+      'pictures': instance.pictures,
     };

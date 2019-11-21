@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/models/story.dart';
+import 'package:misstory/models/timeline.dart';
 import 'package:misstory/pages/detail_page.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/date_util.dart';
@@ -14,7 +15,7 @@ import 'package:misstory/widgets/refresh_grouped_listview.dart';
 /// Date: 2019-10-24
 ///
 class LocationItem extends StatelessWidget {
-  final TItem<Story> item;
+  final TItem<Timeline> item;
   final Function onPressCard;
   final Function onPressPicture;
   final Function onTapMore;
@@ -24,11 +25,11 @@ class LocationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Story story = item.tElement;
+    Timeline timeline = item.tElement;
     String date = "";
-    if (story?.createTime != null && story.createTime != 0) {
+    if (timeline?.startTime != null && timeline.startTime != 0) {
       DateTime dateTime =
-          DateTime.fromMillisecondsSinceEpoch(story.createTime.toInt());
+          DateTime.fromMillisecondsSinceEpoch(timeline.startTime.toInt());
       date = DateFormat("HH:mm").format(dateTime);
     }
     // TODO: implement build
@@ -59,11 +60,11 @@ class LocationItem extends StatelessWidget {
                             child: Padding(
                               padding: EdgeInsets.only(top: 2),
                               child: GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (context) =>
-                                          DetailPage([story])));
-                                },
+//                                onTap: () {
+//                                  Navigator.of(context).push(MaterialPageRoute(
+//                                      builder: (context) =>
+//                                          DetailPage([timeline])));
+//                                },
                                 child: Text(
                                   "$date",
                                   style: AppStyle.mainText14(context),
@@ -97,9 +98,9 @@ class LocationItem extends StatelessWidget {
                                 Padding(
                                   padding: EdgeInsets.only(top: 0),
                                   child: SvgPicture.asset(
-                                    (StringUtil.isEmpty(story.customAddress) &&
+                                    (StringUtil.isEmpty(timeline.customAddress) &&
                                             StringUtil.isEmpty(
-                                                story.writeAddress))
+                                                timeline.customAddress))
                                         ? "assets/images/icon_location_empty.svg"
                                         : "assets/images/icon_location_fill.svg",
                                     width: 14,
@@ -110,7 +111,7 @@ class LocationItem extends StatelessWidget {
                                   child: Padding(
                                     padding: EdgeInsets.only(left: 10),
                                     child: Text(
-                                      getShowAddressText(story),
+                                      getShowAddressText(timeline),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: AppStyle.mainText14(context,
@@ -122,7 +123,7 @@ class LocationItem extends StatelessWidget {
                             ),
                             SizedBox(height: 4),
                             Offstage(
-                              offstage: story.isFromPicture == 1,
+                              offstage: timeline.isFromPicture == 1,
                               child: Row(
                                 children: <Widget>[
                                   SvgPicture.asset(
@@ -134,7 +135,7 @@ class LocationItem extends StatelessWidget {
                                     padding: EdgeInsets.only(left: 11),
                                     child: Text(
                                       DateUtil.getStayShowTime(
-                                          story.intervalTime),
+                                          timeline.intervalTime),
                                       style: AppStyle.descText12(context),
                                     ),
                                   ),
@@ -142,11 +143,11 @@ class LocationItem extends StatelessWidget {
                               ),
                             ),
                             Offstage(
-                              offstage: StringUtil.isEmpty(story.desc),
+                              offstage: StringUtil.isEmpty(timeline.desc),
                               child: Padding(
                                 padding: EdgeInsets.only(top: 4),
                                 child: Text(
-                                  story?.desc ?? "",
+                                  timeline?.desc ?? "",
                                   style: AppStyle.contentText12(context),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -159,13 +160,13 @@ class LocationItem extends StatelessWidget {
                     ],
                   ),
                   Offstage(
-                    offstage: !(story.localImages != null &&
-                        story.localImages.length > 0),
+                    offstage: !(timeline.pictures != null &&
+                        timeline.pictures.length > 0),
 //                    offstage: false,
                     child: Padding(
                       padding: EdgeInsets.only(top: 5),
                       child: PictureItem(
-                          story.localImages ?? null, onPressPicture),
+                          timeline.pictures ?? null, onPressPicture),
                     ),
                   ),
                 ],
@@ -176,7 +177,7 @@ class LocationItem extends StatelessWidget {
               children: <Widget>[
                 SizedBox(width: 16),
                 Offstage(
-                  offstage: !(story.others != null && story.others.length > 0),
+                  offstage: true,
                   child: GestureDetector(
                     onTap: onTapMore,
                     child: SizedBox(
@@ -234,13 +235,13 @@ class LocationItem extends StatelessWidget {
     }
   }
 
-  getShowAddressText(Story story) {
-    if (StringUtil.isNotEmpty(story.writeAddress)) {
-      return story.writeAddress;
+  getShowAddressText(Timeline story) {
+    if (StringUtil.isNotEmpty(story.customAddress)) {
+      return story.customAddress;
     }
     if (StringUtil.isNotEmpty(story.customAddress)) {
       return story.customAddress;
     }
-    return story.defaultAddress;
+    return story.poiName;
   }
 }

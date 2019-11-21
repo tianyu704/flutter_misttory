@@ -24,5 +24,7 @@
   "is_delete": 0,
   "is_from_picture": 0,
   "need_update_poi": 0,
-  "same_id": "adfsadfasf"
+  "same_id": "adfsadfasf",
+  "date": "以下为附加字段，不存库",
+  "pictures": "$[]picture"
 }
