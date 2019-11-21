@@ -17,8 +17,10 @@ class DBManager {
   static final String tablePerson = "Person";
   static final String tableTag = "Tag";
   static final String tablePicture = "Picture";
-  static final String tableConfirmPoi = "ConfirmPoi";
   static final String tableCustomParams = "tableCustomParams";
+  static final String tableConfirmPoi = "ConfirmPoi";
+  static final String tableTimeline = "Timeline";
+
   static final int dbVersion = 6;
 
   ///初始化
@@ -144,6 +146,7 @@ class DBManager {
     pictureFields["isSynced"] = Field(FieldType.Real);
     pictureFields["path"] = Field(FieldType.Text);
 
+
     ///customParams表
     ///
     Map<String,Field> customParamsField = new Map<String, Field>();
@@ -159,6 +162,36 @@ class DBManager {
     customParamsField["pictureRadius"] = Field(FieldType.Real);
     customParamsField["judgeDistanceNum"] = Field(FieldType.Real);
 
+    ///时间线表
+    Map<String, Field> timelineFields = new Map<String, Field>();
+    timelineFields["uuid"] = Field(FieldType.Text, primaryKey: true);
+    timelineFields["poi_id"] = Field(FieldType.Text);
+    timelineFields["poi_name"] = Field(FieldType.Text);
+    timelineFields["poi_type"] = Field(FieldType.Text);
+    timelineFields["poi_type_code"] = Field(FieldType.Text);
+    timelineFields["poi_location"] = Field(FieldType.Text);
+    timelineFields["poi_address"] = Field(FieldType.Text);
+    timelineFields["distance"] = Field(FieldType.Text);
+    timelineFields["country"] = Field(FieldType.Text);
+    timelineFields["province"] = Field(FieldType.Text);
+    timelineFields["city"] = Field(FieldType.Text);
+    timelineFields["district"] = Field(FieldType.Text);
+    timelineFields["custom_address"] = Field(FieldType.Text);
+    timelineFields["desc"] = Field(FieldType.Text);
+    timelineFields["lat"] = Field(FieldType.Real);
+    timelineFields["lon"] = Field(FieldType.Real);
+    timelineFields["altitude"] = Field(FieldType.Real);
+    timelineFields["radius"] = Field(FieldType.Real);
+    timelineFields["radius_sd"] = Field(FieldType.Real);
+    timelineFields["start_time"] = Field(FieldType.Real);
+    timelineFields["end_time"] = Field(FieldType.Real);
+    timelineFields["interval_time"] = Field(FieldType.Real);
+    timelineFields["is_from_picture"] = Field(FieldType.Real);
+    timelineFields["is_delete"] = Field(FieldType.Real);
+    timelineFields["need_update_poi"] = Field(FieldType.Real);
+    timelineFields["same_id"] = Field(FieldType.Text);
+
+
     await FlutterOrmPlugin.createTable(
         dbName, tableMSLocation, mslocationFields);
     await FlutterOrmPlugin.createTable(dbName, tableStory, storyFields);
@@ -167,6 +200,7 @@ class DBManager {
     await FlutterOrmPlugin.createTable(dbName, tablePicture, pictureFields);
     await FlutterOrmPlugin.createTable(dbName, tableLocation, locationFields);
     await FlutterOrmPlugin.createTable(dbName, tableCustomParams, customParamsField);
+    await FlutterOrmPlugin.createTable(dbName, tableTimeline, timelineFields);
 
     dynamic oldVersion = await LocalStorage.get(LocalStorage.dbVersion);
     if (oldVersion == null) {

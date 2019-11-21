@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 
 import 'package:misstory/main.dart';
+import 'package:misstory/models/latlon_range.dart';
 import 'package:misstory/models/latlonpoint.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/picture.dart';
@@ -132,8 +133,8 @@ void main() {
   });
 
   test("distance", () async {
-    Latlonpoint latLng1 = Latlonpoint(39.841131, 116.431685);
-    Latlonpoint latLng2 = Latlonpoint(39.839688, 116.431654);
+    Latlonpoint latLng1 = Latlonpoint(89.9990,180.000);
+    Latlonpoint latLng2 = Latlonpoint(89.999, -90.0000);
     num m = DateTime.now().millisecondsSinceEpoch;
     num a = await CalculateUtil.calculateLineDistance(latLng1, latLng2);
 //    num b =await CalculateUtil.calculateLineDistance(latLng1, latLng2);
@@ -158,6 +159,17 @@ void main() {
     print(uuid.v4());
     print(uuid.v4());
     print(uuid.v4());
+  });
+  
+  test("range",()async{
+    Latlonpoint latlonpoint = Latlonpoint(39.900155, 116.49277);
+    latlonpoint.radius = 400;
+    LatlonRange latlonRange = CalculateUtil.getRange(latlonpoint);
+    print(latlonRange.toString());
+
+    Latlonpoint latLng2 = Latlonpoint(39.89655787769784, 116.49745548670492);
+    num a = await CalculateUtil.calculateLineDistance(latlonpoint, latLng2);
+    print(a);
   });
 }
 

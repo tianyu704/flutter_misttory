@@ -3,12 +3,14 @@ import 'dart:collection';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:misstory/constant.dart';
+import 'package:misstory/models/amap_poi.dart';
 import 'package:misstory/models/flocation.dart';
 import 'package:misstory/models/foursquare.dart';
 import 'package:misstory/models/latlonpoint.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/models/poilocation.dart';
 import 'package:misstory/models/venue.dart';
+import 'package:misstory/utils/print_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import '../location_config.dart';
 import 'address.dart';
@@ -194,10 +196,49 @@ Future<List<Poilocation>> requestLocations({String latlon, String near}) async {
             poilocation = Poilocation()
               ..title = item.name
               ..snippet = item.location?.address
-              ..latLonPoint = Latlonpoint(item.location?.lat,item.location.lng);
+              ..latLonPoint =
+                  Latlonpoint(item.location?.lat, item.location.lng);
             poilocations.add(poilocation);
           });
           return poilocations;
+        }
+      }
+    } on DioError catch (e) {
+      print(e.response);
+    }
+  }
+  return null;
+}
+
+/// 获取poi地点信息
+Future<List<AmapPoi>> requestAMapPois(
+    {num lat = 0,
+    num lon = 0,
+    num limit = 20,
+    num radius,
+    num page = 1}) async {
+  if (lat != 0 && lon != 0) {
+    try {
+      Response response = await Dio().get(
+        Address.requestAMapPois(),
+        queryParameters: {
+          "location": "$lon,$lat",
+          "offset": limit,
+          "key": Constant.aMapWebKey,
+          "radius": radius ?? LocationConfig.poiSearchInterval,
+          "types": Constant.aMapTypes,
+          "sortrule": "distance",
+          "page": page
+        },
+      );
+      if (response.data != null && response.data is Map) {
+        List pois = response.data["pois"];
+        if (pois != null && pois.length > 0) {
+          List<AmapPoi> list = [];
+          for (Map map in pois) {
+            list.add(AmapPoi.fromJson(Map<String, dynamic>.from(map)));
+          }
+          return list;
         }
       }
     } on DioError catch (e) {

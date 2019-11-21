@@ -15,7 +15,8 @@ class LocationConfig {
   static num distanceFilter = 1000.0;
 
   /// 停留时长>judgeUsefulLocation毫秒的点算作一个story
-  static num judgeUsefulLocation = 3 * 60 * 1000.0;
+  static num judgeUsefulLocation = 5 * 60 * 1000.0;
+
 
   /// 首页每隔多久刷新一次最新页面显示数据
   static num refreshTime = 60.0;

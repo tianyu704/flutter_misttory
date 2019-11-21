@@ -230,8 +230,8 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         EventUtil.unregister(this);
     }
 }

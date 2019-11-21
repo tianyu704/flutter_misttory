@@ -6,7 +6,7 @@ part 'poilocation.g.dart';
 class Poilocation {
   Poilocation();
 
-  num id;
+  String id;
 
   @JsonKey(name: "story_uuid")
   String storyUuid;

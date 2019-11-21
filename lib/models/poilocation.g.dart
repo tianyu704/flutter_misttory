@@ -8,7 +8,7 @@ part of 'poilocation.dart';
 
 Poilocation _$PoilocationFromJson(Map<String, dynamic> json) {
   return Poilocation()
-    ..id = json['id'] as num
+    ..id = json['id'] as String
     ..storyUuid = json['story_uuid'] as String
     ..adName = json['adName'] as String
     ..businessArea = json['businessArea'] as String

@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_amap_location_plugin/amap_location_lib.dart' as amap;
 import 'package:lifecycle_state/lifecycle_state.dart';
+import 'package:misstory/db/helper/location_db_helper.dart';
 import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
@@ -255,9 +256,11 @@ class _HomePageState extends LifecycleState<HomePage> {
     LocationChannel().start();
     LocationChannel().onLocationChanged.listen((location) {
       PrintUtil.debugPrint("获取到原生定位信息-----${location.toJson()}");
+      LocationDBHelper().saveNewLocation(location);
     });
     LocationChannel().getCurrentLocation().then((location) {
       PrintUtil.debugPrint("获取一次原生定位信息-----${location.toJson()}");
+      LocationDBHelper().saveNewLocation(location);
     });
   }
 
