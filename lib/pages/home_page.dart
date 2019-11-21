@@ -35,6 +35,7 @@ import '../constant.dart';
 import 'detail_page.dart';
 import 'edit_page.dart';
 import 'log_page.dart';
+
 ///
 /// Create by Hugo.Guo
 /// Date: 2019-09-26
@@ -175,7 +176,8 @@ class _HomePageState extends LifecycleState<HomePage> {
       if (_timelines != null && _timelines.length > 0) {
         time = _timelines[_timelines.length - 1].endTime;
       }
-      List<Timeline> list = await TimelineHelper().queryMoreHistories(time: time);
+      List<Timeline> list =
+          await TimelineHelper().queryMoreHistories(time: time);
       if (list != null && list.length > 0) {
         _timelines.addAll(list);
         _refreshController.loadComplete();

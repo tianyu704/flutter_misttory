@@ -101,7 +101,22 @@ class _EditPageState extends LifecycleState<EditPage> {
     super.initState();
 
     ///数据初始化
-    _currentLatLng = LatLng(widget.timeline.lat, widget.timeline.lon);
+    if (StringUtil.isNotEmpty(widget.timeline.poiLocation)) {
+      ///TODO 需要用真正poi坐标初始化
+      List latlon = widget.timeline.poiLocation.split(",");
+      if (latlon == 3) {
+        double lat = double.tryParse(latlon[1]);
+        double lon = double.tryParse(latlon[0]);
+        String type = latlon[2] as String;
+        if (type == CoordType.gps) {
+//          _currentLatLng = await CalculateTools()
+//              .convertCoordinate(lat: lat, lon: lon, type: LatLngType.gps);
+        } else {
+          _currentLatLng = LatLng(lat, lon);
+        }
+      }
+    }
+
     print(_currentLatLng.toJson());
 //    if (widget.timeline.coordType == "WGS84") {
     CalculateTools()
