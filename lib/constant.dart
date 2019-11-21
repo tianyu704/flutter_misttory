@@ -18,8 +18,9 @@ class Constant {
       "N0IHDULNBN0ZFZKUSX1N2YKRSZBZK11UQ2KW4LFJ2S1KBURD";
 
   /// 高德web api key
+//  static final String aMapWebKey = "0004af0a0ee3b327d404eff0fb88a1b9";
   static final String aMapWebKey = "b24df9f1354d51538d60d3e4410af79e";
 
-  /// 高德types为 050000（餐饮服务）、070000（生活服务）、120000（商务住宅）
-  static final String aMapTypes = "120000|050000";
+  /// 高德types为 050000（餐饮服务）、070000（生活服务）、120000（商务住宅）、110000（风景名胜）
+  static final String aMapTypes = "120000|050000|110000";
 }

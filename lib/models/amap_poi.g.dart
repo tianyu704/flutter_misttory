@@ -12,7 +12,7 @@ AmapPoi _$AmapPoiFromJson(Map<String, dynamic> json) {
     ..name = json['name'] as String
     ..type = json['type'] as String
     ..typecode = json['typecode'] as String
-    ..address = json['address'] as String
+    ..address = json['address'].toString()
     ..location = json['location'] as String
     ..pcode = json['pcode'] as String
     ..pname = json['pname'] as String

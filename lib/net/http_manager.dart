@@ -115,8 +115,8 @@ class HttpManager {
 final HttpManager httpManager = new HttpManager();
 
 /// 获取地点信息
-Future<Mslocation> requestLocation(Mslocation mslocation) async {
-  if (mslocation != null && mslocation.errorCode == 0) {
+Future<AmapPoi> requestLocation(num lat,num lon) async {
+  if (lat != null && lon != null) {
     try {
       Response response = await Dio().get(
         Address.requestLocation(),
@@ -124,7 +124,7 @@ Future<Mslocation> requestLocation(Mslocation mslocation) async {
           "limit": 1,
           "client_id": Constant.clientId,
           "client_secret": Constant.clientSecret,
-          "ll": "${mslocation.lat},${mslocation.lon}",
+          "ll": "${lat},${lon}",
           "v": DateFormat("yyyyMMdd").format(DateTime.now()),
         },
       );
@@ -138,24 +138,26 @@ Future<Mslocation> requestLocation(Mslocation mslocation) async {
             foursquare.response.venues != null &&
             foursquare.response.venues.length > 0) {
           Venue venue = foursquare.response.venues[0];
-          mslocation.aoiname = venue.name;
-          mslocation.poiname = venue.name;
+          AmapPoi amapPoi = new AmapPoi();
+          amapPoi.name = venue.name;
           if (venue.location != null) {
             Flocation location = venue.location;
-            if (!StringUtil.isEmpty(location.country)) {
-              mslocation.country = location.country;
-            }
             if (!StringUtil.isEmpty(location.city)) {
-              mslocation.city = location.city;
+              amapPoi.cityname = location.city;
             }
             if (!StringUtil.isEmpty(location.state)) {
-              mslocation.province = location.state;
+              amapPoi.pname = location.state;
+            }
+            if(location.distance!=null){
+              amapPoi.distance = "${location.distance}";
             }
             if (!StringUtil.isEmpty(location.address)) {
-              mslocation.address = location.address;
+              amapPoi.address = location.address;
             }
+            amapPoi.id = venue.id;
+            amapPoi.location = "${location.lng},${location.lat},WGS84";
           }
-          return mslocation;
+          return amapPoi;
         }
       }
     } on DioError catch (e) {

@@ -53,6 +53,37 @@ class TimelineHelper {
     }
   }
 
+  /// 根据Location创建或更新Timeline
+  Future<String> createOrUpdateTimelineByPicture(Location location) async {
+    if (location == null) {
+      return "";
+    }
+    Timeline firstTimeline = await queryFistTimeline();
+    if (firstTimeline != null) {
+      /// 经纬度相等/在一个半径内认为是同一个地点
+      if ((DateUtil.isSameDay(firstTimeline.startTime, location.time)) &&
+          ((location.lat == firstTimeline.lat &&
+                  location.lon == firstTimeline.lon) ||
+              (CalculateUtil.calculateLatlngDistance(firstTimeline.lat,
+                      firstTimeline.lon, location.lat, location.lon) <
+                  firstTimeline.radius))) {
+        firstTimeline.startTime = location.time;
+        await updateTimeline(firstTimeline);
+        return firstTimeline.uuid;
+      } else {
+        Timeline timeline = await convertTimeline(location, isFromPicture: 1);
+        String uuid = await FlutterOrmPlugin.saveOrm(
+            DBManager.tableTimeline, timeline.toJson());
+        return uuid;
+      }
+    } else {
+      Timeline timeline = await convertTimeline(location, isFromPicture: 1);
+      String uuid = await FlutterOrmPlugin.saveOrm(
+          DBManager.tableTimeline, timeline.toJson());
+      return uuid;
+    }
+  }
+
   ///更新Timeline
   Future<int> updateTimeline(Timeline timeline) async {
     if (timeline != null) {
@@ -141,6 +172,18 @@ class TimelineHelper {
     return null;
   }
 
+  /// 查询最第一条Timeline
+  Future<Timeline> queryFistTimeline() async {
+    Map result = await Query(DBManager.tableTimeline)
+        .orderBy(["start_time"]).whereByColumFilters([
+      WhereCondiction("is_delete", WhereCondictionType.IN, [0])
+    ]).first();
+    if (result != null && result.length > 0) {
+      return Timeline.fromJson(Map<String, dynamic>.from(result));
+    }
+    return null;
+  }
+
   /// 创建Timeline
   Future<String> createTimeline(Timeline timeline) async {
     if (timeline != null) {
@@ -174,7 +217,8 @@ class TimelineHelper {
   }
 
   /// location转成Timeline
-  Future<Timeline> convertTimeline(Location location) async {
+  Future<Timeline> convertTimeline(Location location,
+      {num isFromPicture = 0}) async {
     if (location != null) {
       Timeline timeline = new Timeline();
       timeline.uuid = Uuid().v1();
@@ -187,7 +231,7 @@ class TimelineHelper {
       timeline.endTime = location.time;
       timeline.intervalTime = 0;
       timeline.isDelete = 0;
-      timeline.isFromPicture = 0;
+      timeline.isFromPicture = isFromPicture;
       timeline.poiName = "Unknow";
       timeline.sameId = Uuid().v1();
       return await updatePoiData(timeline);
@@ -242,18 +286,18 @@ class TimelineHelper {
       ]).all();
       if (list != null) {
         num distance = 1000;
-        Timeline timeline;
+        Timeline t;
         for (Map map in list) {
           num d = CalculateUtil.calculateLatlngDistance(
               map["lat"] as num, map["lon"] as num, timeline.lat, timeline.lon);
           if (d < distance) {
             distance = d;
-            timeline = Timeline.fromJson(Map<String, dynamic>.from(map));
+            t = Timeline.fromJson(Map<String, dynamic>.from(map));
           }
         }
-        if (timeline != null) {
-          if (distance <= timeline.radius) {
-            return timeline;
+        if (t != null) {
+          if (distance <= t.radius) {
+            return t;
           }
         }
       }
@@ -329,20 +373,20 @@ class TimelineHelper {
 
   /**
    *
+   * 以上为生成timeline的逻辑
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   *
    * 以下为首页显示用到的相关操作
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
    *
    *
    */
@@ -476,5 +520,69 @@ class TimelineHelper {
       return dateList.length;
     }
     return 1;
+  }
+
+  /**
+   *
+   * 以上为首页展示用的方法
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   * 以下为生成图片Timeline用的方法
+   *
+   */
+
+  ///根据坐标点查找对应story
+  Future<Timeline> findTargetTimeline(num startTime, num endTime) async {
+    Map result = await Query(DBManager.tableTimeline).whereByColumFilters([
+      WhereCondiction(
+          "start_time", WhereCondictionType.EQ_OR_LESS_THEN, startTime),
+      WhereCondiction("end_time", WhereCondictionType.EQ_OR_MORE_THEN, endTime),
+      WhereCondiction("is_delete", WhereCondictionType.IN, [0]),
+    ]).first();
+    if (result != null && result.length > 0) {
+      return Timeline.fromJson(Map<String, dynamic>.from(result));
+    }
+    return null;
+  }
+
+  ///根据时间查找对应story
+  Future<Timeline> findAfterTimeline(num time, {bool equal = true}) async {
+    Map result = await Query(DBManager.tableTimeline)
+        .orderBy(["start_time"]).whereByColumFilters([
+      WhereCondiction(
+          "start_time",
+          equal
+              ? WhereCondictionType.EQ_OR_MORE_THEN
+              : WhereCondictionType.MORE_THEN,
+          time),
+      WhereCondiction("is_delete", WhereCondictionType.IN, [0]),
+    ]).first();
+    if (result != null && result.length > 0) {
+      return Timeline.fromJson(Map<String, dynamic>.from(result));
+    }
+    return null;
+  }
+
+  ///根据时间查找对应story
+  Future<Timeline> findBeforeTimeline(num time, {bool equal = true}) async {
+    Map result = await Query(DBManager.tableTimeline)
+        .orderBy(["end_time desc"]).whereByColumFilters([
+      WhereCondiction(
+          "end_time",
+          equal
+              ? WhereCondictionType.EQ_OR_LESS_THEN
+              : WhereCondictionType.LESS_THEN,
+          time),
+      WhereCondiction("is_delete", WhereCondictionType.IN, [0]),
+    ]).first();
+    if (result != null && result.length > 0) {
+      return Timeline.fromJson(Map<String, dynamic>.from(result));
+    }
+    return null;
   }
 }

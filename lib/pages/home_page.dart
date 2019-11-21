@@ -111,8 +111,8 @@ class _HomePageState extends LifecycleState<HomePage> {
   /// 开始每隔1分钟刷新逻辑
   _startTimerRefresh() {
     Future.delayed(Duration(seconds: 60 - DateTime.now().second), () {
-      _timer = Timer.periodic(Duration(seconds: LocationConfig.refreshTime),
-          (timer) {
+      _timer = Timer.periodic(
+          Duration(seconds: LocationConfig.refreshTime.toInt()), (timer) {
         _refreshStory();
       });
     });
@@ -212,73 +212,37 @@ class _HomePageState extends LifecycleState<HomePage> {
   ///初始化并开始定位
   void _initLocation() async {
     print("===================_initLocation");
-    _aMapLocation = amap.AMapLocation();
-    await _aMapLocation.init(Constant.androidMapKey, Constant.iosMapKey);
-    _subscription = _aMapLocation.onLocationChanged.listen((location) async {
-//      print("==========$location");
-      if (_isDealWithLocation) {
-        return;
-      }
-      _isDealWithLocation = true;
-      if (location != null && location.isNotEmpty) {
-        try {
-          Mslocation mslocation = Mslocation.fromJson(json.decode(location));
-          if (CoordType.aMap != mslocation.coordType) {
-            mslocation = await http.requestLocation(mslocation);
-          }
-          if (mslocation != null && mslocation.errorCode == 0) {
-            mslocation.updatetime = mslocation.time;
-            debugPrint(
-                "===========接收到新定位：${mslocation.lon},${mslocation.lat},${mslocation.time}");
-            await LocationHelper().saveLocation();
-            int result =
-                await LocationHelper().createOrUpdateLocation(mslocation);
-            debugPrint("===============$result");
-            if (result != -1) {
-              await _refreshStory();
-            }
-          } else {
-            if (_isFirstLoad) {
-              await _refreshStory();
-            }
-          }
-        } catch (e) {
-          print(e.toString());
-        }
-      }
-      _isDealWithLocation = false;
-      debugPrint("===========处理新定位完毕！");
-    });
-    amap.LocationClientOptions options = amap.LocationClientOptions(
-      locationMode: amap.LocationMode.Battery_Saving,
-      interval: LocationConfig.interval,
-      distanceFilter: LocationConfig.distanceFilter,
-      isOnceLocation: true,
-    );
-    _aMapLocation?.start(options);
-
     LocationChannel().start(
-        interval: LocationConfig.interval,
-        distanceFilter: LocationConfig.distanceFilter);
-    LocationChannel().onLocationChanged.listen((location) {
+        interval: LocationConfig.interval.toInt(),
+        distanceFilter: LocationConfig.distanceFilter.toInt());
+    LocationChannel().onLocationChanged.listen((location) async {
       PrintUtil.debugPrint("获取到原生定位信息-----${location.toJson()}");
-      LocationDBHelper().saveNewLocation(location);
-    });
-    LocationChannel().getCurrentLocation().then((location) {
-      PrintUtil.debugPrint("获取一次原生定位信息-----${location.toJson()}");
-      LocationDBHelper().saveNewLocation(location);
+      if (location != null) {
+        if (_isDealWithLocation) {
+          return;
+        }
+        _isDealWithLocation = true;
+        await LocationDBHelper().saveNewLocation(location);
+        await _refreshStory();
+        _isDealWithLocation = false;
+      }
     });
   }
 
   ///请求一次定位
   void _onceLocate() async {
-    amap.LocationClientOptions options = amap.LocationClientOptions(
-      locationMode: amap.LocationMode.Battery_Saving,
-      interval: LocationConfig.interval,
-      distanceFilter: LocationConfig.distanceFilter,
-      isOnceLocation: true,
-    );
-    await _aMapLocation?.start(options);
+    LocationChannel().getCurrentLocation().then((location) async {
+      PrintUtil.debugPrint("获取一次原生定位信息-----${location.toJson()}");
+      if (location != null) {
+        if (_isDealWithLocation) {
+          return;
+        }
+        _isDealWithLocation = true;
+        await LocationDBHelper().saveNewLocation(location);
+        await _refreshStory();
+        _isDealWithLocation = false;
+      }
+    });
   }
 
   @override

@@ -139,10 +139,10 @@ class _SearchPageState extends LifecycleState<SearchPage> {
                           ..lat = 28.189403
                           ..lon = 113.212998
                           ..errorCode = 0;
-                        mslocation = await http.requestLocation(mslocation);
-                        _result = mslocation?.toJson()?.toString() ?? "空";
-                        debugPrint(_result);
-                        setState(() {});
+//                        mslocation = await http.requestLocation(mslocation);
+//                        _result = mslocation?.toJson()?.toString() ?? "空";
+//                        debugPrint(_result);
+//                        setState(() {});
 //                    }
                       },
                       child: Text("foursquare获取"),
