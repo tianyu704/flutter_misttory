@@ -152,7 +152,8 @@ class TimelineHelper {
         }
       }
       String uuid;
-      if (((timeline.lat == lastTimeline.lat &&
+      if (lastTimeline != null &&
+          ((timeline.lat == lastTimeline.lat &&
                   timeline.lon == lastTimeline.lon) ||
               (CalculateUtil.calculateLatlngDistance(lastTimeline.lat,
                       lastTimeline.lon, timeline.lat, timeline.lon) <
