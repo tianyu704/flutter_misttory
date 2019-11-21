@@ -1,0 +1,14 @@
+{
+  "itemId": "1",
+  "timeInterval": 90,
+  "distanceFilter":100,
+  "storyRadiusMin": 10,
+  "storyRadiusMax": 200,
+  "storyKeepingTimeMin": 3,
+  "poiSearchInterval": 300,
+  "pictureRadius": 100,
+  "refreshHomePageTime": 60,
+  "judgeDistanceNum": 3000
+}
+
+

@@ -7,11 +7,6 @@ part of 'poilocation.dart';
 // **************************************************************************
 
 Poilocation _$PoilocationFromJson(Map<String, dynamic> json) {
-  Latlonpoint latlonpoint;
-  if (json['latLonPoint'] != null) {
-    latlonpoint =
-        Latlonpoint.fromJson(json['latLonPoint'] as Map<String, dynamic>);
-  }
   return Poilocation()
     ..id = json['id'] as num
     ..storyUuid = json['story_uuid'] as String
@@ -27,9 +22,11 @@ Poilocation _$PoilocationFromJson(Map<String, dynamic> json) {
     ..title = json['title'] as String
     ..typeCode = json['typeCode'] as String
     ..typeDes = json['typeDes'] as String
-    ..latLonPoint = latlonpoint
-    ..lat = latlonpoint?.latitude
-    ..lon = latlonpoint?.longitude;
+    ..latLonPoint = json['latLonPoint'] == null
+        ? null
+        : Latlonpoint.fromJson(json['latLonPoint'] as Map<String, dynamic>)
+    ..lat = json['lat'] as num
+    ..lon = json['lon'] as num;
 }
 
 Map<String, dynamic> _$PoilocationToJson(Poilocation instance) =>
