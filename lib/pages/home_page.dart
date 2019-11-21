@@ -111,7 +111,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   /// 开始每隔1分钟刷新逻辑
   _startTimerRefresh() {
     Future.delayed(Duration(seconds: 60 - DateTime.now().second), () {
-      _timer = Timer.periodic(Duration(seconds: LocationConfig.refreshTime),
+      _timer = Timer.periodic(Duration(seconds: LocationConfig.refreshTime.toInt()),
           (timer) {
         _refreshStory();
       });
@@ -251,15 +251,15 @@ class _HomePageState extends LifecycleState<HomePage> {
     });
     amap.LocationClientOptions options = amap.LocationClientOptions(
       locationMode: amap.LocationMode.Battery_Saving,
-      interval: LocationConfig.interval,
-      distanceFilter: LocationConfig.distanceFilter,
+      interval: LocationConfig.interval.toInt(),
+      distanceFilter: LocationConfig.distanceFilter.toInt(),
       isOnceLocation: true,
     );
     _aMapLocation?.start(options);
 
     LocationChannel().start(
-        interval: LocationConfig.interval,
-        distanceFilter: LocationConfig.distanceFilter);
+        interval: LocationConfig.interval.toInt(),
+        distanceFilter: LocationConfig.distanceFilter.toInt());
     LocationChannel().onLocationChanged.listen((location) {
       PrintUtil.debugPrint("获取到原生定位信息-----${location.toJson()}");
       LocationDBHelper().saveNewLocation(location);
@@ -274,8 +274,8 @@ class _HomePageState extends LifecycleState<HomePage> {
   void _onceLocate() async {
     amap.LocationClientOptions options = amap.LocationClientOptions(
       locationMode: amap.LocationMode.Battery_Saving,
-      interval: LocationConfig.interval,
-      distanceFilter: LocationConfig.distanceFilter,
+      interval: LocationConfig.interval.toInt(),
+      distanceFilter: LocationConfig.distanceFilter.toInt(),
       isOnceLocation: true,
     );
     await _aMapLocation?.start(options);
