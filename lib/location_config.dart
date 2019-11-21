@@ -10,7 +10,7 @@ class LocationConfig {
   static num judgeDistanceNum = 3000.0;
 
   /// 每隔interval毫秒定位一次
-  static num interval = 60 * 1000 * 1;
+  static num interval = 60 * 1000 * 1.0;
 
   /// 每隔distanceFilter米定位一次
   static num distanceFilter = 10.0;
@@ -28,13 +28,13 @@ class LocationConfig {
   static num pictureRadius = 100.0;
 
   /// 地点经纬度半径,判断是否在同一位置
-  static final locationRadius = 100;
+  static num locationRadius = 100.0;
 
   /// 地点经纬度最大半径
-  static final locationMaxRadius = 200;
+  static num locationMaxRadius = 200.0;
 
   /// 2个相邻且相同的地点之间的时间间隔，超过该时间算作一个点，没超过就合并
-  static num intervalGap = 60 * 1000 * 30;
+  static num intervalGap = 60 * 1000 * 30.0;
 
   static num storyRadiusMin = 10.0;
   static num storyRadiusMax = 200.0;
