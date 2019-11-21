@@ -34,7 +34,7 @@ import 'package:misstory/net/http_manager.dart' as http;
 import '../constant.dart';
 import 'detail_page.dart';
 import 'edit_page.dart';
-
+import 'log_page.dart';
 ///
 /// Create by Hugo.Guo
 /// Date: 2019-09-26
@@ -299,6 +299,17 @@ class _HomePageState extends LifecycleState<HomePage> {
                   }));
                 },
                 child: Text("Debug")),
+          ),
+          Offstage(
+            offstage: false,
+            child: FlatButton(
+                onPressed: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    return LogPage();
+                  }));
+                },
+                child: Text("settings")),
           ),
         ],
         backgroundColor: AppStyle.colors(context).colorBgPage,

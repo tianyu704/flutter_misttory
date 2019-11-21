@@ -17,7 +17,10 @@ class DBManager {
   static final String tablePerson = "Person";
   static final String tableTag = "Tag";
   static final String tablePicture = "Picture";
+  static final String tableCustomParams = "tableCustomParams";
+  static final String tableConfirmPoi = "ConfirmPoi";
   static final String tableTimeline = "Timeline";
+
   static final int dbVersion = 6;
 
   ///初始化
@@ -144,6 +147,22 @@ class DBManager {
     pictureFields["isSynced"] = Field(FieldType.Real);
     pictureFields["path"] = Field(FieldType.Text);
 
+
+    ///customParams表
+    ///
+    Map<String,Field> customParamsField = new Map<String, Field>();
+
+    customParamsField["itemId"] = Field(FieldType.Text, primaryKey: true);
+    customParamsField["timeInterval"] = Field(FieldType.Real);
+    customParamsField["distanceFilter"] = Field(FieldType.Real);
+    customParamsField["storyRadiusMin"] = Field(FieldType.Real);
+    customParamsField["storyRadiusMax"] = Field(FieldType.Real);
+    customParamsField["storyKeepingTimeMin"] = Field(FieldType.Real);
+    customParamsField["poiSearchInterval"] = Field(FieldType.Real);
+    customParamsField["refreshHomePageTime"] = Field(FieldType.Real);
+    customParamsField["pictureRadius"] = Field(FieldType.Real);
+    customParamsField["judgeDistanceNum"] = Field(FieldType.Real);
+
     ///时间线表
     Map<String, Field> timelineFields = new Map<String, Field>();
     timelineFields["uuid"] = Field(FieldType.Text, primaryKey: true);
@@ -173,6 +192,7 @@ class DBManager {
     timelineFields["need_update_poi"] = Field(FieldType.Real);
     timelineFields["same_id"] = Field(FieldType.Text);
 
+
     await FlutterOrmPlugin.createTable(
         dbName, tableMSLocation, mslocationFields);
     await FlutterOrmPlugin.createTable(dbName, tableStory, storyFields);
@@ -180,6 +200,7 @@ class DBManager {
     await FlutterOrmPlugin.createTable(dbName, tablePerson, personFields);
     await FlutterOrmPlugin.createTable(dbName, tablePicture, pictureFields);
     await FlutterOrmPlugin.createTable(dbName, tableLocation, locationFields);
+    await FlutterOrmPlugin.createTable(dbName, tableCustomParams, customParamsField);
     await FlutterOrmPlugin.createTable(dbName, tableTimeline, timelineFields);
 
     dynamic oldVersion = await LocalStorage.get(LocalStorage.dbVersion);
