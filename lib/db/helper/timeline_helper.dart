@@ -82,6 +82,30 @@ class TimelineHelper {
           DBManager.tableTimeline, timeline.toJson());
       return uuid;
     }
+
+  }
+
+  /// 编辑页面更新timeLine
+  Future<bool> updateEditTimeItemAndSame(Timeline timeline) async {
+    if (timeline != null) {
+      await FlutterOrmPlugin.saveOrm(
+          DBManager.tableTimeline, timeline.toJson());
+
+      List<Timeline> timelines = await querySameTimeline(timeline.sameId);
+      for (Timeline t in timelines) {
+        await Query(DBManager.tableStory).primaryKey([t.uuid]).update({
+          "poi_id": timeline.poiId,
+          "poi_name": timeline.poiName,
+          "poi_type": timeline.poiType,
+          "poi_type_code": timeline.poiTypeCode,
+          "poi_location": timeline.poiLocation,
+          "poi_address": timeline.poiAddress,
+          "custom_address": timeline.customAddress,
+        });
+      }
+      return true;
+    }
+    return false;
   }
 
   ///更新Timeline

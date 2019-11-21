@@ -111,8 +111,8 @@ class _HomePageState extends LifecycleState<HomePage> {
   /// 开始每隔1分钟刷新逻辑
   _startTimerRefresh() {
     Future.delayed(Duration(seconds: 60 - DateTime.now().second), () {
-      _timer = Timer.periodic(
-          Duration(seconds: LocationConfig.refreshTime.toInt()), (timer) {
+      _timer = Timer.periodic(Duration(seconds: LocationConfig.refreshTime.toInt()),
+          (timer) {
         _refreshStory();
       });
     });
