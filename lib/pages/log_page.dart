@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
-import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/db/helper/timeline_helper.dart';
 import 'package:misstory/style/app_style.dart';
 import 'customparams_page.dart';
-import 'package:misstory/models/story.dart';
+import 'package:misstory/models/timeline.dart';
+import 'package:misstory/utils/date_util.dart';
+
+import 'locationlist_page.dart';
 
 class LogPage extends StatefulWidget {
   @override
@@ -15,8 +18,10 @@ class LogPage extends StatefulWidget {
 }
 
 class _LogPageState extends LifecycleState<LogPage> {
-  List<Story> _stories = List<Story>();
+  //List<Story> _stories = List<Story>();
+  List<Timeline> _timelines = List<Timeline>();
   Map stateMap = {};
+
   @override
   void initState() {
     // TODO: implement initState
@@ -25,15 +30,17 @@ class _LogPageState extends LifecycleState<LogPage> {
   }
 
   initData() async {
-    _stories = await StoryHelper().queryMoreHistories();
-    if (_stories != null && _stories.length > 0) {
+    ///初次加载需要查询前20条数据
+    _timelines = await TimelineHelper().queryMoreHistories();
+    if (_timelines != null && _timelines.length > 0) {
       setState(() {
         ///none
       });
     }
   }
-  _notifySCurrentPage (value) {
-      ///TODO：打碎整体重新开始计算
+
+  _notifySCurrentPage(value) {
+    ///TODO：打碎整体重新开始计算
     print("打碎整体重新开始计算");
     initData();
   }
@@ -49,17 +56,10 @@ class _LogPageState extends LifecycleState<LogPage> {
             offstage: false,
             child: FlatButton(
                 onPressed: () {
-
                   Navigator.of(context)
                       .push(MaterialPageRoute(
-                      builder: (context) => CustomParamsPage()))
+                          builder: (context) => CustomParamsPage()))
                       .then(_notifySCurrentPage);
-
-//                  Navigator.of(context)
-//                      .push(MaterialPageRoute(builder: (context) {
-//                    return CustomParamsPage();
-//                  }));
-
                 },
                 child: Text("settings")),
           ),
@@ -71,7 +71,7 @@ class _LogPageState extends LifecycleState<LogPage> {
             child: ListView.separated(
               itemBuilder: _buildItem,
               separatorBuilder: _buildSeparator,
-              itemCount: _stories?.length ?? 0,
+              itemCount: _timelines?.length ?? 0,
               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
             ),
           ),
@@ -87,63 +87,68 @@ class _LogPageState extends LifecycleState<LogPage> {
   }
 
   Widget _buildItem(context, index) {
-    Story item = _stories[index];
+    Timeline item = _timelines[index];
     String date = "";
-    if (item.updateTime != null && item?.updateTime != 0) {
+    String date1 = "";
+    if (item.startTime != null && item?.endTime != 0) {
       DateTime dateTime =
-          DateTime.fromMillisecondsSinceEpoch(item.updateTime.toInt());
+          DateTime.fromMillisecondsSinceEpoch(item.startTime.toInt());
       date = DateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
     }
     return Card(
         clipBehavior: Clip.antiAlias,
-      color: AppStyle.colors(context).colorBgCard,
-      elevation: 0.1,
-      child: InkWell(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text("中心:(${item.lat},${item.lon})"),
-              Text("半径:"),
-              Text("精度:"),
-              Text("poi:${item.poiName}"),
-              Text("地址：${item.defaultAddress}"),
-              //      Text("经纬度:(${location.lon},${location.lat})"),
-              Text("日期:$date"),
-              Offstage(
-                offstage:!(stateMap.containsKey(index)? stateMap[index] : false),
-                child:  Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text("                ==============="),
-                    Text("元素举例"),
-                    Text("坐标:(${item.lat},${item.lon})"),
-                    Text("半径"),
-                    Text("水平精度"),
-                    Text("速度"),
-                    Text("加速度"),
-                    Text("海拔"),
-                    Text("地址"),
-                    Text("日期:$date"),
-                  ],
-                ),
-              ),
-            ],
+        color: AppStyle.colors(context).colorBgCard,
+        elevation: 0.1,
+        child: InkWell(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text("中心:(${item.lat},${item.lon})"),
+                Text("半径:${item.radius}(m)"),
+                Text("poi距离:${item.distance}(m)"),
+                Text("poi:${item.poiAddress}"),
+                Text("地址：${item.customAddress}"),
+                //      Text("经纬度:(${location.lon},${location.lat})"),
+                Text("开始:$date"),
+                Text("停留：${DateUtil.getStayShowTime(item.intervalTime)}"),
+
+//              Offstage(
+//                offstage:!(stateMap.containsKey(index)? stateMap[index] : false),
+//                child:  Column(
+//                  crossAxisAlignment: CrossAxisAlignment.start,
+//                  children: <Widget>[
+//                    Text("                ==============="),
+//                    Text("元素举例"),
+//                    Text("坐标:(${item.lat},${item.lon})"),
+//                    Text("半径"),
+//                    Text("水平精度"),
+//                    Text("速度"),
+//                    Text("加速度"),
+//                    Text("海拔"),
+//                    Text("地址"),
+//                    Text("日期:$date"),
+//                  ],
+//                ),
+//              ),
+              ],
+            ),
           ),
-        ),
-        onTap: (){
-            if (stateMap.containsKey(index)) {
-               bool isOpen = stateMap[index];
-               stateMap[index] = !isOpen;
-            } else {
-              stateMap[index] = true;
-            }
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => LocationListPage(item)));
+
+//            if (stateMap.containsKey(index)) {
+//               bool isOpen = stateMap[index];
+//               stateMap[index] = !isOpen;
+//            } else {
+//              stateMap[index] = true;
+//            }
             setState(() {
               //none
             });
-        },
-      )
-    );
+          },
+        ));
   }
 }

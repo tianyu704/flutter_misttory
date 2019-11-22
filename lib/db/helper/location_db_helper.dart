@@ -105,4 +105,22 @@ class LocationDBHelper {
     }
     return [];
   }
+
+  /// 查找parent id相同的Location
+  Future<List<Location>> queryLocationsWithTimelineId(String timeLineId) async {
+    List list = await Query(DBManager.tableLocation)
+        .whereByColumFilters([
+      WhereCondiction("timeline_id", WhereCondictionType.IN, [timeLineId])
+    ])
+        .all();
+    if (list != null && list.length > 0) {
+      List<Location> locations = [];
+      for (Map map in list) {
+        locations.add(Location.fromJson(Map<String, dynamic>.from(map)));
+      }
+      return locations;
+    }
+    return null;
+  }
+
 }
