@@ -232,7 +232,7 @@ Future<List<AmapPoi>> requestAMapPois(
           "offset": limit,
           "key": Constant.aMapWebKey,
           "radius": radius ?? LocationConfig.poiSearchInterval.toInt(),
-          "types": types ?? Constant.aMapTypes,
+          "types": types ??  LocationConfig.aMapTypes,
           "sortrule": "distance",
           "page": page
         },

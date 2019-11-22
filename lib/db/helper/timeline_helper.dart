@@ -486,6 +486,25 @@ class TimelineHelper {
     return list;
   }
 
+  ///查询需要显示的全部timeline
+  Future<List<Timeline>> queryAll() async {
+    List result = await Query(DBManager.tableTimeline)
+        .orderBy(["start_time desc"]).whereBySql(
+            "(is_from_picture = ? or interval_time >= ?) and is_delete = 0",
+            [1, LocationConfig.judgeUsefulLocation]).all();
+    List<Timeline> list = [];
+    if (result != null && result.length > 0) {
+      int count = result.length;
+      Timeline timeline;
+      for (int i = 0; i < count; i++) {
+        timeline = Timeline.fromJson(Map<String, dynamic>.from(result[i]));
+        timeline.date = DateUtil.getShowTime(timeline.startTime);
+        list.add(await checkStoryPictures(timeline));
+      }
+    }
+    return list;
+  }
+
   Future<Timeline> checkStoryPictures(Timeline timeline) async {
     timeline.pictures =
         await PictureHelper().queryPicturesByUuid(timeline.uuid);

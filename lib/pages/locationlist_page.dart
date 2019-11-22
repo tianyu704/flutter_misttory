@@ -91,7 +91,6 @@ class _LocationListPageState extends LifecycleState<LocationListPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text("地址"),
                 Text("坐标:(${item.lat},${item.lon})"),
                 Text("水平精度:${item.accuracy}(m)"),
                 Text("垂直精度:${item.verticalAccuracy}（m）"),
