@@ -25,6 +25,7 @@
   "is_from_picture": 0,
   "need_update_poi": 0,
   "same_id": "adfsadfasf",
+  "is_confirm": 0,
   "date": "以下为附加字段，不存库",
   "pictures": "$[]picture"
 }

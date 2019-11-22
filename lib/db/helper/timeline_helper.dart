@@ -82,18 +82,14 @@ class TimelineHelper {
           DBManager.tableTimeline, timeline.toJson());
       return uuid;
     }
-
   }
 
   /// 编辑页面更新timeLine
   Future<bool> updateEditTimeItemAndSame(Timeline timeline) async {
     if (timeline != null) {
-      await FlutterOrmPlugin.saveOrm(
-          DBManager.tableTimeline, timeline.toJson());
-
       List<Timeline> timelines = await querySameTimeline(timeline.sameId);
       for (Timeline t in timelines) {
-        await Query(DBManager.tableStory).primaryKey([t.uuid]).update({
+        await Query(DBManager.tableTimeline).primaryKey([t.uuid]).update({
           "poi_id": timeline.poiId,
           "poi_name": timeline.poiName,
           "poi_type": timeline.poiType,
@@ -101,6 +97,7 @@ class TimelineHelper {
           "poi_location": timeline.poiLocation,
           "poi_address": timeline.poiAddress,
           "custom_address": timeline.customAddress,
+          "is_confirm": timeline.isConfirm,
         });
       }
       return true;
@@ -132,45 +129,47 @@ class TimelineHelper {
         timeline.radius = latlonpoint.radius;
 
         ///判断是否需要更新poi
-        if (timeline.needUpdatePoi == 1) {
-          timeline = await requestPoiData(timeline);
-          PrintUtil.debugPrint("======1更新poi，poi->${timeline.poiName}");
-        } else if (StringUtil.isNotEmpty(timeline.poiLocation)) {
-          List latlonList = timeline.poiLocation.split(",");
-          if (latlonList.length == 3) {
-            String coordType = latlonList[2];
-            double lat1, lon1, lat2, lon2;
-            if (CoordType.aMap == coordType) {
-              //原始坐标转高德
-              amap.LatLng latLng = await amap.CalculateTools()
-                  .convertCoordinate(
-                      lat: timeline.lat,
-                      lon: timeline.lon,
-                      type: amap.LatLngType.gps);
-              lat1 = latLng.latitude;
-              lon1 = latLng.longitude;
+        if (timeline.isConfirm != 1) {
+          if (timeline.needUpdatePoi == 1) {
+            timeline = await requestPoiData(timeline);
+            PrintUtil.debugPrint("======1更新poi，poi->${timeline.poiName}");
+          } else if (StringUtil.isNotEmpty(timeline.poiLocation)) {
+            List latlonList = timeline.poiLocation.split(",");
+            if (latlonList.length == 3) {
+              String coordType = latlonList[2];
+              double lat1, lon1, lat2, lon2;
+              if (CoordType.aMap == coordType) {
+                //原始坐标转高德
+                amap.LatLng latLng = await amap.CalculateTools()
+                    .convertCoordinate(
+                        lat: timeline.lat,
+                        lon: timeline.lon,
+                        type: amap.LatLngType.gps);
+                lat1 = latLng.latitude;
+                lon1 = latLng.longitude;
 
-              lat2 = double.tryParse(latlonList[1]);
-              lon2 = double.tryParse(latlonList[0]);
-              PrintUtil.debugPrint(
-                "======原始坐标转换成高德$lat1,$lon1 poi坐标$lat2,$lon2",
-              );
-            } else {
-              lat1 = timeline.lat;
-              lon1 = timeline.lon;
-              lat2 = double.tryParse(latlonList[1]);
-              lon2 = double.tryParse(latlonList[0]);
-            }
-            num distance = num.tryParse(timeline.distance);
-            if (distance == null || distance == 0) {
-              distance = 10;
-            }
-            num dis =
-                CalculateUtil.calculateLatlngDistance(lat1, lon1, lat2, lon2);
-            PrintUtil.debugPrint("======新中心点到poi的距离$dis,原始距离$distance+5");
-            if (dis > distance + 5) {
-              timeline = await requestPoiData(timeline);
-              PrintUtil.debugPrint("======2更新poi，poi->${timeline.poiName}");
+                lat2 = double.tryParse(latlonList[1]);
+                lon2 = double.tryParse(latlonList[0]);
+                PrintUtil.debugPrint(
+                  "======原始坐标转换成高德$lat1,$lon1 poi坐标$lat2,$lon2",
+                );
+              } else {
+                lat1 = timeline.lat;
+                lon1 = timeline.lon;
+                lat2 = double.tryParse(latlonList[1]);
+                lon2 = double.tryParse(latlonList[0]);
+              }
+              num distance = num.tryParse(timeline.distance);
+              if (distance == null || distance == 0) {
+                distance = 10;
+              }
+              num dis =
+                  CalculateUtil.calculateLatlngDistance(lat1, lon1, lat2, lon2);
+              PrintUtil.debugPrint("======新中心点到poi的距离$dis,原始距离$distance+5");
+              if (dis > distance + 5) {
+                timeline = await requestPoiData(timeline);
+                PrintUtil.debugPrint("======2更新poi，poi->${timeline.poiName}");
+              }
             }
           }
         }
@@ -258,6 +257,7 @@ class TimelineHelper {
       timeline.isFromPicture = isFromPicture;
       timeline.poiName = "Unknow";
       timeline.sameId = Uuid().v1();
+      timeline.isConfirm = 0;
       return await updatePoiData(timeline);
     }
     return null;
@@ -373,7 +373,6 @@ class TimelineHelper {
         .whereByColumFilters([
           WhereCondiction("same_id", WhereCondictionType.IN, [sameId])
         ])
-        .limit(5)
         .all();
     if (list != null && list.length > 0) {
       List<Timeline> timelines = [];
@@ -527,8 +526,10 @@ class TimelineHelper {
 
   /// 查询记录的天数
   Future<int> getStoryDays() async {
-    List stories = await Query(DBManager.tableTimeline)
-        .orderBy(["start_time desc"]).needColums(["start_time"]).all();
+    List stories = await Query(DBManager.tableTimeline).orderBy(
+        ["start_time desc"]).needColums(["start_time"]).whereByColumFilters([
+      WhereCondiction("is_delete", WhereCondictionType.IN, [0])
+    ]).all();
     if (stories != null && stories.length > 0) {
       List dateList = [];
       DateTime dateTime;
