@@ -191,6 +191,7 @@ class DBManager {
     timelineFields["is_delete"] = Field(FieldType.Real);
     timelineFields["need_update_poi"] = Field(FieldType.Real);
     timelineFields["same_id"] = Field(FieldType.Text);
+    timelineFields["is_confirm"] = Field(FieldType.Real);
 
 
     await FlutterOrmPlugin.createTable(

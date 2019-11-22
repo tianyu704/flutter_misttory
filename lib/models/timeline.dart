@@ -74,6 +74,9 @@ class Timeline {
   @JsonKey(name: "same_id")
   String sameId;
 
+  @JsonKey(name: "is_confirm")
+  num isConfirm;
+
   ///以下为附加字段不存入数据库,显示时使用
   String date;
 

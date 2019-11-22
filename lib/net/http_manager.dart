@@ -115,7 +115,7 @@ class HttpManager {
 final HttpManager httpManager = new HttpManager();
 
 /// 获取地点信息
-Future<AmapPoi> requestLocation(num lat,num lon) async {
+Future<AmapPoi> requestLocation(num lat, num lon) async {
   if (lat != null && lon != null) {
     try {
       Response response = await Dio().get(
@@ -148,7 +148,7 @@ Future<AmapPoi> requestLocation(num lat,num lon) async {
             if (!StringUtil.isEmpty(location.state)) {
               amapPoi.pname = location.state;
             }
-            if(location.distance!=null){
+            if (location.distance != null) {
               amapPoi.distance = "${location.distance}";
             }
             if (!StringUtil.isEmpty(location.address)) {
@@ -217,8 +217,10 @@ Future<List<AmapPoi>> requestLocations({String latlon, String near}) async {
 Future<List<AmapPoi>> requestAMapPois(
     {num lat = 0,
     num lon = 0,
+    String keywords = "",
     num limit = 20,
     num radius,
+    String types ,
     num page = 1}) async {
   if (lat != 0 && lon != 0) {
     try {
@@ -226,14 +228,16 @@ Future<List<AmapPoi>> requestAMapPois(
         Address.requestAMapPois(),
         queryParameters: {
           "location": "$lon,$lat",
+          "keywords": keywords,
           "offset": limit,
           "key": Constant.aMapWebKey,
-          "radius": radius ?? LocationConfig.poiSearchInterval,
-          "types": Constant.aMapTypes,
+          "radius": radius ?? LocationConfig.poiSearchInterval.toInt(),
+          "types": types ?? Constant.aMapTypes,
           "sortrule": "distance",
           "page": page
         },
       );
+      PrintUtil.debugPrint("搜索poi。。。。。。");
       if (response.data != null && response.data is Map) {
         List pois = response.data["pois"];
         if (pois != null && pois.length > 0) {

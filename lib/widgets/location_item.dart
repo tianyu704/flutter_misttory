@@ -98,11 +98,9 @@ class LocationItem extends StatelessWidget {
                                 Padding(
                                   padding: EdgeInsets.only(top: 0),
                                   child: SvgPicture.asset(
-                                    (StringUtil.isEmpty(timeline.customAddress) &&
-                                            StringUtil.isEmpty(
-                                                timeline.customAddress))
-                                        ? "assets/images/icon_location_empty.svg"
-                                        : "assets/images/icon_location_fill.svg",
+                                    (timeline.isConfirm == 1)
+                                        ? "assets/images/icon_location_fill.svg"
+                                        : "assets/images/icon_location_empty.svg",
                                     width: 14,
                                     height: 14,
                                   ),
@@ -236,9 +234,6 @@ class LocationItem extends StatelessWidget {
   }
 
   getShowAddressText(Timeline story) {
-    if (StringUtil.isNotEmpty(story.customAddress)) {
-      return story.customAddress;
-    }
     if (StringUtil.isNotEmpty(story.customAddress)) {
       return story.customAddress;
     }

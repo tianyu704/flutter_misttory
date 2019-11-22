@@ -1,24 +1,14 @@
 import 'dart:async';
 
 import 'package:amap_base/amap_base.dart';
-import 'package:amap_base/src/search/model/poi_result.dart';
-import 'package:amap_base/src/search/model/poi_search_query.dart';
-import 'package:amap_base/src/search/model/poi_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
-import 'package:misstory/db/helper/person_helper.dart';
-import 'package:misstory/db/helper/story_helper.dart';
-import 'package:misstory/db/helper/tag_helper.dart';
 import 'package:misstory/db/helper/timeline_helper.dart';
 import 'package:misstory/models/amap_poi.dart';
 import 'package:misstory/models/coord_type.dart';
-import 'package:misstory/models/person.dart';
-import 'package:misstory/models/poilocation.dart';
-import 'package:misstory/models/story.dart';
-import 'package:misstory/models/tag.dart';
 import 'package:misstory/models/timeline.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/utils/string_util.dart';
@@ -133,8 +123,8 @@ class _EditPageState extends LifecycleState<EditPage> {
     _showTimeStr = DateFormat("MM月dd日 HH:mm").format(
         DateTime.fromMillisecondsSinceEpoch(widget.timeline.startTime.toInt()));
     _searchVC.addListener(() {
-      print(_searchVC.text);
-      handleSearchAction();
+//      print(_searchVC.text);
+//      handleSearchAction();
     });
 
     ///
@@ -807,6 +797,8 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///搜索完成
   handleSearchFinished() {
     _searchNode.unfocus();
+    print(_searchVC.text);
+    handleSearchAction();
   }
 
   ///搜素触发方法
@@ -826,7 +818,9 @@ class _EditPageState extends LifecycleState<EditPage> {
       poiList = await http.requestAMapPois(
           lat: _originLatLng.latitude,
           lon: _originLatLng.longitude,
-          radius: LocationConfig.poiSearchInterval);
+          keywords: searchText,
+          types: "",
+          radius: LocationConfig.poiSearchInterval.toInt());
       print("start1......");
     } else {
       print("start......");
@@ -1103,6 +1097,7 @@ class _EditPageState extends LifecycleState<EditPage> {
       timeline.poiType = pickPoi.type;
       timeline.poiName = pickPoi.name;
       timeline.poiId = pickPoi.id;
+      timeline.isConfirm = 1;
       if (isWrite) {
         timeline.customAddress = _addressTextFieldVC.text;
       }
@@ -1113,6 +1108,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     } else {
       if (isWrite) {
         timeline.customAddress = _addressTextFieldVC.text;
+        timeline.isConfirm = 1;
         await TimelineHelper().updateEditTimeItemAndSame(timeline);
         needRefresh = true;
       }
