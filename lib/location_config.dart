@@ -39,6 +39,15 @@ class LocationConfig {
   static num storyRadiusMin = 10;
   static num storyRadiusMax = 200;
 
+  ///高德poi类型
+  /// 010000汽车服务、020000汽车销售、030000汽车维修、050000餐饮服务、060000购物服务、
+  /// 070000生活服务、080000体育休闲、090000医疗保健服务、100000住宿服务、110000风景名胜
+  /// 120000商务住宅、130000政府机构及社会团体、140000科教文化、150000交通设施、
+  /// 160000金融保险、170000公司企业、180000道路附属设施、190000地名地址信息、200000公共设施
+  ///220000事件活动、990000同行设施
+  static String aMapTypes = "120000|050000|110000";
+
+
   static resetData() async {
     LocationConfig.interval = 60 * 1000 * 3;
     LocationConfig.distanceFilter = 1000;

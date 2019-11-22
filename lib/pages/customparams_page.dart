@@ -3,6 +3,7 @@ import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/customparams_helper.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/models/customparams.dart';
+import 'package:misstory/utils/string_util.dart';
 
 import '../location_config.dart';
 
@@ -34,6 +35,14 @@ enum CustomParamsType {
   judgeDistanceNum,
 
   ///两个间隔陌生地点距离边界 3000 [2000     5000]
+  aMapTypes,
+
+  ///高德poi类型
+  /// 010000汽车服务、020000汽车销售、030000汽车维修、050000餐饮服务、060000购物服务、
+  /// 070000生活服务、080000体育休闲、090000医疗保健服务、100000住宿服务、110000风景名胜
+  /// 120000商务住宅、130000政府机构及社会团体、140000科教文化、150000交通设施、
+  /// 160000金融保险、170000公司企业、180000道路附属设施、190000地名地址信息、200000公共设施
+  ///220000事件活动、990000同行设施
 }
 
 class CustomParamsPage extends StatefulWidget {
@@ -47,19 +56,52 @@ class CustomParamsPage extends StatefulWidget {
 class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
   double deviceWidth;
   Customparams params;
+  Map amapTypMap = {
+    "010000": "汽车服务",
+    "020000": "汽车销售",
+    "030000": "汽车维修",
+    "050000": "餐饮服务",
+    "060000": "购物服务",
+    "070000": "生活服务",
+    "080000": "体育休闲",
+    "090000": "医疗保险服务",
+    "100000": "住宿服务",
+    "110000": "风景名胜",
+    "120000": "商务住宅",
+    "130000": "政府机构及社会团体",
+    "140000": "科教文化",
+    "150000": "交通设施",
+    "160000": "金融保险",
+    "170000": "公司企业",
+    "180000": "道路附属设施",
+    "190000": "地名地址信息",
+    "200000": "公共设施",
+    "220000": "事件活动",
+    "990000": "同行设施"
+  };
+  Map amapTypeCheckMap = {};
+  List amapKeyList = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    //
+    for (String key in amapTypMap.keys) {
+      amapKeyList.add(key);
+    }
+    if (StringUtil.isNotEmpty(LocationConfig.aMapTypes)) {
+      List list = LocationConfig.aMapTypes.split("|");
+      for (String key in list) {
+        amapTypeCheckMap[key] = true;
+      }
+    }
     initData();
   }
 
   initData() async {
     params = await LocationConfig.updateDynamicData();
     if (params == null) {
-      print("xxxxx");
-      print(params);
       return;
     }
     setState(() {});
@@ -83,6 +125,19 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
                   onPressed: () {
                     CustomParamsHelper().createOrUpdate(params);
                     LocationConfig.updateDynamicData();
+                    String str = "";
+                    int i = 0;
+                    for (String key in amapTypeCheckMap.keys) {
+                      str = str + key;
+                      if (i < amapTypeCheckMap.keys.length - 1) {
+                        str = str + "|";
+                      }
+                      i++;
+                    }
+                    print("=======$str=====");
+                    if (StringUtil.isNotEmpty(str)) {
+                      LocationConfig.aMapTypes = str;
+                    }
                     Navigator.pop(context);
                   },
                   child: Text("保存修改")),
@@ -146,6 +201,7 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
                   "首页更新时间 second 当前值为${params == null ? LocationConfig.refreshTime : params.refreshHomePageTime}"),
             ),
             cell(CustomParamsType.refreshHomePageTime),
+            buildWrapCheck(),
 
             // buildSlider(getInit(CustomParamsType.judgeDistanceNum),CustomParamsType.judgeDistanceNum),
             //buildSlider(getInit(CustomParamsType.timeInterval),CustomParamsType.timeInterval),
@@ -200,6 +256,39 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
       min: getMin(itemType),
     );
   }
+
+  buildWrapCheck() {
+    return Wrap(
+      spacing: 0, //主轴上子控件的间距
+      runSpacing: 0, //交叉轴上子控件之间的间距
+      children: Boxs(), //要显示的子控件集合
+    );
+  }
+
+  /*一个渐变颜色的正方形集合*/
+  List<Widget> Boxs() => List.generate(amapKeyList.length, (index) {
+        String key = amapKeyList[index];
+        bool _checkboxSelected =
+            amapTypeCheckMap.containsKey(key) ? amapTypeCheckMap[key] : false;
+        String title = amapTypMap[key];
+        return SizedBox(
+          width: deviceWidth / 2,
+          child: CheckboxListTile(
+            title: Text(title),
+            value: _checkboxSelected,
+            onChanged: (bool value) {
+              setState(() {
+                _checkboxSelected = value;
+                amapTypeCheckMap[key] = value;
+                if (!value) {
+                  amapTypeCheckMap.remove(key);
+                }
+                print(amapTypeCheckMap);
+              });
+            },
+          ),
+        );
+      });
 
   getInit(CustomParamsType itemType) {
     num value = 10;
