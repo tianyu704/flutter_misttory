@@ -26,18 +26,14 @@ class LocationConfig {
 
   /// 图片经纬度半径,判断是否在同一位置
   static num pictureRadius = 100;
-
-  /// 地点经纬度半径,判断是否在同一位置
-  static num locationRadius = 100;
-
-  /// 地点经纬度最大半径
-  static num locationMaxRadius = 200;
-
   /// 2个相邻且相同的地点之间的时间间隔，超过该时间算作一个点，没超过就合并
   static num intervalGap = 60 * 1000 * 30;
 
-  static num storyRadiusMin = 10;
-  static num storyRadiusMax = 200;
+  /// 地点经纬度最小半径
+  static num locationRadius = 100;
+  /// 地点经纬度最大半径
+  static num locationMaxRadius = 200;
+
 
   ///高德poi类型
   /// 010000汽车服务、020000汽车销售、030000汽车维修、050000餐饮服务、060000购物服务、
@@ -51,8 +47,8 @@ class LocationConfig {
   static resetData() async {
     LocationConfig.interval = 60 * 1000 * 3;
     LocationConfig.distanceFilter = 1000;
-    LocationConfig.storyRadiusMax = 200;
-    LocationConfig.storyRadiusMin = 10;
+    LocationConfig.locationMaxRadius = 200;
+    LocationConfig.locationRadius = 100;
     LocationConfig.judgeUsefulLocation = 3 * 60 * 1000;
     LocationConfig.poiSearchInterval = 1000;
     LocationConfig.pictureRadius = 100;
@@ -72,8 +68,8 @@ class LocationConfig {
       params.itemId = "1";
       params.timeInterval = LocationConfig.interval;
       params.distanceFilter = LocationConfig.distanceFilter;
-      params.storyRadiusMax = LocationConfig.storyRadiusMax;
-      params.storyRadiusMin = LocationConfig.storyRadiusMin;
+      params.storyRadiusMax = LocationConfig.locationMaxRadius;
+      params.storyRadiusMin = LocationConfig.locationRadius;
       params.storyKeepingTimeMin = LocationConfig.judgeUsefulLocation;
       params.poiSearchInterval = LocationConfig.poiSearchInterval;
       params.pictureRadius = LocationConfig.pictureRadius;
@@ -84,8 +80,8 @@ class LocationConfig {
       print("CC1");
       LocationConfig.interval = params.timeInterval;
       LocationConfig.distanceFilter = params.distanceFilter;
-      LocationConfig.storyRadiusMax = params.storyRadiusMax;
-      LocationConfig.storyRadiusMin = params.storyRadiusMin;
+      LocationConfig.locationMaxRadius = params.storyRadiusMax;
+      LocationConfig.locationRadius = params.storyRadiusMin;
       LocationConfig.judgeUsefulLocation = params.storyKeepingTimeMin;
       LocationConfig.poiSearchInterval = params.poiSearchInterval;
       LocationConfig.pictureRadius = params.pictureRadius;

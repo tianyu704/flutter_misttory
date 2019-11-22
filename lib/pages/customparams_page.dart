@@ -16,10 +16,10 @@ enum CustomParamsType {
   ///定位米数间隔 [2  1000 2000];
   storyRadiusMin,
 
-  /// [2  10  50]
+  /// [2  150]
   storyRadiusMax,
 
-  /// [50   200   1000]
+  /// [150   200   1000]
   storyKeepingTimeMin,
 
   ///[1 *60 * 1000   30 * 60 * 1000]
@@ -174,13 +174,13 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
             Padding(
               padding: EdgeInsets.only(top: 40, left: 20),
               child: Text(
-                  "story 最大半径（m）当前值为 ${params == null ? LocationConfig.storyRadiusMax : params.storyRadiusMax}"),
+                  "story 最大半径（m）当前值为 ${params == null ? LocationConfig.locationMaxRadius : params.storyRadiusMax}"),
             ),
             cell(CustomParamsType.storyRadiusMax),
             Padding(
               padding: EdgeInsets.only(top: 40, left: 20),
               child: Text(
-                  "story 最小半径（m）当前值为 ${params == null ? LocationConfig.storyRadiusMin : params.storyRadiusMin}"),
+                  "story 最小半径（m）当前值为 ${params == null ? LocationConfig.locationRadius : params.storyRadiusMin}"),
             ),
             cell(CustomParamsType.storyRadiusMin),
             Padding(
@@ -201,6 +201,11 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
                   "首页更新时间 second 当前值为${params == null ? LocationConfig.refreshTime : params.refreshHomePageTime}"),
             ),
             cell(CustomParamsType.refreshHomePageTime),
+
+            Padding(
+              padding: EdgeInsets.only(top: 40, left: 20),
+              child:  Text("Poi 推荐搜索类型"),
+            ),
             buildWrapCheck(),
 
             // buildSlider(getInit(CustomParamsType.judgeDistanceNum),CustomParamsType.judgeDistanceNum),
@@ -336,7 +341,7 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
     } else if (CustomParamsType.refreshHomePageTime == itemType) {
       max = 60 * 2;
     } else if (CustomParamsType.storyRadiusMin == itemType) {
-      max = 49;
+      max = 150;
     }
     return max.toDouble();
   }
@@ -353,7 +358,7 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
     } else if (CustomParamsType.storyKeepingTimeMin == itemType) {
       value = 1;
     } else if (CustomParamsType.storyRadiusMax == itemType) {
-      value = 50;
+      value = 150;
     } else if (CustomParamsType.distanceFilter == itemType) {
       value = 2;
     } else if (CustomParamsType.pictureRadius == itemType) {
