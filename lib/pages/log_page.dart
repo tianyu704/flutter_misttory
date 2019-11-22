@@ -31,7 +31,7 @@ class _LogPageState extends LifecycleState<LogPage> {
 
   initData() async {
     ///初次加载需要查询前20条数据
-    _timelines = await TimelineHelper().queryMoreHistories();
+    _timelines = await TimelineHelper().queryAll();
     if (_timelines != null && _timelines.length > 0) {
       setState(() {
         ///none

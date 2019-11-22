@@ -369,11 +369,9 @@ class TimelineHelper {
   /// 查找same_id相同的TimeLine
   Future<List<Timeline>> querySameTimeline(String sameId) async {
     List list = await Query(DBManager.tableTimeline)
-        .orderBy(["start_time desc"])
-        .whereByColumFilters([
-          WhereCondiction("same_id", WhereCondictionType.IN, [sameId])
-        ])
-        .all();
+        .orderBy(["start_time desc"]).whereByColumFilters([
+      WhereCondiction("same_id", WhereCondictionType.IN, [sameId])
+    ]).all();
     if (list != null && list.length > 0) {
       List<Timeline> timelines = [];
       for (Map map in list) {
@@ -458,6 +456,25 @@ class TimelineHelper {
         timeline = Timeline.fromJson(Map<String, dynamic>.from(result[i]));
         timeline.date = DateUtil.getShowTime(timeline.startTime);
 //        list.addAll(await separateStory(story));
+        list.add(await checkStoryPictures(timeline));
+      }
+    }
+    return list;
+  }
+
+  ///查询需要显示的全部timeline
+  Future<List<Timeline>> queryAll() async {
+    List result = await Query(DBManager.tableTimeline)
+        .orderBy(["start_time desc"]).whereBySql(
+            "(is_from_picture = ? or interval_time >= ?) and is_delete = 0",
+            [1, LocationConfig.judgeUsefulLocation]).all();
+    List<Timeline> list = [];
+    if (result != null && result.length > 0) {
+      int count = result.length;
+      Timeline timeline;
+      for (int i = 0; i < count; i++) {
+        timeline = Timeline.fromJson(Map<String, dynamic>.from(result[i]));
+        timeline.date = DateUtil.getShowTime(timeline.startTime);
         list.add(await checkStoryPictures(timeline));
       }
     }
