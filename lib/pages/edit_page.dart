@@ -79,9 +79,6 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///
   String _showTimeStr = "";
 
-  ///之前的手写地址
-  String _perWriteAddress = "";
-
   ///正在保存中。。。
   bool isSaving = false;
 
@@ -95,9 +92,6 @@ class _EditPageState extends LifecycleState<EditPage> {
 
     _descTextFieldVC.text =
         StringUtil.isNotEmpty(widget.timeline.desc) ? widget.timeline.desc : "";
-    _perWriteAddress = StringUtil.isNotEmpty(widget.timeline.customAddress)
-        ? widget.timeline.customAddress
-        : "";
     _addressTextFieldVC.text = getShowAddress(widget.timeline);
     _showTimeStr = DateFormat("MM月dd日 HH:mm").format(
         DateTime.fromMillisecondsSinceEpoch(widget.timeline.startTime.toInt()));
@@ -146,7 +140,7 @@ class _EditPageState extends LifecycleState<EditPage> {
         icon: "assets/images/icon_location.png",
       ));
     }
-    await _controller?.zoomToSpan([_poiLatLng, _originLatLng]);
+    _controller?.zoomToSpan([_poiLatLng, _originLatLng]);
     setState(() {});
     getPoi();
   }
@@ -340,9 +334,9 @@ class _EditPageState extends LifecycleState<EditPage> {
             Padding(
               padding: EdgeInsets.only(top: 0),
               child: SvgPicture.asset(
-                StringUtil.isEmpty(widget.timeline.customAddress)
-                    ? "assets/images/icon_location_empty.svg"
-                    : "assets/images/icon_location_fill.svg",
+                widget.timeline.isConfirm == 1
+                    ? "assets/images/icon_location_fill.svg"
+                    : "assets/images/icon_location_empty.svg",
                 width: 14,
                 height: 14,
               ),
@@ -584,7 +578,7 @@ class _EditPageState extends LifecycleState<EditPage> {
               position: _poiLatLng,
             ));
           }
-          await _controller.zoomToSpan([_poiLatLng, _originLatLng]);
+          _controller.zoomToSpan([_poiLatLng, _originLatLng]);
 //          _controller.setZoomLevel(15);
         },
         amapOptions: AMapOptions(
@@ -934,10 +928,8 @@ class _EditPageState extends LifecycleState<EditPage> {
         icon: "assets/images/icon_location.png",
       ));
     }
-    await _controller.zoomToSpan([_poiLatLng, _originLatLng]);
-    if (StringUtil.isEmpty(_perWriteAddress)) {
-      _addressTextFieldVC.text = getShowAddress(widget.timeline);
-    }
+    _controller.zoomToSpan([_poiLatLng, _originLatLng]);
+    _addressTextFieldVC.text = pickPoi?.name;
     setState(() {});
   }
 
@@ -1076,17 +1068,14 @@ class _EditPageState extends LifecycleState<EditPage> {
       _addressFocusNode.unfocus();
       String str = _addressTextFieldVC.text;
       if (StringUtil.isEmpty(str)) {
-        _addressTextFieldVC.text = getShowAddress(widget.timeline);
+        _addressTextFieldVC.text = StringUtil.isNotEmpty(pickPoi?.name)
+            ? pickPoi?.name
+            : getShowAddress(widget.timeline);
       }
     }
-    //
-    bool isWrite = isWriteAddressed(_addressTextFieldVC.text);
 
     ///自定义地点保存
     if (pickPoi != null && StringUtil.isNotEmpty(pickPoi.name)) {
-      if (StringUtil.isEmpty(timeline.customAddress)) {
-        timeline.customAddress = pickPoi.name;
-      }
       timeline.poiAddress = pickPoi.address;
       timeline.poiLocation = "${pickPoi.location},GCJ02";
       timeline.poiTypeCode = pickPoi.typecode;
@@ -1094,20 +1083,16 @@ class _EditPageState extends LifecycleState<EditPage> {
       timeline.poiName = pickPoi.name;
       timeline.poiId = pickPoi.id;
       timeline.isConfirm = 1;
-      if (isWrite) {
-        timeline.customAddress = _addressTextFieldVC.text;
-      }
+      timeline.customAddress = _addressTextFieldVC.text;
       await TimelineHelper().updateEditTimeItemAndSame(timeline);
       needRefresh = true;
 
       ///存储该pick 点 如果没存过的话
     } else {
-      if (isWrite) {
-        timeline.customAddress = _addressTextFieldVC.text;
-        timeline.isConfirm = 1;
-        await TimelineHelper().updateEditTimeItemAndSame(timeline);
-        needRefresh = true;
-      }
+      timeline.customAddress = _addressTextFieldVC.text;
+      timeline.isConfirm = 1;
+      await TimelineHelper().updateEditTimeItemAndSame(timeline);
+      needRefresh = true;
     }
 
     ///进度消失
@@ -1119,27 +1104,9 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   getShowAddress(Timeline timeline) {
-    if (StringUtil.isNotEmpty(_perWriteAddress)) {
-      return _perWriteAddress;
-    }
-    if (pickPoi != null && StringUtil.isNotEmpty(pickPoi.name)) {
-      return pickPoi.name;
-    }
-    if (StringUtil.isNotEmpty(timeline.customAddress)) {
-      return timeline.customAddress;
+    if (StringUtil.isNotEmpty(widget.timeline.customAddress)) {
+      return widget.timeline.customAddress;
     }
     return timeline.poiName;
-  }
-
-  bool isWriteAddressed(String str) {
-    if (StringUtil.isNotEmpty(str)) {
-      if (str == _perWriteAddress) return false;
-      if (pickPoi == null) {
-        return true;
-      } else {
-        if (str != pickPoi.name) return true;
-      }
-    }
-    return false;
   }
 }
