@@ -162,6 +162,7 @@ class DBManager {
     customParamsField["refreshHomePageTime"] = Field(FieldType.Real);
     customParamsField["pictureRadius"] = Field(FieldType.Real);
     customParamsField["judgeDistanceNum"] = Field(FieldType.Real);
+    customParamsField["aMapTypes"] = Field(FieldType.Text);
 
     ///时间线表
     Map<String, Field> timelineFields = new Map<String, Field>();

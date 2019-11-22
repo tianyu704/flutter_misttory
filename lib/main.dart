@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:amap_base/amap_base.dart';
+
 //import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -39,14 +40,14 @@ void main() async {
 //  Crashlytics.instance.enableInDevMode = true;
 //  FlutterError.onError = Crashlytics.instance.recordFlutterError;
 //  runZoned<Future<void>>(() async {
-    runApp(MultiProvider(
-      providers: [
-        ChangeNotifierProvider<ThemeProvider>.value(
-          value: ThemeProvider(isNight ? AppTheme.night : AppTheme.light),
-        ),
-      ],
-      child: MyApp(),
-    ));
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider<ThemeProvider>.value(
+        value: ThemeProvider(isNight ? AppTheme.night : AppTheme.light),
+      ),
+    ],
+    child: MyApp(),
+  ));
 //  }, onError: Crashlytics.instance.recordError);
 }
 
@@ -81,6 +82,9 @@ class MyApp extends StatelessWidget {
       localeListResolutionCallback:
           S.delegate.listResolution(fallback: const Locale('zh', '')),
       home: HomePage(),
+      routes: {
+        "/home": (context) => HomePage(),
+      },
     );
   }
 }

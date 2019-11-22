@@ -50,7 +50,7 @@ class _LogPageState extends LifecycleState<LogPage> {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        title: Text("SettingDetail"),
+        title: Text("时间轴数据"),
         actions: <Widget>[
           Offstage(
             offstage: false,
@@ -61,7 +61,7 @@ class _LogPageState extends LifecycleState<LogPage> {
                           builder: (context) => CustomParamsPage()))
                       .then(_notifySCurrentPage);
                 },
-                child: Text("settings")),
+                child: Text("调整参数")),
           ),
         ],
       ),

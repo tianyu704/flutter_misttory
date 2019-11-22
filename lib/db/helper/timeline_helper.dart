@@ -106,7 +106,7 @@ class TimelineHelper {
     return false;
   }
 
-  Future mergeTimeline(String timelineId) async{
+  Future mergeTimeline(String timelineId) async {
 //    Query(DBManager.tableTimeline).whereByColumFilters([
 //      WhereCondiction("same_id",WhereCondictionType.IN,[timelineId])
 //    ]).orderBy([""]).first();
@@ -498,8 +498,9 @@ class TimelineHelper {
       Timeline timeline;
       for (int i = 0; i < count; i++) {
         timeline = Timeline.fromJson(Map<String, dynamic>.from(result[i]));
-        timeline.date = DateUtil.getShowTime(timeline.startTime);
-        list.add(await checkStoryPictures(timeline));
+//        timeline.date = DateUtil.getShowTime(timeline.startTime);
+//        list.add(await checkStoryPictures(timeline));
+        list.add(timeline);
       }
     }
     return list;
@@ -650,5 +651,12 @@ class TimelineHelper {
       return Timeline.fromJson(Map<String, dynamic>.from(result));
     }
     return null;
+  }
+
+  ///清除Location生成的Timeline
+  Future deleteLocationTimeline()async{
+    await Query(DBManager.tableTimeline).whereByColumFilters([
+      WhereCondiction("is_from_picture",WhereCondictionType.IN,[0]),
+    ]).delete();
   }
 }

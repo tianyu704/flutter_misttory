@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/customparams_helper.dart';
+import 'package:misstory/db/helper/location_db_helper.dart';
+import 'package:misstory/db/helper/timeline_helper.dart';
+import 'package:misstory/eventbus/event_bus_util.dart';
 import 'package:misstory/style/app_style.dart';
 import 'package:misstory/models/customparams.dart';
 import 'package:misstory/utils/string_util.dart';
+import 'package:misstory/widgets/loading_dialog.dart';
 
 import '../location_config.dart';
 
@@ -122,9 +126,20 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
             Offstage(
               offstage: false,
               child: FlatButton(
-                  onPressed: () {
-                    CustomParamsHelper().createOrUpdate(params);
-                    LocationConfig.updateDynamicData();
+                  onPressed: () async {
+                    await EventBusUtil.fireLocationEvent(0);
+                    LoadingDialog loading = LoadingDialog(
+                      outsideDismiss: false,
+                      loadingText: "重新生成中Thinking...",
+                    );
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) {
+                          return loading;
+                        });
+                    await Future.delayed(Duration(milliseconds: 500));
+
                     String str = "";
                     int i = 0;
                     for (String key in amapTypeCheckMap.keys) {
@@ -136,8 +151,16 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
                     }
                     print("=======$str=====");
                     if (StringUtil.isNotEmpty(str)) {
-                      LocationConfig.aMapTypes = str;
+                      params.aMapTypes = str;
                     }
+                    await CustomParamsHelper().createOrUpdate(params);
+                    await LocationConfig.updateDynamicData();
+                    await TimelineHelper().deleteLocationTimeline();
+                    await LocationDBHelper().convertAllLocationToTimeline();
+                    await EventBusUtil.fireLocationEvent(1);
+
+                    ///进度消失
+                    await loading.handleDismiss();
                     Navigator.pop(context);
                   },
                   child: Text("保存修改")),
@@ -153,12 +176,12 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
             ),
             cell(CustomParamsType.timeInterval),
 
-            Padding(
-              padding: EdgeInsets.only(top: 40, left: 20),
-              child: Text(
-                  "两个陌生点的距离（m）当前值 为${params == null ? LocationConfig.judgeDistanceNum : params.judgeDistanceNum}"),
-            ),
-            cell(CustomParamsType.judgeDistanceNum),
+//            Padding(
+//              padding: EdgeInsets.only(top: 40, left: 20),
+//              child: Text(
+//                  "两个陌生点的距离（m）当前值 为${params == null ? LocationConfig.judgeDistanceNum : params.judgeDistanceNum}"),
+//            ),
+//            cell(CustomParamsType.judgeDistanceNum),
             Padding(
               padding: EdgeInsets.only(top: 40, left: 20),
               child: Text(
@@ -186,25 +209,25 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
             Padding(
               padding: EdgeInsets.only(top: 40, left: 20),
               child: Text(
-                  "定位间隔距离（m）当前值为 ${params == null ? LocationConfig.distanceFilter : params.distanceFilter}"),
+                  "系统定位每隔${params == null ? LocationConfig.distanceFilter : params.distanceFilter}米定位一次"),
             ),
             cell(CustomParamsType.distanceFilter),
             Padding(
               padding: EdgeInsets.only(top: 40, left: 20),
               child: Text(
-                  "图片区域半径（m）当前值为 ${params == null ? LocationConfig.pictureRadius : params.pictureRadius}"),
+                  "图片生成Story的半径，当前值为 ${params == null ? LocationConfig.pictureRadius : params.pictureRadius}米"),
             ),
             cell(CustomParamsType.pictureRadius),
             Padding(
               padding: EdgeInsets.only(top: 40, left: 20),
               child: Text(
-                  "首页更新时间 second 当前值为${params == null ? LocationConfig.refreshTime : params.refreshHomePageTime}"),
+                  "首页刷新时间，当前值为${params == null ? LocationConfig.refreshTime : params.refreshHomePageTime}秒"),
             ),
             cell(CustomParamsType.refreshHomePageTime),
 
             Padding(
               padding: EdgeInsets.only(top: 40, left: 20),
-              child:  Text("Poi 推荐搜索类型"),
+              child: Text("Poi 推荐搜索类型"),
             ),
             buildWrapCheck(),
 

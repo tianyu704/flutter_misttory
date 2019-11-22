@@ -12,6 +12,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/helper/timeline_helper.dart';
 import 'package:misstory/db/local_storage.dart';
 import 'package:misstory/eventbus/event_bus_util.dart';
+import 'package:misstory/eventbus/location_event.dart';
 import 'package:misstory/eventbus/refresh_progress.dart';
 import 'package:misstory/location_config.dart';
 import 'package:misstory/models/coord_type.dart';
@@ -62,6 +63,7 @@ class _HomePageState extends LifecycleState<HomePage> {
   bool _isDealWithLocation = false;
   Timeline _currentTimeline;
   StreamSubscription _refreshSubscription;
+  StreamSubscription _locationEventSubscription;
   bool hasBuild = false;
   LoadingPicturesAlert loadingAlert;
 
@@ -94,6 +96,15 @@ class _HomePageState extends LifecycleState<HomePage> {
         }
       }
     });
+    _locationEventSubscription = EventBusUtil.listen<LocationEvent>((event) {
+      if (event.option == 0) {
+        _stopLocation();
+      } else {
+        _isFirstLoad = true;
+        _refreshStory();
+        _initLocation();
+      }
+    });
   }
 
   ///同步图片逻辑
@@ -111,8 +122,8 @@ class _HomePageState extends LifecycleState<HomePage> {
   /// 开始每隔1分钟刷新逻辑
   _startTimerRefresh() {
     Future.delayed(Duration(seconds: 60 - DateTime.now().second), () {
-      _timer = Timer.periodic(Duration(seconds: LocationConfig.refreshTime.toInt()),
-          (timer) {
+      _timer = Timer.periodic(
+          Duration(seconds: LocationConfig.refreshTime.toInt()), (timer) {
         _refreshStory();
       });
     });
@@ -231,6 +242,10 @@ class _HomePageState extends LifecycleState<HomePage> {
     });
   }
 
+  void _stopLocation() {
+    LocationChannel().stop();
+  }
+
   ///请求一次定位
   void _onceLocate() async {
     LocationChannel().getCurrentLocation().then((location) async {
@@ -258,16 +273,16 @@ class _HomePageState extends LifecycleState<HomePage> {
         title: _buildHeader(),
         actions: <Widget>[
           Offstage(
-            offstage: !Constant.isDebug,
-            child: FlatButton(
+              offstage: !Constant.isDebug,
+              child: FlatButton(
                 onPressed: () {
                   Navigator.of(context)
                       .push(MaterialPageRoute(builder: (context) {
                     return SearchPage("");
                   }));
                 },
-                child: Text("Debug")),
-          ),
+                child: Text("无用"),
+              )),
           Offstage(
             offstage: false,
             child: FlatButton(
@@ -277,7 +292,7 @@ class _HomePageState extends LifecycleState<HomePage> {
                     return LogPage();
                   }));
                 },
-                child: Text("settings")),
+                child: Text("调试")),
           ),
         ],
         backgroundColor: AppStyle.colors(context).colorBgPage,

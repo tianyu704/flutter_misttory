@@ -75,6 +75,7 @@ class LocationConfig {
       params.pictureRadius = LocationConfig.pictureRadius;
       params.refreshHomePageTime = LocationConfig.refreshTime;
       params.judgeDistanceNum = LocationConfig.judgeDistanceNum;
+      params.aMapTypes = LocationConfig.aMapTypes;
       await CustomParamsHelper().createOrUpdate(params);
     } else {
       print("CC1");
@@ -87,6 +88,7 @@ class LocationConfig {
       LocationConfig.pictureRadius = params.pictureRadius;
       LocationConfig.refreshTime = params.refreshHomePageTime;
       LocationConfig.judgeDistanceNum = params.judgeDistanceNum;
+      LocationConfig.aMapTypes = params.aMapTypes;
     }
     return params;
   }

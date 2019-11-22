@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:event_bus/event_bus.dart';
+import 'package:misstory/eventbus/location_event.dart';
 import 'package:misstory/eventbus/refresh_progress.dart';
 
 ///
@@ -9,12 +10,16 @@ import 'package:misstory/eventbus/refresh_progress.dart';
 ///
 
 class EventBusUtil {
+  static StreamSubscription<T> listen<T>(void onData(T event)) {
+    return eventBus.on<T>().listen(onData);
+  }
+
   static fireRefreshProgress(num total, num count) {
     eventBus.fire(RefreshProgress(total, count));
   }
 
-  static StreamSubscription<T> listen<T>(void onData(T event)) {
-    return eventBus.on<T>().listen(onData);
+  static fireLocationEvent(num option){
+    eventBus.fire(LocationEvent(option));
   }
 }
 

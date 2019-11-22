@@ -127,4 +127,21 @@ class LocationDBHelper {
     }
     return null;
   }
+
+  ///把location重新依次生成timeline
+  Future convertAllLocationToTimeline() async {
+    List list = await Query(DBManager.tableLocation).orderBy(["time"]).all();
+    if (list != null && list.length > 0) {
+      Location location;
+      for (Map map in list) {
+        location = Location.fromJson(Map<String, dynamic>.from(map));
+        String timelineId =
+            await TimelineHelper().createOrUpdateTimeline(location);
+        if (StringUtil.isNotEmpty(timelineId)) {
+          location.timelineId = timelineId;
+          await updateLocationTimelineId(location);
+        }
+      }
+    }
+  }
 }

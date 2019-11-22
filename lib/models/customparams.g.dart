@@ -17,7 +17,8 @@ Customparams _$CustomparamsFromJson(Map<String, dynamic> json) {
     ..poiSearchInterval = json['poiSearchInterval'] as num
     ..pictureRadius = json['pictureRadius'] as num
     ..refreshHomePageTime = json['refreshHomePageTime'] as num
-    ..judgeDistanceNum = json['judgeDistanceNum'] as num;
+    ..judgeDistanceNum = json['judgeDistanceNum'] as num
+    ..aMapTypes = json['aMapTypes'] as String;
 }
 
 Map<String, dynamic> _$CustomparamsToJson(Customparams instance) =>
@@ -32,4 +33,5 @@ Map<String, dynamic> _$CustomparamsToJson(Customparams instance) =>
       'pictureRadius': instance.pictureRadius,
       'refreshHomePageTime': instance.refreshHomePageTime,
       'judgeDistanceNum': instance.judgeDistanceNum,
+      'aMapTypes': instance.aMapTypes,
     };

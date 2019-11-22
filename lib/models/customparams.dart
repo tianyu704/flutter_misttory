@@ -26,6 +26,8 @@ class Customparams {
 
   num judgeDistanceNum;
 
+  String aMapTypes;
+
   factory Customparams.fromJson(Map<String, dynamic> json) => _$CustomparamsFromJson(json);
 
   Map<String, dynamic> toJson() => _$CustomparamsToJson(this);
