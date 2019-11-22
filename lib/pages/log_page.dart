@@ -108,11 +108,13 @@ class _LogPageState extends LifecycleState<LogPage> {
                 Text("中心:(${item.lat},${item.lon})"),
                 Text("半径:${item.radius}(m)"),
                 Text("poi距离:${item.distance}(m)"),
+                Text("poiname：${item.poiName}"),
                 Text("poi:${item.poiAddress}"),
-                Text("地址：${item.customAddress}"),
+                Text("自定义名：${item.customAddress}"),
                 //      Text("经纬度:(${location.lon},${location.lat})"),
                 Text("开始:$date"),
                 Text("停留：${DateUtil.getStayShowTime(item.intervalTime)}"),
+                Text("是否是图片：${item.isFromPicture == 1}"),
 
 //              Offstage(
 //                offstage:!(stateMap.containsKey(index)? stateMap[index] : false),

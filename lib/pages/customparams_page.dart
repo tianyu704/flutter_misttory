@@ -7,9 +7,15 @@ import 'package:misstory/models/customparams.dart';
 import '../location_config.dart';
 
 enum CustomParamsType {
-  timeInterval,///定位时间间隔 【1 * 60 * 000    30 * 60 * 1000】
-  distanceFilter,///定位米数间隔 [2  1000 2000];
-  storyRadiusMin,/// [2  10  50]
+  timeInterval,
+
+  ///定位时间间隔 【1 * 60 * 000    30 * 60 * 1000】
+  distanceFilter,
+
+  ///定位米数间隔 [2  1000 2000];
+  storyRadiusMin,
+
+  /// [2  10  50]
   storyRadiusMax,
 
   /// [50   200   1000]
@@ -74,10 +80,10 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
             Offstage(
               offstage: false,
               child: FlatButton(
-                  onPressed: ()  {
-                     CustomParamsHelper().createOrUpdate(params);
-                     LocationConfig.updateDynamicData();
-                     Navigator.pop(context);
+                  onPressed: () {
+                    CustomParamsHelper().createOrUpdate(params);
+                    LocationConfig.updateDynamicData();
+                    Navigator.pop(context);
                   },
                   child: Text("保存修改")),
             ),
@@ -85,44 +91,61 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
         ),
         body: ListView(
           children: <Widget>[
-            Padding(padding: EdgeInsets.only(top: 40,left: 20),
-            child: Text("获取定位时间间隔（min）当前值为${params== null? LocationConfig.interval/1000/60 : params.timeInterval/1000/60}"),),
-            cell(getInit(CustomParamsType.timeInterval),
-                CustomParamsType.timeInterval),
+            Padding(
+              padding: EdgeInsets.only(top: 40, left: 20),
+              child: Text(
+                  "获取定位时间间隔（min）当前值为${params == null ? LocationConfig.interval / 1000 / 60 : params.timeInterval / 1000 / 60}"),
+            ),
+            cell(CustomParamsType.timeInterval),
 
-            Padding(padding: EdgeInsets.only(top: 40,left: 20),
-              child: Text("两个陌生点的距离（m）当前值 为${params == null? LocationConfig.judgeDistanceNum : params.judgeDistanceNum}"),),
-            cell(getInit(CustomParamsType.judgeDistanceNum),
-                CustomParamsType.judgeDistanceNum),
-            Padding(padding: EdgeInsets.only(top: 40,left: 20),
-              child: Text("poi搜索范围（m）当前值为 ${params == null ?LocationConfig.poiSearchInterval : params.poiSearchInterval}"),),
-            cell(getInit(CustomParamsType.poiSearchInterval),
-                CustomParamsType.poiSearchInterval),
-            Padding(padding: EdgeInsets.only(top: 40,left: 20),
-              child: Text("story 最短停留时长（min）当前值为 ${params == null ? LocationConfig.judgeUsefulLocation/1000/60 :params.storyKeepingTimeMin/1000/60}"),),
-            cell(getInit(CustomParamsType.storyKeepingTimeMin),
-                CustomParamsType.storyKeepingTimeMin),
-            Padding(padding: EdgeInsets.only(top: 40,left: 20),
-              child: Text("story 最大半径（m）当前值为 ${params == null ? LocationConfig.storyRadiusMax :params.storyRadiusMax}"),),
-            cell(getInit(CustomParamsType.storyRadiusMax),
-                CustomParamsType.storyRadiusMax),
-            Padding(padding: EdgeInsets.only(top: 40,left: 20),
-              child: Text("story 最小半径（m）当前值为 ${params == null ? LocationConfig.storyRadiusMin :params.storyRadiusMin}"),),
-            cell(getInit(CustomParamsType.storyRadiusMin),
-                CustomParamsType.storyRadiusMin),
-            Padding(padding: EdgeInsets.only(top: 40,left: 20),
-              child: Text("定位间隔距离（m）当前值为 ${params == null ? LocationConfig.distanceFilter :params.distanceFilter}"),),
-            cell(getInit(CustomParamsType.distanceFilter),
-                CustomParamsType.distanceFilter),
-            Padding(padding: EdgeInsets.only(top: 40,left: 20),
-              child: Text("图片区域半径（m）当前值为 ${params == null ? LocationConfig.pictureRadius :params.pictureRadius}"),),
-            cell(getInit(CustomParamsType.pictureRadius),
-                CustomParamsType.pictureRadius),
-            Padding(padding: EdgeInsets.only(top: 40,left: 20),
-              child: Text("首页更新时间 second 当前值为${params == null? LocationConfig.refreshTime : params.refreshHomePageTime}"),),
-            cell(getInit(CustomParamsType.refreshHomePageTime),
-                CustomParamsType.refreshHomePageTime),
-
+            Padding(
+              padding: EdgeInsets.only(top: 40, left: 20),
+              child: Text(
+                  "两个陌生点的距离（m）当前值 为${params == null ? LocationConfig.judgeDistanceNum : params.judgeDistanceNum}"),
+            ),
+            cell(CustomParamsType.judgeDistanceNum),
+            Padding(
+              padding: EdgeInsets.only(top: 40, left: 20),
+              child: Text(
+                  "poi搜索范围（m）当前值为 ${params == null ? LocationConfig.poiSearchInterval : params.poiSearchInterval}"),
+            ),
+            cell(CustomParamsType.poiSearchInterval),
+            Padding(
+              padding: EdgeInsets.only(top: 40, left: 20),
+              child: Text(
+                  "story 最短停留时长（min）当前值为 ${params == null ? LocationConfig.judgeUsefulLocation / 1000 / 60 : params.storyKeepingTimeMin / 1000 / 60}"),
+            ),
+            cell(CustomParamsType.storyKeepingTimeMin),
+            Padding(
+              padding: EdgeInsets.only(top: 40, left: 20),
+              child: Text(
+                  "story 最大半径（m）当前值为 ${params == null ? LocationConfig.storyRadiusMax : params.storyRadiusMax}"),
+            ),
+            cell(CustomParamsType.storyRadiusMax),
+            Padding(
+              padding: EdgeInsets.only(top: 40, left: 20),
+              child: Text(
+                  "story 最小半径（m）当前值为 ${params == null ? LocationConfig.storyRadiusMin : params.storyRadiusMin}"),
+            ),
+            cell(CustomParamsType.storyRadiusMin),
+            Padding(
+              padding: EdgeInsets.only(top: 40, left: 20),
+              child: Text(
+                  "定位间隔距离（m）当前值为 ${params == null ? LocationConfig.distanceFilter : params.distanceFilter}"),
+            ),
+            cell(CustomParamsType.distanceFilter),
+            Padding(
+              padding: EdgeInsets.only(top: 40, left: 20),
+              child: Text(
+                  "图片区域半径（m）当前值为 ${params == null ? LocationConfig.pictureRadius : params.pictureRadius}"),
+            ),
+            cell(CustomParamsType.pictureRadius),
+            Padding(
+              padding: EdgeInsets.only(top: 40, left: 20),
+              child: Text(
+                  "首页更新时间 second 当前值为${params == null ? LocationConfig.refreshTime : params.refreshHomePageTime}"),
+            ),
+            cell(CustomParamsType.refreshHomePageTime),
 
             // buildSlider(getInit(CustomParamsType.judgeDistanceNum),CustomParamsType.judgeDistanceNum),
             //buildSlider(getInit(CustomParamsType.timeInterval),CustomParamsType.timeInterval),
@@ -130,34 +153,33 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
         ));
   }
 
-  Widget cell(num progressNum, CustomParamsType itemType) {
+  Widget cell(CustomParamsType itemType) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Text("${getMin(itemType)}"),
-        buildSlider(getInit(itemType),
-            itemType),
+        buildSlider(getInit(itemType), itemType),
         Text("${getMax(itemType)}"),
       ],
     );
   }
-  Widget buildSlider(num progressNum, CustomParamsType itemType) {
-    return Slider(
 
+  Widget buildSlider(double progressNum, CustomParamsType itemType) {
+    return Slider(
       value: progressNum,
-      label: "$progressNum",
+      label: "${progressNum.toInt()}",
       divisions: 50,
       onChanged: (initValue) {
-        double value = initValue.roundToDouble();
+        int value = initValue.toInt();
         print(value);
-        if (params != null)  {
+        if (params != null) {
           if (CustomParamsType.timeInterval == itemType) {
             print("赋值${value * 60 * 1000}");
             params.timeInterval = value * 60 * 1000;
           } else if (CustomParamsType.judgeDistanceNum == itemType) {
             params.judgeDistanceNum = value;
           } else if (CustomParamsType.poiSearchInterval == itemType) {
-            params.poiSearchInterval = value ;
+            params.poiSearchInterval = value;
           } else if (CustomParamsType.storyKeepingTimeMin == itemType) {
             params.storyKeepingTimeMin = value * 60 * 1000;
           } else if (CustomParamsType.storyRadiusMax == itemType) {
@@ -168,12 +190,11 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
             params.pictureRadius = value;
           } else if (CustomParamsType.refreshHomePageTime == itemType) {
             params.refreshHomePageTime = value;
-          }  else if (CustomParamsType.storyRadiusMin  == itemType) {
+          } else if (CustomParamsType.storyRadiusMin == itemType) {
             params.storyRadiusMin = value;
           }
         }
-        setState(() {
-        });
+        setState(() {});
       },
       max: getMax(itemType),
       min: getMin(itemType),
@@ -181,16 +202,18 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
   }
 
   getInit(CustomParamsType itemType) {
-    double value = 10;
-    if (params == null) return value;
+    num value = 10;
+    if (params == null) return value.toDouble();
     if (CustomParamsType.timeInterval == itemType) {
-      value = params.timeInterval /60 / 1000;
+      double v = params.timeInterval.toDouble() / 60 / 1000;
+      value = v.toInt();
     } else if (CustomParamsType.judgeDistanceNum == itemType) {
       value = params.judgeDistanceNum;
     } else if (CustomParamsType.poiSearchInterval == itemType) {
       value = params.poiSearchInterval;
     } else if (CustomParamsType.storyKeepingTimeMin == itemType) {
-      value = params.storyKeepingTimeMin/60/1000;
+      double v = params.storyKeepingTimeMin.toDouble() / 60 / 1000;
+      value = v.toInt();
     } else if (CustomParamsType.storyRadiusMax == itemType) {
       value = params.storyRadiusMax;
     } else if (CustomParamsType.distanceFilter == itemType) {
@@ -199,22 +222,22 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
       value = params.pictureRadius;
     } else if (CustomParamsType.refreshHomePageTime == itemType) {
       value = params.refreshHomePageTime;
-    }  else if (CustomParamsType.storyRadiusMin  == itemType) {
+    } else if (CustomParamsType.storyRadiusMin == itemType) {
       value = params.storyRadiusMin;
     }
-    return value;
+    return value.toDouble();
   }
 
   getMax(CustomParamsType itemType) {
-    double max = 3000;
+    num max = 3000;
     if (CustomParamsType.timeInterval == itemType) {
-      max = 30  ;
+      max = 30;
     } else if (CustomParamsType.judgeDistanceNum == itemType) {
       max = 5000;
     } else if (CustomParamsType.poiSearchInterval == itemType) {
       max = 1000;
     } else if (CustomParamsType.storyKeepingTimeMin == itemType) {
-      max = 30  ;
+      max = 30;
     } else if (CustomParamsType.storyRadiusMax == itemType) {
       max = 1000;
     } else if (CustomParamsType.distanceFilter == itemType) {
@@ -222,24 +245,24 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
     } else if (CustomParamsType.pictureRadius == itemType) {
       max = 3000;
     } else if (CustomParamsType.refreshHomePageTime == itemType) {
-      max = 60 * 2.0;
-    } else if (CustomParamsType.storyRadiusMin  == itemType) {
+      max = 60 * 2;
+    } else if (CustomParamsType.storyRadiusMin == itemType) {
       max = 49;
     }
-    return max;
+    return max.toDouble();
   }
 
   getMin(CustomParamsType itemType) {
-    double value = 10;
-    if (params == null) return value;
+    int value = 10;
+    if (params == null) return value.toDouble();
     if (CustomParamsType.timeInterval == itemType) {
-      value = 1 ;
+      value = 1;
     } else if (CustomParamsType.judgeDistanceNum == itemType) {
       value = 2000;
     } else if (CustomParamsType.poiSearchInterval == itemType) {
       value = 100;
     } else if (CustomParamsType.storyKeepingTimeMin == itemType) {
-      value = 1  ;
+      value = 1;
     } else if (CustomParamsType.storyRadiusMax == itemType) {
       value = 50;
     } else if (CustomParamsType.distanceFilter == itemType) {
@@ -248,10 +271,9 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
       value = 50;
     } else if (CustomParamsType.refreshHomePageTime == itemType) {
       value = 15;
-    }
-    else if (CustomParamsType.storyRadiusMin  == itemType) {
+    } else if (CustomParamsType.storyRadiusMin == itemType) {
       value = 2;
     }
-    return value;
+    return value.toDouble();
   }
 }
