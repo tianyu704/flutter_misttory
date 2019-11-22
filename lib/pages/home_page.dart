@@ -121,7 +121,6 @@ class _HomePageState extends LifecycleState<HomePage> {
   ///刷新最新的story
   _refreshStory() async {
     await LocationHelper().saveLocation();
-//    await LocationHelper().createStoryByLocation();
     _currentTimeline = await TimelineHelper().getCurrentStory();
     if (_isFirstLoad) {
       ///初次加载需要查询前20条数据
@@ -131,8 +130,11 @@ class _HomePageState extends LifecycleState<HomePage> {
       }
     } else {
       /// 刷新时获取最新的story
-      _timelines = await TimelineHelper().checkLatestStory(_timelines);
+//      _timelines = await TimelineHelper().checkLatestStory(_timelines);
+      _timelines = await TimelineHelper()
+          .findAfterStories(_timelines[_timelines.length - 1].startTime);
     }
+
     await _mergeStories();
     _day = await TimelineHelper().getStoryDays();
     _footprint = await TimelineHelper().getFootprint();
@@ -393,8 +395,6 @@ class _HomePageState extends LifecycleState<HomePage> {
   _notifyStories(value) async {
     if (value != null && value is bool && value) {
       if (_timelines != null && _timelines.length > 0) {
-        _timelines = await TimelineHelper()
-            .findAfterStories(_timelines[_timelines.length - 1].startTime);
         if (mounted) {
           _refreshStory();
         }

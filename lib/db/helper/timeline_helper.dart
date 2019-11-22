@@ -100,9 +100,16 @@ class TimelineHelper {
           "is_confirm": timeline.isConfirm,
         });
       }
+      await mergeTimeline(timeline.sameId);
       return true;
     }
     return false;
+  }
+
+  Future mergeTimeline(String timelineId) async{
+//    Query(DBManager.tableTimeline).whereByColumFilters([
+//      WhereCondiction("same_id",WhereCondictionType.IN,[timelineId])
+//    ]).orderBy([""]).first();
   }
 
   ///更新Timeline
@@ -124,9 +131,26 @@ class TimelineHelper {
         if (latlonpoint.radius < LocationConfig.locationRadius) {
           latlonpoint.radius = LocationConfig.locationRadius;
         }
+
+        ///把新的中心点赋值给timeline
         timeline.lat = latlonpoint.latitude;
         timeline.lon = latlonpoint.longitude;
         timeline.radius = latlonpoint.radius;
+
+        /// 新timeline的中心点可能会在上一个timeline的半径范围内，如果在就删除新timeline，
+        /// 并把点合并到上一个上面去
+        Timeline lastTimeline =
+            await findBeforeTimeline(timeline.startTime, equal: false);
+        if (lastTimeline != null &&
+            CalculateUtil.calculateLatlngDistance(timeline.lat, timeline.lon,
+                    lastTimeline.lat, lastTimeline.lon) <=
+                lastTimeline.radius) {
+          await deleteTimeline(timeline);
+          LocationDBHelper()
+              .updateLocationsTimelineId(timeline.uuid, lastTimeline.uuid);
+          lastTimeline.endTime = timeline.endTime;
+          return await updateTimeline(lastTimeline);
+        }
 
         ///判断是否需要更新poi
         if (timeline.isConfirm != 1) {
@@ -369,11 +393,9 @@ class TimelineHelper {
   /// 查找same_id相同的TimeLine
   Future<List<Timeline>> querySameTimeline(String sameId) async {
     List list = await Query(DBManager.tableTimeline)
-        .orderBy(["start_time desc"])
-        .whereByColumFilters([
-          WhereCondiction("same_id", WhereCondictionType.IN, [sameId])
-        ])
-        .all();
+        .orderBy(["start_time desc"]).whereByColumFilters([
+      WhereCondiction("same_id", WhereCondictionType.IN, [sameId])
+    ]).all();
     if (list != null && list.length > 0) {
       List<Timeline> timelines = [];
       for (Map map in list) {

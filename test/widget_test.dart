@@ -133,7 +133,7 @@ void main() {
   });
 
   test("distance", () async {
-    Latlonpoint latLng1 = Latlonpoint(89.9990,180.000);
+    Latlonpoint latLng1 = Latlonpoint(89.9990, 180.000);
     Latlonpoint latLng2 = Latlonpoint(89.999, -90.0000);
     num m = DateTime.now().millisecondsSinceEpoch;
     num a = await CalculateUtil.calculateLineDistance(latLng1, latLng2);
@@ -160,8 +160,8 @@ void main() {
     print(uuid.v4());
     print(uuid.v4());
   });
-  
-  test("range",()async{
+
+  test("range", () async {
     Latlonpoint latlonpoint = Latlonpoint(39.900155, 116.49277);
     latlonpoint.radius = 400;
     LatlonRange latlonRange = CalculateUtil.getRange(latlonpoint);
@@ -172,9 +172,24 @@ void main() {
     print(a);
   });
 
-  test("pase",()async{
+  test("pase", () async {
     String a = '11.23332';
     print(double.tryParse(a));
+  });
+
+  test("center", () async {
+    num time = DateTime.now().millisecondsSinceEpoch;
+    List<Latlonpoint> points = [];
+    num i = 0;
+    num n = 1000000;
+    while (i < n) {
+      i++;
+      points.add(Latlonpoint(
+          39.8405031408 + 0.00001 * i, 116.4320168124 + 0.00001 * i));
+    }
+    Latlonpoint latlonpoint = await CalculateUtil.calculateCenterLatLon(points);
+    print("半径${latlonpoint.radius}");
+    print("$n条数据用时${DateTime.now().millisecondsSinceEpoch - time}毫秒");
   });
 }
 

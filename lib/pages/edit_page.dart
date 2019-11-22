@@ -49,7 +49,7 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   ///
   AMapController _controller;
-  LatLng _currentLatLng;
+  LatLng _poiLatLng;
   LatLng _originLatLng;
   MyLocationStyle _myLocationStyle;
 
@@ -93,27 +93,6 @@ class _EditPageState extends LifecycleState<EditPage> {
 
     print("${widget.timeline.poiLocation}");
 
-    ///数据初始化
-    if (StringUtil.isNotEmpty(widget.timeline.poiLocation)) {
-      ///TODO 需要用真正poi坐标初始化
-      List latlon = widget.timeline.poiLocation.split(",");
-      if (latlon.length == 3) {
-        double lat = double.tryParse(latlon[1]);
-        double lon = double.tryParse(latlon[0]);
-        String type = latlon[2] as String;
-
-        if (type == CoordType.gps) {
-          _currentLatLng = LatLng(lat, lon);
-          initCurrentLatLonConvert(lat, lon);
-        } else {
-          _currentLatLng = LatLng(lat, lon);
-        }
-      }
-    } else {
-      _currentLatLng = LatLng(widget.timeline.lat, widget.timeline.lon);
-
-      ///存在空poi的timeLine 有必要该初始化赋值 否则UI错乱
-    }
     _descTextFieldVC.text =
         StringUtil.isNotEmpty(widget.timeline.desc) ? widget.timeline.desc : "";
     _perWriteAddress = StringUtil.isNotEmpty(widget.timeline.customAddress)
@@ -126,50 +105,49 @@ class _EditPageState extends LifecycleState<EditPage> {
 //      print(_searchVC.text);
 //      handleSearchAction();
     });
-
-    ///
-    initData();
+    _originLatLng = LatLng(widget.timeline.lat, widget.timeline.lon);
+    initCurrentLatLonConvert();
   }
 
-  initCurrentLatLonConvert(double lat, double lon) async {
-    _currentLatLng = await CalculateTools()
-        .convertCoordinate(lat: lat, lon: lon, type: LatLngType.gps);
-    setState(() {});
-    CalculateTools()
-        .convertCoordinate(
-            lat: widget.timeline.lat,
-            lon: widget.timeline.lon,
-            type: LatLngType.gps)
-        .then((v) {
-      _currentLatLng = v;
-      _controller?.clearMarkers();
-      _controller?.addMarker(MarkerOptions(
-        position: _currentLatLng,
+  initCurrentLatLonConvert() async {
+    _originLatLng = await CalculateTools().convertCoordinate(
+        lat: widget.timeline.lat,
+        lon: widget.timeline.lon,
+        type: LatLngType.gps);
+
+    ///数据初始化
+    if (StringUtil.isNotEmpty(widget.timeline.poiLocation)) {
+      ///TODO 需要用真正poi坐标初始化
+      List latlon = widget.timeline.poiLocation.split(",");
+      if (latlon.length == 3) {
+        double lat = double.tryParse(latlon[1]);
+        double lon = double.tryParse(latlon[0]);
+        String type = latlon[2] as String;
+        if (type == CoordType.gps) {
+          _poiLatLng = await CalculateTools()
+              .convertCoordinate(lat: lat, lon: lon, type: LatLngType.gps);
+        } else {
+          _poiLatLng = LatLng(lat, lon);
+        }
+      }
+    } else {
+      ///存在空poi的timeLine 有必要该初始化赋值 否则UI错乱
+      _poiLatLng = _originLatLng;
+    }
+    await _controller?.clearMarkers();
+    if (_poiLatLng != null) {
+      await _controller?.addMarker(MarkerOptions(
+        position: _poiLatLng,
       ));
-    });
-  }
-
-  initData() async {
-    ///
-    String uuid = widget.timeline.uuid;
-//    personCacheList = await PersonHelper().queryPersonsByStoryId(uuid);
-//    if (personCacheList != null && personCacheList.length > 0) {
-//      for (Person person in personCacheList) {
-//        if (StringUtil.isNotEmpty(person.name)) {
-//          showPeopleList.add(person.name);
-//          peoplePreList.add(person.name);
-//        }
-//      }
-//    }
-//    tagCacheList = await TagHelper().queryTagsByStoryId(uuid);
-//    if (tagCacheList != null && tagCacheList.length > 0) {
-//      for (Tag tag in tagCacheList) {
-//        if (StringUtil.isNotEmpty(tag.tagName)) {
-//          showTagList.add(tag.tagName);
-//          tagPreList.add(tag.tagName);
-//        }
-//      }
-//    }
+    }
+    if (_originLatLng != null) {
+      await _controller?.addMarker(MarkerOptions(
+        position: _originLatLng,
+        icon: "assets/images/icon_location.png",
+      ));
+    }
+    await _controller?.zoomToSpan([_poiLatLng, _originLatLng]);
+    setState(() {});
     getPoi();
   }
 
@@ -578,34 +556,44 @@ class _EditPageState extends LifecycleState<EditPage> {
       height: 220,
       width: double.infinity,
       child: AMapView(
-        onAMapViewCreated: (controller) {
+        onAMapViewCreated: (controller) async {
           ///``添加坐标点 地图图钉📌
           _controller = controller;
-
-          _controller.addMarker(MarkerOptions(
-            position: _currentLatLng,
-          ));
-          _myLocationStyle = MyLocationStyle(
-            strokeColor: Color(0x662196F3),
-            radiusFillColor: Color(0x662196F3),
-            showMyLocation: false,
-
-            ///false 否则不能显示目标地点为中心点
-          );
           _controller.setUiSettings(UiSettings(
             isMyLocationButtonEnabled: false,
             logoPosition: LOGO_POSITION_BOTTOM_LEFT,
             isZoomControlsEnabled: false,
           ));
+          _myLocationStyle = MyLocationStyle(
+            strokeColor: Color(0x662196F3),
+            radiusFillColor: Color(0x662196F3),
+            //false 否则不能显示目标地点为中心点
+            showMyLocation: false,
+            myLocationType: LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER,
+            interval: 2000000,
+          );
           _controller.setMyLocationStyle(_myLocationStyle);
-          _controller.setZoomLevel(15);
+          if (_originLatLng != null) {
+            await _controller.addMarker(MarkerOptions(
+              position: _originLatLng,
+              icon: "assets/images/icon_location.png",
+            ));
+          }
+          if (_poiLatLng != null) {
+            await _controller.addMarker(MarkerOptions(
+              position: _poiLatLng,
+            ));
+          }
+          await _controller.zoomToSpan([_poiLatLng, _originLatLng]);
+//          _controller.setZoomLevel(15);
         },
         amapOptions: AMapOptions(
           compassEnabled: false,
           zoomControlsEnabled: true,
           logoPosition: LOGO_POSITION_BOTTOM_CENTER,
           camera: CameraPosition(
-            target: _currentLatLng,
+            target: _originLatLng,
+            bearing: widget.timeline.radius.toDouble(),
             zoom: 15,
           ),
         ),
@@ -844,11 +832,12 @@ class _EditPageState extends LifecycleState<EditPage> {
       setState(() {});
       return;
     }
-
-    _originLatLng = await CalculateTools().convertCoordinate(
-        lat: widget.timeline.lat,
-        lon: widget.timeline.lon,
-        type: LatLngType.gps);
+    if (_originLatLng == null) {
+      _originLatLng = await CalculateTools().convertCoordinate(
+          lat: widget.timeline.lat,
+          lon: widget.timeline.lon,
+          type: LatLngType.gps);
+    }
 
     if (isInChina()) {
       poiPreList = await http.requestAMapPois(
@@ -924,21 +913,28 @@ class _EditPageState extends LifecycleState<EditPage> {
     return false;
   }
 
-  clickPOI(AmapPoi amapPoi) {
+  clickPOI(AmapPoi amapPoi) async {
     pickPoi = amapPoi;
     if (StringUtil.isNotEmpty(amapPoi.location)) {
       List lonlat = amapPoi.location.split(",");
       if (lonlat.length >= 2) {
         double lat = double.tryParse(lonlat[1]);
         double lon = double.tryParse(lonlat[0]);
-        _currentLatLng = LatLng(lat, lon);
+        _poiLatLng = LatLng(lat, lon);
       }
     }
 
-    _controller.clearMarkers();
-    _controller.addMarker(MarkerOptions(
-      position: _currentLatLng,
+    await _controller.clearMarkers();
+    await _controller.addMarker(MarkerOptions(
+      position: _poiLatLng,
     ));
+    if (_originLatLng != null) {
+      await _controller.addMarker(MarkerOptions(
+        position: _originLatLng,
+        icon: "assets/images/icon_location.png",
+      ));
+    }
+    await _controller.zoomToSpan([_poiLatLng, _originLatLng]);
     if (StringUtil.isEmpty(_perWriteAddress)) {
       _addressTextFieldVC.text = getShowAddress(widget.timeline);
     }

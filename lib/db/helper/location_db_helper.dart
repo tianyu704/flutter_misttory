@@ -89,6 +89,13 @@ class LocationDBHelper {
         .primaryKey([location.id]).update({"timeline_id": location.timelineId});
   }
 
+  ///更新timeline_id
+  Future updateLocationsTimelineId(String oldId, String newId) async {
+    await Query(DBManager.tableLocation).whereByColumFilters([
+      WhereCondiction("timeline_id", WhereCondictionType.IN, [oldId])
+    ]).update({"timeline_id": newId});
+  }
+
   Future<List<Latlonpoint>> queryPoints(String timelineId) async {
     List result = await Query(DBManager.tableLocation).whereByColumFilters([
       WhereCondiction("timeline_id", WhereCondictionType.IN, [timelineId]),
@@ -108,11 +115,9 @@ class LocationDBHelper {
 
   /// 查找parent id相同的Location
   Future<List<Location>> queryLocationsWithTimelineId(String timeLineId) async {
-    List list = await Query(DBManager.tableLocation)
-        .whereByColumFilters([
+    List list = await Query(DBManager.tableLocation).whereByColumFilters([
       WhereCondiction("timeline_id", WhereCondictionType.IN, [timeLineId])
-    ])
-        .all();
+    ]).all();
     if (list != null && list.length > 0) {
       List<Location> locations = [];
       for (Map map in list) {
@@ -122,5 +127,4 @@ class LocationDBHelper {
     }
     return null;
   }
-
 }
