@@ -306,6 +306,8 @@ class TimelineHelper {
         timeline.city = same.city;
         timeline.district = same.district;
         timeline.needUpdatePoi = same.needUpdatePoi;
+        timeline.customAddress = same.customAddress;
+        timeline.isConfirm = same.isConfirm;
       } else {
         timeline = await requestPoiData(timeline);
       }
@@ -654,9 +656,9 @@ class TimelineHelper {
   }
 
   ///清除Location生成的Timeline
-  Future deleteLocationTimeline()async{
+  Future deleteLocationTimeline() async {
     await Query(DBManager.tableTimeline).whereByColumFilters([
-      WhereCondiction("is_from_picture",WhereCondictionType.IN,[0]),
+      WhereCondiction("is_from_picture", WhereCondictionType.IN, [0]),
     ]).delete();
   }
 }
