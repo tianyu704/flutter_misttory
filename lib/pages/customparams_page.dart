@@ -94,20 +94,21 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
     for (String key in amapTypMap.keys) {
       amapKeyList.add(key);
     }
+    initData();
+  }
+
+  initData() async {
+    params = await LocationConfig.updateDynamicData();
     if (StringUtil.isNotEmpty(LocationConfig.aMapTypes)) {
       List list = LocationConfig.aMapTypes.split("|");
       for (String key in list) {
         amapTypeCheckMap[key] = true;
       }
     }
-    initData();
-  }
-
-  initData() async {
-    params = await LocationConfig.updateDynamicData();
     if (params == null) {
       return;
     }
+
     setState(() {});
   }
 
