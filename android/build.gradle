@@ -1,14 +1,17 @@
 buildscript {
     repositories {
+        maven{ url'http://maven.aliyun.com/nexus/content/groups/public/' }
+        maven{ url'http://maven.aliyun.com/nexus/content/repositories/jcenter'}
+        maven { url 'https://jitpack.io' }
         google()
-        jcenter()
+//        jcenter()
 //        maven {
 //            url 'https://maven.fabric.io/public'
 //        }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.5.0'
         classpath "io.realm:realm-gradle-plugin:6.0.0"
         // Add the google services classpath
 //        classpath 'com.google.gms:google-services:4.3.0'
@@ -19,9 +22,11 @@ buildscript {
 
 allprojects {
     repositories {
-        google()
-        jcenter()
+        maven{ url'http://maven.aliyun.com/nexus/content/groups/public/' }
+        maven{ url'http://maven.aliyun.com/nexus/content/repositories/jcenter'}
         maven { url 'https://jitpack.io' }
+        google()
+//        jcenter()
     }
 }
 

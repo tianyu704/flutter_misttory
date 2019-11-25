@@ -38,6 +38,8 @@ public class LocationData extends RealmObject implements Serializable {
     @JsonProperty(value = "coord_type")
     private String coordType;
 
+    private String provider;
+
     public String getId() {
         return id;
     }
@@ -116,5 +118,13 @@ public class LocationData extends RealmObject implements Serializable {
 
     public void setCoordType(String coordType) {
         this.coordType = coordType;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 }

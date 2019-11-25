@@ -54,7 +54,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         GeneratedPluginRegistrant.registerWith(this);
         methodChannel = new MethodChannel(getFlutterView(), "com.admqr.misstory");
         methodChannel.setMethodCallHandler(this);
-        locationUtil = new LocationUtil(this);
+        locationUtil = LocationUtil.getInstance();
     }
 
 
@@ -109,6 +109,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     }
 
     public void onceLocation(MethodChannel.Result result) {
+        locationUtil.stop();
         locationUtil.startOnce(location -> {
             result.success(JacksonUtil.getInstance().writeValueAsString(location));
         });

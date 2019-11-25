@@ -75,11 +75,14 @@ class LocationDBHelper {
 
   ///
   Future saveLocation(Location location) async {
-    await createLocation(location);
-    String timelineId = await TimelineHelper().createOrUpdateTimeline(location);
-    if (StringUtil.isNotEmpty(timelineId)) {
-      location.timelineId = timelineId;
-      await updateLocationTimelineId(location);
+    int result = await createLocation(location);
+    if (result == 0) {
+      String timelineId =
+          await TimelineHelper().createOrUpdateTimeline(location);
+      if (StringUtil.isNotEmpty(timelineId)) {
+        location.timelineId = timelineId;
+        await updateLocationTimelineId(location);
+      }
     }
   }
 
@@ -117,7 +120,7 @@ class LocationDBHelper {
   Future<List<Location>> queryLocationsWithTimelineId(String timeLineId) async {
     List list = await Query(DBManager.tableLocation).whereByColumFilters([
       WhereCondiction("timeline_id", WhereCondictionType.IN, [timeLineId])
-    ]).all();
+    ]).orderBy(["time desc"]).all();
     if (list != null && list.length > 0) {
       List<Location> locations = [];
       for (Map map in list) {

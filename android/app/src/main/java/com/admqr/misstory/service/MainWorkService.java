@@ -1,9 +1,6 @@
 package com.admqr.misstory.service;
 
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -15,27 +12,18 @@ import com.admqr.misstory.MainActivity;
 import com.admqr.misstory.db.LocationDataHelper;
 import com.admqr.misstory.db.LocationHelper;
 import com.admqr.misstory.eventbus.EventUtil;
-import com.admqr.misstory.model.LocationData;
 import com.admqr.misstory.model.LocationResult;
-import com.admqr.misstory.model.MSLocation;
 import com.admqr.misstory.net.HttpRequest;
 import com.admqr.misstory.utils.JacksonUtil;
 import com.admqr.misstory.utils.LocationUtil;
 import com.admqr.misstory.utils.LogUtil;
-import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
 import com.shihoo.daemon.work.AbsWorkService;
 
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
-import me.yohom.amapbase.search.LatLng;
 
 
 public class MainWorkService extends AbsWorkService {
@@ -103,14 +91,10 @@ public class MainWorkService extends AbsWorkService {
 
     public void initNative() {
         if (locationUtil == null) {
-            locationUtil = new LocationUtil(MainWorkService.this);
-            locationUtil.setMsLocationListener(locationData -> {
-//                Log.d(TAG, JacksonUtil.getInstance().writeValueAsString(location));
-                LocationDataHelper.getInstance().createLocation(locationData);
-                EventUtil.postLocationEvent(locationData);
-            });
+            locationUtil = LocationUtil.getInstance();
+            locationUtil.init(this);
             handler.removeMessages(1);
-            handler.sendEmptyMessageDelayed(1, 10 * 1000);
+            handler.sendEmptyMessageDelayed(1, 5 * 1000);
         }
     }
 
@@ -143,7 +127,10 @@ public class MainWorkService extends AbsWorkService {
                 if (locationUtil.isStarted()) {
                     locationUtil.stop();
                 }
-                locationUtil.start();
+                locationUtil.startOnce(location -> {
+                    LocationDataHelper.getInstance().createLocation(location);
+                    EventUtil.postLocationEvent(location);
+                });
                 handler.sendEmptyMessageDelayed(1, LocationUtil.interval);
             }
 

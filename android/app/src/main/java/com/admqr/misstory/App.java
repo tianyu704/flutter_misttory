@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.multidex.MultiDex;
 
+import com.admqr.misstory.db.MyMigration;
 import com.admqr.misstory.service.MainWorkService;
 import com.admqr.misstory.utils.ApkHelper;
 import com.admqr.misstory.utils.CrashHandler;
@@ -51,7 +52,8 @@ public class App extends FlutterApplication {
         Realm.init(this);
         RealmConfiguration config = new RealmConfiguration.Builder()
                 .name("Misstory.realm")
-                .schemaVersion(0)
+                .schemaVersion(1)
+                .migration(new MyMigration())
                 .deleteRealmIfMigrationNeeded()
                 .build();
         Realm.setDefaultConfiguration(config);

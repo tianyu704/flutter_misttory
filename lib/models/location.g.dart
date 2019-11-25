@@ -19,7 +19,8 @@ Location _$LocationFromJson(Map<String, dynamic> json) {
     ..bearing = json['bearing'] as num
     ..count = json['count'] as num
     ..coordType = json['coord_type'] as String
-    ..timelineId = json['timeline_id'] as String;
+    ..timelineId = json['timeline_id'] as String
+    ..provider = json['provider'] as String;
 }
 
 Map<String, dynamic> _$LocationToJson(Location instance) => <String, dynamic>{
@@ -35,4 +36,5 @@ Map<String, dynamic> _$LocationToJson(Location instance) => <String, dynamic>{
       'count': instance.count,
       'coord_type': instance.coordType,
       'timeline_id': instance.timelineId,
+      'provider': instance.provider,
     };
