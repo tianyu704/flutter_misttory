@@ -142,6 +142,7 @@ void main() {
 //    num d =await CalculateUtil.calculateLineDistance(latLng1, latLng2);
     print(DateTime.now().millisecondsSinceEpoch - m);
     print(a);
+    print(CalculateUtil.distance(89.9990, 180.000, 89.999, -90.0000));
     //85305.78125
   });
 
@@ -190,6 +191,17 @@ void main() {
     Latlonpoint latlonpoint = await CalculateUtil.calculateCenterLatLon(points);
     print("半径${latlonpoint.radius}");
     print("$n条数据用时${DateTime.now().millisecondsSinceEpoch - time}毫秒");
+  });
+
+  test("convert", () {
+    //39.89881441318218,116.48662651612794 wgs84
+    //{latitude: 39.900074055989585, longitude: 116.49268120659723}
+    // 39.9000648232,116.4926701661  gcj02
+    num time = DateTime.now().millisecondsSinceEpoch;
+    print(CalculateUtil.gcjToWgs(39.900074055989585, 116.49268120659723));
+    print("用时${DateTime.now().millisecondsSinceEpoch - time}毫秒");
+    //{lat: 39.89880410390069, lon: 116.48661399086808}
+    print(CalculateUtil.wgsToGcj(39.89881441318218, 116.48662651612794));
   });
 }
 

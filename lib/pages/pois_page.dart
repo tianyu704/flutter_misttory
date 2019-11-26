@@ -8,6 +8,7 @@ import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/local_storage.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/net/http_manager.dart' as http;
+import 'package:misstory/utils/calculate_util.dart';
 import 'package:misstory/utils/channel_util.dart';
 
 ///
@@ -215,6 +216,18 @@ class _SearchPageState extends LifecycleState<SearchPage> {
                   await LocalStorage.saveBool(LocalStorage.isStep, false);
                   await LocalStorage.saveInt(LocalStorage.dbVersion, 0);
                   debugPrint("！！！！！！！！！删除成功！！！！！！！");
+//                    debugPrint("=========${await StoryHelper().getDistanceBetween1()}");
+                }),
+          ),
+          SliverToBoxAdapter(
+            child: RaisedButton(
+                child: Text("wgs84转gcj02"),
+                onPressed: () async {
+                  //39.89881441318218,116.48662651612794
+                  var a = await CalculateUtil.wgsToGcj(
+                      39.89881441318218,
+                      116.48662651612794);
+                  debugPrint("!!!!!!!!!!!!!${a.toJson()}");
 //                    debugPrint("=========${await StoryHelper().getDistanceBetween1()}");
                 }),
           ),
