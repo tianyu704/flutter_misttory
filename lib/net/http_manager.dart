@@ -254,3 +254,54 @@ Future<List<AmapPoi>> requestAMapPois(
   }
   return null;
 }
+
+Future<List<AmapPoi>> requestTencentPois(
+    {num lat = 0,
+      num lon = 0,
+      String keywords = "",
+      num limit = 20,
+      num radius,
+      String types ,
+      num page = 1}) async {
+  if (lat != 0 && lon != 0) {
+    try {
+      Response response = await Dio().get(
+        Address.requestTencentLocation(),
+        queryParameters: {
+          "keyword":keywords,
+          "key": Constant.tencentKey,
+          "boundary":"nearby($lat,$lon,$radius)",
+          "orderby":"_distance",
+          "page_size":limit,
+          "page_index":page
+        },
+      );
+      PrintUtil.debugPrint("搜索Tencent poi。。。。。。");
+      if (response.data != null && response.data is Map) {
+        List pois = response.data["data"];
+        if (pois != null && pois.length > 0) {
+          List<AmapPoi> list = [];
+          for (Map map in pois) {
+            AmapPoi amapPoi =AmapPoi();
+            amapPoi.id = map["id"];
+            amapPoi.name = map["title"];
+            amapPoi.address = map["adress"];
+            amapPoi.typecode = map["type"];
+            amapPoi.type = map["category"];
+            Map location = map["location"];
+            amapPoi.location = "${location["lng"]},${location["lat"]},WGS84";
+            Map adInfo = map["ad_info"];
+            amapPoi.adcode = adInfo["adcode"];
+            amapPoi.cityname = adInfo["city"];
+            amapPoi.distance = map["_distance"];
+            list.add(amapPoi);
+          }
+          return list;
+        }
+      }
+    } on DioError catch (e) {
+      print(e.response);
+    }
+  }
+  return null;
+}

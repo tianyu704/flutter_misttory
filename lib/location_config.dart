@@ -93,3 +93,9 @@ class LocationConfig {
     return params;
   }
 }
+
+class LocationFromType {
+  static const GPS  = "gps";
+  static const AMap   = "AMap";
+  static const Tencent   = "Tencent";
+}
