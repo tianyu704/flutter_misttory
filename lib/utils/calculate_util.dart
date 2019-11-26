@@ -1,12 +1,6 @@
-import 'package:amap_base/amap_base.dart';
-import 'package:misstory/models/coord_type.dart';
 import 'package:misstory/models/latlon_range.dart';
 import 'package:misstory/models/latlonpoint.dart';
 import 'dart:math';
-
-import 'package:misstory/models/mslocation.dart';
-import 'package:misstory/models/picture.dart';
-import 'package:misstory/models/story.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -23,70 +17,6 @@ class CalculateUtil {
     }
     return calculateLineDistance(
         Latlonpoint(lat1, lng1), Latlonpoint(lat2, lng2));
-  }
-
-  static Future<double> calculateStoriesDistance(Story l1, Story l2) async {
-    if (l1 != null && l2 != null) {
-      LatLng latLng1;
-      if (l1.coordType == CoordType.gps) {
-        latLng1 = await CalculateTools()
-            .convertCoordinate(lat: l1.lat, lon: l1.lon, type: LatLngType.gps);
-      } else {
-        latLng1 = LatLng(l1.lat, l1.lon);
-      }
-      LatLng latLng2;
-      if (l2.coordType == CoordType.gps) {
-        latLng2 = await CalculateTools()
-            .convertCoordinate(lat: l2.lat, lon: l2.lon, type: LatLngType.gps);
-      } else {
-        latLng2 = LatLng(l2.lat, l2.lon);
-      }
-      return calculateLineDistance(
-          Latlonpoint(latLng1.latitude, latLng1.longitude),
-          Latlonpoint(latLng2.latitude, latLng2.longitude));
-    }
-    return double.infinity;
-  }
-
-  static Future<double> calculateStoryDistance(Story l1, Mslocation l2) async {
-    if (l1 != null && l2 != null) {
-      LatLng latLng1;
-      if (l1.coordType == CoordType.gps) {
-        latLng1 = await CalculateTools()
-            .convertCoordinate(lat: l1.lat, lon: l1.lon, type: LatLngType.gps);
-      } else {
-        latLng1 = LatLng(l1.lat, l1.lon);
-      }
-      LatLng latLng2;
-      if (l2.coordType == CoordType.gps) {
-        latLng2 = await CalculateTools()
-            .convertCoordinate(lat: l2.lat, lon: l2.lon, type: LatLngType.gps);
-      } else {
-        latLng2 = LatLng(l2.lat, l2.lon);
-      }
-      return calculateLineDistance(
-          Latlonpoint(latLng1.latitude, latLng1.longitude),
-          Latlonpoint(latLng2.latitude, latLng2.longitude));
-    }
-    return double.infinity;
-  }
-
-  static Future<double> calculatePictureDistance(Story l1, Picture p) async {
-    if (l1 != null && p != null) {
-      LatLng latLng1;
-      if (l1.coordType == CoordType.gps) {
-        latLng1 = await CalculateTools()
-            .convertCoordinate(lat: l1.lat, lon: l1.lon, type: LatLngType.gps);
-      } else {
-        latLng1 = LatLng(l1.lat, l1.lon);
-      }
-      LatLng latLng2 = await CalculateTools()
-          .convertCoordinate(lat: p.lat, lon: p.lon, type: LatLngType.gps);
-      return calculateLineDistance(
-          Latlonpoint(latLng1.latitude, latLng1.longitude),
-          Latlonpoint(latLng2.latitude, latLng2.longitude));
-    }
-    return double.infinity;
   }
 
   static double calculateLineDistance(

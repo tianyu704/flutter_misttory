@@ -179,8 +179,8 @@ class StoryHelper {
         if ((afterStory.lat == story.lat && afterStory.lon == story.lon) ||
             ((afterStory.writeAddress == story.writeAddress ||
                     afterStory.customAddress == story.customAddress) &&
-                await CalculateUtil.calculateStoriesDistance(
-                        story, afterStory) <
+                CalculateUtil.calculateLatlngDistance(
+                        story.lat, story.lon, afterStory.lat, afterStory.lon) <
                     LocationConfig.poiSearchInterval)) {
           story.updateTime = afterStory.updateTime;
           story.customAddress = afterStory.customAddress ?? story.customAddress;
@@ -197,8 +197,8 @@ class StoryHelper {
         if ((beforeStory.lat == story.lat && beforeStory.lon == story.lon) ||
             ((beforeStory.writeAddress == story.writeAddress ||
                     beforeStory.customAddress == story.customAddress) &&
-                await CalculateUtil.calculateStoriesDistance(
-                        story, beforeStory) <
+                await CalculateUtil.calculateLatlngDistance(story.lat,
+                        story.lon, beforeStory.lat, beforeStory.lon) <
                     LocationConfig.poiSearchInterval)) {
           story.createTime = beforeStory.createTime;
           story.customAddress =
@@ -659,7 +659,8 @@ class StoryHelper {
     if (list != null && list.length > 0) {
       List<Story> stories = [];
       for (Map item in list) {
-        num distance = CalculateUtil.calculateLatlngDistance(story.lat, story.lon,item["lat"], item["lon"]);
+        num distance = CalculateUtil.calculateLatlngDistance(
+            story.lat, story.lon, item["lat"], item["lon"]);
         if (distance < LocationConfig.poiSearchInterval) {
           stories.add(Story.fromJson(Map<String, dynamic>.from(list.first)));
         }
@@ -700,15 +701,18 @@ class StoryHelper {
     if (lastStory != null) {
       /// 经纬度相等/地址相等认为是同一个地点
       if ((location.lat == lastStory.lat && location.lon == lastStory.lon) ||
-          (await CalculateUtil.calculateStoryDistance(lastStory, location) <
+          (CalculateUtil.calculateLatlngDistance(
+                  lastStory.lat, lastStory.lon, location.lat, location.lon) <
               lastStory.radius) ||
           (lastStory.defaultAddress == address &&
-              await CalculateUtil.calculateStoryDistance(lastStory, location) <
+              CalculateUtil.calculateLatlngDistance(lastStory.lat,
+                      lastStory.lon, location.lat, location.lon) <
                   LocationConfig.judgeDistanceNum) ||
           (sameStory != null &&
               (sameStory.customAddress == lastStory.customAddress ||
                   sameStory.writeAddress == lastStory.writeAddress) &&
-              await CalculateUtil.calculateStoryDistance(lastStory, location) <
+              CalculateUtil.calculateLatlngDistance(lastStory.lat,
+                      lastStory.lon, location.lat, location.lon) <
                   LocationConfig.poiSearchInterval)) {
         lastStory.updateTime = location.updatetime;
         return await updateStoryTimes(lastStory);
