@@ -19,6 +19,7 @@
     //
 @property (nonatomic, strong) CLLocation *lastLocation;
 @property (nonatomic, strong) NSDate *lastDate;
+@property (nonatomic, assign) BOOL isFristLoad;
 
 @end
 
@@ -59,6 +60,7 @@
 
 - (void)commonInit
 {
+    self.isFristLoad = YES;
     self.locationManager=[[CLLocationManager alloc] init];
     [self auth];
     if ([self locationServicesEnabled]) {
@@ -99,6 +101,12 @@
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations
 {
+    
+    NSLog(@"%@",locations);
+    if (self.isFristLoad) {
+        self.isFristLoad = NO;
+        return ;
+    }
     bool isWright = YES;
     if (self.lastDate) {
         long t = [self getSecondsFromStarTime:self.lastDate andInsertEndTime:[NSDate date]];
@@ -107,15 +115,15 @@
             //NSLog(@"时间太短了 %@ < %@不记录",@(t),@(self.timeCycleNum));
         }
     }
-    //获取当前最大精度坐标
+    //获取当前最大精度坐标 数值最小
     CLLocation *myLocation = locations.firstObject;
     for (CLLocation *l in locations) {
-        if (myLocation.horizontalAccuracy < l.horizontalAccuracy) {
+        if (myLocation.horizontalAccuracy >= l.horizontalAccuracy) {
             myLocation = l;
         }
     }
-    //更新历史最大精度坐标
-    if (!self.lastLocation || (self.lastLocation && self.lastLocation.horizontalAccuracy < myLocation.horizontalAccuracy)) {
+    //更新历史最大精度坐标 数值最小
+    if (!self.lastLocation || (self.lastLocation && self.lastLocation.horizontalAccuracy >= myLocation.horizontalAccuracy)) {
         self.lastLocation = myLocation;
     }
     if (self.onceSuccess) {
