@@ -123,7 +123,6 @@ class StoryHelper {
     if (story != null) {
 //      await Query(DBManager.tableStory).primaryKey([story.id]).update(
 //          {"custom_address": story.customAddress});
-      LatLng latLng1 = LatLng(story.lat, story.lon);
       if (updateCustom) {
         List result = await Query(DBManager.tableStory).whereByColumFilters([
           WhereCondiction(
@@ -131,11 +130,9 @@ class StoryHelper {
           WhereCondiction("write_address", WhereCondictionType.IS_NULL, false),
         ]).all();
         if (result != null && result.length > 0) {
-          LatLng latLng2;
           for (Map item in result) {
-            latLng2 = LatLng(item["lat"], item["lon"]);
-            num distance =
-                await CalculateTools().calcDistance(latLng1, latLng2);
+            num distance = CalculateUtil.calculateLatlngDistance(
+                story.lat, story.lon, item["lat"], item["lon"]);
             if (distance < LocationConfig.poiSearchInterval) {
               story.writeAddress = item["write_address"] as String;
               break;
@@ -150,11 +147,10 @@ class StoryHelper {
       ]).all();
 
       if (list != null && list.length > 0) {
-        LatLng latLng2;
 //        story = await calculateRadius(story);
         for (Map item in list) {
-          latLng2 = LatLng(item["lat"], item["lon"]);
-          num distance = await CalculateTools().calcDistance(latLng1, latLng2);
+          num distance = CalculateUtil.calculateLatlngDistance(
+              story.lat, story.lon, item["lat"], item["lon"]);
           if (distance < LocationConfig.poiSearchInterval) {
             item["custom_address"] = story.customAddress;
             item["write_address"] = story.writeAddress;
@@ -183,8 +179,8 @@ class StoryHelper {
         if ((afterStory.lat == story.lat && afterStory.lon == story.lon) ||
             ((afterStory.writeAddress == story.writeAddress ||
                     afterStory.customAddress == story.customAddress) &&
-                await CalculateUtil.calculateStoriesDistance(
-                        story, afterStory) <
+                CalculateUtil.calculateLatlngDistance(
+                        story.lat, story.lon, afterStory.lat, afterStory.lon) <
                     LocationConfig.poiSearchInterval)) {
           story.updateTime = afterStory.updateTime;
           story.customAddress = afterStory.customAddress ?? story.customAddress;
@@ -201,8 +197,8 @@ class StoryHelper {
         if ((beforeStory.lat == story.lat && beforeStory.lon == story.lon) ||
             ((beforeStory.writeAddress == story.writeAddress ||
                     beforeStory.customAddress == story.customAddress) &&
-                await CalculateUtil.calculateStoriesDistance(
-                        story, beforeStory) <
+                await CalculateUtil.calculateLatlngDistance(story.lat,
+                        story.lon, beforeStory.lat, beforeStory.lon) <
                     LocationConfig.poiSearchInterval)) {
           story.createTime = beforeStory.createTime;
           story.customAddress =
@@ -633,12 +629,10 @@ class StoryHelper {
     List list = await Query(DBManager.tableStory).whereBySql(
         "default_address = ? and (custom_address IS NOT NULL or write_address IS NOT NULL)",
         [story.defaultAddress]).all();
-    LatLng latLng1 = LatLng(story.lat, story.lon);
     if (list != null && list.length > 0) {
-      LatLng latLng2;
       for (Map item in list) {
-        latLng2 = LatLng(item["lat"], item["lon"]);
-        num distance = await CalculateTools().calcDistance(latLng1, latLng2);
+        num distance = CalculateUtil.calculateLatlngDistance(
+            story.lat, story.lon, item["lat"], item["lon"]);
         if (distance < LocationConfig.poiSearchInterval) {
           Story targetStory =
               Story.fromJson(Map<String, dynamic>.from(list.first));
@@ -651,7 +645,7 @@ class StoryHelper {
 
   ///根据当前story查库中相同地点的story集合
   Future<List<Story>> findSamePointStories(Story story) async {
-    if(StringUtil.isEmpty(story.defaultAddress)){
+    if (StringUtil.isEmpty(story.defaultAddress)) {
       return null;
     }
     String sql = "default_address = ? and isFromPicture != 1";
@@ -662,13 +656,11 @@ class StoryHelper {
       args = [story.defaultAddress, story.customAddress];
     }
     List list = await Query(DBManager.tableStory).whereBySql(sql, args).all();
-    LatLng latLng1 = LatLng(story.lat, story.lon);
     if (list != null && list.length > 0) {
-      LatLng latLng2;
       List<Story> stories = [];
       for (Map item in list) {
-        latLng2 = LatLng(item["lat"], item["lon"]);
-        num distance = await CalculateTools().calcDistance(latLng1, latLng2);
+        num distance = CalculateUtil.calculateLatlngDistance(
+            story.lat, story.lon, item["lat"], item["lon"]);
         if (distance < LocationConfig.poiSearchInterval) {
           stories.add(Story.fromJson(Map<String, dynamic>.from(list.first)));
         }
@@ -709,15 +701,18 @@ class StoryHelper {
     if (lastStory != null) {
       /// 经纬度相等/地址相等认为是同一个地点
       if ((location.lat == lastStory.lat && location.lon == lastStory.lon) ||
-          (await CalculateUtil.calculateStoryDistance(lastStory, location) <
+          (CalculateUtil.calculateLatlngDistance(
+                  lastStory.lat, lastStory.lon, location.lat, location.lon) <
               lastStory.radius) ||
           (lastStory.defaultAddress == address &&
-              await CalculateUtil.calculateStoryDistance(lastStory, location) <
+              CalculateUtil.calculateLatlngDistance(lastStory.lat,
+                      lastStory.lon, location.lat, location.lon) <
                   LocationConfig.judgeDistanceNum) ||
           (sameStory != null &&
               (sameStory.customAddress == lastStory.customAddress ||
                   sameStory.writeAddress == lastStory.writeAddress) &&
-              await CalculateUtil.calculateStoryDistance(lastStory, location) <
+              CalculateUtil.calculateLatlngDistance(lastStory.lat,
+                      lastStory.lon, location.lat, location.lon) <
                   LocationConfig.poiSearchInterval)) {
         lastStory.updateTime = location.updatetime;
         return await updateStoryTimes(lastStory);
@@ -861,10 +856,8 @@ class StoryHelper {
   Future<List<Story>> findBetweenStories(num bigTime, num smallTime) async {
     List result = await Query(DBManager.tableStory)
         .orderBy(["create_time desc"]).whereByColumFilters([
-      WhereCondiction(
-          "create_time", WhereCondictionType.MORE_THEN, smallTime),
-      WhereCondiction(
-          "create_time", WhereCondictionType.LESS_THEN, bigTime),
+      WhereCondiction("create_time", WhereCondictionType.MORE_THEN, smallTime),
+      WhereCondiction("create_time", WhereCondictionType.LESS_THEN, bigTime),
       WhereCondiction("isFromPicture", WhereCondictionType.NOT_IN, [1]),
       WhereCondiction("is_deleted", WhereCondictionType.IN, [0]),
     ]).all();

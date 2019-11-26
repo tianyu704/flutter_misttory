@@ -21,7 +21,6 @@ public class App extends FlutterApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-//        CrashHandler.instance.init();
         createDataBase();
         OkGo.getInstance().init(this).setRetryCount(1);
         MultiDex.install(this);
@@ -44,8 +43,7 @@ public class App extends FlutterApplication {
             ForegroundNotificationUtils.setPackgeName(BuildConfig.APPLICATION_ID);
             Log.d("wsh-daemon", "启动了看门狗进程");
         }
-
-
+        CrashHandler.getInstance().init(this);
     }
 
     public void createDataBase() {

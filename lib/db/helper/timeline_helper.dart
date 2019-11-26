@@ -1,4 +1,3 @@
-import 'package:amap_base/amap_base.dart' as amap;
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/db/helper/location_db_helper.dart';
 import 'package:misstory/location_config.dart';
@@ -164,13 +163,9 @@ class TimelineHelper {
               double lat1, lon1, lat2, lon2;
               if (CoordType.aMap == coordType) {
                 //原始坐标转高德
-                amap.LatLng latLng = await amap.CalculateTools()
-                    .convertCoordinate(
-                        lat: timeline.lat,
-                        lon: timeline.lon,
-                        type: amap.LatLngType.gps);
-                lat1 = latLng.latitude;
-                lon1 = latLng.longitude;
+                var latLng = CalculateUtil.wgsToGcj(timeline.lat, timeline.lon);
+                lat1 = latLng["lat"];
+                lon1 = latLng["lon"];
 
                 lat2 = double.tryParse(latlonList[1]);
                 lon2 = double.tryParse(latlonList[0]);
@@ -358,10 +353,9 @@ class TimelineHelper {
   /// 网络请求下poi并赋值给Timeline
   Future<Timeline> requestPoiData(Timeline timeline) async {
     if (timeline != null) {
-      amap.LatLng latLng = await amap.CalculateTools().convertCoordinate(
-          lat: timeline.lat, lon: timeline.lon, type: amap.LatLngType.gps);
+      var latLng = CalculateUtil.wgsToGcj(timeline.lat, timeline.lon);
       List<AmapPoi> list = await requestAMapPois(
-          lat: latLng.latitude, lon: latLng.longitude, limit: 1, radius: 300);
+          lat: latLng['lat'], lon: latLng['lon'], limit: 1, radius: 300);
       if (list != null && list.length > 0) {
         AmapPoi amapPoi = list[0];
         if (amapPoi != null) {
