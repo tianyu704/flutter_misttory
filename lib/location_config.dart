@@ -5,6 +5,14 @@ import 'package:misstory/db/helper/customparams_helper.dart';
 /// Create by Hugo.Guo
 /// Date: 2019-10-10
 ///
+///
+///
+
+class LocationWebReqestType {
+  static const AMap   = "AMap";
+  static const Tencent   = "Tencent";
+}
+
 class LocationConfig {
   /// 判断2个点距离是否超出judgeDistanceNum
   static num judgeDistanceNum = 3000;
@@ -42,7 +50,7 @@ class LocationConfig {
   /// 160000金融保险、170000公司企业、180000道路附属设施、190000地名地址信息、200000公共设施
   ///220000事件活动、990000同行设施
   static String aMapTypes = "120000|050000|110000";
-
+  static String locationWebReqestType = LocationWebReqestType.AMap;
 
   static resetData() async {
     LocationConfig.interval = 60 * 1000 * 3;
@@ -76,6 +84,7 @@ class LocationConfig {
       params.refreshHomePageTime = LocationConfig.refreshTime;
       params.judgeDistanceNum = LocationConfig.judgeDistanceNum;
       params.aMapTypes = LocationConfig.aMapTypes;
+      params.locationWebReqestType = LocationConfig.locationWebReqestType;
       await CustomParamsHelper().createOrUpdate(params);
     } else {
       print("CC1");
@@ -89,13 +98,9 @@ class LocationConfig {
       LocationConfig.refreshTime = params.refreshHomePageTime;
       LocationConfig.judgeDistanceNum = params.judgeDistanceNum;
       LocationConfig.aMapTypes = params.aMapTypes;
+      LocationConfig.locationWebReqestType = params.locationWebReqestType;
     }
     return params;
   }
 }
 
-class LocationFromType {
-  static const GPS  = "gps";
-  static const AMap   = "AMap";
-  static const Tencent   = "Tencent";
-}

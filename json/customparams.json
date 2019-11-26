@@ -9,7 +9,8 @@
   "pictureRadius": 100,
   "refreshHomePageTime": 60,
   "judgeDistanceNum": 3000,
-  "aMapTypes": ""
+  "aMapTypes": "",
+  "locationWebReqestType": ""
 }
 
 

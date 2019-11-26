@@ -164,7 +164,7 @@ class DBManager {
     customParamsField["pictureRadius"] = Field(FieldType.Real);
     customParamsField["judgeDistanceNum"] = Field(FieldType.Real);
     customParamsField["aMapTypes"] = Field(FieldType.Text);
-
+    customParamsField["locationWebReqestType"] = Field(FieldType.Text);
     ///时间线表
     Map<String, Field> timelineFields = new Map<String, Field>();
     timelineFields["uuid"] = Field(FieldType.Text, primaryKey: true);
@@ -194,7 +194,6 @@ class DBManager {
     timelineFields["need_update_poi"] = Field(FieldType.Real);
     timelineFields["same_id"] = Field(FieldType.Text);
     timelineFields["is_confirm"] = Field(FieldType.Real);
-
 
     await FlutterOrmPlugin.createTable(
         dbName, tableMSLocation, mslocationFields);

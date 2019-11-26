@@ -354,7 +354,7 @@ class TimelineHelper {
   Future<Timeline> requestPoiData(Timeline timeline) async {
     if (timeline != null) {
       var latLng = CalculateUtil.wgsToGcj(timeline.lat, timeline.lon);
-      List<AmapPoi> list = await requestAMapPois(
+      List<AmapPoi> list = await requestPois(
           lat: latLng['lat'], lon: latLng['lon'], limit: 1, radius: 300);
       if (list != null && list.length > 0) {
         AmapPoi amapPoi = list[0];

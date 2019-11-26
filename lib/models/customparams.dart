@@ -28,6 +28,8 @@ class Customparams {
 
   String aMapTypes;
 
+  String locationWebReqestType;
+
   factory Customparams.fromJson(Map<String, dynamic> json) => _$CustomparamsFromJson(json);
 
   Map<String, dynamic> toJson() => _$CustomparamsToJson(this);

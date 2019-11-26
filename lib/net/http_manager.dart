@@ -213,7 +213,27 @@ Future<List<AmapPoi>> requestLocations({String latlon, String near}) async {
   return null;
 }
 
-/// 获取poi地点信息
+///综合选取poi集合方法
+Future<List<AmapPoi>> requestPois (
+    {num lat = 0,
+      num lon = 0,
+      String keywords = "",
+      num limit = 20,
+      num radius,
+      String types ,
+      num page = 1})  {
+
+  if (LocationWebReqestType.Tencent == LocationConfig.locationWebReqestType) {///请使用腾讯坐标
+    print("腾讯坐标");
+    return requestTencentPois(lat: lat,lon:lon,keywords: keywords,limit: limit,radius: radius,types: types,page: page);
+  } else {///请使用高德坐标
+    print("高德坐标");
+    return requestAMapPois(lat: lat,lon:lon,keywords: keywords,limit: limit,radius: radius,types: types,page: page);
+  }
+}
+
+
+/// 获取高德poi地点信息
 Future<List<AmapPoi>> requestAMapPois(
     {num lat = 0,
     num lon = 0,
@@ -255,6 +275,7 @@ Future<List<AmapPoi>> requestAMapPois(
   return null;
 }
 
+///获取腾讯poi集合
 Future<List<AmapPoi>> requestTencentPois(
     {num lat = 0,
       num lon = 0,
@@ -270,7 +291,7 @@ Future<List<AmapPoi>> requestTencentPois(
         queryParameters: {
           "keyword":keywords,
           "key": Constant.tencentKey,
-          "boundary":"nearby($lat,$lon,$radius)",
+          "boundary":"nearby($lat,$lon,$radius,0)",
           "orderby":"_distance",
           "page_size":limit,
           "page_index":page
@@ -285,15 +306,15 @@ Future<List<AmapPoi>> requestTencentPois(
             AmapPoi amapPoi =AmapPoi();
             amapPoi.id = map["id"];
             amapPoi.name = map["title"];
-            amapPoi.address = map["adress"];
-            amapPoi.typecode = map["type"];
+            amapPoi.address = map["address"];
+            amapPoi.typecode = map["type"].toString();
             amapPoi.type = map["category"];
             Map location = map["location"];
-            amapPoi.location = "${location["lng"]},${location["lat"]},WGS84";
+            amapPoi.location = "${location["lng"]},${location["lat"]}";
             Map adInfo = map["ad_info"];
-            amapPoi.adcode = adInfo["adcode"];
+            amapPoi.adcode = adInfo["adcode"].toString();
             amapPoi.cityname = adInfo["city"];
-            amapPoi.distance = map["_distance"];
+            amapPoi.distance = map["_distance"].toString();
             list.add(amapPoi);
           }
           return list;
