@@ -49,7 +49,7 @@ FlutterMethodChannel *_channel;
                     num = num/1000;//转second
 //                    double desiredAccuracy = [params[@"locationMode"] doubleValue];
                     double distanceFilter = [params[@"distanceFilter"]doubleValue];//每间隔distanceFilter 米定位一次
-                    app.blessManager  = [[BlessLocationManager alloc]initWithFilter:distanceFilter accuracy:kCLLocationAccuracyHundredMeters timeCycle:num / 2];
+                    app.blessManager  = [[BlessLocationManager alloc]initWithFilter:distanceFilter accuracy:kCLLocationAccuracyNearestTenMeters timeCycle:num / 2];
                 } else {
                     app.blessManager = [[BlessLocationManager alloc]init];
                 }
