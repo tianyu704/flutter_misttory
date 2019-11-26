@@ -231,6 +231,7 @@ class _SearchPageState extends LifecycleState<SearchPage> {
 //                    debugPrint("=========${await StoryHelper().getDistanceBetween1()}");
                 }),
           ),
+          SizedBox(),
         ],
       ),
     );

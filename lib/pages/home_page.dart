@@ -249,19 +249,8 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   ///请求一次定位
-  void _onceLocate() async {
-    LocationChannel().getCurrentLocation().then((location) async {
-      PrintUtil.debugPrint("获取一次原生定位信息-----${location.toJson()}");
-      if (location != null) {
-        if (_isDealWithLocation) {
-          return;
-        }
-        _isDealWithLocation = true;
-        await LocationDBHelper().saveNewLocation(location);
-        await _refreshStory();
-        _isDealWithLocation = false;
-      }
-    });
+  void _onceLocate() {
+    LocationChannel().getCurrentLocation();
   }
 
   @override

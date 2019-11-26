@@ -81,7 +81,8 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
                 result.success("");
             }
         } else if (methodCall.method.equals("current_location")) {
-            onceLocation(result);
+            onceLocation();
+            result.success("");
         } else if (methodCall.method.equals("query_location")) {
             List<MSLocation> locationList = LocationHelper.getInstance().getAllLocation();
             LocationHelper.getInstance().clearLocation();
@@ -108,10 +109,14 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         isCanStartWorkService = false;
     }
 
-    public void onceLocation(MethodChannel.Result result) {
+    public void onceLocation() {
         locationUtil.stop();
         locationUtil.startOnce(location -> {
-            result.success(JacksonUtil.getInstance().writeValueAsString(location));
+//            result.success(JacksonUtil.getInstance().writeValueAsString(location));
+            if (methodChannel != null) {
+                String json = JacksonUtil.getInstance().writeValueAsString(location);
+                methodChannel.invokeMethod("locationListener", json);
+            }
         });
     }
 
@@ -203,14 +208,14 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 result.success("GRANTED");
             } else {
-                result.success("DENIED");
+//                result.success("DENIED");
                 requestLocationPermission(result);
             }
         } else if (requestCode == PERMISSION_STORAGE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 result.success("GRANTED");
             } else {
-                result.success("DENIED");
+//                result.success("DENIED");
                 requestStoragePermission(result);
             }
         }
