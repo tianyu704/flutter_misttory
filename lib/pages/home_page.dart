@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_amap_location_plugin/amap_location_lib.dart' as amap;
+import 'package:flutter_bugly/flutter_bugly.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/location_db_helper.dart';
 import 'package:misstory/db/helper/location_helper.dart';
@@ -105,6 +106,7 @@ class _HomePageState extends LifecycleState<HomePage> {
         _initLocation();
       }
     });
+    FlutterBugly.init(androidAppId: "aa88483ea0",iOSAppId: "11dc0ba141");
   }
 
   ///同步图片逻辑

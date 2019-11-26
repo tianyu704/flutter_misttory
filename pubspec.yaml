@@ -68,6 +68,7 @@ dependencies:
 #  connectivity: ^0.4.5+2
   uuid: ^2.0.2
 #  firebase_crashlytics: 0.1.1+2
+  flutter_bugly: 0.2.8
 
 dev_dependencies:
   flutter_test:
