@@ -106,7 +106,7 @@ class _HomePageState extends LifecycleState<HomePage> {
         _initLocation();
       }
     });
-    FlutterBugly.init(androidAppId: "aa88483ea0",iOSAppId: "11dc0ba141");
+    FlutterBugly.init(androidAppId: "aa88483ea0", iOSAppId: "11dc0ba141");
   }
 
   ///同步图片逻辑
@@ -422,10 +422,11 @@ class _HomePageState extends LifecycleState<HomePage> {
   @override
   void dispose() {
     // TODO: implement dispose
-    _subscription.cancel();
-    _refreshSubscription.cancel();
-    _aMapLocation.dispose();
-    _refreshController.dispose();
+    _subscription?.cancel();
+    _refreshSubscription?.cancel();
+    _aMapLocation?.dispose();
+    _refreshController?.dispose();
+    _locationEventSubscription?.cancel();
     _timer?.cancel();
     super.dispose();
   }
