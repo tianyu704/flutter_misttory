@@ -1,12 +1,11 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:amap_base/amap_base.dart';
 
-//import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bugly/flutter_bugly.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:misstory/pages/home_page.dart';
 import 'package:misstory/db/db_manager.dart';
@@ -35,20 +34,16 @@ void main() async {
         SystemUiOverlayStyle(statusBarColor: Colors.transparent);
     SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
   }
-
-//  /// Crashlytics
-//  Crashlytics.instance.enableInDevMode = true;
-//  FlutterError.onError = Crashlytics.instance.recordFlutterError;
-//  runZoned<Future<void>>(() async {
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider<ThemeProvider>.value(
-        value: ThemeProvider(isNight ? AppTheme.night : AppTheme.light),
-      ),
-    ],
-    child: MyApp(),
-  ));
-//  }, onError: Crashlytics.instance.recordError);
+  FlutterBugly.postCatchedException(() {
+    runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ThemeProvider>.value(
+          value: ThemeProvider(isNight ? AppTheme.night : AppTheme.light),
+        ),
+      ],
+      child: MyApp(),
+    ));
+  });
 }
 
 class MyApp extends StatelessWidget {
