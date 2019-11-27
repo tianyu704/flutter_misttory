@@ -133,7 +133,7 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
               offstage: false,
               child: FlatButton(
                   onPressed: () async {
-                    await EventBusUtil.fireLocationEvent(0);
+                    EventBusUtil.fireLocationEvent(0);
                     LoadingDialog loading = LoadingDialog(
                       outsideDismiss: false,
                       loadingText: "重新生成中Thinking...",
@@ -165,10 +165,10 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
                     await LocationConfig.updateDynamicData();
                     await TimelineHelper().deleteLocationTimeline();
                     await LocationDBHelper().convertAllLocationToTimeline();
-                    await EventBusUtil.fireLocationEvent(1);
+                    EventBusUtil.fireLocationEvent(1);
 
                     ///进度消失
-                    await loading.handleDismiss();
+                    loading.handleDismiss();
                     Navigator.pop(context);
                   },
                   child: Text("保存修改")),

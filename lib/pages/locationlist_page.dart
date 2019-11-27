@@ -30,8 +30,14 @@ class _LocationListPageState extends LifecycleState<LocationListPage> {
   }
 
   initData() async {
-    _locations = await LocationDBHelper()
-        .queryLocationsWithTimelineId(widget.timeline.uuid);
+    if (widget.timeline.uuid == null) {
+      _locations = await LocationDBHelper().queryLocationsBetweenTime(
+          widget.timeline.startTime, widget.timeline.endTime);
+    } else {
+      _locations = await LocationDBHelper()
+          .queryLocationsWithTimelineId(widget.timeline.uuid);
+    }
+
     if (_locations != null && _locations.length > 0) {
       setState(() {
         ///none

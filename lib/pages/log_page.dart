@@ -123,7 +123,17 @@ class _LogPageState extends LifecycleState<LogPage> {
                 Text("开始:$date"),
                 Text("停留：${DateUtil.getStayShowTime(item.intervalTime)}"),
                 Text("是否是图片：${item.isFromPicture == 1}"),
-
+                RaisedButton(
+                  child: Text("过程点"),
+                  onPressed: () {
+                    Timeline timeline = Timeline();
+                    timeline.startTime = (index < _timelines.length-1)?(_timelines[index+1].endTime):0;
+                    timeline.endTime = item.startTime;
+                    print("${timeline.startTime}-${timeline.endTime}");
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => LocationListPage(timeline)));
+                  },
+                )
 //              Offstage(
 //                offstage:!(stateMap.containsKey(index)? stateMap[index] : false),
 //                child:  Column(

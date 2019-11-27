@@ -646,7 +646,8 @@ class _EditPageState extends LifecycleState<EditPage> {
   Widget poiCell(int index) {
     AmapPoi p = poiList[index];
     String poiId = p.id;
-    String subName = StringUtil.isNotEmpty(p.address) ? p.address : "";
+    String subName =
+        "${p.type}-->${StringUtil.isNotEmpty(p.address) ? p.address : ""}";
     return Padding(
       padding: EdgeInsets.only(bottom: index == poiList.length - 1 ? 37 : 0),
       child: InkWell(

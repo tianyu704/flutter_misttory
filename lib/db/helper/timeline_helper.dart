@@ -487,7 +487,7 @@ class TimelineHelper {
     List result = await Query(DBManager.tableTimeline)
         .orderBy(["start_time desc"]).whereBySql(
             "(is_from_picture = ? or interval_time >= ?) and is_delete = 0",
-            [1, LocationConfig.judgeUsefulLocation]).all();
+            [1, 0]).all();
     List<Timeline> list = [];
     if (result != null && result.length > 0) {
       int count = result.length;

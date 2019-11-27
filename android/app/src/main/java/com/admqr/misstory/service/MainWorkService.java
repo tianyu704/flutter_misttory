@@ -72,6 +72,7 @@ public class MainWorkService extends AbsWorkService {
 
     @Override
     public void stopWork() {
+        LogUtil.d(TAG, "定位保活服务关闭！！！！！！！！");
         //取消对任务的订阅
         if (mDisposable != null && !mDisposable.isDisposed()) {
             mDisposable.dispose();
@@ -80,11 +81,15 @@ public class MainWorkService extends AbsWorkService {
             handler.removeMessages(1);
             handler.removeMessages(0);
         }
+        if(locationUtil != null){
+            locationUtil.stop();
+        }
 //        saveData();
     }
 
     @Override
     public void startWork() {
+        LogUtil.d(TAG, "定位保活服务开启！！！！！！！！");
 //        initAMap();
         initNative();
     }

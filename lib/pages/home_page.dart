@@ -249,19 +249,10 @@ class _HomePageState extends LifecycleState<HomePage> {
   }
 
   ///请求一次定位
-  void _onceLocate() async {
-    LocationChannel().getCurrentLocation().then((location) async {
-      PrintUtil.debugPrint("获取一次原生定位信息-----${location.toJson()}");
-      if (location != null) {
-        if (_isDealWithLocation) {
-          return;
-        }
-        _isDealWithLocation = true;
-        await LocationDBHelper().saveNewLocation(location);
-        await _refreshStory();
-        _isDealWithLocation = false;
-      }
-    });
+  void _onceLocate() {
+    if (LocationChannel().isStart) {
+      LocationChannel().getCurrentLocation();
+    }
   }
 
   @override
@@ -278,10 +269,11 @@ class _HomePageState extends LifecycleState<HomePage> {
               offstage: !Constant.isDebug,
               child: FlatButton(
                 onPressed: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
-                    return SearchPage("");
-                  }));
+//                  Navigator.of(context)
+//                      .push(MaterialPageRoute(builder: (context) {
+//                    return SearchPage("");
+//                  }));
+                  _stopLocation();
                 },
                 child: Text("无用"),
               )),
