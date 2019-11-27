@@ -267,7 +267,9 @@ class TimelineHelper {
       timeline.lat = location.lat;
       timeline.lon = location.lon;
       timeline.altitude = location.altitude;
-      timeline.radius = LocationConfig.locationRadius;
+      timeline.radius = isFromPicture == 0
+          ? LocationConfig.locationRadius
+          : LocationConfig.pictureRadius;
       timeline.radiusSd = 0;
       timeline.startTime = location.time;
       timeline.endTime = location.time;
@@ -543,12 +545,13 @@ class TimelineHelper {
     }
     return checkedTimelines;
   }
+
   ///根据搜索名 搜索timeLine集合
   Future<List<Timeline>> querySearch(String searchText) async {
     List result = await Query(DBManager.tableTimeline)
         .orderBy(["start_time desc"]).whereBySql(
-        "(custom_address like ? or poi_name like ?) and is_delete = 0",
-        ["%$searchText%", "%$searchText%"]).all();
+            "(custom_address like ? or poi_name like ?) and is_delete = 0",
+            ["%$searchText%", "%$searchText%"]).all();
     List<Timeline> list = [];
     if (result != null && result.length > 0) {
       int count = result.length;
@@ -560,6 +563,7 @@ class TimelineHelper {
     }
     return list;
   }
+
   /// 获取当前位置的story
   Future<Timeline> getCurrentStory() async {
     Timeline current = await queryLastTimeline();
