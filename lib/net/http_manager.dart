@@ -341,7 +341,7 @@ Future<List<AmapPoi>> requestTencentPois(
           "key": Constant.tencentKey,
           "location": "$lat,$lon",
           "poi_options":
-              "address_format=short;radius=$radius;page_size=$limit;page_index=$page",
+              "address_format=short;radius=${radius.toInt()};page_size=$limit;page_index=$page",
         },
       );
       PrintUtil.debugPrint("搜索Tencent poi。。。。。。");
