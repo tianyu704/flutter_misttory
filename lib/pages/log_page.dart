@@ -70,7 +70,7 @@ class _LogPageState extends LifecycleState<LogPage> {
         actions: <Widget>[
           FlatButton(
               onPressed: () {
-                isSearch = !isSearchgit;
+                isSearch = !isSearch;
                 _searchTimelines =  List<Timeline>();
 
                 _textFieldVC.text = "";
