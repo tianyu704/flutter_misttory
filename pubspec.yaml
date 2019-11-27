@@ -69,6 +69,9 @@ dependencies:
   uuid: ^2.0.2
 #  firebase_crashlytics: 0.1.1+2
   flutter_bugly: 0.2.8
+ # 获取包名版本号信息
+  package_info: ^0.4.0+2
+
 
 dev_dependencies:
   flutter_test:

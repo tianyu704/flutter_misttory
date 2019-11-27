@@ -237,10 +237,10 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
               padding: EdgeInsets.only(top: 40, left: 20),
               child: Text("Poi 推荐搜索类型"),
             ),
-//            Offstage(
-//              offstage: LocationWebReqestType.Tencent == LocationConfig.locationWebReqestType,
-//              child: buildWrapCheck(),
-//            ),
+            Offstage(
+              offstage: LocationWebReqestType.Tencent == LocationConfig.locationWebReqestType,
+              child: buildWrapCheck(),
+            ),
             Offstage(
               offstage: false,
               //LocationWebReqestType.Tencent != LocationConfig.locationWebReqestType,
