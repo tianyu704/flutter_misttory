@@ -23,8 +23,13 @@ class Address {
     return "https://restapi.amap.com/v3/place/around";
   }
   ///获取腾讯坐标信息
-  static requestTencentLocation() {
+  static searchTencentLocation() {
     return "https://apis.map.qq.com/ws/place/v1/search";
+  }
+
+  ///搜索腾讯坐标信息
+  static requestTencentLocation() {
+    return "https://apis.map.qq.com/ws/geocoder/v1/";
   }
 
 }

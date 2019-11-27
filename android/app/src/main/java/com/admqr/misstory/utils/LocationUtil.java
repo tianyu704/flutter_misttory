@@ -55,6 +55,8 @@ public class LocationUtil {
     public static int timeout = 5 * 1000;
     private String provider = LocationManager.NETWORK_PROVIDER;
     private boolean isSearching = false;
+    GeocodeAddress geocodeAddress;
+    long time;
 
     private static class Holder {
         private final static LocationUtil instance = new LocationUtil();
@@ -141,6 +143,9 @@ public class LocationUtil {
                             }
                             msLocationListener.onLocationChanged(locationData);
                             stop();
+//                            time = System.currentTimeMillis();
+//                            geocodeAddress = new GeocodeAddress();
+//                            geocodeAddress.execute(location);
                         }
                     }
 
@@ -352,17 +357,18 @@ public class LocationUtil {
         protected String doInBackground(Location... params) {
             // TODO Auto-generated method stub
             if (params[0] != null) {
-
-//                Geocoder geocoder = new Geocoder(context);
-//                try {
-//                    List<Address> address = geocoder.getFromLocation(38.4307949819,115.9315904557, 1);
-//                    if (address != null && address.size() > 0) {
-//                        Log.d(TAG, JacksonUtil.getInstance().writeValueAsString(address.get(0)));
-//                    }
-//                } catch (IOException e) {
-//                    // TODO Auto-generated catch block
-//                    e.printStackTrace();
-//                }
+                Geocoder geocoder = new Geocoder(context);
+                try {
+//                    List<Address> address = geocoder.getFromLocation(params[0].getLatitude(), params[0].getLongitude(), 5);
+                    List<Address> address = geocoder.getFromLocation(22.3973920700,114.1832235300, 5);
+                    if (address != null && address.size() > 0) {
+                        Log.d(TAG, JacksonUtil.getInstance().writeValueAsString(address));
+//                        LogUtil.d(TAG, System.currentTimeMillis() - time + "");
+                    }
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
             return null;
         }

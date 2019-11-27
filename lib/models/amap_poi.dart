@@ -48,6 +48,8 @@ class AmapPoi {
   @JsonKey(name: "indoor_map")
   String indoorMap;
 
+  String country;
+
   factory AmapPoi.fromJson(Map<String, dynamic> json) => _$AmapPoiFromJson(json);
 
   Map<String, dynamic> toJson() => _$AmapPoiToJson(this);

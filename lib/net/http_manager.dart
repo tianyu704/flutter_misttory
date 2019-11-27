@@ -214,24 +214,72 @@ Future<List<AmapPoi>> requestLocations({String latlon, String near}) async {
 }
 
 ///综合选取poi集合方法
-Future<List<AmapPoi>> requestPois (
+Future<List<AmapPoi>> searchPois(
     {num lat = 0,
-      num lon = 0,
-      String keywords = "",
-      num limit = 20,
-      num radius,
-      String types ,
-      num page = 1})  {
-
-  if (LocationWebReqestType.Tencent == LocationConfig.locationWebReqestType) {///请使用腾讯坐标
+    num lon = 0,
+    String keywords = "",
+    num limit = 20,
+    num radius,
+    String types,
+    num page = 1}) {
+  if (LocationWebReqestType.Tencent == LocationConfig.locationWebRequestType) {
+    ///请使用腾讯坐标
     PrintUtil.debugPrint("腾讯坐标");
-    return requestTencentPois(lat: lat,lon:lon,keywords: keywords,limit: limit,radius: radius,types: types,page: page);
-  } else {///请使用高德坐标
+    return searchTencentPois(
+        lat: lat,
+        lon: lon,
+        keywords: keywords,
+        limit: limit,
+        radius: radius,
+        types: types,
+        page: page);
+  } else {
+    ///请使用高德坐标
     PrintUtil.debugPrint("高德坐标");
-    return requestAMapPois(lat: lat,lon:lon,keywords: keywords,limit: limit,radius: radius,types: types,page: page);
+    return requestAMapPois(
+        lat: lat,
+        lon: lon,
+        keywords: keywords,
+        limit: limit,
+        radius: radius,
+        types: types,
+        page: page);
   }
 }
 
+///综合选取poi集合方法
+Future<List<AmapPoi>> requestPois(
+    {num lat = 0,
+    num lon = 0,
+    String keywords = "",
+    num limit = 20,
+    num radius,
+    String types,
+    num page = 1}) {
+  if (LocationWebReqestType.Tencent == LocationConfig.locationWebRequestType) {
+    ///请使用腾讯坐标
+    PrintUtil.debugPrint("腾讯坐标");
+    return requestTencentPois(
+        lat: lat,
+        lon: lon,
+        keywords: keywords,
+        limit: limit,
+        radius: radius,
+        types: types,
+        page: page);
+  } else {
+    ///请使用高德坐标
+    PrintUtil.debugPrint("高德坐标");
+    return requestAMapPois(
+        lat: lat,
+        lon: lon,
+        keywords: keywords,
+        limit: limit,
+        radius: radius,
+        types: types,
+        page: page);
+  }
+}
 
 /// 获取高德poi地点信息
 Future<List<AmapPoi>> requestAMapPois(
@@ -240,7 +288,7 @@ Future<List<AmapPoi>> requestAMapPois(
     String keywords = "",
     num limit = 20,
     num radius,
-    String types ,
+    String types,
     num page = 1}) async {
   if (lat != 0 && lon != 0) {
     try {
@@ -252,7 +300,7 @@ Future<List<AmapPoi>> requestAMapPois(
           "offset": limit,
           "key": Constant.aMapWebKey,
           "radius": radius ?? LocationConfig.poiSearchInterval.toInt(),
-          "types": types ??  LocationConfig.aMapTypes,
+          "types": types ?? LocationConfig.aMapTypes,
           "sortrule": "distance",
           "page": page
         },
@@ -278,23 +326,81 @@ Future<List<AmapPoi>> requestAMapPois(
 ///获取腾讯poi集合
 Future<List<AmapPoi>> requestTencentPois(
     {num lat = 0,
-      num lon = 0,
-      String keywords = "",
-      num limit = 20,
-      num radius,
-      String types ,
-      num page = 1}) async {
+    num lon = 0,
+    String keywords = "",
+    num limit = 20,
+    num radius,
+    String types,
+    num page = 1}) async {
   if (lat != 0 && lon != 0) {
     try {
       Response response = await Dio().get(
         Address.requestTencentLocation(),
         queryParameters: {
-          "keyword":keywords,
+          "get_poi": 1,
           "key": Constant.tencentKey,
-          "boundary":"nearby($lat,$lon,$radius,0)",
-          "orderby":"_distance",
-          "page_size":limit,
-          "page_index":page
+          "location": "$lat,$lon",
+          "poi_options":
+              "address_format=short;radius=$radius;page_size=$limit;page_index=$page",
+        },
+      );
+      PrintUtil.debugPrint("搜索Tencent poi。。。。。。");
+      if (response.data != null && response.data is Map) {
+        Map result = response.data["result"];
+        if (result != null && result.length > 0) {
+          List pois = result["pois"];
+          Map address = result["address_component"];
+          String country = address != null ? address["nation"] : "";
+          if (pois != null && pois.length > 0) {
+            List<AmapPoi> list = [];
+            for (Map map in pois) {
+              AmapPoi amapPoi = AmapPoi();
+              amapPoi.id = map["id"];
+              amapPoi.name = map["title"];
+              amapPoi.address = map["address"];
+              amapPoi.typecode = map["type"].toString();
+              amapPoi.type = map["category"];
+              Map location = map["location"];
+              amapPoi.location = "${location["lng"]},${location["lat"]}";
+              Map adInfo = map["ad_info"];
+              amapPoi.adcode = adInfo["adcode"].toString();
+              amapPoi.cityname = adInfo["city"];
+              amapPoi.pname = adInfo["province"];
+              amapPoi.country = country;
+              amapPoi.distance = map["_distance"].toString();
+              list.add(amapPoi);
+            }
+            return list;
+          }
+        }
+      }
+    } on DioError catch (e) {
+      print(e.response);
+    }
+  }
+  return null;
+}
+
+///获取腾讯poi集合
+Future<List<AmapPoi>> searchTencentPois(
+    {num lat = 0,
+    num lon = 0,
+    String keywords = "",
+    num limit = 20,
+    num radius,
+    String types,
+    num page = 1}) async {
+  if (lat != 0 && lon != 0) {
+    try {
+      Response response = await Dio().get(
+        Address.searchTencentLocation(),
+        queryParameters: {
+          "keyword": keywords,
+          "key": Constant.tencentKey,
+          "boundary": "nearby($lat,$lon,$radius,0)",
+          "orderby": "_distance",
+          "page_size": limit,
+          "page_index": page
         },
       );
       PrintUtil.debugPrint("搜索Tencent poi。。。。。。");
@@ -303,7 +409,7 @@ Future<List<AmapPoi>> requestTencentPois(
         if (pois != null && pois.length > 0) {
           List<AmapPoi> list = [];
           for (Map map in pois) {
-            AmapPoi amapPoi =AmapPoi();
+            AmapPoi amapPoi = AmapPoi();
             amapPoi.id = map["id"];
             amapPoi.name = map["title"];
             amapPoi.address = map["address"];

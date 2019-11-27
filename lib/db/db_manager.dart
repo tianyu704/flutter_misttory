@@ -1,5 +1,6 @@
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/db/helper/story_helper.dart';
+import 'package:misstory/location_config.dart';
 
 import 'helper/location_helper.dart';
 import 'helper/picture_helper.dart';
@@ -148,10 +149,9 @@ class DBManager {
     pictureFields["isSynced"] = Field(FieldType.Real);
     pictureFields["path"] = Field(FieldType.Text);
 
-
     ///customParams表
     ///
-    Map<String,Field> customParamsField = new Map<String, Field>();
+    Map<String, Field> customParamsField = new Map<String, Field>();
 
     customParamsField["itemId"] = Field(FieldType.Text, primaryKey: true);
     customParamsField["timeInterval"] = Field(FieldType.Real);
@@ -165,6 +165,7 @@ class DBManager {
     customParamsField["judgeDistanceNum"] = Field(FieldType.Real);
     customParamsField["aMapTypes"] = Field(FieldType.Text);
     customParamsField["locationWebReqestType"] = Field(FieldType.Text);
+
     ///时间线表
     Map<String, Field> timelineFields = new Map<String, Field>();
     timelineFields["uuid"] = Field(FieldType.Text, primaryKey: true);
@@ -202,8 +203,11 @@ class DBManager {
     await FlutterOrmPlugin.createTable(dbName, tablePerson, personFields);
     await FlutterOrmPlugin.createTable(dbName, tablePicture, pictureFields);
     await FlutterOrmPlugin.createTable(dbName, tableLocation, locationFields);
-    await FlutterOrmPlugin.createTable(dbName, tableCustomParams, customParamsField);
+    await FlutterOrmPlugin.createTable(
+        dbName, tableCustomParams, customParamsField);
     await FlutterOrmPlugin.createTable(dbName, tableTimeline, timelineFields);
+
+    await LocationConfig.updateDynamicData();
 
     dynamic oldVersion = await LocalStorage.get(LocalStorage.dbVersion);
     if (oldVersion == null) {

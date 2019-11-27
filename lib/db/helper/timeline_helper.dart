@@ -114,11 +114,11 @@ class TimelineHelper {
   ///更新Timeline
   Future<int> updateTimeline(Timeline timeline) async {
     if (timeline != null) {
-      List<Timeline> timelines = await querySameTimeline(timeline.sameId);
+//      List<Timeline> timelines = await querySameTimeline(timeline.sameId);
       List<Latlonpoint> points = [];
-      for (Timeline t in timelines) {
-        points.addAll(await LocationDBHelper().queryPoints(t.uuid));
-      }
+//      for (Timeline t in timelines) {
+      points.addAll(await LocationDBHelper().queryPoints(timeline.uuid));
+//      }
       Latlonpoint latlonpoint =
           await CalculateUtil.calculateCenterLatLon(points);
       if (latlonpoint != null) {
@@ -368,7 +368,8 @@ class TimelineHelper {
             timeline.poiLocation = "${amapPoi.location},GCJ02";
           }
           timeline.distance = amapPoi.distance;
-          timeline.country = "中国";
+          timeline.country =
+              StringUtil.isEmpty(amapPoi.country) ? "中国" : amapPoi.country;
           timeline.province = amapPoi.pname;
           timeline.city = amapPoi.cityname;
           timeline.district = amapPoi.adname;

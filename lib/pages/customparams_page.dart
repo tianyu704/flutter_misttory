@@ -107,7 +107,7 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
         amapTypeCheckMap[key] = true;
       }
     }
-    _newValue = LocationConfig.locationWebReqestType;
+    _newValue = LocationConfig.locationWebRequestType;
     print(params.locationWebReqestType);
 
     if (params == null) {
@@ -136,7 +136,7 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
                     EventBusUtil.fireLocationEvent(0);
                     LoadingDialog loading = LoadingDialog(
                       outsideDismiss: false,
-                      loadingText: "重新生成中Thinking...",
+                      loadingText: "重新生成中...",
                     );
                     showDialog(
                         context: context,
@@ -164,7 +164,9 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
                     await CustomParamsHelper().createOrUpdate(params);
                     await LocationConfig.updateDynamicData();
                     await TimelineHelper().deleteLocationTimeline();
-                    await LocationDBHelper().convertAllLocationToTimeline();
+                    await LocationDBHelper().convertAllLocationToTimeline((s) {
+                      loading.refreshLoadingText("重新生成中...\n($s)");
+                    });
                     EventBusUtil.fireLocationEvent(1);
 
                     ///进度消失
@@ -238,7 +240,8 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
               child: Text("Poi 推荐搜索类型"),
             ),
             Offstage(
-              offstage: LocationWebReqestType.Tencent == LocationConfig.locationWebReqestType,
+              offstage: LocationWebReqestType.Tencent ==
+                  LocationConfig.locationWebRequestType,
               child: buildWrapCheck(),
             ),
             Offstage(
@@ -361,7 +364,6 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
                 });
               }),
         ),
-
       ],
     );
   }
