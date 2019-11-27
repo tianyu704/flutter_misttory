@@ -75,12 +75,10 @@
         self.locationManager.pausesLocationUpdatesAutomatically = NO;
         self.locationManager.desiredAccuracy =  self.desiredAccuracy;
         self.locationManager.distanceFilter = self.distanceFilter;
-        [self.locationManager startUpdatingLocation];
-            //支持被kill掉以后能够后台自动重启
-            //后台自动唤醒
-        [self.locationManager startMonitoringSignificantLocationChanges];
+        [self restart];
     }
 }
+
 
 - (void)onceLocationWithSuccess:(void(^)(NSString *locationJsonString))onceSuccess
 {
@@ -92,9 +90,16 @@
     self.success = success;
 }
 
+- (void)restart {
+    [self.locationManager startUpdatingLocation];
+        //支持被kill掉以后能够后台自动重启
+        //后台自动唤醒
+    [self.locationManager startMonitoringSignificantLocationChanges];
+}
 - (void)stop
 {
     [self.locationManager stopUpdatingLocation];
+    [self.locationManager stopMonitoringSignificantLocationChanges];
 }
 
 #pragma mark - location manager delegate
@@ -115,6 +120,15 @@
             //NSLog(@"时间太短了 %@ < %@不记录",@(t),@(self.timeCycleNum));
         }
     }
+//    if (self.lastLocation) {
+//        double distance = [myLocation distanceFromLocation:self.lastLocation];
+//        if (distance > 150 ) {
+//            NSLog(@"太近了 不记录");
+//           // return;
+//        }
+//        NSLog(@"%@======",@(distance));
+//    }
+    
     //获取当前最大精度坐标 数值最小
     CLLocation *myLocation = locations.firstObject;
     for (CLLocation *l in locations) {
