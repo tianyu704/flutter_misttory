@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/timeline_helper.dart';
 import 'package:misstory/style/app_style.dart';
+import 'package:package_info/package_info.dart';
 import 'customparams_page.dart';
 import 'package:misstory/models/timeline.dart';
 import 'package:misstory/utils/date_util.dart';
@@ -21,6 +22,8 @@ class _LogPageState extends LifecycleState<LogPage> {
   //List<Story> _stories = List<Story>();
   List<Timeline> _timelines = List<Timeline>();
   Map stateMap = {};
+  String versionStr = "";
+
 
   @override
   void initState() {
@@ -37,6 +40,10 @@ class _LogPageState extends LifecycleState<LogPage> {
         ///none
       });
     }
+    await getVersion();
+    setState(() {
+
+    });
   }
 
   _notifySCurrentPage(value) {
@@ -67,6 +74,7 @@ class _LogPageState extends LifecycleState<LogPage> {
       ),
       body: Column(
         children: <Widget>[
+          Text(versionStr),
           Flexible(
             child: ListView.separated(
               itemBuilder: _buildItem,
@@ -162,5 +170,11 @@ class _LogPageState extends LifecycleState<LogPage> {
             });
           },
         ));
+  }
+
+  getVersion () async{
+
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    versionStr =  "app版本号：${packageInfo.version}(${packageInfo.buildNumber})";
   }
 }

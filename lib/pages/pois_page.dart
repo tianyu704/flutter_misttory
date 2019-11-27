@@ -6,6 +6,7 @@ import 'package:misstory/db/helper/location_helper.dart';
 import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/story_helper.dart';
 import 'package:misstory/db/local_storage.dart';
+import 'package:misstory/models/amap_poi.dart';
 import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/net/http_manager.dart' as http;
 import 'package:misstory/utils/calculate_util.dart';
@@ -111,14 +112,20 @@ class _SearchPageState extends LifecycleState<SearchPage> {
                         //40.74224,-73.99386
                         //37.5536,126.921774
                         //28.189403,113.212998
-                        _aMapSearch
-                            .searchReGeocode(
-                                LatLng(28.189403, 113.212998), 100, 1)
-                            .then((result) {
-                          _result = result.regeocodeAddress.toString();
-                          debugPrint(result.toString());
-                          setState(() {});
-                        });
+                        print("xxx");
+                        List list = await http.requestTencentPois(lat:39.899466,lon:116.486954,radius: 1000,keywords: "美食",limit: 1);
+                        AmapPoi poi = list.first;
+                        _result = "name:${poi.name},address:${poi.address},distance:${poi.distance}";
+                        setState(() {});
+//
+//                        _aMapSearch
+//                            .searchReGeocode(
+//                                LatLng(28.189403, 113.212998), 100, 1)
+//                            .then((result) {
+//                          _result = result.regeocodeAddress.toString();
+//                          debugPrint(result.toString());
+//                          setState(() {});
+//                        });
 //                    }
                       },
                       child: Text("高德获取"),

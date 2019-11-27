@@ -798,7 +798,7 @@ class _EditPageState extends LifecycleState<EditPage> {
           type: LatLngType.gps);
     }
     if (isInChina()) {
-      poiList = await http.requestAMapPois(
+      poiList = await http.requestPois(
           lat: _originLatLng.latitude,
           lon: _originLatLng.longitude,
           keywords: searchText,
@@ -835,7 +835,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
 
     if (isInChina()) {
-      poiPreList = await http.requestAMapPois(
+      poiPreList = await http.requestPois(
           lat: _originLatLng.latitude,
           lon: _originLatLng.longitude,
           radius: LocationConfig.poiSearchInterval);

@@ -20,4 +20,8 @@ class Constant {
   /// 高德web api key
 //  static final String aMapWebKey = "0004af0a0ee3b327d404eff0fb88a1b9";
   static final String aMapWebKey = "b24df9f1354d51538d60d3e4410af79e";
+
+  /// 腾讯 web api key
+///
+  static final String tencentKey = "24DBZ-IJFC4-YSYUQ-D2NAI-LYXDO-4HFUV";
 }

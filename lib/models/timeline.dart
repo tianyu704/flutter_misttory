@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:misstory/models/picture.dart';
-
+import "picture.dart";
 part 'timeline.g.dart';
 
 @JsonSerializable()
@@ -77,7 +76,6 @@ class Timeline {
   @JsonKey(name: "is_confirm")
   num isConfirm;
 
-  ///以下为附加字段不存入数据库,显示时使用
   String date;
 
   List<Picture> pictures;

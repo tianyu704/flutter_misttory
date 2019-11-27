@@ -40,6 +40,7 @@ enum CustomParamsType {
 
   ///两个间隔陌生地点距离边界 3000 [2000     5000]
   aMapTypes,
+  locationWebReqestType,
 
   ///高德poi类型
   /// 010000汽车服务、020000汽车销售、030000汽车维修、050000餐饮服务、060000购物服务、
@@ -85,6 +86,7 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
   };
   Map amapTypeCheckMap = {};
   List amapKeyList = [];
+  String _newValue = "";
 
   @override
   void initState() {
@@ -105,6 +107,9 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
         amapTypeCheckMap[key] = true;
       }
     }
+    _newValue = LocationConfig.locationWebReqestType;
+    print(params.locationWebReqestType);
+
     if (params == null) {
       return;
     }
@@ -154,6 +159,8 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
                     if (StringUtil.isNotEmpty(str)) {
                       params.aMapTypes = str;
                     }
+                    params.locationWebReqestType = _newValue;
+                    print(params.locationWebReqestType);
                     await CustomParamsHelper().createOrUpdate(params);
                     await LocationConfig.updateDynamicData();
                     await TimelineHelper().deleteLocationTimeline();
@@ -230,7 +237,15 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
               padding: EdgeInsets.only(top: 40, left: 20),
               child: Text("Poi 推荐搜索类型"),
             ),
-            buildWrapCheck(),
+            Offstage(
+              offstage: LocationWebReqestType.Tencent == LocationConfig.locationWebReqestType,
+              child: buildWrapCheck(),
+            ),
+            Offstage(
+              offstage: false,
+              //LocationWebReqestType.Tencent != LocationConfig.locationWebReqestType,
+              child: locationWebReqestType(),
+            )
 
             // buildSlider(getInit(CustomParamsType.judgeDistanceNum),CustomParamsType.judgeDistanceNum),
             //buildSlider(getInit(CustomParamsType.timeInterval),CustomParamsType.timeInterval),
@@ -318,6 +333,38 @@ class _CustomParamsPageState extends LifecycleState<CustomParamsPage> {
           ),
         );
       });
+
+  /*一个渐变颜色的正方形集合*/
+  Widget locationWebReqestType() {
+    List list = ["高德poi", "腾讯poi"];
+    return Row(
+      children: <Widget>[
+        Flexible(
+          child: RadioListTile<String>(
+              value: LocationWebReqestType.AMap,
+              title: Text(list[0]),
+              groupValue: _newValue,
+              onChanged: (value) {
+                setState(() {
+                  _newValue = value;
+                });
+              }),
+        ),
+        Flexible(
+          child: RadioListTile<String>(
+              value: LocationWebReqestType.Tencent,
+              title: Text(list[1]),
+              groupValue: _newValue,
+              onChanged: (value) {
+                setState(() {
+                  _newValue = value;
+                });
+              }),
+        ),
+
+      ],
+    );
+  }
 
   getInit(CustomParamsType itemType) {
     num value = 10;
