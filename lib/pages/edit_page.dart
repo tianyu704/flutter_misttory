@@ -11,6 +11,7 @@ import 'package:misstory/models/amap_poi.dart';
 import 'package:misstory/models/coord_type.dart';
 import 'package:misstory/models/timeline.dart';
 import 'package:misstory/style/app_style.dart';
+import 'package:misstory/utils/print_util.dart';
 import 'package:misstory/utils/string_util.dart';
 import 'package:misstory/widgets/loading_dialog.dart';
 import 'package:misstory/widgets/my_appbar.dart';
@@ -798,7 +799,7 @@ class _EditPageState extends LifecycleState<EditPage> {
           type: LatLngType.gps);
     }
     if (isInChina()) {
-      poiList = await http.requestPois(
+      poiList = await http.searchPois(
           lat: _originLatLng.latitude,
           lon: _originLatLng.longitude,
           keywords: searchText,
@@ -821,7 +822,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   getPoi() async {
-    print("===0===");
+    PrintUtil.debugPrint("===0===");
     if (poiPreList != null && poiPreList.length > 0 && !isSearching) {
       poiList = poiPreList;
       setState(() {});

@@ -132,10 +132,11 @@ class LocationDBHelper {
   }
 
   ///把location重新依次生成timeline
-  Future convertAllLocationToTimeline() async {
+  Future convertAllLocationToTimeline(void progress(String s)) async {
     List list = await Query(DBManager.tableLocation).orderBy(["time"]).all();
     if (list != null && list.length > 0) {
       Location location;
+      int i = 0;
       for (Map map in list) {
         location = Location.fromJson(Map<String, dynamic>.from(map));
         String timelineId =
@@ -144,6 +145,8 @@ class LocationDBHelper {
           location.timelineId = timelineId;
           await updateLocationTimelineId(location);
         }
+        i++;
+        progress("$i/${list.length}");
       }
     }
   }

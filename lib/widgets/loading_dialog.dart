@@ -9,33 +9,42 @@ class LoadingDialog extends StatefulWidget {
   Future<dynamic> requestCallBack;
 
   _LoadingDialog _state;
+
   LoadingDialog(
       {Key key,
-        this.loadingText = "loading...",
-        this.outsideDismiss = true,
-        this.dismissCallback,
-        this.requestCallBack})
+      this.loadingText = "loading...",
+      this.outsideDismiss = true,
+      this.dismissCallback,
+      this.requestCallBack})
       : super(key: key);
 
   @override
-  State<LoadingDialog>  createState() {
+  State<LoadingDialog> createState() {
     _state = _LoadingDialog();
     return _state;
   }
 
-  handleDismiss() async{
+  handleDismiss() async {
     if (_state != null) {
-     await _state. dismissDialog();
+      await _state.dismissDialog();
+    }
+  }
+
+  refreshLoadingText(String text) {
+    if (_state != null) {
+      _state._refreshLoadingText(text);
     }
   }
 }
 
 class _LoadingDialog extends State<LoadingDialog> {
-  dismissDialog()async {
+  String _loadingText;
+
+  dismissDialog() async {
     if (widget.dismissCallback != null) {
       widget.dismissCallback();
     }
-   await Navigator.of(context).pop();
+    await Navigator.of(context).pop();
   }
 
   @override
@@ -46,6 +55,7 @@ class _LoadingDialog extends State<LoadingDialog> {
         Navigator.pop(context);
       });
     }
+    _loadingText = widget.loadingText;
   }
 
   @override
@@ -77,7 +87,8 @@ class _LoadingDialog extends State<LoadingDialog> {
                       top: 20.0,
                     ),
                     child: new Text(
-                      widget.loadingText,
+                      _loadingText,
+                      textAlign: TextAlign.center,
                       style: new TextStyle(fontSize: 12.0),
                     ),
                   ),
@@ -88,5 +99,11 @@ class _LoadingDialog extends State<LoadingDialog> {
         ),
       ),
     );
+  }
+
+  _refreshLoadingText(String text) {
+    setState(() {
+      _loadingText = text;
+    });
   }
 }

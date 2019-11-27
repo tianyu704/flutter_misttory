@@ -50,7 +50,7 @@ class LocationConfig {
   /// 160000金融保险、170000公司企业、180000道路附属设施、190000地名地址信息、200000公共设施
   ///220000事件活动、990000同行设施
   static String aMapTypes = "120000|050000|110000";
-  static String locationWebReqestType = LocationWebReqestType.AMap;
+  static String locationWebRequestType = LocationWebReqestType.AMap;
 
   static resetData() async {
     LocationConfig.interval = 60 * 1000 * 3;
@@ -84,7 +84,7 @@ class LocationConfig {
       params.refreshHomePageTime = LocationConfig.refreshTime;
       params.judgeDistanceNum = LocationConfig.judgeDistanceNum;
       params.aMapTypes = LocationConfig.aMapTypes;
-      params.locationWebReqestType = LocationConfig.locationWebReqestType;
+      params.locationWebReqestType = LocationConfig.locationWebRequestType;
       await CustomParamsHelper().createOrUpdate(params);
     } else {
       print("CC1");
@@ -98,7 +98,7 @@ class LocationConfig {
       LocationConfig.refreshTime = params.refreshHomePageTime;
       LocationConfig.judgeDistanceNum = params.judgeDistanceNum;
       LocationConfig.aMapTypes = params.aMapTypes;
-      LocationConfig.locationWebReqestType = params.locationWebReqestType;
+      LocationConfig.locationWebRequestType = params.locationWebReqestType;
     }
     return params;
   }
