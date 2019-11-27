@@ -248,4 +248,25 @@
     return totalMilliseconds;
 }
 
+
+- (void)getAddress:(CLLocation *)location
+{
+    CLGeocoder *geocoder = [[CLGeocoder alloc] init];
+        [geocoder reverseGeocodeLocation:location completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
+            if (error == nil) {
+                CLPlacemark *placemark = [placemarks objectAtIndex:0];
+//                NSString *administrativeArea = placemark.administrativeArea;
+//                NSString *city = placemark.locality;
+//                NSString *subLocality = placemark.subLocality;
+//                NSString *thoroughfare = placemark.thoroughfare;
+                NSLog(@"%@",[self convertJSONWithDic:placemark.addressDictionary]);
+                
+               
+            } else {
+                NSLog(@"获取定位解析信息失败， 失败原因 = %@", error.localizedDescription);
+                 
+            }
+        }];
+}
+
 @end

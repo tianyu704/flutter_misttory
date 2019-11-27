@@ -224,10 +224,10 @@ Future<List<AmapPoi>> requestPois (
       num page = 1})  {
 
   if (LocationWebReqestType.Tencent == LocationConfig.locationWebReqestType) {///请使用腾讯坐标
-    print("腾讯坐标");
+    PrintUtil.debugPrint("腾讯坐标");
     return requestTencentPois(lat: lat,lon:lon,keywords: keywords,limit: limit,radius: radius,types: types,page: page);
   } else {///请使用高德坐标
-    print("高德坐标");
+    PrintUtil.debugPrint("高德坐标");
     return requestAMapPois(lat: lat,lon:lon,keywords: keywords,limit: limit,radius: radius,types: types,page: page);
   }
 }
