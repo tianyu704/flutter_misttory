@@ -24,15 +24,19 @@ class LocationChannel {
 
   Stream<Location> get onLocationChanged => _controller.stream;
 
+  bool isStart = false;
+
   /// 开始定位
   Future<void> start(
       {int interval = 3 * 60 * 1000, int distanceFilter = 10}) async {
+    isStart = true;
     return await _channel.invokeMethod("start_location",
         {'interval': interval, 'distanceFilter': distanceFilter});
   }
 
   /// 停止定位
   Future<void> stop() async {
+    isStart = false;
     return await _channel.invokeMethod("stop_location");
   }
 

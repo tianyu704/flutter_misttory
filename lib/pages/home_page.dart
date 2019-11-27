@@ -250,7 +250,9 @@ class _HomePageState extends LifecycleState<HomePage> {
 
   ///请求一次定位
   void _onceLocate() {
-    LocationChannel().getCurrentLocation();
+    if (LocationChannel().isStart) {
+      LocationChannel().getCurrentLocation();
+    }
   }
 
   @override
@@ -267,10 +269,11 @@ class _HomePageState extends LifecycleState<HomePage> {
               offstage: !Constant.isDebug,
               child: FlatButton(
                 onPressed: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
-                    return SearchPage("");
-                  }));
+//                  Navigator.of(context)
+//                      .push(MaterialPageRoute(builder: (context) {
+//                    return SearchPage("");
+//                  }));
+                  _stopLocation();
                 },
                 child: Text("无用"),
               )),

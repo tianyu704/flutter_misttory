@@ -245,14 +245,14 @@ packages:
       name: flutter_luakit_plugin
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.0.18"
+    version: "1.0.19"
   flutter_orm_plugin:
     dependency: "direct main"
     description:
       name: flutter_orm_plugin
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.0.12"
+    version: "1.0.13"
   flutter_svg:
     dependency: "direct main"
     description:

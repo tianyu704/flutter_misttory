@@ -48,7 +48,7 @@ dependencies:
       url: https://github.com/tianyu704/amap_base_flutter.git
       path: 'base'
 
-  flutter_orm_plugin: 1.0.12
+  flutter_orm_plugin: 1.0.13
   grouped_listview: ^0.0.2 #分组包
   provider: ^3.1.0
   shared_preferences: 0.5.3+4

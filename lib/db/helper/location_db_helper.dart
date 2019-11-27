@@ -147,4 +147,21 @@ class LocationDBHelper {
       }
     }
   }
+
+  Future<List<Location>> queryLocationsBetweenTime(
+      num startTime, num endTime) async {
+    List list = await Query(DBManager.tableLocation)
+        .orderBy(["time desc"]).whereByColumFilters([
+      WhereCondiction("time", WhereCondictionType.MORE_THEN, startTime),
+      WhereCondiction("time", WhereCondictionType.LESS_THEN, endTime),
+    ]).all();
+    if (list != null && list.length > 0) {
+      List<Location> locations = [];
+      for (Map map in list) {
+        locations.add(Location.fromJson(Map<String, dynamic>.from(map)));
+      }
+      return locations;
+    }
+    return null;
+  }
 }
