@@ -75,12 +75,10 @@
         self.locationManager.pausesLocationUpdatesAutomatically = NO;
         self.locationManager.desiredAccuracy =  self.desiredAccuracy;
         self.locationManager.distanceFilter = self.distanceFilter;
-        [self.locationManager startUpdatingLocation];
-            //支持被kill掉以后能够后台自动重启
-            //后台自动唤醒
-        [self.locationManager startMonitoringSignificantLocationChanges];
+        [self restart];
     }
 }
+
 
 - (void)onceLocationWithSuccess:(void(^)(NSString *locationJsonString))onceSuccess
 {
@@ -92,9 +90,16 @@
     self.success = success;
 }
 
+- (void)restart {
+    [self.locationManager startUpdatingLocation];
+        //支持被kill掉以后能够后台自动重启
+        //后台自动唤醒
+    [self.locationManager startMonitoringSignificantLocationChanges];
+}
 - (void)stop
 {
     [self.locationManager stopUpdatingLocation];
+    [self.locationManager stopMonitoringSignificantLocationChanges];
 }
 
 #pragma mark - location manager delegate
@@ -115,6 +120,15 @@
             //NSLog(@"时间太短了 %@ < %@不记录",@(t),@(self.timeCycleNum));
         }
     }
+//    if (self.lastLocation) {
+//        double distance = [myLocation distanceFromLocation:self.lastLocation];
+//        if (distance > 150 ) {
+//            NSLog(@"太近了 不记录");
+//           // return;
+//        }
+//        NSLog(@"%@======",@(distance));
+//    }
+    
     //获取当前最大精度坐标 数值最小
     CLLocation *myLocation = locations.firstObject;
     for (CLLocation *l in locations) {
@@ -232,6 +246,27 @@
     NSTimeInterval interval = [datetime timeIntervalSince1970];
     long long totalMilliseconds = interval*1000 ;
     return totalMilliseconds;
+}
+
+
+- (void)getAddress:(CLLocation *)location
+{
+    CLGeocoder *geocoder = [[CLGeocoder alloc] init];
+        [geocoder reverseGeocodeLocation:location completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
+            if (error == nil) {
+                CLPlacemark *placemark = [placemarks objectAtIndex:0];
+//                NSString *administrativeArea = placemark.administrativeArea;
+//                NSString *city = placemark.locality;
+//                NSString *subLocality = placemark.subLocality;
+//                NSString *thoroughfare = placemark.thoroughfare;
+                NSLog(@"%@",[self convertJSONWithDic:placemark.addressDictionary]);
+                
+               
+            } else {
+                NSLog(@"获取定位解析信息失败， 失败原因 = %@", error.localizedDescription);
+                 
+            }
+        }];
 }
 
 @end

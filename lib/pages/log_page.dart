@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/timeline_helper.dart';
 import 'package:misstory/style/app_style.dart';
+import 'package:misstory/utils/string_util.dart';
 import 'package:package_info/package_info.dart';
 import 'customparams_page.dart';
 import 'package:misstory/models/timeline.dart';
@@ -21,9 +22,14 @@ class LogPage extends StatefulWidget {
 class _LogPageState extends LifecycleState<LogPage> {
   //List<Story> _stories = List<Story>();
   List<Timeline> _timelines = List<Timeline>();
+  List<Timeline> _searchTimelines = List<Timeline>();
   Map stateMap = {};
   String versionStr = "";
+  bool isSearch = false;
 
+  ///搜索
+  TextEditingController _textFieldVC = TextEditingController();
+  FocusNode _focusNode = new FocusNode();
 
   @override
   void initState() {
@@ -41,15 +47,18 @@ class _LogPageState extends LifecycleState<LogPage> {
       });
     }
     await getVersion();
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   _notifySCurrentPage(value) {
     ///TODO：打碎整体重新开始计算
     print("打碎整体重新开始计算");
     initData();
+  }
+
+  _searchText(String text) async {
+    _searchTimelines = await TimelineHelper().querySearch(text);
+    setState(() {});
   }
 
   @override
@@ -59,6 +68,20 @@ class _LogPageState extends LifecycleState<LogPage> {
       appBar: AppBar(
         title: Text("时间轴数据"),
         actions: <Widget>[
+          FlatButton(
+              onPressed: () {
+                isSearch = !isSearchgit;
+                _searchTimelines =  List<Timeline>();
+
+                _textFieldVC.text = "";
+                if (!isSearch) {
+                  _focusNode.unfocus();
+                } else {
+                  FocusScope.of(context).requestFocus(_focusNode);
+                }
+                setState(() {});
+              },
+              child: Text(isSearch ? "取消搜索" : "搜索")),
           Offstage(
             offstage: false,
             child: FlatButton(
@@ -75,15 +98,45 @@ class _LogPageState extends LifecycleState<LogPage> {
       body: Column(
         children: <Widget>[
           Text(versionStr),
+          Offstage(
+            offstage: !isSearch,
+            child: _searchWidget(context),
+          ),
           Flexible(
             child: ListView.separated(
               itemBuilder: _buildItem,
               separatorBuilder: _buildSeparator,
-              itemCount: _timelines?.length ?? 0,
+              itemCount: isSearch
+                  ? _searchTimelines?.length ?? 0
+                  : _timelines?.length ?? 0,
               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _searchWidget(context) {
+    return Padding(
+      padding: EdgeInsets.all(10),
+      child: TextField(
+        controller: _textFieldVC,
+        focusNode: _focusNode,
+        enabled: true,
+        minLines: 1,
+        textInputAction: TextInputAction.done,
+        decoration: InputDecoration(
+          hintText: "输入地点名",
+        ),
+        onEditingComplete: () {
+          //TODO:监听输入完成触发
+          _focusNode.unfocus();
+          debugPrint("===${_textFieldVC.text}");
+          if (StringUtil.isNotEmpty(_textFieldVC.text)) {
+            _searchText(_textFieldVC.text);
+          }
+        },
       ),
     );
   }
@@ -95,7 +148,7 @@ class _LogPageState extends LifecycleState<LogPage> {
   }
 
   Widget _buildItem(context, index) {
-    Timeline item = _timelines[index];
+    Timeline item = isSearch ? _searchTimelines[index] : _timelines[index];
     String date = "";
     String date1 = "";
     if (item.startTime != null && item?.endTime != 0) {
@@ -123,17 +176,23 @@ class _LogPageState extends LifecycleState<LogPage> {
                 Text("开始:$date"),
                 Text("停留：${DateUtil.getStayShowTime(item.intervalTime)}"),
                 Text("是否是图片：${item.isFromPicture == 1}"),
-                RaisedButton(
-                  child: Text("过程点"),
-                  onPressed: () {
-                    Timeline timeline = Timeline();
-                    timeline.startTime = (index < _timelines.length-1)?(_timelines[index+1].endTime):0;
-                    timeline.endTime = item.startTime;
-                    print("${timeline.startTime}-${timeline.endTime}");
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => LocationListPage(timeline)));
-                  },
+                Offstage(
+                  offstage: isSearch,
+                  child: RaisedButton(
+                    child: Text("过程点"),
+                    onPressed: () {
+                      Timeline timeline = Timeline();
+                      timeline.startTime = (index < _timelines.length - 1)
+                          ? (_timelines[index + 1].endTime)
+                          : 0;
+                      timeline.endTime = item.startTime;
+                      print("${timeline.startTime}-${timeline.endTime}");
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => LocationListPage(timeline)));
+                    },
+                  ),
                 )
+
 //              Offstage(
 //                offstage:!(stateMap.containsKey(index)? stateMap[index] : false),
 //                child:  Column(
@@ -172,9 +231,8 @@ class _LogPageState extends LifecycleState<LogPage> {
         ));
   }
 
-  getVersion () async{
-
+  getVersion() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    versionStr =  "app版本号：${packageInfo.version}(${packageInfo.buildNumber})";
+    versionStr = "app版本号：${packageInfo.version}(${packageInfo.buildNumber})";
   }
 }

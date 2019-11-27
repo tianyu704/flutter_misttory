@@ -543,7 +543,25 @@ class TimelineHelper {
     }
     return checkedTimelines;
   }
-
+  ///根据搜索名 搜索timeLine集合
+  Future<List<Timeline>> querySearch(String searchText) async {
+    List result = await Query(DBManager.tableTimeline)
+        .orderBy(["start_time desc"]).whereBySql(
+        "(custom_address like ? or poi_name like ?) and is_delete = 0",
+        [searchText, searchText]).all();
+    List<Timeline> list = [];
+    if (result != null && result.length > 0) {
+      int count = result.length;
+      Timeline timeline;
+      for (int i = 0; i < count; i++) {
+        timeline = Timeline.fromJson(Map<String, dynamic>.from(result[i]));
+//        timeline.date = DateUtil.getShowTime(timeline.startTime);
+//        list.add(await checkStoryPictures(timeline));
+        list.add(timeline);
+      }
+    }
+    return list;
+  }
   /// 获取当前位置的story
   Future<Timeline> getCurrentStory() async {
     Timeline current = await queryLastTimeline();

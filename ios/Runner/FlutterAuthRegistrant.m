@@ -12,8 +12,10 @@
 #import "MSPermissionManager.h"
 #import "BlessLocationManager.h"
 #include "AppDelegate.h"
+#import "TencentLocationManager.h"
 
 FlutterMethodChannel *_channel;
+TencentLocationManager *locationManager;
 
 @implementation FlutterAuthRegistrant
 
@@ -40,31 +42,38 @@ FlutterMethodChannel *_channel;
             }];
             return ;
         } else {
-            AppDelegate *app = (AppDelegate *)[UIApplication sharedApplication].delegate;
-            if ([@"start_location" isEqualToString:call.method]) {
+            if ([@"init" isEqualToString:call.method]) {
+                locationManager = [[TencentLocationManager alloc]init];
+                locationManager.tencentKey = call.arguments[@"key"];
+                //NSLog(@"初始化成功");
+                result(@YES);
+            } else if ([@"start_location" isEqualToString:call.method]) {
                 if (call.arguments) {
-                    
+                    if (!locationManager) {
+                        locationManager = [[TencentLocationManager alloc]init];
+                        locationManager.tencentKey = call.arguments[@"key"];
+                    }
                     NSDictionary *params = call.arguments;
                     double num = [params[@"interval"]doubleValue];//单次定位间隔时间毫秒
                     num = num/1000;//转second
-//                    double desiredAccuracy = [params[@"locationMode"] doubleValue];
                     double distanceFilter = [params[@"distanceFilter"]doubleValue];//每间隔distanceFilter 米定位一次
-                    app.blessManager  = [[BlessLocationManager alloc]initWithFilter:distanceFilter accuracy:kCLLocationAccuracyNearestTenMeters timeCycle:num / 2];
-                } else {
-                    app.blessManager = [[BlessLocationManager alloc]init];
+                    //
+                    locationManager.distanceFilter = distanceFilter;
+                    locationManager.cycleTimerSeconds = num / 2;
                 }
-                [app.blessManager startLocationWithSuccess:^(NSString * _Nonnull locationJsonString) {
+                [locationManager configLocationManager];//包括start
+                [locationManager startLocationWithSuccess:^(NSString * _Nonnull locationJsonString) {
                     [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
                 }];
             } else if ([@"current_location" isEqualToString:call.method]) {//获取一次定位
-                [app.blessManager onceLocationWithSuccess:^(NSString * _Nonnull locationJsonString) {
+                [locationManager onceLocationWithSuccess:^(NSString * _Nonnull locationJsonString) {
                     result(locationJsonString);
                 }];
             } else if ([@"stop_location" isEqualToString:call.method]) {
-                [app.blessManager stop];
+                [locationManager stop];
                 result(@"停止定位");
             } else if ([@"destroy" isEqualToString:call.method]) {
-                [app.blessManager stop];
+                [locationManager stop];
                 result(@"销毁（停止定位）");
             } else {
                 result(FlutterMethodNotImplemented);
