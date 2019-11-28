@@ -51,10 +51,15 @@ class PictureHelper {
   }
 
   /// 检查没有转换成地点的Picture
-  checkUnSyncedPicture() async {
+  checkUnSyncedPicture({num time}) async {
     isPictureConverting = true;
     num start = DateTime.now().millisecondsSinceEpoch;
-    List<Picture> pictures = await queryUnSyncedPictures();
+    List<Picture> pictures;
+    if (time == null) {
+      pictures = await queryUnSyncedPictures();
+    } else {
+      pictures = await queryPicturesAfterTime(time);
+    }
     if (pictures != null && pictures.length > 0) {
       num total = pictures.length;
       num progress = 0;
@@ -206,6 +211,20 @@ class PictureHelper {
     List result = await Query(DBManager.tablePicture)
         .orderBy(["creationDate desc"]).whereByColumFilters([
       WhereCondiction("isSynced", WhereCondictionType.NOT_IN, [1]),
+    ]).all();
+    if (result != null && result.length > 0) {
+      List<Picture> list = [];
+      result.forEach((item) =>
+          list.add(Picture.fromJson(Map<String, dynamic>.from(item))));
+      return list;
+    }
+    return null;
+  }
+
+  Future<List> queryPicturesAfterTime(num time) async {
+    List result = await Query(DBManager.tablePicture)
+        .orderBy(["creationDate desc"]).whereByColumFilters([
+      WhereCondiction("creationDate", WhereCondictionType.MORE_THEN, time),
     ]).all();
     if (result != null && result.length > 0) {
       List<Picture> list = [];

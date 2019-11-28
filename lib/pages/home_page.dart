@@ -227,9 +227,6 @@ class _HomePageState extends LifecycleState<HomePage> {
   ///初始化并开始定位
   void _initLocation() async {
     print("===================_initLocation");
-    LocationChannel().start(
-        interval: LocationConfig.interval.toInt(),
-        distanceFilter: LocationConfig.distanceFilter.toInt());
     LocationChannel().onLocationChanged.listen((location) async {
       PrintUtil.debugPrint("获取到原生定位信息-----${location.toJson()}");
       if (location != null) {
@@ -242,6 +239,9 @@ class _HomePageState extends LifecycleState<HomePage> {
         _isDealWithLocation = false;
       }
     });
+    LocationChannel().start(
+        interval: LocationConfig.interval.toInt(),
+        distanceFilter: LocationConfig.distanceFilter.toInt());
   }
 
   void _stopLocation() {
