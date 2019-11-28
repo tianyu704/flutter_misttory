@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
+import 'package:misstory/db/helper/picture_helper.dart';
 import 'package:misstory/db/helper/timeline_helper.dart';
 import 'package:misstory/models/amap_poi.dart';
 import 'package:misstory/models/latlonpoint.dart';
@@ -148,6 +149,8 @@ class LocationDBHelper {
         i++;
         progress("$i/${list.length}");
       }
+      location = Location.fromJson(Map<String, dynamic>.from(list[0]));
+      await PictureHelper().checkUnSyncedPicture(time: location.time);
     }
   }
 

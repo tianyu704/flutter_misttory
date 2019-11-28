@@ -81,7 +81,7 @@ public class MainWorkService extends AbsWorkService {
             handler.removeMessages(1);
             handler.removeMessages(0);
         }
-        if(locationUtil != null){
+        if (locationUtil != null) {
             locationUtil.stop();
         }
 //        saveData();
@@ -98,9 +98,9 @@ public class MainWorkService extends AbsWorkService {
         if (locationUtil == null) {
             locationUtil = LocationUtil.getInstance();
             locationUtil.init(this);
-            handler.removeMessages(1);
-            handler.sendEmptyMessageDelayed(1, 5 * 1000);
         }
+        handler.removeMessages(1);
+        handler.sendEmptyMessageDelayed(1, 3 * 1000);
     }
 
     private Handler handler = new Handler() {
