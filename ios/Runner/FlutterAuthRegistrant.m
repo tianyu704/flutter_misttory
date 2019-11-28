@@ -66,9 +66,16 @@ TencentLocationManager *locationManager;
                     [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
                 }];
             } else if ([@"current_location" isEqualToString:call.method]) {//获取一次定位
-                [locationManager onceLocationWithSuccess:^(NSString * _Nonnull locationJsonString) {
-                    result(locationJsonString);
-                }];
+                [locationManager restart];
+                NSString *json = [locationManager getCurrentLocationString];
+                if (json) {
+                    result(json);
+                    [locationManager clearCurrentLocation];
+                } else {
+                    [locationManager onceLocationWithSuccess:^(NSString * _Nonnull locationJsonString) {
+                        result(locationJsonString);
+                    }];
+                }
             } else if ([@"stop_location" isEqualToString:call.method]) {
                 [locationManager stop];
                 result(@"停止定位");

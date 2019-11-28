@@ -21,6 +21,7 @@
 //@property (nonatomic, copy) void(^failure)(TencentLocationManager *manager);
 ///
 @property (nonatomic, strong) CLLocation *lastLocation;
+@property (nonatomic, strong) CLLocation *currentLocation;
 @property (nonatomic, strong) NSDate *lastDate;
 @property (nonatomic, assign) BOOL isFristLoad;
 
@@ -66,6 +67,7 @@
         [self.locationManager setDelegate:self];
         /////
         __weak typeof(self) weakSelf = self;
+        self.locationHelper = nil;
         self.locationHelper = [[HFBlessLocationHelper alloc]init];
         [self.locationHelper startLocationWithSuccess:^(id  _Nonnull sender) {
             [weakSelf restart];
@@ -92,6 +94,17 @@
 - (void)stop
 {
     [self.locationManager stopUpdatingLocation];
+    [self.locationHelper stop];
+}
+
+- (NSString *)getCurrentLocationString
+{
+    return [self getJsonStringWithLocation:self.currentLocation];
+}
+
+- (void)clearCurrentLocation
+{
+    self.currentLocation = nil;
 }
 
 #pragma mark - TencentLBSLocationManagerDelegate
@@ -111,6 +124,7 @@
     if (!self.lastLocation || (self.lastLocation && self.lastLocation.horizontalAccuracy >= myLocation.horizontalAccuracy)) {
         self.lastLocation = myLocation;
     }
+    self.currentLocation = myLocation;
     if (self.onceSuccess) {
         NSString *jsonStr = [self getJsonStringWithLocation:myLocation];
         self.onceSuccess(jsonStr);
