@@ -122,7 +122,8 @@ class _EditPageState extends LifecycleState<EditPage> {
     if (StringUtil.isNotEmpty(timeline.poiLocation)) {
       ///TODO 需要用真正poi坐标初始化
       List latlon = timeline.poiLocation.split(",");
-      if (latlon.length == 3) {
+      print(latlon);
+      if (latlon.length >= 3) {
         double lat = double.tryParse(latlon[1]);
         double lon = double.tryParse(latlon[0]);
         String type = latlon[2] as String;
