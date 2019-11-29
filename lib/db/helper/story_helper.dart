@@ -14,7 +14,6 @@ import 'package:misstory/utils/string_util.dart';
 import 'package:uuid/uuid.dart';
 import '../db_manager.dart';
 import 'package:misstory/models/mslocation.dart';
-import 'package:amap_base/amap_base.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -86,8 +85,8 @@ class StoryHelper {
         Latlonpoint point = await CalculateUtil.calculateCenterLatLon(list);
         if (point != null) {
           if (StringUtil.isEmpty(story.customAddress)) {
-            story.lat = point.latitude;
-            story.lon = point.longitude;
+            story.lat = point.lat;
+            story.lon = point.lon;
           }
           story.radius = point.radius;
         }
@@ -613,8 +612,8 @@ class StoryHelper {
       if (point != null) {
         story.radius = point.radius;
         if (StringUtil.isEmpty(story.customAddress)) {
-          story.lat = point.latitude;
-          story.lon = point.longitude;
+          story.lat = point.lat;
+          story.lon = point.lon;
         }
       }
     }

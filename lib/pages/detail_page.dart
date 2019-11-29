@@ -1,4 +1,3 @@
-import 'package:amap_base/amap_base.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
@@ -30,13 +29,10 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPage extends LifecycleState<DetailPage> {
-  AMapController _controller;
-  MyLocationStyle _myLocationStyle;
 
 //  PolylineOptions _polylineOptions;
-  List<LatLng> _latLngList = [];
+  List<Latlonpoint> _latLngList = [];
   List<Timeline> _timelines;
-  List<MarkerOptions> _markerOptions = [];
 
   @override
   void initState() {
@@ -58,12 +54,12 @@ class _DetailPage extends LifecycleState<DetailPage> {
 //    });
     List<Latlonpoint> points = await LocationHelper().queryPoints(
         _timelines[_timelines.length - 1].startTime, _timelines[0].endTime);
-    LatLng latLng;
-    for (Latlonpoint point in points) {
-      latLng = LatLng(point.latitude, point.longitude);
-      _latLngList.add(latLng);
-      _markerOptions.add(MarkerOptions(position: latLng));
-    }
+//    LatLng latLng;
+//    for (Latlonpoint point in points) {
+//      latLng = LatLng(point.lat, point.lon);
+//      _latLngList.add(latLng);
+//      _markerOptions.add(MarkerOptions(position: latLng));
+//    }
 //    _polylineOptions = PolylineOptions(
 //      latLngList: _latLngList,
 //      width: 30,
@@ -79,8 +75,8 @@ class _DetailPage extends LifecycleState<DetailPage> {
 //      lineCapType: PolylineOptions.LINE_CAP_TYPE_ARROW,
 //    );
 //    _controller?.addPolyline(_polylineOptions);
-    _controller?.addMarkers(_markerOptions);
-    _controller?.zoomToSpan(_latLngList);
+//    _controller?.addMarkers(_markerOptions);
+//    _controller?.zoomToSpan(_latLngList);
   }
 
   @override
@@ -167,50 +163,50 @@ class _DetailPage extends LifecycleState<DetailPage> {
   }
 
   Widget locationMapView(BuildContext context) {
-    return SizedBox(
-      height: 220,
-      width: double.infinity,
-      child: AMapView(
-        onAMapViewCreated: (controller) {
-          ///``添加坐标点 地图图钉📌
-          _controller = controller;
-
-//          _controller.addMarker(MarkerOptions(
-//            position: _currentLatLng,
+//    return SizedBox(
+//      height: 220,
+//      width: double.infinity,
+//      child: AMapView(
+//        onAMapViewCreated: (controller) {
+//          ///``添加坐标点 地图图钉📌
+//          _controller = controller;
+//
+////          _controller.addMarker(MarkerOptions(
+////            position: _currentLatLng,
+////          ));
+//          _myLocationStyle = MyLocationStyle(
+//            strokeColor: Color(0x662196F3),
+//            radiusFillColor: Color(0x662196F3),
+//            showMyLocation: false,
+//            showsAccuracyRing: true,
+//
+//            ///false 否则不能显示目标地点为中心点
+//          );
+//          _controller.setUiSettings(UiSettings(
+//            isMyLocationButtonEnabled: false,
+//            logoPosition: LOGO_POSITION_BOTTOM_LEFT,
+//            isZoomControlsEnabled: false,
 //          ));
-          _myLocationStyle = MyLocationStyle(
-            strokeColor: Color(0x662196F3),
-            radiusFillColor: Color(0x662196F3),
-            showMyLocation: false,
-            showsAccuracyRing: true,
-
-            ///false 否则不能显示目标地点为中心点
-          );
-          _controller.setUiSettings(UiSettings(
-            isMyLocationButtonEnabled: false,
-            logoPosition: LOGO_POSITION_BOTTOM_LEFT,
-            isZoomControlsEnabled: false,
-          ));
-          _controller.setMyLocationStyle(_myLocationStyle);
-//          _controller.setZoomLevel(17);
-          if (_markerOptions != null &&
-              _latLngList != null &&
-              _latLngList.length > 0) {
-//            _controller?.addPolyline(_polylineOptions);
-            _controller.addMarkers(_markerOptions);
-            _controller?.zoomToSpan(_latLngList);
-          }
-        },
-        amapOptions: AMapOptions(
-          compassEnabled: false,
-          zoomControlsEnabled: true,
-          logoPosition: LOGO_POSITION_BOTTOM_CENTER,
-//          camera: CameraPosition(
-//            zoom: 17,
-//          ),
-        ),
-      ),
-    );
+//          _controller.setMyLocationStyle(_myLocationStyle);
+////          _controller.setZoomLevel(17);
+//          if (_markerOptions != null &&
+//              _latLngList != null &&
+//              _latLngList.length > 0) {
+////            _controller?.addPolyline(_polylineOptions);
+//            _controller.addMarkers(_markerOptions);
+//            _controller?.zoomToSpan(_latLngList);
+//          }
+//        },
+//        amapOptions: AMapOptions(
+//          compassEnabled: false,
+//          zoomControlsEnabled: true,
+//          logoPosition: LOGO_POSITION_BOTTOM_CENTER,
+////          camera: CameraPosition(
+////            zoom: 17,
+////          ),
+//        ),
+//      ),
+//    );
   }
 
   ///从编辑页面返回后的刷新

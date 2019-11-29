@@ -8,14 +8,14 @@ part of 'latlonpoint.dart';
 
 Latlonpoint _$LatlonpointFromJson(Map<String, dynamic> json) {
   return Latlonpoint(
-    json['latitude'] as num,
-    json['longitude'] as num,
+    json['lat'] as num,
+    json['lon'] as num,
   )..radius = json['radius'] as num;
 }
 
 Map<String, dynamic> _$LatlonpointToJson(Latlonpoint instance) =>
     <String, dynamic>{
-      'latitude': instance.latitude,
-      'longitude': instance.longitude,
+      'lat': instance.lat,
+      'lon': instance.lon,
       'radius': instance.radius,
     };

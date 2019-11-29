@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:amap_base/amap_base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:local_image_provider/local_image.dart';

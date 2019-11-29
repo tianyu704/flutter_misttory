@@ -49,7 +49,7 @@ class LocationConfig {
   /// 120000商务住宅、130000政府机构及社会团体、140000科教文化、150000交通设施、
   /// 160000金融保险、170000公司企业、180000道路附属设施、190000地名地址信息、200000公共设施
   ///220000事件活动、990000同行设施
-  static String aMapTypes = "120000|050000|110000";
+  static String aMapTypes = "120000|050000|110000|200000";
   static String locationWebRequestType = LocationWebReqestType.AMap;
 
   static resetData() async {

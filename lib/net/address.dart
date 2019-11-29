@@ -8,20 +8,21 @@ class Address {
   static const String release = "https://sleep.jappstore.com/";
   static const String host = Constant.isDebug ? develop : release;
 
-  ///获取foursquare位置信息
-  static requestLocation() {
+  ///获取foursquare poi信息
+  static requestFoursquarePoi() {
     return "https://api.foursquare.com/v2/venues/search";
   }
 
-  ///获取高德位置poi信息
+  ///获取高德poi信息
   static requestAMapPois() {
+    return "https://restapi.amap.com/v3/geocode/regeo";
+  }
+
+  ///获取高德poi信息
+  static searchAMapPois() {
     return "https://restapi.amap.com/v3/place/around";
   }
 
-  ///获取高德坐标信息
-  static requestAMapLocation() {
-    return "https://restapi.amap.com/v3/place/around";
-  }
   ///获取腾讯坐标信息
   static searchTencentLocation() {
     return "https://apis.map.qq.com/ws/place/v1/search";

@@ -8,7 +8,6 @@
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:amap_base/amap_base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:misstory/db/helper/story_helper.dart';

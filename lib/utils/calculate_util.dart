@@ -23,10 +23,10 @@ class CalculateUtil {
       Latlonpoint latLng1, Latlonpoint latLng2) {
     if (latLng1 != null && latLng2 != null) {
       try {
-        double var2 = latLng1.longitude;
-        double var4 = latLng1.latitude;
-        double var6 = latLng2.longitude;
-        double var8 = latLng2.latitude;
+        double var2 = latLng1.lon;
+        double var4 = latLng1.lat;
+        double var6 = latLng2.lon;
+        double var8 = latLng2.lat;
         var2 *= 0.01745329251994329;
         var4 *= 0.01745329251994329;
         var6 *= 0.01745329251994329;
@@ -76,8 +76,8 @@ class CalculateUtil {
       int total = points.length;
       double lat = 0, lon = 0;
       for (Latlonpoint p in points) {
-        lat += p.latitude * pi / 180;
-        lon += p.longitude * pi / 180;
+        lat += p.lat * pi / 180;
+        lon += p.lon * pi / 180;
       }
       lat /= total;
       lon /= total;
@@ -97,10 +97,10 @@ class CalculateUtil {
       LatlonRange latlonRange = LatlonRange();
       num latR = latlon.radius / 111.2 * 0.001;
       num lonR = latlon.radius / 85.37 * 0.001;
-      latlonRange.minLat = latlon.latitude - latR;
-      latlonRange.maxLat = latlon.latitude + latR;
-      latlonRange.minLon = latlon.longitude - lonR;
-      latlonRange.maxLon = latlon.longitude + lonR;
+      latlonRange.minLat = latlon.lat - latR;
+      latlonRange.maxLat = latlon.lat + latR;
+      latlonRange.minLon = latlon.lon - lonR;
+      latlonRange.maxLon = latlon.lon + lonR;
       if (latlonRange.minLat < -90) {
         latlonRange.minLat = -90.000000;
       }

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_amap_location_plugin/amap_location_lib.dart' as amap;
 import 'package:flutter_bugly/flutter_bugly.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:misstory/db/helper/location_db_helper.dart';
@@ -53,7 +52,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends LifecycleState<HomePage> {
   List<Timeline> _timelines = List<Timeline>();
   List<Timeline> _timelineAll = List<Timeline>();
-  amap.AMapLocation _aMapLocation;
   StreamSubscription _subscription;
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
@@ -269,11 +267,11 @@ class _HomePageState extends LifecycleState<HomePage> {
               offstage: !Constant.isDebug,
               child: FlatButton(
                 onPressed: () {
-//                  Navigator.of(context)
-//                      .push(MaterialPageRoute(builder: (context) {
-//                    return SearchPage("");
-//                  }));
-                  _stopLocation();
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    return SearchPage("");
+                  }));
+//                  _stopLocation();
                 },
                 child: Text("无用"),
               )),
@@ -416,7 +414,6 @@ class _HomePageState extends LifecycleState<HomePage> {
     // TODO: implement dispose
     _subscription?.cancel();
     _refreshSubscription?.cancel();
-    _aMapLocation?.dispose();
     _refreshController?.dispose();
     _locationEventSubscription?.cancel();
     _timer?.cancel();

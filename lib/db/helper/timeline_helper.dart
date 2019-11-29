@@ -123,7 +123,7 @@ class TimelineHelper {
           await CalculateUtil.calculateCenterLatLon(points);
       if (latlonpoint != null) {
         PrintUtil.debugPrint(
-            "======计算平均半径，radius->${latlonpoint.radius},中心点${latlonpoint.latitude},${latlonpoint.longitude}");
+            "======计算平均半径，radius->${latlonpoint.radius},中心点${latlonpoint.lat},${latlonpoint.lon}");
         if (latlonpoint.radius > LocationConfig.locationMaxRadius) {
           latlonpoint.radius = LocationConfig.locationMaxRadius;
         }
@@ -132,8 +132,8 @@ class TimelineHelper {
         }
 
         ///把新的中心点赋值给timeline
-        timeline.lat = latlonpoint.latitude;
-        timeline.lon = latlonpoint.longitude;
+        timeline.lat = latlonpoint.lat;
+        timeline.lon = latlonpoint.lon;
         timeline.radius = latlonpoint.radius;
 
         /// 新timeline的中心点可能会在上一个timeline的半径范围内，如果在就删除新timeline，
@@ -356,7 +356,7 @@ class TimelineHelper {
   Future<Timeline> requestPoiData(Timeline timeline) async {
     if (timeline != null) {
       var latLng = CalculateUtil.wgsToGcj(timeline.lat, timeline.lon);
-      List<AmapPoi> list = await requestPois(
+      List<AmapPoi> list = await searchAMapPois(
           lat: latLng['lat'], lon: latLng['lon'], limit: 1, radius: 300);
       if (list != null && list.length > 0) {
         AmapPoi amapPoi = list[0];

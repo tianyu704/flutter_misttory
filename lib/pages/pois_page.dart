@@ -1,5 +1,7 @@
-import 'package:amap_base/amap_base.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lifecycle_state/lifecycle_state.dart';
 import 'package:local_image_provider/local_image.dart';
 import 'package:misstory/db/helper/location_helper.dart';
@@ -11,6 +13,7 @@ import 'package:misstory/models/mslocation.dart';
 import 'package:misstory/net/http_manager.dart' as http;
 import 'package:misstory/utils/calculate_util.dart';
 import 'package:misstory/utils/channel_util.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 ///
 /// Create by Hugo.Guo
@@ -31,9 +34,9 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends LifecycleState<SearchPage> {
   TextEditingController _controller;
   ScrollController _scrollController = ScrollController();
-  AMapSearch _aMapSearch = AMapSearch();
   List<LocalImage> images;
   String _result = "adfasfas";
+  WebViewController _webViewController;
 
   @override
   void initState() {
@@ -113,9 +116,15 @@ class _SearchPageState extends LifecycleState<SearchPage> {
                         //37.5536,126.921774
                         //28.189403,113.212998
                         print("xxx");
-                        List list = await http.requestTencentPois(lat:39.899466,lon:116.486954,radius: 1000,keywords: "美食",limit: 1);
+                        List list = await http.searchAMapPois(
+                            lat: 39.899466,
+                            lon: 116.486954,
+                            radius: 1000,
+                            keywords: "美食",
+                            limit: 1);
                         AmapPoi poi = list.first;
-                        _result = "name:${poi.name},address:${poi.address},distance:${poi.distance}";
+                        _result =
+                            "name:${poi.name},address:${poi.address},distance:${poi.distance}";
                         setState(() {});
 //
 //                        _aMapSearch
@@ -155,16 +164,16 @@ class _SearchPageState extends LifecycleState<SearchPage> {
                       },
                       child: Text("foursquare获取"),
                     ),
-                    RaisedButton(
-                      onPressed: () async {
-                        LatLng latLng1 = LatLng(39.898923, 116.48666);
-                        LatLng latLng2 = LatLng(39.898923, 116.48566);
-                        num a = await CalculateTools()
-                            .calcDistance(latLng1, latLng2);
-                        print(a);
-                      },
-                      child: Text("计算距离"),
-                    )
+//                    RaisedButton(
+//                      onPressed: () async {
+//                        LatLng latLng1 = LatLng(39.898923, 116.48666);
+//                        LatLng latLng2 = LatLng(39.898923, 116.48566);
+//                        num a = await CalculateTools()
+//                            .calcDistance(latLng1, latLng2);
+//                        print(a);
+//                      },
+//                      child: Text("计算距离"),
+//                    )
                   ],
                 ),
               ),
@@ -232,16 +241,60 @@ class _SearchPageState extends LifecycleState<SearchPage> {
                 onPressed: () async {
                   //39.89881441318218,116.48662651612794
                   var a = await CalculateUtil.wgsToGcj(
-                      39.89881441318218,
-                      116.48662651612794);
+                      39.89881441318218, 116.48662651612794);
                   debugPrint("!!!!!!!!!!!!!${a.toJson()}");
 //                    debugPrint("=========${await StoryHelper().getDistanceBetween1()}");
                 }),
           ),
-          SizedBox(),
+          SliverToBoxAdapter(
+            child: Row(
+              children: <Widget>[
+                RaisedButton(
+                  child: Text("remove"),
+                  onPressed: () {
+                    _webViewController.loadUrl("javascript:clearMap()");
+                  },
+                ),
+                RaisedButton(
+                  child: Text("add"),
+                  onPressed: () {
+                    _webViewController.loadUrl(
+                        "javascript:setMap(39.89889899987045,116.48663599962181)");
+                  },
+                ),
+              ],
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              width: double.infinity,
+              height: 200,
+              child: WebView(
+                initialUrl: "assets/html/tencent_map.html",
+                javascriptMode: JavascriptMode.unrestricted,
+                onWebViewCreated: (webViewController) {
+                  _webViewController = webViewController;
+//                  _loadHtmlFromAssets();
+                },
+                javascriptChannels: <JavascriptChannel>[
+                  _toasterJavascriptChannel(context),
+                ].toSet(),
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  JavascriptChannel _toasterJavascriptChannel(BuildContext context) {
+    return JavascriptChannel(
+        name: 'Toaster',
+        onMessageReceived: (JavascriptMessage message) {
+          Scaffold.of(context).showSnackBar(
+            SnackBar(content: Text(message.message)),
+          );
+        });
   }
 
   _getPicture() async {

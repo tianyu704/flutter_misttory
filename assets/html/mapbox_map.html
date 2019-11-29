@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>Map</title>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet'/>
+    <style>
+        html,
+        body,
+        #container {
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiaHVnb2d1byIsImEiOiJjazJ0djVuc2EweXJjM2Rudnp6azNwanFvIn0.c6L1d48CbQkBzMt0bZsHow';
+var lat = getQueryString("lat");
+var lon = getQueryString("lon");
+var radius = getQueryString("radius");
+var center = [116.397428, 39.90923];
+var level = 16;
+var marker;
+if(lat!=null&&lon!=null){
+    center = [lon,lat];
+}
+var map = new mapboxgl.Map( {
+    container: "container",
+    style: 'mapbox://styles/mapbox/streets-v10',
+    interactive: false,
+    zoom:level,
+    center: center,
+});
+map.on('load',function (){addCircle(lat,lon,radius);});
+
+function addMarker(lat,lon){
+    if(lat != null && lon != null){
+        marker = new mapboxgl.Marker()
+        .setLngLat([lon, lat])
+        .addTo(map);
+    }
+}
+
+function removeMarker(){
+    if(marker != null){
+        marker.remove();
+    }
+}
+
+function addCircle(lat,lon,radius){
+    if(lat != null && lon != null){
+        map.addSource("circle", {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [lon, lat]
+                    }
+                }]
+            }
+        });
+        map.addLayer({
+            "id": "circle",
+            "source": "circle",
+            "type": "circle",
+            "paint": {
+                "circle-radius": {
+                  stops: [
+                    [0, 0],
+                    [20, metersToPixelsAtMaxZoom(radius,lat)]
+                  ],
+                  base: 2
+                },
+                "circle-color": "#476BE1",
+                "circle-opacity":0.35,
+                "circle-stroke-color":"#476BE1",
+                "circle-stroke-opacity":0.35,
+                "circle-stroke-width":1
+            }
+        });
+    }
+}
+
+function metersToPixelsAtMaxZoom(meters, latitude) {
+    return meters / 0.075 / Math.cos(latitude * Math.PI / 180);
+}
+
+
+function removeCircle(){
+    map.removeLayer("circle");
+}
+
+function clearMap(){
+    removeMarker();
+    removeCircle();
+}
+
+function setZoom(level){
+    map.setZoom(level)
+}
+
+function getQueryString(name){
+     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+     var r = window.location.search.substr(1).match(reg);
+     if(r!=null)return  unescape(r[2]); return null;
+}
+
+
+</script>
+</body>
+</html>

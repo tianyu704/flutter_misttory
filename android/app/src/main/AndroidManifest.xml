@@ -48,9 +48,9 @@
             </intent-filter>
         </activity>
         <!--高德地图apikey-->
-        <meta-data
-            android:name="com.amap.api.v2.apikey"
-            android:value="77419f4f5b07ffcc0a41cafd2fe763af"/>
+<!--        <meta-data-->
+<!--            android:name="com.amap.api.v2.apikey"-->
+<!--            android:value="77419f4f5b07ffcc0a41cafd2fe763af"/>-->
 
 
         <!--保活所需-->

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:amap_base/amap_base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/db/db_manager.dart';
@@ -24,7 +23,6 @@ class LocationHelper {
 
   LocationHelper._internal();
 
-  ReGeocodeResult reGeocodeResult;
   Picture cachePicture;
 
   ///从Android Realm数据库中读出Location放到Mslocation表中

@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>Map</title>
+    <script src="https://webapi.amap.com/maps?v=1.4.15&key=79292bee6df74e7855b402ca1dd9302c"></script>
+    <style>
+        html,
+        body,
+        #container {
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<script>
+var lat = getQueryString("lat");
+var lon = getQueryString("lon");
+var radius = getQueryString("radius");
+var center = [116.397428, 39.90923];
+var level = 16
+if(lat!=null&&lon!=null){
+    center = [lon,lat];
+}
+var map = new AMap.Map('container', {
+    resizeEnable: true,
+    zoom:level,
+    center: center,
+    rotateEnable: false,
+    dragEnable: false,
+    zoomEnable: true,
+    doubleClickZoom: false,
+    keyboardEnable: false,
+    touchZoom: false,
+
+});
+addCircle(lat,lon,radius);
+function addMarker(lat,lon){
+    if(lat != null && lon != null){
+        marker = new AMap.Marker({
+            position: [lon, lat]
+        });
+        map.add(marker);
+    }
+}
+
+function removeMarker(){
+    map.remove(marker);
+}
+
+function addCircle(lat,lon,radius){
+    if(lat != null && lon != null){
+        circle = new AMap.Circle({
+            center: [lon, lat], // 圆心位置
+            radius: radius,  //半径
+            strokeColor: "#476BE1",  //线颜色
+            strokeOpacity: 0.35,  //线透明度
+            strokeWeight: 1,  //线粗细度
+            fillColor: "#476BE1",  //填充颜色
+            fillOpacity: 0.35 //填充透明度
+        });
+        map.add(circle);
+    }
+}
+
+function removeCircle(){
+    map.remove(circle);
+}
+
+function clearMap(){
+    map.clearMap();
+}
+
+function setZoom(level){
+    map.setZoom(level)
+}
+
+function getQueryString(name){
+     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+     var r = window.location.search.substr(1).match(reg);
+     if(r!=null)return  unescape(r[2]); return null;
+}
+
+</script>
+</body>
+</html>

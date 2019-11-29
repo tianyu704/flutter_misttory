@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:amap_base/amap_base.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,6 @@ import 'style/app_style.dart';
 void main() async {
   /// 初始化数据库
   await DBManager.initDB();
-  await AMap.init(Constant.iosMapKey);
 //  await StoryHelper().updateAllDefaultAddress();
 //  await StoryHelper().clear();
 //  await PictureHelper().addPath();

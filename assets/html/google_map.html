@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Marker Clustering</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+
+</head>
+<body>
+<div id="map"></div>
+<script>
+    var map;
+    var marker;
+    var circle;
+    function initMap(lat,lng,radius) {
+        var center = {lat: lat, lng: lng};
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 16,
+            center: center,
+            //gestureHandling: 'none',
+            //zoomControl: false,
+            //mapTypeControl: false,
+            //scaleControl: false,
+            //streetViewControl: false,
+            //rotateControl: false,
+            //fullscreenControl: false,
+            disableDefaultUI: true
+        });
+        addCircle(lat,lng,radius);
+    }
+    function clearMarker(){
+        if(marker!=null){
+            marker.setMap(null);
+        }
+    }
+    function addMarker(lat,lng){
+        if(marker!=null){
+            marker.setMap(null);
+        }
+        marker = new google.maps.Marker({
+            position: {lat: lat, lng: lng},
+            map:map
+        });
+        marker.setMap(map);
+    }
+
+    function addCircle(lat,lng,radius){
+        if(circle!=null){
+            circle.setMap(null);
+        }
+        circle = new google.maps.Circle({
+            strokeColor: '#FF0000',
+            strokeOpacity: 0.35,
+            strokeWeight: 0,
+            fillColor: '#FF0000',
+            fillOpacity: 0.35,
+            map: map,
+            center: {lat: lat, lng: lng},
+            radius: radius
+        });
+        circle.setMap(map);
+    }
+
+    function clearCircle(){
+        if(circle!=null){
+            circle.setMap(null);
+        }
+    }
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB35KLix48BbKQl6Qumhd3ERsNfuOKdhbk&callback">
+</script>
+</body>
+</html>

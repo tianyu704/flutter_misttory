@@ -4,11 +4,11 @@ part 'latlonpoint.g.dart';
 
 @JsonSerializable()
 class Latlonpoint {
-  Latlonpoint(this.latitude, this.longitude);
+  Latlonpoint(this.lat, this.lon);
 
-  num latitude;
+  num lat;
 
-  num longitude;
+  num lon;
 
   num radius;
 

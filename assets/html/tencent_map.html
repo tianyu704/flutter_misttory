@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport"
+          content="initial-scale=1.0, user-scalable=no"/>
+    <title>添加标记</title>
+    <script charset="utf-8"
+            src="https://map.qq.com/api/js?v=2.exp&key=OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-WPB77"></script>
+    <style>
+        #container {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+    </style>
+
+</head>
+<body>
+<div id="container"></div>
+<script>
+    var map;
+    var marker;
+    var circle;
+    function initMap(lat,lng,radius) {
+<!--        var lat = 39.89889899987045;-->
+<!--        var lng = 116.48663599962181;-->
+<!--        var radius = 100;-->
+        var center = new qq.maps.LatLng(lat,lng);
+        map = new qq.maps.Map(document.getElementById('container'),{
+            center: center,
+            zoom: 16,
+            disableDefaultUI: true
+        });
+        addCircle(lat,lng,radius);
+    }
+    function clearMarker(){
+        if(marker!=null){
+            marker.setMap(null);
+        }
+    }
+    function addMarker(lat,lng){
+        var center = new qq.maps.LatLng(lat,lng);
+        if(marker!=null){
+            marker.setMap(null);
+        }
+        marker = new qq.maps.Marker({
+            position: center,
+            map: map
+        });
+        marker.setMap(map);
+    }
+
+    function addCircle(lat,lng,radius){
+        var center = new qq.maps.LatLng(lat,lng);
+        var color =new qq.maps.Color(255,0,0,0.35);
+        if(circle!=null){
+            circle.setMap(null);
+        }
+        circle = new qq.maps.Circle({
+            strokeColor:color,
+            strokeWeight: 0,
+            fillColor:color,
+            center: center,
+            radius: radius,
+            map: map
+        });
+        circle.setMap(map);
+    }
+
+    function clearCircle(){
+        if(circle!=null){
+            circle.setMap(null);
+        }
+    }
+
+</script>
+</body>
+</html>
