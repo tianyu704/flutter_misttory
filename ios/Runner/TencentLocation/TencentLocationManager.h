@@ -43,6 +43,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)restart;
 - (void)stop;
 
+- (NSString *)getCurrentLocationString;
+- (void)clearCurrentLocation;
 - (void)startLocationWithSuccess:(void(^)(NSString *locationJsonString))success;
 - (void)onceLocationWithSuccess:(void(^)(NSString *locationJsonString))onceSuccess;
 
