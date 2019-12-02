@@ -116,7 +116,7 @@ final HttpManager httpManager = new HttpManager();
 
 /// 获取Foursquare poi地点信息
 Future<List<AmapPoi>> getFoursquarePoi(
-    {String latlon, String near, int limit = 20}) async {
+    {String latlon, String near, int radius, int limit = 20}) async {
   if (StringUtil.isNotEmpty(latlon)) {
     try {
       Response response = await Dio().get(
@@ -126,7 +126,7 @@ Future<List<AmapPoi>> getFoursquarePoi(
           "client_id": Constant.clientId,
           "client_secret": Constant.clientSecret,
           "near": near,
-          "radius": LocationConfig.poiSearchInterval,
+          "radius": radius ?? LocationConfig.poiSearchInterval,
           "ll": latlon,
           "v": DateFormat("yyyyMMdd").format(DateTime.now()),
         },

@@ -203,9 +203,20 @@ void main() {
     print(CalculateUtil.wgsToGcj(39.89881441318218, 116.48662651612794));
   });
 
-  test("to",(){
+  test("to", () {
     var a = [];
     print("--${a.toString()}");
+  });
+
+  test("charAt", () {
+    String a = "01234567";
+    print(a.substring(4, 5));
+  });
+
+  test("isInChina", () {
+    num time = DateTime.now().millisecondsSinceEpoch;
+    print(
+        "${CalculateUtil.isInChina(30.9463431236,121.8990240963)}--${DateTime.now().millisecondsSinceEpoch - time}");
   });
 }
 
@@ -232,3 +243,5 @@ Future testa(var i) async {
   double n = 10 / 0;
   return n;
 }
+
+
