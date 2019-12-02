@@ -203,13 +203,15 @@ Future<List<AmapPoi>> getAMapPois(
             List<AmapPoi> list = [];
             AmapPoi amapPoi;
             for (Map map in pois) {
-              amapPoi = AmapPoi.fromJson(Map<String, dynamic>.from(map));
-              amapPoi.country = country;
-              amapPoi.pname = province;
-              amapPoi.cityname = city;
-              amapPoi.adname = district;
-              amapPoi.location = "${amapPoi.location},GCJ02";
-              list.add(amapPoi);
+              try {
+                amapPoi = AmapPoi.fromJson(Map<String, dynamic>.from(map));
+                amapPoi.country = country;
+                amapPoi.pname = province;
+                amapPoi.cityname = city;
+                amapPoi.adname = district;
+                amapPoi.location = "${amapPoi.location},GCJ02";
+                list.add(amapPoi);
+              } catch (e) {}
             }
             list.sort((AmapPoi a1, AmapPoi a2) =>
                 num.tryParse(a1.distance).compareTo(num.tryParse(a2.distance)));
@@ -255,9 +257,11 @@ Future<List<AmapPoi>> searchAMapPois(
           List<AmapPoi> list = [];
           AmapPoi amapPoi;
           for (Map map in pois) {
-            amapPoi = AmapPoi.fromJson(Map<String, dynamic>.from(map));
-            amapPoi.location = "${amapPoi.location},GCJ02";
-            list.add(amapPoi);
+            try {
+              amapPoi = AmapPoi.fromJson(Map<String, dynamic>.from(map));
+              amapPoi.location = "${amapPoi.location},GCJ02";
+              list.add(amapPoi);
+            } catch (e) {}
           }
           return list;
         }

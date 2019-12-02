@@ -151,6 +151,27 @@ class TimelineHelper {
           return await updateTimeline(lastTimeline);
         }
 
+        /// 防止最开始定位的中心点在曾经的某个点S之外，后来中心点又慢慢偏向了S点内，这时
+        /// 会出现2个不同点的数据
+        Timeline same = await findSamePoiData(timeline);
+        if (same != null && timeline.sameId != same.sameId) {
+          timeline.sameId = same.sameId;
+          timeline.poiId = same.poiId;
+          timeline.poiName = same.poiName;
+          timeline.poiAddress = same.poiAddress;
+          timeline.poiType = same.poiType;
+          timeline.poiTypeCode = same.poiTypeCode;
+          timeline.poiLocation = same.poiLocation;
+          timeline.distance = same.distance;
+          timeline.country = same.country;
+          timeline.province = same.province;
+          timeline.city = same.city;
+          timeline.district = same.district;
+          timeline.needUpdatePoi = same.needUpdatePoi;
+          timeline.customAddress = same.customAddress;
+          timeline.isConfirm = same.isConfirm;
+        }
+
         ///判断是否需要更新poi
         if (timeline.isConfirm != 1) {
           if (timeline.needUpdatePoi == 1) {

@@ -50,8 +50,6 @@ class AmapPoi {
 
   String country;
 
-  String poiweight;
-
   factory AmapPoi.fromJson(Map<String, dynamic> json) => _$AmapPoiFromJson(json);
 
   Map<String, dynamic> toJson() => _$AmapPoiToJson(this);
