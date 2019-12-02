@@ -74,8 +74,9 @@ NSDate *lastDate;
                 
                 CLLocation *once =  [arcManager arcOnce];
                 if (once) {
-                    NSString *json = [self getJsonStringWithLocation:once];
-                    result(json);
+                   NSString *json = [self getJsonStringWithLocation:once];
+                   [_channel invokeMethod:@"locationListener" arguments:json];
+                   result(json);
                 }
             } else if ([@"stop_location" isEqualToString:call.method]) {
                 [arcManager arcStop];
