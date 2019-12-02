@@ -202,6 +202,11 @@ void main() {
     //{lat: 39.89880410390069, lon: 116.48661399086808}
     print(CalculateUtil.wgsToGcj(39.89881441318218, 116.48662651612794));
   });
+
+  test("to",(){
+    var a = [];
+    print("--${a.toString()}");
+  });
 }
 
 convert(Picture picture) {

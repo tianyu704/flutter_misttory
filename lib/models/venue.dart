@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import "flocation.dart";
+import "category.dart";
 part 'venue.g.dart';
 
 @JsonSerializable()
@@ -15,6 +16,8 @@ class Venue {
   String referralId;
 
   bool hasPerk;
+
+  List<Category> categories;
 
   factory Venue.fromJson(Map<String, dynamic> json) => _$VenueFromJson(json);
 

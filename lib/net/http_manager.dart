@@ -148,7 +148,13 @@ Future<List<AmapPoi>> getFoursquarePoi(
               ..name = item.name
               ..distance = "${item?.location?.distance}"
               ..address = item.location?.address
-              ..location = "${item.location.lng},${item.location?.lat}";
+              ..location = "${item.location.lng},${item.location?.lat},WGS84"
+              ..country = item.location?.country
+              ..pname = item.location.state
+              ..cityname = item.location?.city
+              ..type = (item.categories != null && item.categories.length > 0)
+                  ? item.categories[0].name
+                  : "";
             amapPois.add(amapPoi);
           });
           return amapPois;
@@ -163,38 +169,52 @@ Future<List<AmapPoi>> getFoursquarePoi(
 
 /// 获取高德poi地点信息
 Future<List<AmapPoi>> getAMapPois(
-    {num lat = 0,
-    num lon = 0,
-    String keywords = "",
-    num limit = 20,
-    num radius,
-    String types,
-    num page = 1}) async {
+    {num lat = 0, num lon = 0, num radius}) async {
   if (lat != 0 && lon != 0) {
     try {
       Response response = await Dio().get(
         Address.requestAMapPois(),
         queryParameters: {
           "location": "$lon,$lat",
-          "keywords": keywords,
           "extensions": "all",
-          "offset": limit,
           "key": Constant.aMapWebKey,
           "radius": radius ?? LocationConfig.poiSearchInterval.toInt(),
-          "poitype": types ?? LocationConfig.aMapTypes,
-          "sortrule": "distance",
-          "page": page
         },
       );
       PrintUtil.debugPrint("搜索poi。。。。。。");
-      if (response.data != null && response.data is Map) {
-        List pois = response.data["pois"];
-        if (pois != null && pois.length > 0) {
-          List<AmapPoi> list = [];
-          for (Map map in pois) {
-            list.add(AmapPoi.fromJson(Map<String, dynamic>.from(map)));
+      if (response.data != null &&
+          response.data is Map &&
+          (response.data["status"] == "1" || response.data["status"] == 1)) {
+        var regeocode = response.data["regeocode"];
+        if (regeocode != null && regeocode is Map) {
+          List pois = regeocode["pois"];
+          if (pois != null && pois.length > 0) {
+            dynamic addressComponent = regeocode["addressComponent"];
+            var country;
+            var province;
+            var city;
+            var district;
+            if (addressComponent != null && addressComponent is Map) {
+              country = addressComponent["country"].toString();
+              province = addressComponent["province"].toString();
+              city = addressComponent["city"].toString();
+              district = addressComponent["district"].toString();
+            }
+            List<AmapPoi> list = [];
+            AmapPoi amapPoi;
+            for (Map map in pois) {
+              amapPoi = AmapPoi.fromJson(Map<String, dynamic>.from(map));
+              amapPoi.country = country;
+              amapPoi.pname = province;
+              amapPoi.cityname = city;
+              amapPoi.adname = district;
+              amapPoi.location = "${amapPoi.location},GCJ02";
+              list.add(amapPoi);
+            }
+            list.sort((AmapPoi a1, AmapPoi a2) =>
+                num.tryParse(a1.distance).compareTo(num.tryParse(a2.distance)));
+            return list;
           }
-          return list;
         }
       }
     } on DioError catch (e) {
@@ -207,12 +227,12 @@ Future<List<AmapPoi>> getAMapPois(
 /// 获取高德poi地点信息
 Future<List<AmapPoi>> searchAMapPois(
     {num lat = 0,
-      num lon = 0,
-      String keywords = "",
-      num limit = 20,
-      num radius,
-      String types,
-      num page = 1}) async {
+    num lon = 0,
+    String keywords = "",
+    num limit = 20,
+    num radius,
+    String types,
+    num page = 1}) async {
   if (lat != 0 && lon != 0) {
     try {
       Response response = await Dio().get(
@@ -233,8 +253,11 @@ Future<List<AmapPoi>> searchAMapPois(
         List pois = response.data["pois"];
         if (pois != null && pois.length > 0) {
           List<AmapPoi> list = [];
+          AmapPoi amapPoi;
           for (Map map in pois) {
-            list.add(AmapPoi.fromJson(Map<String, dynamic>.from(map)));
+            amapPoi = AmapPoi.fromJson(Map<String, dynamic>.from(map));
+            amapPoi.location = "${amapPoi.location},GCJ02";
+            list.add(amapPoi);
           }
           return list;
         }

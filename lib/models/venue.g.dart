@@ -14,7 +14,11 @@ Venue _$VenueFromJson(Map<String, dynamic> json) {
         ? null
         : Flocation.fromJson(json['location'] as Map<String, dynamic>)
     ..referralId = json['referralId'] as String
-    ..hasPerk = json['hasPerk'] as bool;
+    ..hasPerk = json['hasPerk'] as bool
+    ..categories = (json['categories'] as List)
+        ?.map((e) =>
+            e == null ? null : Category.fromJson(e as Map<String, dynamic>))
+        ?.toList();
 }
 
 Map<String, dynamic> _$VenueToJson(Venue instance) => <String, dynamic>{
@@ -23,4 +27,5 @@ Map<String, dynamic> _$VenueToJson(Venue instance) => <String, dynamic>{
       'location': instance.location,
       'referralId': instance.referralId,
       'hasPerk': instance.hasPerk,
+      'categories': instance.categories,
     };

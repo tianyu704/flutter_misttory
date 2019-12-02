@@ -153,6 +153,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     ///
     _searchVC.dispose();
     _descTextFieldVC.dispose();
+    _addressTextFieldVC.dispose();
     super.dispose();
   }
 
@@ -701,7 +702,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                   ],
                 ),
               ),
-              Text("${p.distance}m"),
+              Text("${num.tryParse(p.distance).toInt()}m"),
               Offstage(
                 offstage: !isShowCheck(poiId),
 
@@ -835,7 +836,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
 
     if (isInChina) {
-      poiPreList = await http.searchAMapPois(
+      poiPreList = await http.getAMapPois(
           lat: _originLatLng.lat,
           lon: _originLatLng.lon,
           radius: LocationConfig.poiSearchInterval);
@@ -1048,12 +1049,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     ///自定义地点保存
     if (pickPoi != null && StringUtil.isNotEmpty(pickPoi.name)) {
       timeline.poiAddress = pickPoi.address;
-      List lonlat = pickPoi.location.split(",");
-      if (isInChina) {
-        timeline.poiLocation = "${lonlat[0]},${lonlat[1]},GCJ02";
-      } else {
-        timeline.poiLocation = "${lonlat[0]},${lonlat[1]},WGS84";
-      }
+      timeline.poiLocation = pickPoi.location;
       timeline.poiTypeCode = pickPoi.typecode;
       timeline.poiType = pickPoi.type;
       timeline.poiName = pickPoi.name;

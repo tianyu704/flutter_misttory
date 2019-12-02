@@ -3,5 +3,6 @@
   "name": "Fort Myer Hatfield Gate",
   "location": "$flocation",
   "referralId": "v-1572497961",
-  "hasPerk": false
+  "hasPerk": false,
+  "categories": "$[]category"
 }

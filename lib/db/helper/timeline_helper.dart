@@ -356,8 +356,8 @@ class TimelineHelper {
   Future<Timeline> requestPoiData(Timeline timeline) async {
     if (timeline != null) {
       var latLng = CalculateUtil.wgsToGcj(timeline.lat, timeline.lon);
-      List<AmapPoi> list = await searchAMapPois(
-          lat: latLng['lat'], lon: latLng['lon'], limit: 1, radius: 300);
+      List<AmapPoi> list = await getAMapPois(
+          lat: latLng['lat'], lon: latLng['lon'], radius: 300);
       if (list != null && list.length > 0) {
         AmapPoi amapPoi = list[0];
         if (amapPoi != null) {
@@ -366,9 +366,7 @@ class TimelineHelper {
           timeline.poiAddress = amapPoi.address;
           timeline.poiType = amapPoi.type;
           timeline.poiTypeCode = amapPoi.typecode;
-          if (StringUtil.isNotEmpty(amapPoi.location)) {
-            timeline.poiLocation = "${amapPoi.location},GCJ02";
-          }
+          timeline.poiLocation = amapPoi.location;
           timeline.distance = amapPoi.distance;
           timeline.country =
               StringUtil.isEmpty(amapPoi.country) ? "中国" : amapPoi.country;
