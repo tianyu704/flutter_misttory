@@ -76,8 +76,6 @@ NSDate *lastDate;
                 if (once) {
                     NSString *json = [self getJsonStringWithLocation:once];
                     result(json);
-                } else {
-                    
                 }
             } else if ([@"stop_location" isEqualToString:call.method]) {
                 [arcManager arcStop];
@@ -123,7 +121,7 @@ NSDate *lastDate;
     
     NSDictionary *dic = @{
         @"id":[[NSUUID UUID] UUIDString],
-        @"time":@([self getDateTimeTOMilliSeconds:location.timestamp]),
+        @"time":@([self getDateTimeTOMilliSeconds:[NSDate date]]),//防止不是最新的
         @"lat":@(location.coordinate.latitude),
         @"lon":@(location.coordinate.longitude),
         @"altitude":@(location.altitude),

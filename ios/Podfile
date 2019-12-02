@@ -40,7 +40,7 @@ def parse_KV_file(file, separator='=')
 end
 
 target 'Runner' do
-  pod 'Bugly'  #, :git => 'https://github.com/BuglyDevTeam/Bugly-iOS.git'
+  pod 'Bugly'# , :git => 'https://github.com/BuglyDevTeam/Bugly-iOS.git'
   pod 'curl', '~> 1.0.0'
   pod 'LuakitPod', '~> 1.0.28'
   pod 'LocoKit', :git => 'https://github.com/sobri909/LocoKit.git', :branch => 'develop'
@@ -80,6 +80,11 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
       config.build_settings['ENABLE_BITCODE'] = 'NO'
+    end
+    if ['Upsurge'].include? target.name
+        target.build_configurations.each do |config|
+            config.build_settings['SWIFT_VERSION'] = '4.2'
+        end
     end
   end
 end
