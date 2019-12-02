@@ -806,15 +806,17 @@ class _EditPageState extends LifecycleState<EditPage> {
       return;
     }
     if (isInChina) {
+      PrintUtil.debugPrint(
+          "${_originLatLng.lat},${_originLatLng.lon},$searchText");
       poiList = await http.searchAMapPois(
           lat: _originLatLng.lat,
           lon: _originLatLng.lon,
           keywords: searchText,
           types: "",
           radius: LocationConfig.poiSearchInterval.toInt());
-      print("start1......");
     } else {
-      print("start......");
+      PrintUtil.debugPrint(
+          "${_originLatLng.lat},${_originLatLng.lon},$searchText");
       poiList = await http.getFoursquarePoi(
           latlon: "${timeline.lat}, ${timeline.lon}", near: searchText);
     }
@@ -828,7 +830,6 @@ class _EditPageState extends LifecycleState<EditPage> {
   }
 
   getPoi() async {
-    PrintUtil.debugPrint("===0===");
     if (poiPreList != null && poiPreList.length > 0 && !isSearching) {
       poiList = poiPreList;
       setState(() {});
@@ -836,11 +837,15 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
 
     if (isInChina) {
+      PrintUtil.debugPrint(
+          "${_originLatLng.lat},${_originLatLng.lon}");
       poiPreList = await http.getAMapPois(
           lat: _originLatLng.lat,
           lon: _originLatLng.lon,
           radius: LocationConfig.poiSearchInterval);
     } else {
+      PrintUtil.debugPrint(
+          "${_originLatLng.lat},${_originLatLng.lon}");
       poiPreList = await http.getFoursquarePoi(
           latlon: "${_originLatLng.lat}, ${_originLatLng.lon}");
     }

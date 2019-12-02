@@ -12,7 +12,7 @@ AmapPoi _$AmapPoiFromJson(Map<String, dynamic> json) {
     ..name = json['name'] as String
     ..type = json['type'] as String
     ..typecode = json['typecode'] as String
-    ..address = json['address'] as String
+    ..address = json['address'].toString()
     ..location = json['location'] as String
     ..pcode = json['pcode'] as String
     ..pname = json['pname'] as String
@@ -32,8 +32,7 @@ AmapPoi _$AmapPoiFromJson(Map<String, dynamic> json) {
         ? null
         : DateTime.parse(json['timestamp'] as String)
     ..indoorMap = json['indoor_map'] as String
-    ..country = json['country'] as String
-    ..poiweight = json['poiweight'] as String;
+    ..country = json['country'] as String;
 }
 
 Map<String, dynamic> _$AmapPoiToJson(AmapPoi instance) => <String, dynamic>{
@@ -58,5 +57,4 @@ Map<String, dynamic> _$AmapPoiToJson(AmapPoi instance) => <String, dynamic>{
       'timestamp': instance.timestamp?.toIso8601String(),
       'indoor_map': instance.indoorMap,
       'country': instance.country,
-      'poiweight': instance.poiweight,
     };
