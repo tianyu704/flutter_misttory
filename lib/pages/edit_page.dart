@@ -108,7 +108,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     _searchVC.addListener(() {
 //      handleSearchAction();
     });
-    isInChina = !CalculateUtil.outOfChina(timeline.lat, timeline.lon);
+    isInChina = CalculateUtil.isInChina(timeline.lat, timeline.lon);
 
     ///初始化原坐标,在中国转换成gcj02坐标；
     if (isInChina) {

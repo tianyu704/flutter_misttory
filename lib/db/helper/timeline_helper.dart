@@ -36,7 +36,11 @@ class TimelineHelper {
     Timeline lastTimeline = await queryLastTimeline();
     if (lastTimeline != null) {
       /// 经纬度相等/在一个半径内认为是同一个地点
-      if ((location.lat == lastTimeline.lat &&
+      if (lastTimeline.isFromPicture == 1 &&
+          location.time - lastTimeline.endTime > LocationConfig.intervalGap) {
+        return await createTimeline(await convertTimeline(location),
+            force: true);
+      } else if ((location.lat == lastTimeline.lat &&
               location.lon == lastTimeline.lon) ||
           (CalculateUtil.calculateLatlngDistance(lastTimeline.lat,
                   lastTimeline.lon, location.lat, location.lon) <
@@ -143,7 +147,9 @@ class TimelineHelper {
         if (lastTimeline != null &&
             CalculateUtil.calculateLatlngDistance(timeline.lat, timeline.lon,
                     lastTimeline.lat, lastTimeline.lon) <=
-                lastTimeline.radius) {
+                lastTimeline.radius &&
+            timeline.startTime - lastTimeline.endTime <
+                LocationConfig.intervalGap) {
           await deleteTimeline(timeline);
           LocationDBHelper()
               .updateLocationsTimelineId(timeline.uuid, lastTimeline.uuid);
@@ -248,30 +254,36 @@ class TimelineHelper {
   }
 
   /// 创建Timeline
-  Future<String> createTimeline(Timeline timeline) async {
+  Future<String> createTimeline(Timeline timeline, {bool force = false}) async {
     if (timeline != null) {
-      Timeline lastTimeline = await queryLastTimeline();
-      if (lastTimeline != null) {
-        if (lastTimeline.intervalTime < LocationConfig.judgeUsefulLocation) {
-          await deleteTimeline(lastTimeline);
-          lastTimeline = await queryLastTimeline();
-        }
-      }
       String uuid;
-      if (lastTimeline != null &&
-          ((timeline.lat == lastTimeline.lat &&
-                  timeline.lon == lastTimeline.lon) ||
-              (CalculateUtil.calculateLatlngDistance(lastTimeline.lat,
-                      lastTimeline.lon, timeline.lat, timeline.lon) <
-                  lastTimeline.radius)) &&
-          (timeline.startTime - lastTimeline.endTime) <
-              LocationConfig.intervalGap) {
-        lastTimeline.endTime = timeline.endTime;
-        await updateTimeline(lastTimeline);
-        uuid = lastTimeline.uuid;
-      } else {
+      if (force) {
         uuid = await FlutterOrmPlugin.saveOrm(
             DBManager.tableTimeline, timeline.toJson());
+      } else {
+        Timeline lastTimeline = await queryLastTimeline();
+        if (lastTimeline != null) {
+          if (lastTimeline.intervalTime < LocationConfig.judgeUsefulLocation) {
+            await deleteTimeline(lastTimeline);
+            lastTimeline = await queryLastTimeline();
+          }
+        }
+
+        if (lastTimeline != null &&
+            ((timeline.lat == lastTimeline.lat &&
+                    timeline.lon == lastTimeline.lon) ||
+                (CalculateUtil.calculateLatlngDistance(lastTimeline.lat,
+                        lastTimeline.lon, timeline.lat, timeline.lon) <
+                    lastTimeline.radius)) &&
+            (timeline.startTime - lastTimeline.endTime) <
+                LocationConfig.intervalGap) {
+          lastTimeline.endTime = timeline.endTime;
+          await updateTimeline(lastTimeline);
+          uuid = lastTimeline.uuid;
+        } else {
+          uuid = await FlutterOrmPlugin.saveOrm(
+              DBManager.tableTimeline, timeline.toJson());
+        }
       }
       PrintUtil.debugPrint("======创建Timeline！,radius->${timeline.radius}");
       return uuid;
@@ -377,8 +389,14 @@ class TimelineHelper {
   Future<Timeline> requestPoiData(Timeline timeline) async {
     if (timeline != null) {
       var latLng = CalculateUtil.wgsToGcj(timeline.lat, timeline.lon);
-      List<AmapPoi> list = await getAMapPois(
-          lat: latLng['lat'], lon: latLng['lon'], radius: 300);
+      List<AmapPoi> list = [];
+      if (CalculateUtil.isInChina(latLng['lat'], latLng['lon'])) {
+        list = await getAMapPois(
+            lat: latLng['lat'], lon: latLng['lon'], radius: 300);
+      } else {
+        list = await getFoursquarePoi(
+            latlon: "${timeline.lat},${timeline.lon}", radius: 300);
+      }
       if (list != null && list.length > 0) {
         AmapPoi amapPoi = list[0];
         if (amapPoi != null) {
