@@ -1,15 +1,13 @@
 # Using a CDN with CocoaPods 1.7.2 or later can save a lot of time on pod installation, but it's experimental rather than the default.
 # source 'https://cdn.cocoapods.org/'
+source 'https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git'
 
-# LuakitPod
-source 'https://github.com/williamwen1986/LuakitPod.git'
-source 'https://github.com/williamwen1986/curl.git'
 
 # Uncomment this line to define a global platform for your project
-platform :ios, '9.0'
+platform :ios, '10.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
-ENV['COCOAPODS_DISABLE_STATS'] = 'tru
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 project 'Runner', {
   'Debug' => :debug,
   'Profile' => :release,
@@ -39,9 +37,9 @@ def parse_KV_file(file, separator='=')
 end
 
 target 'Runner' do
-  pod 'Bugly'  , :git => 'https://github.com/BuglyDevTeam/Bugly-iOS.git'
-  pod 'curl', '~> 1.0.0'
-  pod 'LuakitPod', '~> 1.0.28'
+  pod 'LocoKit', :git => 'https://github.com/sobri909/LocoKit.git', :branch => 'develop'
+  pod 'LocoKitCore', :git => 'https://github.com/sobri909/LocoKit.git', :branch => 'develop'
+  pod 'LocoKit/Timelines', :git => 'https://github.com/sobri909/LocoKit.git', :branch => 'develop'
   # Prepare symlinks folder. We use symlinks to avoid having Podfile.lock
   # referring to absolute paths on developers' machines.
   system('rm -rf .symlinks')
@@ -76,6 +74,11 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
       config.build_settings['ENABLE_BITCODE'] = 'NO'
+    end
+    if ['Upsurge'].include? target.name
+        target.build_configurations.each do |config|
+            config.build_settings['SWIFT_VERSION'] = '4.2'
+        end
     end
   end
 end
