@@ -22,31 +22,42 @@ import CoreLocation
     let store = TimelineStore()
     var recorder: TimelineRecorder
     
+    var timer :Timer!
     var lastDate:Date?
-   // var lastLocation:CLLocation?
+
     public override init() {
        //init
-        self.recorder = TimelineRecorder(store: store)
+       self.recorder = TimelineRecorder(store: store)
    }
+   
+    @objc func timerAction(){
+          self.calculateLocation(true)
+    }
     
     @objc public func arcOnce() {
         self.isOnce = true;
-        self.locoArc.locationManager .startUpdatingLocation();
+        self.locoArc.locationManager.startUpdatingLocation();
+        self.calculateLocation(true)
     }
     
    @objc public func arcStart() {
         
-    self.recorder.startRecording()
-    let timeline = self.recorder
-    let loco = self.locoArc
-    ///didUpdateLocations
-//    when(loco, does: .locomotionSampleUpdated) { _ in
-//    
-//        
-//        
-//    }
+      self.recorder.startRecording()
+      let loco = self.locoArc
+    
+      self.startTimer();
       when(loco, does: .locomotionSampleUpdated) { _ in
-         if ((self.myEidtorBlock) != nil){
+        print("过滤后定位")
+        self.calculateLocation();
+      }
+   }
+    func calculateLocation() {
+        calculateLocation(false);
+    }
+    func calculateLocation(_ isUseTimer:Bool) {
+        let timeline = self.recorder
+        let loco = self.locoArc
+        if ((self.myEidtorBlock) != nil){
             var location:CLLocation?
             location = loco.filteredLocation
             
@@ -64,18 +75,24 @@ import CoreLocation
                     self.isOnce = false;
                 }
             } else {
-                self.myEidtorBlock!(location,false)
+                self.myEidtorBlock!(location,isUseTimer)
                 if (self.isOnce) {
-                    self.myOnceBlock!(location,false)
+                    self.myOnceBlock!(location,isUseTimer)
                     self.isOnce = false;
                 }
             }
         }
-      }
-   }
+    }
     
    @objc public func arcStop() {
+    self.endTimer();
     self.recorder.stopRecording()
    }
-
+   
+    func startTimer () {
+        timer = Timer.scheduledTimer(timeInterval: timeCycleNum, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
+    }
+    func endTimer () {
+        timer?.invalidate();
+    }
 }

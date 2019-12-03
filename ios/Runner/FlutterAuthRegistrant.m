@@ -63,7 +63,7 @@ NSDate *lastDate;
                              isWrite = false;
                          }
                      }
-                     if (isWrite) {
+                     if (isWrite || true) {//TODO:这里先一直记录试试看
                          lastDate = [NSDate date];
                          NSString *locationJsonString = [self getJsonStringWithLocation:lo isChangeDate:isNeedDateChang];
                          [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
