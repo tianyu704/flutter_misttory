@@ -596,7 +596,7 @@ class _EditPageState extends LifecycleState<EditPage> {
       height: 220,
       width: double.infinity,
       child: WebView(
-        initialUrl: url,
+        initialUrl: "assets/html/gaode_map.html",
         javascriptMode: JavascriptMode.unrestricted,
         onWebViewCreated: (webViewController) {
           _webViewController = webViewController;

@@ -382,9 +382,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     // TODO: implement onResume
     super.onResume();
     if (!_isFirstLoad) {
-      if (Platform.isAndroid) {
         _onceLocate();
-      }
       refreshNewPictures().then((_) {
         _refreshStory();
       });
