@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -537,7 +538,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                 ),
                 onTap: () {
                   _zoom++;
-                  _webViewController?.loadUrl("javascript:setZoom($_zoom)");
+                  _webViewController?.evaluateJavascript("setZoom($_zoom)");
                 },
               ),
               InkWell(
@@ -549,7 +550,7 @@ class _EditPageState extends LifecycleState<EditPage> {
                 ),
                 onTap: () {
                   _zoom--;
-                  _webViewController?.loadUrl("javascript:setZoom($_zoom)");
+                  _webViewController?.evaluateJavascript("setZoom($_zoom)");
                 },
               ),
             ],
@@ -583,11 +584,13 @@ class _EditPageState extends LifecycleState<EditPage> {
   Widget locationMapView1(BuildContext context) {
     String url;
     if (isInChina) {
-      url =
-          "assets/html/gaode_map.html?lat=${_originLatLng.lat}&lon=${_originLatLng.lon}&radius=${timeline.radius}";
+      url = "assets/html/gaode_map.html";
     } else {
+      url = "assets/html/mapbox_map.html";
+    }
+    if (Platform.isAndroid) {
       url =
-          "assets/html/mapbox_map.html?lat=${_originLatLng.lat}&lon=${_originLatLng.lon}&radius=${timeline.radius}";
+          "$url?lat=${_originLatLng.lat}&lon=${_originLatLng.lon}&radius=${timeline.radius}";
     }
     return SizedBox(
       height: 220,
@@ -601,8 +604,14 @@ class _EditPageState extends LifecycleState<EditPage> {
         onPageFinished: (s) {
           print(s);
           if (_poiLatLng != null) {
-            _webViewController?.loadUrl(
-                "javascript:addMarker(${_poiLatLng.lat},${_poiLatLng.lon})");
+            if (Platform.isIOS) {
+              _webViewController?.evaluateJavascript(
+                  "setCenter(${_poiLatLng.lat},${_poiLatLng.lon})");
+              _webViewController?.evaluateJavascript(
+                  "addCircle(${_poiLatLng.lat},${_poiLatLng.lon},${timeline.radius})");
+            }
+            _webViewController?.evaluateJavascript(
+                "addMarker(${_poiLatLng.lat},${_poiLatLng.lon})");
           }
         },
       ),
@@ -837,15 +846,13 @@ class _EditPageState extends LifecycleState<EditPage> {
     }
 
     if (isInChina) {
-      PrintUtil.debugPrint(
-          "${_originLatLng.lat},${_originLatLng.lon}");
+      PrintUtil.debugPrint("${_originLatLng.lat},${_originLatLng.lon}");
       poiPreList = await http.getAMapPois(
           lat: _originLatLng.lat,
           lon: _originLatLng.lon,
           radius: LocationConfig.poiSearchInterval);
     } else {
-      PrintUtil.debugPrint(
-          "${_originLatLng.lat},${_originLatLng.lon}");
+      PrintUtil.debugPrint("${_originLatLng.lat},${_originLatLng.lon}");
       poiPreList = await http.getFoursquarePoi(
           latlon: "${_originLatLng.lat}, ${_originLatLng.lon}");
     }
@@ -938,9 +945,9 @@ class _EditPageState extends LifecycleState<EditPage> {
 
   addMarker() {
     if (_poiLatLng != null) {
-      _webViewController?.loadUrl("javascript:removeMarker()");
-      _webViewController?.loadUrl(
-          "javascript:addMarker(${_poiLatLng.lat},${_poiLatLng.lon})");
+      _webViewController?.evaluateJavascript("removeMarker()");
+      _webViewController?.evaluateJavascript(
+          "addMarker(${_poiLatLng.lat},${_poiLatLng.lon})");
     }
   }
 
