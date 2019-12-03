@@ -22,7 +22,7 @@ import io.reactivex.disposables.Disposable;
 
 public class MainWorkService extends AbsWorkService {
     static final String TAG = LogUtil.makeLogTag(MainWorkService.class);
-    private Disposable mDisposable;
+//    private Disposable mDisposable;
     private long mSaveDataStamp;
     //    AMapLocationClient mLocationClient;
     LocationUtil locationUtil;
@@ -45,7 +45,8 @@ public class MainWorkService extends AbsWorkService {
     @Override
     public Boolean isWorkRunning() {
         //若还没有取消订阅, 就说明任务仍在运行.
-        return mDisposable != null && !mDisposable.isDisposed();
+//        return mDisposable != null && !mDisposable.isDisposed();
+        return handler != null && handler.hasMessages(1);
     }
 
     @Override
@@ -68,9 +69,9 @@ public class MainWorkService extends AbsWorkService {
     public void stopWork() {
         LogUtil.d(TAG, "定位保活服务关闭！！！！！！！！");
         //取消对任务的订阅
-        if (mDisposable != null && !mDisposable.isDisposed()) {
-            mDisposable.dispose();
-        }
+//        if (mDisposable != null && !mDisposable.isDisposed()) {
+//            mDisposable.dispose();
+//        }
         if (handler != null) {
             handler.removeMessages(1);
             handler.removeMessages(0);
