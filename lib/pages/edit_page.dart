@@ -611,7 +611,6 @@ class _EditPageState extends LifecycleState<EditPage> {
             }
           }
           if (_poiLatLng != null) {
-
             _webViewController?.evaluateJavascript(
                 "addMarker(${_poiLatLng.lat},${_poiLatLng.lon})");
           }
