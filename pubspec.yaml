@@ -16,6 +16,9 @@ version: 1.0.0+1
 environment:
   sdk: ">=2.1.0 <3.0.0"
 
+dependency_overrides:
+  intl: ^0.16.0
+
 dependencies:
   flutter:
     sdk: flutter
@@ -156,5 +159,4 @@ flutter:
   #         weight: 700
   #
   # For details regarding fonts from package dependencies,
-
   # see https://flutter.dev/custom-fonts/#from-packages
