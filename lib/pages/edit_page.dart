@@ -593,7 +593,7 @@ class _EditPageState extends LifecycleState<EditPage> {
       height: 220,
       width: double.infinity,
       child: WebView(
-        initialUrl: url,
+        initialUrl: "assets/html/gaode_map.html",
         javascriptMode: JavascriptMode.unrestricted,
         onWebViewCreated: (webViewController) {
           _webViewController = webViewController;
@@ -601,6 +601,8 @@ class _EditPageState extends LifecycleState<EditPage> {
         onPageFinished: (s) {
           print(s);
           if (_poiLatLng != null) {
+            _webViewController?.loadUrl(
+                "javascript:addCircle(${_poiLatLng.lat},${_poiLatLng.lon},${timeline.radius})");
             _webViewController?.loadUrl(
                 "javascript:addMarker(${_poiLatLng.lat},${_poiLatLng.lon})");
           }

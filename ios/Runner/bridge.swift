@@ -12,23 +12,26 @@ import CoreLocation
 
  
 @objc public class HFArcManager:NSObject {
-    typealias editorBlock = (_ t:CLLocation?) -> Void
+    typealias editorBlock = (_ t:CLLocation?,_ isNeedDateChange:Bool) -> Void
+    typealias onceBlock = (_ t:CLLocation?,_ isNeedDateChange:Bool) -> Void
     @objc  var myEidtorBlock:editorBlock?
+    @objc  var myOnceBlock:onceBlock?
     @objc  var timeCycleNum:Double = 30;//second
     @objc let locoArc = LocomotionManager.highlander;
-    
+    var isOnce:Bool = false;
     let store = TimelineStore()
     var recorder: TimelineRecorder
     
     var lastDate:Date?
-    var lastLocation:CLLocation?
+   // var lastLocation:CLLocation?
     public override init() {
        //init
         self.recorder = TimelineRecorder(store: store)
    }
     
-    @objc public func arcOnce()-> CLLocation {
-        return self.lastLocation!;
+    @objc public func arcOnce() {
+        self.isOnce = true;
+        self.locoArc.locationManager .startUpdatingLocation();
     }
     
    @objc public func arcStart() {
@@ -36,27 +39,37 @@ import CoreLocation
     self.recorder.startRecording()
     let timeline = self.recorder
     let loco = self.locoArc
-    ///
+    ///didUpdateLocations
+//    when(loco, does: .locomotionSampleUpdated) { _ in
+//    
+//        
+//        
+//    }
       when(loco, does: .locomotionSampleUpdated) { _ in
          if ((self.myEidtorBlock) != nil){
             var location:CLLocation?
-            if (loco.locomotionSample().location != nil) {
-                location = (loco.locomotionSample().location)!
-            } else {
-                location = loco.filteredLocation
-            }
-            if (self.lastLocation == nil) {
-                self.lastLocation = location
-            }
+            location = loco.filteredLocation
+            
+            let isFar = Double(location?.horizontalAccuracy ?? -1) > 2000.0
             let item = timeline.currentItem!
-            if (item.isValid == true && Double(location?.horizontalAccuracy ?? -1) > 2000.0)   {
+            if (item.isDataGap && isFar) {
+                return ;
+            }
+            if (item is Visit == true && isFar)   {
                 let sample = timeline.currentItem?.samples.first;
                 location = sample?.location!
-                self.myEidtorBlock!(location)
+                self.myEidtorBlock!(location,true)
+                if (self.isOnce) {
+                     self.myOnceBlock!(location,true)
+                    self.isOnce = false;
+                }
             } else {
-                self.myEidtorBlock!(self.lastLocation)
+                self.myEidtorBlock!(location,false)
+                if (self.isOnce) {
+                    self.myOnceBlock!(location,false)
+                    self.isOnce = false;
+                }
             }
-            self.lastLocation = location;
         }
       }
    }

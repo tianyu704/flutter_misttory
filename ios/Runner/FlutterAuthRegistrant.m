@@ -55,7 +55,7 @@ NSDate *lastDate;
                     arcManager.timeCycleNum = num / 2;
                 }
                 [arcManager arcStart];
-                 arcManager.myEidtorBlock = ^(CLLocation *lo) {
+                 arcManager.myEidtorBlock = ^(CLLocation * _Nullable lo, BOOL isNeedDateChang) {
                      BOOL isWrite = true;
                      if (lastDate) {
                          long time = [self getSecondsFromStarTime:lastDate andInsertEndTime:[NSDate date]];
@@ -65,19 +65,19 @@ NSDate *lastDate;
                      }
                      if (isWrite) {
                          lastDate = [NSDate date];
-                         NSString *locationJsonString = [self getJsonStringWithLocation:lo];
+                         NSString *locationJsonString = [self getJsonStringWithLocation:lo isChangeDate:isNeedDateChang];
                          [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
                      }
                 };
        
             } else if ([@"current_location" isEqualToString:call.method]) {//获取一次定位
-                
-                CLLocation *once =  [arcManager arcOnce];
-                if (once) {
-                   NSString *json = [self getJsonStringWithLocation:once];
-                   [_channel invokeMethod:@"locationListener" arguments:json];
-                   result(json);
-                }
+                [arcManager arcOnce];
+                arcManager.myOnceBlock = ^(CLLocation * _Nullable lo, BOOL isNeedDateChang) {
+                      NSString *locationJsonString = [self getJsonStringWithLocation:lo isChangeDate:isNeedDateChang];
+                      [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
+                      result(locationJsonString);
+                };
+               
             } else if ([@"stop_location" isEqualToString:call.method]) {
                 [arcManager arcStop];
                 result(@"停止定位");
@@ -91,8 +91,12 @@ NSDate *lastDate;
     }];
 }
 
-
 + (NSString *)getJsonStringWithLocation:(CLLocation *)location
+{
+   return  [self getJsonStringWithLocation:location isChangeDate:false];
+}
+
++ (NSString *)getJsonStringWithLocation:(CLLocation *)location isChangeDate:(BOOL)isChangeDate
 {
     /**
      
@@ -122,7 +126,7 @@ NSDate *lastDate;
     
     NSDictionary *dic = @{
         @"id":[[NSUUID UUID] UUIDString],
-        @"time":@([self getDateTimeTOMilliSeconds:[NSDate date]]),//防止不是最新的
+        @"time":@([self getDateTimeTOMilliSeconds:isChangeDate ? [NSDate date] : location.timestamp]), 
         @"lat":@(location.coordinate.latitude),
         @"lon":@(location.coordinate.longitude),
         @"altitude":@(location.altitude),
