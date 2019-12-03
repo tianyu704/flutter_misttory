@@ -123,7 +123,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     if (StringUtil.isNotEmpty(timeline.poiLocation)) {
       ///TODO 需要用真正poi坐标初始化
       List latlon = timeline.poiLocation.split(",");
-      print(latlon);
+      PrintUtil.debugPrint(latlon);
       if (latlon.length >= 3) {
         double lat = double.tryParse(latlon[1]);
         double lon = double.tryParse(latlon[0]);
@@ -596,20 +596,22 @@ class _EditPageState extends LifecycleState<EditPage> {
       height: 220,
       width: double.infinity,
       child: WebView(
-        initialUrl: "assets/html/gaode_map.html",
+        initialUrl: url,
         javascriptMode: JavascriptMode.unrestricted,
         onWebViewCreated: (webViewController) {
           _webViewController = webViewController;
         },
         onPageFinished: (s) {
-          print(s);
-          if (_poiLatLng != null) {
+          if (_originLatLng != null) {
             if (Platform.isIOS) {
               _webViewController?.evaluateJavascript(
-                  "setCenter(${_poiLatLng.lat},${_poiLatLng.lon})");
+                  "setCenter(${_originLatLng.lat},${_originLatLng.lon})");
               _webViewController?.evaluateJavascript(
-                  "addCircle(${_poiLatLng.lat},${_poiLatLng.lon},${timeline.radius})");
+                  "addCircle(${_originLatLng.lat},${_originLatLng.lon},${timeline.radius})");
             }
+          }
+          if (_poiLatLng != null) {
+
             _webViewController?.evaluateJavascript(
                 "addMarker(${_poiLatLng.lat},${_poiLatLng.lon})");
           }
@@ -738,7 +740,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   finishedEditAddress() {
     isSwitchToEditAddress = false;
     _addressFocusNode.unfocus();
-    print("******");
+    PrintUtil.debugPrint("******");
     String str = _addressTextFieldVC.text;
     if (StringUtil.isEmpty(str)) {
       _addressTextFieldVC.text = getShowAddress(timeline);
@@ -803,7 +805,7 @@ class _EditPageState extends LifecycleState<EditPage> {
   ///搜索完成
   handleSearchFinished() {
     _searchNode.unfocus();
-    print(_searchVC.text);
+    PrintUtil.debugPrint(_searchVC.text);
     handleSearchAction();
   }
 
