@@ -69,15 +69,14 @@ NSDate *lastDate;
                          [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
                      }
                 };
-       
-            } else if ([@"current_location" isEqualToString:call.method]) {//获取一次定位
-                [arcManager arcOnce];
                 arcManager.myOnceBlock = ^(CLLocation * _Nullable lo, BOOL isNeedDateChang) {
                       NSString *locationJsonString = [self getJsonStringWithLocation:lo isChangeDate:isNeedDateChang];
                       [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
                       result(locationJsonString);
                 };
-               
+       
+            } else if ([@"current_location" isEqualToString:call.method]) {//获取一次定位
+                [arcManager arcOnce];
             } else if ([@"stop_location" isEqualToString:call.method]) {
                 [arcManager arcStop];
                 result(@"停止定位");
