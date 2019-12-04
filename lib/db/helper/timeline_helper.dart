@@ -52,10 +52,10 @@ class TimelineHelper {
         return lastTimeline.uuid;
       } else {
         if (Platform.isIOS) {
+
           if (lastTimeline.intervalTime >= LocationConfig.judgeUsefulLocation
               &&  location.accuracy >= 2000
               && (CalculateUtil.calculateLatlngDistance(lastTimeline.lat, lastTimeline.lon, location.lat, location.lon) > lastTimeline.radius)) {
-              lastTimeline.endTime = location.time;
               await updateTimeline(lastTimeline);
               return lastTimeline.uuid;
           }

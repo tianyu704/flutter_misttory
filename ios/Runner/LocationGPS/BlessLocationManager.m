@@ -18,9 +18,11 @@
     //
 @property (nonatomic, strong) CLLocation *lastLocation;
 @property (nonatomic, strong) NSDate *lastDate;
+@property (nonatomic, strong) NSDate *lastTimeStamp;
 @property (nonatomic, assign) BOOL isFristLoad;
 @property (nonatomic, assign) BOOL isOnce;
 
+@property (nonatomic, weak) NSTimer *timer;
 
 @end
 
@@ -46,6 +48,14 @@
     self.timeCycleNum = 5;//五秒一获取定位
     [self commonInit];
     return self;
+}
+
+- (void)startTime {
+    __weak typeof(self) weakSelf = self;
+    self.timer= [BlessLocationManager fir_scheduledTimerWithTimeInterval:self.timeCycleNum block:^(NSTimer * _Nonnull timer) {
+        [weakSelf.locationManager startUpdatingLocation];
+    } repeats:YES];
+   // [self.timer fire];//立即执行
 }
 
 - (void)auth
@@ -76,7 +86,12 @@
         self.locationManager.pausesLocationUpdatesAutomatically = NO;
         self.locationManager.desiredAccuracy =  self.desiredAccuracy;
         self.locationManager.distanceFilter = kCLDistanceFilterNone;//self.distanceFilter;
-        [self restart];
+        [self.locationManager startUpdatingLocation];
+        
+        //支持被kill掉以后能够后台自动重启
+        //后台自动唤醒
+        [self.locationManager startMonitoringSignificantLocationChanges];
+        [self startTime];
     }
 }
 
@@ -97,16 +112,15 @@
 }
 
 - (void)restart {
-    [self.locationManager startUpdatingLocation];
-    
-        //支持被kill掉以后能够后台自动重启
-        //后台自动唤醒
-    [self.locationManager startMonitoringSignificantLocationChanges];
+    [self startTime];
+     [self.locationManager startMonitoringSignificantLocationChanges];
 }
 - (void)stop
 {
     [self.locationManager stopUpdatingLocation];
     [self.locationManager stopMonitoringSignificantLocationChanges];
+    [self.timer invalidate];
+    self.timer = nil;
 }
 
 #pragma mark - location manager delegate
@@ -119,24 +133,6 @@
         self.isFristLoad = NO;
         return ;
     }
-    bool isWright = YES;
-    if (self.lastDate) {
-        long t = [self getSecondsFromStarTime:self.lastDate andInsertEndTime:[NSDate date]];
-        if (t < self.timeCycleNum) {
-            isWright = NO;
-            //NSLog(@"时间太短了 %@ < %@不记录",@(t),@(self.timeCycleNum));
-        }
-    }
-    
-//    if (self.lastLocation) {
-//        double distance = [myLocation distanceFromLocation:self.lastLocation];
-//        if (distance > 150 ) {
-//            NSLog(@"太近了 不记录");
-//           // return;
-//        }
-//        NSLog(@"%@======",@(distance));
-//    }
-    
     //获取当前最大精度坐标 数值最小
     CLLocation *myLocation = locations.firstObject;
     for (CLLocation *l in locations) {
@@ -144,27 +140,31 @@
             myLocation = l;
         }
     }
+    BOOL isNewDate = false;
+    if (self.lastLocation && myLocation.horizontalAccuracy >= 2500) {
+        double distance = [myLocation distanceFromLocation:self.lastLocation];
+        double time = self.timeCycleNum;
+        if ((distance / time > 10)&&(myLocation.speed < 2)) { /// 平均速度大于10 30s 瞬时速度小于2m/s
+            isNewDate = true;
+            self.lastTimeStamp = myLocation.timestamp;
+        }
+    }
+    if (!isNewDate) {
+        self.lastLocation = myLocation;
+    }
     if (!self.lastLocation) {
         self.lastLocation = myLocation;
     }
-    //更新历史最大精度坐标 数值最小
-    if (self.lastLocation && self.lastLocation.horizontalAccuracy >= myLocation.horizontalAccuracy) {
-        self.lastLocation = myLocation;
-    }
     if (self.isOnce && self.onceSuccess) {
-        NSString *jsonStr = [self getJsonStringWithLocation:myLocation];
+        NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation isNewDate:isNewDate];
         self.onceSuccess(jsonStr);
         self.isOnce = false;
     }
-    if (isWright) {
-        self.lastDate = [NSDate date];
-        if (self.success) {
-            NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation];
-            self.success(jsonStr);
-        }
-        self.lastLocation = nil;
+     if (self.success) {
+        NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation isNewDate:isNewDate];
+        self.success(jsonStr);
     }
-    NSLog(@"%@",myLocation);
+    [self.locationManager stopUpdatingLocation];
 }
 
 //不论是创建还是写入只需调用此段代码即可 如果文件未创建 会进行创建操作
@@ -227,7 +227,7 @@
     
     NSDictionary *dic = @{
         @"id":[[NSUUID UUID] UUIDString],
-        @"time":@([self getDateTimeTOMilliSeconds:isNewDate ? [NSDate date]:location.timestamp]),
+        @"time":@([self getDateTimeTOMilliSeconds:isNewDate ? self.lastTimeStamp:location.timestamp]),
         @"lat":@(location.coordinate.latitude),
         @"lon":@(location.coordinate.longitude),
         @"altitude":@(location.altitude),
@@ -299,6 +299,17 @@
                  
             }
         }];
+}
+
++ (void)_yy_ExecBlock:(NSTimer *)timer {
+    if ([timer userInfo]) {
+        void (^block)(NSTimer *timer) = (void (^)(NSTimer *timer))[timer userInfo];
+        block(timer);
+    }
+}
+
++ (NSTimer *)fir_scheduledTimerWithTimeInterval:(NSTimeInterval)seconds block:(void (^)(NSTimer *timer))block repeats:(BOOL)repeats {
+    return [NSTimer scheduledTimerWithTimeInterval:seconds target:self selector:@selector(_yy_ExecBlock:) userInfo:[block copy] repeats:repeats];
 }
 
 @end
