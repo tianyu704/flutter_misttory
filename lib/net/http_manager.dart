@@ -260,6 +260,7 @@ Future<List<AmapPoi>> searchAMapPois(
             try {
               amapPoi = AmapPoi.fromJson(Map<String, dynamic>.from(map));
               amapPoi.location = "${amapPoi.location},GCJ02";
+              amapPoi.country = "中国";
               list.add(amapPoi);
             } catch (e) {}
           }

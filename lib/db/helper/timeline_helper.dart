@@ -101,6 +101,11 @@ class TimelineHelper {
           "poi_address": timeline.poiAddress,
           "custom_address": timeline.customAddress,
           "is_confirm": timeline.isConfirm,
+          "distance": timeline.distance,
+          "country": timeline.country,
+          "province": timeline.province,
+          "city": timeline.city,
+          "district":timeline.district,
         });
       }
       await mergeTimeline(timeline.sameId);
@@ -352,8 +357,8 @@ class TimelineHelper {
         ..radius = 400;
       LatlonRange latlonRange = CalculateUtil.getRange(latlonpoint);
       List list = await Query(DBManager.tableTimeline).whereByColumFilters([
-        WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
-            LocationConfig.judgeUsefulLocation),
+//        WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
+//            LocationConfig.judgeUsefulLocation),
         WhereCondiction(
             "lat", WhereCondictionType.EQ_OR_MORE_THEN, latlonRange.minLat),
         WhereCondiction(

@@ -672,6 +672,7 @@ class _EditPageState extends LifecycleState<EditPage> {
     String poiId = p.id;
     String subName =
         "${p.type}-->${StringUtil.isNotEmpty(p.address) ? p.address : ""}";
+    print(p.distance);
     return Padding(
       padding: EdgeInsets.only(bottom: index == poiList.length - 1 ? 37 : 0),
       child: InkWell(
@@ -1067,6 +1068,11 @@ class _EditPageState extends LifecycleState<EditPage> {
       timeline.poiType = pickPoi.type;
       timeline.poiName = pickPoi.name;
       timeline.poiId = pickPoi.id;
+      timeline.country = pickPoi.country;
+      timeline.province = pickPoi.pname;
+      timeline.city = pickPoi.cityname;
+      timeline.district = pickPoi.adname;
+      timeline.distance = pickPoi.distance;
       timeline.isConfirm = 1;
       timeline.customAddress = _addressTextFieldVC.text;
       await TimelineHelper().updateEditTimeItemAndSame(timeline);
