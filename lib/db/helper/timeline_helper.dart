@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_orm_plugin/flutter_orm_plugin.dart';
 import 'package:misstory/db/helper/location_db_helper.dart';
 import 'package:misstory/location_config.dart';
@@ -49,6 +51,16 @@ class TimelineHelper {
         await updateTimeline(lastTimeline);
         return lastTimeline.uuid;
       } else {
+        if (Platform.isIOS) {
+          if (lastTimeline.intervalTime >= LocationConfig.judgeUsefulLocation
+              &&  location.accuracy >= 2000
+              && (CalculateUtil.calculateLatlngDistance(lastTimeline.lat, lastTimeline.lon, location.lat, location.lon) > lastTimeline.radius)) {
+              lastTimeline.endTime = location.time;
+              await updateTimeline(lastTimeline);
+              return lastTimeline.uuid;
+          }
+        }
+
         return await createTimeline(await convertTimeline(location));
       }
     } else {

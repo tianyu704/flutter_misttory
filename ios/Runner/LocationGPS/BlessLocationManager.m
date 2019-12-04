@@ -6,7 +6,6 @@
     //
 
 #import "BlessLocationManager.h"
-    //#import <CoreLocation/CoreLocation.h>
 
 @interface BlessLocationManager  () <CLLocationManagerDelegate>
 
@@ -21,7 +20,6 @@
 @property (nonatomic, strong) NSDate *lastDate;
 @property (nonatomic, assign) BOOL isFristLoad;
 @property (nonatomic, assign) BOOL isOnce;
-@property (nonatomic, strong) CLVisit *lastVisit;
 
 
 @end
@@ -100,7 +98,7 @@
 
 - (void)restart {
     [self.locationManager startUpdatingLocation];
-    [self.locationManager startMonitoringVisits];
+    
         //支持被kill掉以后能够后台自动重启
         //后台自动唤醒
     [self.locationManager startMonitoringSignificantLocationChanges];
@@ -108,7 +106,6 @@
 - (void)stop
 {
     [self.locationManager stopUpdatingLocation];
-    [self.locationManager stopMonitoringVisits];
     [self.locationManager stopMonitoringSignificantLocationChanges];
 }
 
@@ -147,50 +144,27 @@
             myLocation = l;
         }
     }
-    BOOL isVisit = [self.lastVisit.departureDate isEqualToDate: NSDate.distantFuture];//到达没离开
-     
     if (!self.lastLocation) {
         self.lastLocation = myLocation;
     }
-    BOOL isNewDate = false;
     //更新历史最大精度坐标 数值最小
     if (self.lastLocation && self.lastLocation.horizontalAccuracy >= myLocation.horizontalAccuracy) {
-        if (isVisit && myLocation.horizontalAccuracy >= 2000) {
-            [self writeToFileWithTxt:@"=======start========="];
-            [self writeToFileWithTxt:[NSString stringWithFormat:@"%@\n",self.lastVisit]];
-            [self writeToFileWithTxt:[NSString stringWithFormat:@"可能是漂移点：%@\n",myLocation]];
-            [self writeToFileWithTxt:@"=======end========="];
-            //认为是停留点
-            isNewDate = true;
-        } else {
-            self.lastLocation = myLocation;
-        }
+        self.lastLocation = myLocation;
     }
     if (self.isOnce && self.onceSuccess) {
-        NSString *jsonStr = [self getJsonStringWithLocation:myLocation isNewDate:isNewDate];
+        NSString *jsonStr = [self getJsonStringWithLocation:myLocation];
         self.onceSuccess(jsonStr);
         self.isOnce = false;
     }
     if (isWright) {
         self.lastDate = [NSDate date];
         if (self.success) {
-            NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation isNewDate:isNewDate];
+            NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation];
             self.success(jsonStr);
         }
         self.lastLocation = nil;
     }
     NSLog(@"%@",myLocation);
-}
-
-- (void)locationManager:(CLLocationManager *)manager didVisit:(CLVisit *)visit {
-    
-    if ([visit.departureDate isEqualToDate: NSDate.distantFuture]) {
-        self.lastVisit = visit;
-    } else {
-        self.lastVisit = nil;
-    }
-    NSString *str = [NSString stringWithFormat:@"%@\n",visit];
-    [self writeToFileWithTxt:str];
 }
 
 //不论是创建还是写入只需调用此段代码即可 如果文件未创建 会进行创建操作
