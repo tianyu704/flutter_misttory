@@ -20,6 +20,9 @@
 @property (nonatomic, strong) CLLocation *lastLocation;
 @property (nonatomic, strong) NSDate *lastDate;
 @property (nonatomic, assign) BOOL isFristLoad;
+@property (nonatomic, assign) BOOL isOnce;
+@property (nonatomic, strong) CLVisit *lastVisit;
+
 
 @end
 
@@ -74,7 +77,7 @@
         }
         self.locationManager.pausesLocationUpdatesAutomatically = NO;
         self.locationManager.desiredAccuracy =  self.desiredAccuracy;
-        self.locationManager.distanceFilter = self.distanceFilter;
+        self.locationManager.distanceFilter = kCLDistanceFilterNone;//self.distanceFilter;
         [self restart];
     }
 }
@@ -90,8 +93,14 @@
     self.success = success;
 }
 
+- (void)startOnce {
+    self.isOnce = true;
+    [self.locationManager startUpdatingLocation];
+}
+
 - (void)restart {
     [self.locationManager startUpdatingLocation];
+    [self.locationManager startMonitoringVisits];
         //支持被kill掉以后能够后台自动重启
         //后台自动唤醒
     [self.locationManager startMonitoringSignificantLocationChanges];
@@ -99,6 +108,7 @@
 - (void)stop
 {
     [self.locationManager stopUpdatingLocation];
+    [self.locationManager stopMonitoringVisits];
     [self.locationManager stopMonitoringSignificantLocationChanges];
 }
 
@@ -120,6 +130,7 @@
             //NSLog(@"时间太短了 %@ < %@不记录",@(t),@(self.timeCycleNum));
         }
     }
+    
 //    if (self.lastLocation) {
 //        double distance = [myLocation distanceFromLocation:self.lastLocation];
 //        if (distance > 150 ) {
@@ -136,36 +147,83 @@
             myLocation = l;
         }
     }
-    //更新历史最大精度坐标 数值最小
-    if (!self.lastLocation || (self.lastLocation && self.lastLocation.horizontalAccuracy >= myLocation.horizontalAccuracy)) {
+    BOOL isVisit = [self.lastVisit.departureDate isEqualToDate: NSDate.distantFuture];//到达没离开
+     
+    if (!self.lastLocation) {
         self.lastLocation = myLocation;
     }
-    if (self.onceSuccess) {
-        NSString *jsonStr = [self getJsonStringWithLocation:myLocation];
+    BOOL isNewDate = false;
+    //更新历史最大精度坐标 数值最小
+    if (self.lastLocation && self.lastLocation.horizontalAccuracy >= myLocation.horizontalAccuracy) {
+        if (isVisit && myLocation.horizontalAccuracy >= 2000) {
+            [self writeToFileWithTxt:@"=======start========="];
+            [self writeToFileWithTxt:[NSString stringWithFormat:@"%@\n",self.lastVisit]];
+            [self writeToFileWithTxt:[NSString stringWithFormat:@"可能是漂移点：%@\n",myLocation]];
+            [self writeToFileWithTxt:@"=======end========="];
+            //认为是停留点
+            isNewDate = true;
+        } else {
+            self.lastLocation = myLocation;
+        }
+    }
+    if (self.isOnce && self.onceSuccess) {
+        NSString *jsonStr = [self getJsonStringWithLocation:myLocation isNewDate:isNewDate];
         self.onceSuccess(jsonStr);
-        self.onceSuccess = nil;
+        self.isOnce = false;
     }
     if (isWright) {
         self.lastDate = [NSDate date];
         if (self.success) {
-            NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation];
+            NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation isNewDate:isNewDate];
             self.success(jsonStr);
         }
         self.lastLocation = nil;
     }
+    NSLog(@"%@",myLocation);
+}
+
+- (void)locationManager:(CLLocationManager *)manager didVisit:(CLVisit *)visit {
     
-    
-//    if (self.lastLocation) {
-//        double distance = [myLocation distanceFromLocation:self.lastLocation];
-//        if (distance < 2) {
-//            NSLog(@"太近了 不记录");
-//                // return;
-//        }
-//        NSLog(@"%@======",@(distance));
-//    }
+    if ([visit.departureDate isEqualToDate: NSDate.distantFuture]) {
+        self.lastVisit = visit;
+    } else {
+        self.lastVisit = nil;
+    }
+    NSString *str = [NSString stringWithFormat:@"%@\n",visit];
+    [self writeToFileWithTxt:str];
+}
+
+//不论是创建还是写入只需调用此段代码即可 如果文件未创建 会进行创建操作
+- (void)writeToFileWithTxt:(NSString *)string{
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        @synchronized (self) {
+            //获取沙盒路径
+            NSArray *paths  = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask,YES);
+            //获取文件路径
+            NSString *theFilePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"testLogs.text"];
+            //创建文件管理器
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            //如果文件不存在 创建文件
+            if(![fileManager fileExistsAtPath:theFilePath]){
+                NSString *str = @"日志开始记录\n";
+                [str writeToFile:theFilePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+            }
+            NSLog(@"所写内容=%@",string);
+            NSFileHandle *fileHandle = [NSFileHandle fileHandleForUpdatingAtPath:theFilePath];
+            [fileHandle seekToEndOfFile];  //将节点跳到文件的末尾
+            NSData* stringData  = [[NSString stringWithFormat:@"%@\n",string] dataUsingEncoding:NSUTF8StringEncoding];
+            [fileHandle writeData:stringData]; //追加写入数据
+            [fileHandle closeFile];
+        }
+    });
 }
 
 - (NSString *)getJsonStringWithLocation:(CLLocation *)location
+{
+    return [self getJsonStringWithLocation:location isNewDate:false];
+}
+
+- (NSString *)getJsonStringWithLocation:(CLLocation *)location isNewDate:(BOOL)isNewDate
 {
     /**
      
@@ -195,7 +253,7 @@
     
     NSDictionary *dic = @{
         @"id":[[NSUUID UUID] UUIDString],
-        @"time":@([self getDateTimeTOMilliSeconds:location.timestamp]),
+        @"time":@([self getDateTimeTOMilliSeconds:isNewDate ? [NSDate date]:location.timestamp]),
         @"lat":@(location.coordinate.latitude),
         @"lon":@(location.coordinate.longitude),
         @"altitude":@(location.altitude),
