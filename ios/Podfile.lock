@@ -11,7 +11,7 @@ PODS:
     - LuakitPod (>= 1.0.28)
   - flutter_orm_plugin (0.0.1):
     - Flutter
-    - LuakitPod (>= 1.0.28)
+    - LuakitPod (>= 1.0.24)
   - GRDB.swift (4.6.2):
     - GRDB.swift/standard (= 4.6.2)
   - GRDB.swift/standard (4.6.2)
@@ -103,7 +103,7 @@ SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_bugly: c9800f4d5bc5bdc27ffdde3417a26ba44266e0c3
   flutter_luakit_plugin: 1af28abdcc568be64152059f2d45596869d80175
-  flutter_orm_plugin: 2bb5ff599b87ae359fa9980514d1fd0dd72043cb
+  flutter_orm_plugin: d0e44188e60e1598276acd74aba91802aa063cdc
   GRDB.swift: 258520e10b49ff55307cbb0bec701af0742ae621
   local_image_provider: dce3592c21eaa668e5a2fff03cb6c9e53a60dff2
   LocoKit: 11697ab6994ff259a773fdab8f8ce239ad2e62b8

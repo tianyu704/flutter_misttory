@@ -17,10 +17,9 @@
 @property(assign, nonatomic) double timeCycleNum;
     //
 @property (nonatomic, strong) CLLocation *lastLocation;
-@property (nonatomic, strong) NSDate *lastDate;
 @property (nonatomic, assign) BOOL isFristLoad;
 @property (nonatomic, assign) BOOL isOnce;
-
+@property (nonatomic, weak) NSTimer *timer;
 
 @end
 
@@ -43,9 +42,18 @@
     if (!self)  return nil;
     self.distanceFilter = kCLDistanceFilterNone;
     self.desiredAccuracy = kCLLocationAccuracyNearestTenMeters;
-    self.timeCycleNum = 5;//五秒一获取定位
+    self.timeCycleNum = 30;//五秒一获取定位
     [self commonInit];
     return self;
+}
+
+- (void)startTime {
+    __weak typeof(self) weakSelf = self;
+    self.timer= [BlessLocationManager fir_scheduledTimerWithTimeInterval:self.timeCycleNum block:^(NSTimer * _Nonnull timer) {
+        [weakSelf.locationManager startUpdatingLocation];
+        NSLog(@"%@",[NSDate date]);
+    } repeats:YES];
+   // [self.timer fire];//立即执行
 }
 
 - (void)auth
@@ -76,7 +84,12 @@
         self.locationManager.pausesLocationUpdatesAutomatically = NO;
         self.locationManager.desiredAccuracy =  self.desiredAccuracy;
         self.locationManager.distanceFilter = kCLDistanceFilterNone;//self.distanceFilter;
-        [self restart];
+        [self.locationManager startUpdatingLocation];
+        
+        //支持被kill掉以后能够后台自动重启
+        //后台自动唤醒
+        [self.locationManager startMonitoringSignificantLocationChanges];
+        [self startTime];
     }
 }
 
@@ -97,46 +110,25 @@
 }
 
 - (void)restart {
-    [self.locationManager startUpdatingLocation];
-    
-        //支持被kill掉以后能够后台自动重启
-        //后台自动唤醒
+    [self startTime];
     [self.locationManager startMonitoringSignificantLocationChanges];
 }
 - (void)stop
 {
     [self.locationManager stopUpdatingLocation];
     [self.locationManager stopMonitoringSignificantLocationChanges];
+    [self.timer invalidate];
+    self.timer = nil;
 }
 
 #pragma mark - location manager delegate
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations
 {
-    
-    NSLog(@"%@",locations);
     if (self.isFristLoad) {
         self.isFristLoad = NO;
         return ;
     }
-    bool isWright = YES;
-    if (self.lastDate) {
-        long t = [self getSecondsFromStarTime:self.lastDate andInsertEndTime:[NSDate date]];
-        if (t < self.timeCycleNum) {
-            isWright = NO;
-            //NSLog(@"时间太短了 %@ < %@不记录",@(t),@(self.timeCycleNum));
-        }
-    }
-    
-//    if (self.lastLocation) {
-//        double distance = [myLocation distanceFromLocation:self.lastLocation];
-//        if (distance > 150 ) {
-//            NSLog(@"太近了 不记录");
-//           // return;
-//        }
-//        NSLog(@"%@======",@(distance));
-//    }
-    
     //获取当前最大精度坐标 数值最小
     CLLocation *myLocation = locations.firstObject;
     for (CLLocation *l in locations) {
@@ -156,15 +148,10 @@
         self.onceSuccess(jsonStr);
         self.isOnce = false;
     }
-    if (isWright) {
-        self.lastDate = [NSDate date];
-        if (self.success) {
-            NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation];
-            self.success(jsonStr);
-        }
-        self.lastLocation = nil;
+    if (self.success) {
+        NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation];
+        self.success(jsonStr);
     }
-    NSLog(@"%@",myLocation);
 }
 
 //不论是创建还是写入只需调用此段代码即可 如果文件未创建 会进行创建操作
@@ -280,25 +267,15 @@
     return totalMilliseconds;
 }
 
++ (void)_yy_ExecBlock:(NSTimer *)timer {
+    if ([timer userInfo]) {
+        void (^block)(NSTimer *timer) = (void (^)(NSTimer *timer))[timer userInfo];
+        block(timer);
+    }
+}
 
-- (void)getAddress:(CLLocation *)location
-{
-    CLGeocoder *geocoder = [[CLGeocoder alloc] init];
-        [geocoder reverseGeocodeLocation:location completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
-            if (error == nil) {
-                CLPlacemark *placemark = [placemarks objectAtIndex:0];
-//                NSString *administrativeArea = placemark.administrativeArea;
-//                NSString *city = placemark.locality;
-//                NSString *subLocality = placemark.subLocality;
-//                NSString *thoroughfare = placemark.thoroughfare;
-                NSLog(@"%@",[self convertJSONWithDic:placemark.addressDictionary]);
-                
-               
-            } else {
-                NSLog(@"获取定位解析信息失败， 失败原因 = %@", error.localizedDescription);
-                 
-            }
-        }];
++ (NSTimer *)fir_scheduledTimerWithTimeInterval:(NSTimeInterval)seconds block:(void (^)(NSTimer *timer))block repeats:(BOOL)repeats {
+    return [NSTimer scheduledTimerWithTimeInterval:seconds target:self selector:@selector(_yy_ExecBlock:) userInfo:[block copy] repeats:repeats];
 }
 
 @end
