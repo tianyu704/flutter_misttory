@@ -7,10 +7,9 @@ import androidx.multidex.MultiDex;
 import com.admqr.misstory.db.MyMigration;
 import com.admqr.misstory.service.MainWorkService;
 import com.admqr.misstory.utils.ApkHelper;
-import com.admqr.misstory.utils.CrashHandler;
 import com.lzy.okgo.OkGo;
-import com.shihoo.daemon.ForegroundNotificationUtils;
-import com.shihoo.daemon.watch.WatchProcessPrefHelper;
+import com.tianyu704.daemon.ForegroundNotificationUtils;
+import com.tianyu704.daemon.watch.WatchProcessPrefHelper;
 
 import io.flutter.app.FlutterApplication;
 import io.realm.Realm;

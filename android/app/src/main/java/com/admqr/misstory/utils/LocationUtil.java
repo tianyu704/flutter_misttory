@@ -50,7 +50,6 @@ public class LocationUtil {
     private LocationManager locationManager;
     private MSLocationListener msLocationListener;
     private boolean isStarted = false;
-    public static int interval = 3 * 60 * 1000;
     public static int distance = 10;
     public static int timeout = 5 * 1000;
     private String provider = LocationManager.NETWORK_PROVIDER;

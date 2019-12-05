@@ -37,7 +37,7 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.admqr.misstory"
         minSdkVersion 19
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -90,7 +90,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.github.williamwen1986:LuakitJitpack:1.0.14'
-    implementation 'com.github.tianyu704:DaemonLibrary:v1.2.3'
+    implementation 'com.github.tianyu704:DaemonLibrary:v1.2.4'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.10'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.9.10'

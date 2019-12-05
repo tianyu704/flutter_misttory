@@ -7,22 +7,18 @@ import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
 
-import com.admqr.misstory.MainActivity;
 import com.admqr.misstory.db.LocationDataHelper;
+import com.admqr.misstory.db.SharedPreferencesUtil;
 import com.admqr.misstory.eventbus.EventUtil;
 import com.admqr.misstory.utils.LocationUtil;
 import com.admqr.misstory.utils.LogUtil;
-import com.shihoo.daemon.work.AbsWorkService;
-
-import io.reactivex.disposables.Disposable;
-
-//import com.amap.api.location.AMapLocationClient;
-//import com.amap.api.location.AMapLocationClientOption;
+import com.tianyu704.daemon.watch.WatchProcessPrefHelper;
+import com.tianyu704.daemon.work.AbsWorkService;
 
 
 public class MainWorkService extends AbsWorkService {
     static final String TAG = LogUtil.makeLogTag(MainWorkService.class);
-//    private Disposable mDisposable;
+    //    private Disposable mDisposable;
     private long mSaveDataStamp;
     //    AMapLocationClient mLocationClient;
     LocationUtil locationUtil;
@@ -34,7 +30,7 @@ public class MainWorkService extends AbsWorkService {
      */
     @Override
     public Boolean needStartWorkService() {
-        return MainActivity.isCanStartWorkService;
+        return WatchProcessPrefHelper.getIsStartDaemon(this);
     }
 
     /**
@@ -124,7 +120,8 @@ public class MainWorkService extends AbsWorkService {
 //                handler.sendEmptyMessageDelayed(0, LocationUtil.interval);
 //            } else
             if (msg.what == 1) {
-                Log.d(TAG, LocationUtil.interval / 60 / 1000 + " 分钟执行一次.... ");
+                int interval = SharedPreferencesUtil.getInstance(MainWorkService.this).getLocationInterval();
+                Log.d(TAG, interval / 60 / 1000 + " 分钟执行一次.... ");
                 if (locationUtil.isStarted()) {
                     locationUtil.stop();
                 }
@@ -132,7 +129,7 @@ public class MainWorkService extends AbsWorkService {
                     LocationDataHelper.getInstance().createLocation(location);
                     EventUtil.postLocationEvent(location);
                 });
-                handler.sendEmptyMessageDelayed(1, LocationUtil.interval);
+                handler.sendEmptyMessageDelayed(1, interval);
             }
 
         }
