@@ -95,7 +95,7 @@ public class MainWorkService extends AbsWorkService {
             locationUtil.init(this);
         }
         handler.removeMessages(1);
-        handler.sendEmptyMessageDelayed(1, 3 * 1000);
+        handler.sendEmptyMessageDelayed(1, 1 * 1000);
     }
 
     private Handler handler = new Handler() {

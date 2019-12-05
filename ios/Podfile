@@ -1,10 +1,15 @@
 # Using a CDN with CocoaPods 1.7.2 or later can save a lot of time on pod installation, but it's experimental rather than the default.
 # source 'https://cdn.cocoapods.org/'
 source 'https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git'
+source 'https://github.com/williamwen1986/LuakitPod.git'
+source 'https://github.com/williamwen1986/curl.git'
 
 
 # Uncomment this line to define a global platform for your project
 platform :ios, '10.0'
+
+# Disable warnings in Pods!!
+inhibit_all_warnings!
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
