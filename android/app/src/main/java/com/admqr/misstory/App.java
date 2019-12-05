@@ -43,7 +43,7 @@ public class App extends FlutterApplication {
             ForegroundNotificationUtils.setPackgeName(BuildConfig.APPLICATION_ID);
             Log.d("wsh-daemon", "启动了看门狗进程");
         }
-        CrashHandler.getInstance().init(this);
+//        CrashHandler.getInstance().init(this);
     }
 
     public void createDataBase() {

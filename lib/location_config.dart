@@ -33,7 +33,7 @@ class LocationConfig {
   static num poiSearchInterval = 1000;
 
   /// 图片经纬度半径,判断是否在同一位置
-  static num pictureRadius = 200;
+  static num pictureRadius = 100;
   /// 2个相邻且相同的地点之间的时间间隔，超过该时间算作一个点，没超过就合并
   static num intervalGap = 60 * 1000 * 30;
 
