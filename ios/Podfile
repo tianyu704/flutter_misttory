@@ -42,9 +42,6 @@ def parse_KV_file(file, separator='=')
 end
 
 target 'Runner' do
-  pod 'LocoKit', :git => 'https://github.com/sobri909/LocoKit.git', :branch => 'develop'
-  pod 'LocoKitCore', :git => 'https://github.com/sobri909/LocoKit.git', :branch => 'develop'
-  pod 'LocoKit/Timelines', :git => 'https://github.com/sobri909/LocoKit.git', :branch => 'develop'
   # Prepare symlinks folder. We use symlinks to avoid having Podfile.lock
   # referring to absolute paths on developers' machines.
   system('rm -rf .symlinks')

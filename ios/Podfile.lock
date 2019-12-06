@@ -12,20 +12,8 @@ PODS:
   - flutter_orm_plugin (0.0.1):
     - Flutter
     - LuakitPod (>= 1.0.24)
-  - GRDB.swift (4.6.2):
-    - GRDB.swift/standard (= 4.6.2)
-  - GRDB.swift/standard (4.6.2)
   - local_image_provider (0.0.1):
     - Flutter
-  - LocoKit (7.0.0):
-    - LocoKit/Base (= 7.0.0)
-  - LocoKit/Base (7.0.0):
-    - LocoKitCore (= 7.0.0)
-    - Upsurge (~> 0.10)
-  - LocoKit/Timelines (7.0.0):
-    - GRDB.swift (~> 4)
-    - LocoKit/Base
-  - LocoKitCore (7.0.0)
   - LuakitPod (1.0.28):
     - LuakitPod/static (= 1.0.28)
   - LuakitPod/static (1.0.28)
@@ -35,7 +23,6 @@ PODS:
     - Flutter
   - shared_preferences (0.0.1):
     - Flutter
-  - Upsurge (0.10.2)
   - webview_flutter (0.0.1):
     - Flutter
 
@@ -45,9 +32,6 @@ DEPENDENCIES:
   - flutter_luakit_plugin (from `.symlinks/plugins/flutter_luakit_plugin/ios`)
   - flutter_orm_plugin (from `.symlinks/plugins/flutter_orm_plugin/ios`)
   - local_image_provider (from `.symlinks/plugins/local_image_provider/ios`)
-  - LocoKit (from `https://github.com/sobri909/LocoKit.git`, branch `develop`)
-  - LocoKit/Timelines (from `https://github.com/sobri909/LocoKit.git`, branch `develop`)
-  - LocoKitCore (from `https://github.com/sobri909/LocoKit.git`, branch `develop`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
@@ -60,8 +44,6 @@ SPEC REPOS:
     - LuakitPod
   https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
     - Bugly
-    - GRDB.swift
-    - Upsurge
 
 EXTERNAL SOURCES:
   Flutter:
@@ -74,12 +56,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_orm_plugin/ios"
   local_image_provider:
     :path: ".symlinks/plugins/local_image_provider/ios"
-  LocoKit:
-    :branch: develop
-    :git: https://github.com/sobri909/LocoKit.git
-  LocoKitCore:
-    :branch: develop
-    :git: https://github.com/sobri909/LocoKit.git
   package_info:
     :path: ".symlinks/plugins/package_info/ios"
   path_provider:
@@ -89,14 +65,6 @@ EXTERNAL SOURCES:
   webview_flutter:
     :path: ".symlinks/plugins/webview_flutter/ios"
 
-CHECKOUT OPTIONS:
-  LocoKit:
-    :commit: de3d18d19af3222f2c345dfe46991342bbb17112
-    :git: https://github.com/sobri909/LocoKit.git
-  LocoKitCore:
-    :commit: de3d18d19af3222f2c345dfe46991342bbb17112
-    :git: https://github.com/sobri909/LocoKit.git
-
 SPEC CHECKSUMS:
   Bugly: dbac48b55ad469a97cc4321045cd50df8f63d44f
   curl: ec0615c2f1046f5751549e6e714f845c9b609805
@@ -104,17 +72,13 @@ SPEC CHECKSUMS:
   flutter_bugly: c9800f4d5bc5bdc27ffdde3417a26ba44266e0c3
   flutter_luakit_plugin: 1af28abdcc568be64152059f2d45596869d80175
   flutter_orm_plugin: d0e44188e60e1598276acd74aba91802aa063cdc
-  GRDB.swift: 258520e10b49ff55307cbb0bec701af0742ae621
   local_image_provider: dce3592c21eaa668e5a2fff03cb6c9e53a60dff2
-  LocoKit: 11697ab6994ff259a773fdab8f8ce239ad2e62b8
-  LocoKitCore: 30cff6a1e4ac5a32eefe232c19e24fd79485661d
   LuakitPod: 99b9086c52f9cc9d16ed508b751566ad10977f70
   package_info: 48b108e75b8802c2d5e126f208ef540561c98aef
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
   shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
-  Upsurge: 5866beadc3da27f91c5df4ac795deb3f3238d678
   webview_flutter: 1aa7604e6cdb451a9b7ed2c37d5454c0b440246b
 
-PODFILE CHECKSUM: af03b8a25e56db8feec1acbdb39223bfa3d65d0f
+PODFILE CHECKSUM: b9e260ae079029f5df10959a5ff3d367d8830cb0
 
 COCOAPODS: 1.8.4
