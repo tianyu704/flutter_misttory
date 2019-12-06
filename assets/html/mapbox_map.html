@@ -120,6 +120,15 @@ function setCenter(lat,lon){
     map.setCenter([lon,lat]);
 }
 
+function setTouch(touch){
+    map = new mapboxgl.Map( {
+        container: "container",
+        style: 'mapbox://styles/mapbox/light-v9',
+        interactive: touch,
+        zoom:level,
+        center: center,
+    });
+}
 
 </script>
 </body>

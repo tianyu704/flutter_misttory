@@ -91,6 +91,28 @@ function setCenter(lat,lon){
     map.setCenter([lon,lat]);
 }
 
+function setTouch(touch){
+    if(touch){
+        map.setStatus({
+            rotateEnable: true,
+            dragEnable: true,
+            zoomEnable: true,
+            doubleClickZoom: true,
+            keyboardEnable: true,
+            touchZoom: true,
+        });
+    }else{
+        map.setStatus({
+            rotateEnable: false,
+            dragEnable: false,
+            zoomEnable: true,
+            doubleClickZoom: false,
+            keyboardEnable: false,
+            touchZoom: false,
+        });
+    }
+}
+
 </script>
 </body>
 </html>
