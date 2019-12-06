@@ -20,10 +20,6 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
-		E423524023920C2F00BAF350 /* SwiftNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = E423523F23920C2F00BAF350 /* SwiftNote.swift */; };
-		E437EA7C238E477C009512CF /* TencentLBS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E437EA7B238E477C009512CF /* TencentLBS.framework */; };
-		E437EA7F238E4820009512CF /* HFBlessLocationHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = E437EA7E238E4820009512CF /* HFBlessLocationHelper.m */; };
-		E437EA82238E4983009512CF /* TencentLocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E437EA81238E4983009512CF /* TencentLocationManager.m */; };
 		E437EA84238E6930009512CF /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E437EA83238E6930009512CF /* SystemConfiguration.framework */; };
 		E466A51C2359A0E400FF346E /* bridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E466A51B2359A0E400FF346E /* bridge.swift */; };
 		E4A35E5B2383FEE200AEE3EC /* BlessLocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E4A35E5A2383FEE200AEE3EC /* BlessLocationManager.m */; };
@@ -67,12 +63,6 @@
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DBAECE74A0B59746D0D08A03 /* libPods-Runner.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Runner.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		E423523F23920C2F00BAF350 /* SwiftNote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftNote.swift; sourceTree = "<group>"; };
-		E437EA7B238E477C009512CF /* TencentLBS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TencentLBS.framework; sourceTree = "<group>"; };
-		E437EA7D238E4820009512CF /* HFBlessLocationHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HFBlessLocationHelper.h; sourceTree = "<group>"; };
-		E437EA7E238E4820009512CF /* HFBlessLocationHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HFBlessLocationHelper.m; sourceTree = "<group>"; };
-		E437EA80238E4982009512CF /* TencentLocationManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TencentLocationManager.h; sourceTree = "<group>"; };
-		E437EA81238E4983009512CF /* TencentLocationManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TencentLocationManager.m; sourceTree = "<group>"; };
 		E437EA83238E6930009512CF /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		E437EA85238E695F009512CF /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		E466A51A2359A0E400FF346E /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -98,7 +88,6 @@
 				9705A1C61CF904A100538489 /* Flutter.framework in Frameworks */,
 				E437EA84238E6930009512CF /* SystemConfiguration.framework in Frameworks */,
 				3B80C3941E831B6300D905FE /* App.framework in Frameworks */,
-				E437EA7C238E477C009512CF /* TencentLBS.framework in Frameworks */,
 				093913941383D6893D997FEF /* libPods-Runner.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -152,7 +141,6 @@
 			isa = PBXGroup;
 			children = (
 				E437EA85238E695F009512CF /* Runner.entitlements */,
-				E437EA79238E406A009512CF /* TencentLocation */,
 				E4A35E582383FEB000AEE3EC /* LocationGPS */,
 				E4F2EF2623729E750077146B /* LocationAuth */,
 				7AFFD8ED1D35381100E5BB4D /* AppDelegate.h */,
@@ -166,7 +154,6 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				E4F2EF1C237292AA0077146B /* FlutterAuthRegistrant.h */,
 				E4F2EF1D237292AA0077146B /* FlutterAuthRegistrant.m */,
-				E423523F23920C2F00BAF350 /* SwiftNote.swift */,
 				E466A51B2359A0E400FF346E /* bridge.swift */,
 				E466A51A2359A0E400FF346E /* Runner-Bridging-Header.h */,
 			);
@@ -188,26 +175,6 @@
 				DBAECE74A0B59746D0D08A03 /* libPods-Runner.a */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		E437EA79238E406A009512CF /* TencentLocation */ = {
-			isa = PBXGroup;
-			children = (
-				E437EA7A238E477C009512CF /* TencentLBS_v3.18 */,
-				E437EA7D238E4820009512CF /* HFBlessLocationHelper.h */,
-				E437EA7E238E4820009512CF /* HFBlessLocationHelper.m */,
-				E437EA80238E4982009512CF /* TencentLocationManager.h */,
-				E437EA81238E4983009512CF /* TencentLocationManager.m */,
-			);
-			path = TencentLocation;
-			sourceTree = "<group>";
-		};
-		E437EA7A238E477C009512CF /* TencentLBS_v3.18 */ = {
-			isa = PBXGroup;
-			children = (
-				E437EA7B238E477C009512CF /* TencentLBS.framework */,
-			);
-			path = TencentLBS_v3.18;
 			sourceTree = "<group>";
 		};
 		E4A35E582383FEB000AEE3EC /* LocationGPS */ = {
@@ -384,16 +351,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E437EA7F238E4820009512CF /* HFBlessLocationHelper.m in Sources */,
 				E4F2EF1E237292AA0077146B /* FlutterAuthRegistrant.m in Sources */,
-				E437EA82238E4983009512CF /* TencentLocationManager.m in Sources */,
 				E466A51C2359A0E400FF346E /* bridge.swift in Sources */,
 				E4A35E5B2383FEE200AEE3EC /* BlessLocationManager.m in Sources */,
 				978B8F6F1D3862AE00F588F7 /* AppDelegate.m in Sources */,
 				E4F2EF2E23729FEF0077146B /* MSPermissionManager.m in Sources */,
 				97C146F31CF9000F007C117D /* main.m in Sources */,
 				E4F2EF2A23729E750077146B /* MSLocationPermissionStrategy.m in Sources */,
-				E423524023920C2F00BAF350 /* SwiftNote.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -493,7 +457,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.admqr.misstory1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.admqr.misstory-vist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -630,7 +594,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.admqr.misstory1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.admqr.misstory-vist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -662,7 +626,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.admqr.misstory1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.admqr.misstory-vist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;

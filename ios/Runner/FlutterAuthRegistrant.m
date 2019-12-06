@@ -11,12 +11,10 @@
 #import <CoreLocation/CoreLocation.h>
 #import "MSPermissionManager.h"
 #import "BlessLocationManager.h"
-#import "Runner-Bridging-Header.h"
-#import "Runner-Swift.h"
+#include "AppDelegate.h"
 
 FlutterMethodChannel *_channel;
-HFArcManager *arcManager;
-NSDate *lastDate;
+
 @implementation FlutterAuthRegistrant
 
 + (void)authRegistrant:(id)vc
@@ -42,46 +40,33 @@ NSDate *lastDate;
             }];
             return ;
         } else {
-            if ([@"init" isEqualToString:call.method]) {
-                arcManager = [[HFArcManager alloc]init];
-                result(@YES);
-            } else if ([@"start_location" isEqualToString:call.method]) {
+            AppDelegate *app = (AppDelegate *)[UIApplication sharedApplication].delegate;
+            if ([@"start_location" isEqualToString:call.method]) {
                 if (call.arguments) {
-                    arcManager = [[HFArcManager alloc]init]; true;//允许使用全天记录省电模式
-                   
+                    
                     NSDictionary *params = call.arguments;
                     double num = [params[@"interval"]doubleValue];//单次定位间隔时间毫秒
                     num = num/1000;//转second
-                    arcManager.timeCycleNum = num / 2;
+//                    double desiredAccuracy = [params[@"locationMode"] doubleValue];
+                    double distanceFilter = [params[@"distanceFilter"]doubleValue];//每间隔distanceFilter 米定位一次
+                    app.blessManager  = [[BlessLocationManager alloc]initWithFilter:distanceFilter accuracy:kCLLocationAccuracyNearestTenMeters timeCycle:num / 2];
+                } else {
+                    app.blessManager = [[BlessLocationManager alloc]init];
                 }
-                [arcManager arcStart];
-                 arcManager.myEidtorBlock = ^(CLLocation * _Nullable lo, BOOL isNeedDateChang) {
-                     BOOL isWrite = true;
-                     if (lastDate) {
-                         long time = [self getSecondsFromStarTime:lastDate andInsertEndTime:[NSDate date]];
-                         if (time <  arcManager.timeCycleNum) {
-                             isWrite = false;
-                         }
-                     }
-                     if (isWrite || true) {//TODO:这里先一直记录试试看
-                         lastDate = [NSDate date];
-                         NSString *locationJsonString = [self getJsonStringWithLocation:lo isChangeDate:isNeedDateChang];
-                         [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
-                     }
-                };
-                arcManager.myOnceBlock = ^(CLLocation * _Nullable lo, BOOL isNeedDateChang) {
-                      NSString *locationJsonString = [self getJsonStringWithLocation:lo isChangeDate:isNeedDateChang];
-                      [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
-                      result(locationJsonString);
-                };
-       
+                [app.blessManager startLocationWithSuccess:^(NSString * _Nonnull locationJsonString) {
+                    [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
+                }];
             } else if ([@"current_location" isEqualToString:call.method]) {//获取一次定位
-                [arcManager arcOnce];
+                [app.blessManager startOnce];
+                [app.blessManager onceLocationWithSuccess:^(NSString * _Nonnull locationJsonString) {
+                    [_channel invokeMethod:@"locationListener" arguments:locationJsonString];
+                    result(locationJsonString);
+                }];
             } else if ([@"stop_location" isEqualToString:call.method]) {
-                [arcManager arcStop];
+                [app.blessManager stop];
                 result(@"停止定位");
             } else if ([@"destroy" isEqualToString:call.method]) {
-               [arcManager arcStop];
+                [app.blessManager stop];
                 result(@"销毁（停止定位）");
             } else {
                 result(FlutterMethodNotImplemented);
@@ -90,92 +75,6 @@ NSDate *lastDate;
     }];
 }
 
-+ (NSString *)getJsonStringWithLocation:(CLLocation *)location
-{
-   return  [self getJsonStringWithLocation:location isChangeDate:false];
-}
 
-+ (NSString *)getJsonStringWithLocation:(CLLocation *)location isChangeDate:(BOOL)isChangeDate
-{
-    /**
-     
-     String id;
-     
-     num time;
-     
-     num lat;
-     
-     num lon;
-     
-     num altitude;
-     
-     num accuracy;
-     
-     @JsonKey(name: "vertical_accuracy")
-     num verticalAccuracy;
-     
-     num speed;
-     
-     num bearing;
-     
-     ////// num count;
-     
-     @JsonKey(name: "coord_type")
-     */
-    
-    NSDictionary *dic = @{
-        @"id":[[NSUUID UUID] UUIDString],
-        @"time":@([self getDateTimeTOMilliSeconds:isChangeDate ? [NSDate date] : location.timestamp]), 
-        @"lat":@(location.coordinate.latitude),
-        @"lon":@(location.coordinate.longitude),
-        @"altitude":@(location.altitude),
-        @"accuracy":@(location.horizontalAccuracy),
-        @"vertical_accuracy":@(location.verticalAccuracy),
-        @"speed":@(location.speed),
-        @"bearing":@(location.course),
-        @"coord_type":@"WGS84"//默认gps坐标
-    };
-    
-    return [self convertJSONWithDic:dic];
-}
-
-    //字典转JSON
-+ (NSString *)convertJSONWithDic:(NSDictionary *)dic {
-    NSError *err;
-    NSData *data = [NSJSONSerialization dataWithJSONObject:dic options:NSJSONWritingPrettyPrinted error:&err];
-    if (err) {
-        return @"字典转JSON出错";
-    }
-    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-}
-
-    //JSON转字典
-+(NSDictionary *)convertDicWithJSON:(NSString *)jsonStr {
-    if (jsonStr.length == 0) {
-        return nil;
-    }
-    NSError *err;
-    NSData *jsondata = [jsonStr dataUsingEncoding:NSUTF8StringEncoding];
-    NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:jsondata options:NSJSONReadingMutableContainers error:&err];
-    if (err) {
-        return nil;
-    }
-    
-    return dic;
-}
-+ (NSTimeInterval)getSecondsFromStarTime:(NSDate *)starTime andInsertEndTime:(NSDate *)endTime {
-    
-    NSDate* startDate = starTime;
-    NSDate* endDate = endTime;
-    NSTimeInterval time = [endDate timeIntervalSinceDate:startDate];
-    return time;
-}
-
-+ (long long)getDateTimeTOMilliSeconds:(NSDate *)datetime
-{
-    NSTimeInterval interval = [datetime timeIntervalSince1970];
-    long long totalMilliseconds = interval*1000 ;
-    return totalMilliseconds;
-}
- 
 @end
+
