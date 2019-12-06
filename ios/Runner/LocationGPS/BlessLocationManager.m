@@ -75,12 +75,13 @@
 - (void)startTime {
     __weak typeof(self) weakSelf = self;
     self.timer= [BlessLocationManager fir_scheduledTimerWithTimeInterval:self.timeCycleNum block:^(NSTimer * _Nonnull timer) {
+        [weakSelf.locationManager stopUpdatingLocation];
         [weakSelf.locationManager startUpdatingLocation];
-        NSLog(@"%@",[NSDate date]);
+        //NSLog(@"%@",[NSDate date]);
     } repeats:YES];
    // [self.timer fire];//立即执行
 }
-
+    
 - (void)auth
 {
     [self.locationManager requestAlwaysAuthorization];// 永久授权
@@ -108,7 +109,7 @@
         }
         self.locationManager.pausesLocationUpdatesAutomatically = NO;
         self.locationManager.desiredAccuracy =  self.desiredAccuracy;
-        self.locationManager.distanceFilter = kCLDistanceFilterNone;//self.distanceFilter;
+        self.locationManager.distanceFilter = 10; //kCLDistanceFilterNone;//self.distanceFilter;
         [self.locationManager startUpdatingLocation];
         
         //支持被kill掉以后能够后台自动重启
@@ -132,6 +133,7 @@
 
 - (void)startOnce {
     self.isOnce = true;
+    [self.locationManager stopUpdatingLocation];
     [self.locationManager startUpdatingLocation];
 }
 
