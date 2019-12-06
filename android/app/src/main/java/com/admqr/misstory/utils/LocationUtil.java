@@ -20,22 +20,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.admqr.misstory.model.LocationData;
-import com.admqr.misstory.net.HttpRequest;
-import com.lzy.okgo.callback.StringCallback;
-import com.lzy.okgo.model.Response;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 
 import static android.os.Build.VERSION_CODES.N;
@@ -54,6 +47,8 @@ public class LocationUtil {
     public static int timeout = 5 * 1000;
     private String provider = LocationManager.NETWORK_PROVIDER;
     private boolean isSearching = false;
+    private GnssStatus.Callback gnssStatusCallback;
+    private GpsStatus.Listener gpsStatusListener;
     GeocodeAddress geocodeAddress;
     long time;
 
@@ -68,6 +63,65 @@ public class LocationUtil {
     public void init(Context context) {
         this.context = context;
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= N) {
+            gnssStatusCallback = new GnssStatus.Callback() {
+                @Override
+                public void onSatelliteStatusChanged(GnssStatus status) {
+                    super.onSatelliteStatusChanged(status);
+                    LogUtil.d(TAG, "gnss status changed");
+                    int count = 0;
+                    if (status != null && status.getSatelliteCount() > 0) {
+                        for (int i = 0; i < status.getSatelliteCount(); i++) {
+                            if (status.getCn0DbHz(i) > 0) {
+                                count++;
+                            }
+                        }
+                        if (count >= 4) {
+                            provider = LocationManager.GPS_PROVIDER;
+                        } else {
+                            provider = LocationManager.NETWORK_PROVIDER;
+                        }
+                    } else {
+                        provider = LocationManager.NETWORK_PROVIDER;
+                    }
+                    LogUtil.d(TAG, "可用卫星数量：" + count + "个，定位类型为:" + provider);
+                    locationManager.unregisterGnssStatusCallback(this);
+                    isSearching = false;
+                    startLocation();
+                }
+            };
+        } else {
+            gpsStatusListener = new GpsStatus.Listener() {
+                @Override
+                public void onGpsStatusChanged(int event) {
+                    if (event == GpsStatus.GPS_EVENT_SATELLITE_STATUS) {
+                        LogUtil.d(TAG, "gnss status changed");
+                        @SuppressLint("MissingPermission")
+                        GpsStatus status = locationManager.getGpsStatus(null);
+                        int count = 0;
+                        if (status != null && status.getMaxSatellites() > 0) {
+                            Iterator<GpsSatellite> iters = status.getSatellites().iterator();
+                            while (iters.hasNext()) {
+                                if (iters.next().getSnr() > 0) {
+                                    count++;
+                                }
+                            }
+                            if (count >= 4) {
+                                provider = LocationManager.GPS_PROVIDER;
+                            } else {
+                                provider = LocationManager.NETWORK_PROVIDER;
+                            }
+                        } else {
+                            provider = LocationManager.NETWORK_PROVIDER;
+                        }
+                        LogUtil.d(TAG, "可用卫星数量：" + count + "个，定位类型为:" + provider);
+                        locationManager.removeGpsStatusListener(this);
+                        isSearching = false;
+                        startLocation();
+                    }
+                }
+            };
+        }
     }
 
     public boolean isStarted() {
@@ -80,10 +134,14 @@ public class LocationUtil {
             super.handleMessage(msg);
             if (isSearching) {
                 if (Build.VERSION.SDK_INT >= N) {
-                    locationManager.unregisterGnssStatusCallback(gnssStatusCallback);
+                    if (gnssStatusCallback != null) {
+                        locationManager.unregisterGnssStatusCallback(gnssStatusCallback);
+                    }
                     startLocation();
                 } else {
-                    locationManager.removeGpsStatusListener(gpsStatusListener);
+                    if (gpsStatusListener != null) {
+                        locationManager.removeGpsStatusListener(gpsStatusListener);
+                    }
                     startLocation();
                 }
             }
@@ -187,71 +245,20 @@ public class LocationUtil {
                 && ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             isSearching = true;
             if (Build.VERSION.SDK_INT >= N) {
-                locationManager.registerGnssStatusCallback(gnssStatusCallback);
+                if (gnssStatusCallback != null) {
+                    locationManager.registerGnssStatusCallback(gnssStatusCallback);
+                } else {
+                    LogUtil.e(TAG, "please init");
+                }
             } else {
-                locationManager.addGpsStatusListener(gpsStatusListener);
+                if (gpsStatusListener != null) {
+                    locationManager.addGpsStatusListener(gpsStatusListener);
+                } else {
+                    LogUtil.e(TAG, "please init");
+                }
             }
         }
     }
-
-    @RequiresApi(N)
-    private GnssStatus.Callback gnssStatusCallback = new GnssStatus.Callback() {
-        @Override
-        public void onSatelliteStatusChanged(GnssStatus status) {
-            super.onSatelliteStatusChanged(status);
-            LogUtil.d(TAG, "gnss status changed");
-            int count = 0;
-            if (status != null && status.getSatelliteCount() > 0) {
-                for (int i = 0; i < status.getSatelliteCount(); i++) {
-                    if (status.getCn0DbHz(i) > 0) {
-                        count++;
-                    }
-                }
-                if (count >= 4) {
-                    provider = LocationManager.GPS_PROVIDER;
-                } else {
-                    provider = LocationManager.NETWORK_PROVIDER;
-                }
-            } else {
-                provider = LocationManager.NETWORK_PROVIDER;
-            }
-            LogUtil.d(TAG, "可用卫星数量：" + count + "个，定位类型为:" + provider);
-            locationManager.unregisterGnssStatusCallback(this);
-            isSearching = false;
-            startLocation();
-        }
-    };
-
-    @SuppressLint("MissingPermission")
-    private GpsStatus.Listener gpsStatusListener = new GpsStatus.Listener() {
-        @Override
-        public void onGpsStatusChanged(int event) {
-            if (event == GpsStatus.GPS_EVENT_SATELLITE_STATUS) {
-                LogUtil.d(TAG, "gnss status changed");
-                GpsStatus status = locationManager.getGpsStatus(null);
-                int count = 0;
-                if (status != null && status.getMaxSatellites() > 0) {
-                    Iterator<GpsSatellite> iters = status.getSatellites().iterator();
-                    while (iters.hasNext()) {
-                        if (iters.next().getSnr() > 0) {
-                            count++;
-                        }
-                    }
-                    if (count >= 4) {
-                        provider = LocationManager.GPS_PROVIDER;
-                    } else {
-                        provider = LocationManager.NETWORK_PROVIDER;
-                    }
-                } else {
-                    provider = LocationManager.NETWORK_PROVIDER;
-                }
-                LogUtil.d(TAG, "可用卫星数量：" + count + "个，定位类型为:" + provider);
-                locationManager.removeGpsStatusListener(this);
-                isSearching = false;
-                startLocation();
-            }
-        }
-    };
 
 
     private LocationListener locationListener = new LocationListener() {
@@ -359,7 +366,7 @@ public class LocationUtil {
                 Geocoder geocoder = new Geocoder(context);
                 try {
 //                    List<Address> address = geocoder.getFromLocation(params[0].getLatitude(), params[0].getLongitude(), 5);
-                    List<Address> address = geocoder.getFromLocation(22.3973920700,114.1832235300, 5);
+                    List<Address> address = geocoder.getFromLocation(22.3973920700, 114.1832235300, 5);
                     if (address != null && address.size() > 0) {
                         Log.d(TAG, JacksonUtil.getInstance().writeValueAsString(address));
 //                        LogUtil.d(TAG, System.currentTimeMillis() - time + "");

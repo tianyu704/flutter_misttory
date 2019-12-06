@@ -7,7 +7,6 @@ import androidx.multidex.MultiDex;
 import com.admqr.misstory.db.MyMigration;
 import com.admqr.misstory.service.MainWorkService;
 import com.admqr.misstory.utils.ApkHelper;
-import com.lzy.okgo.OkGo;
 import com.tianyu704.daemon.ForegroundNotificationUtils;
 import com.tianyu704.daemon.watch.WatchProcessPrefHelper;
 
@@ -21,7 +20,7 @@ public class App extends FlutterApplication {
     public void onCreate() {
         super.onCreate();
         createDataBase();
-        OkGo.getInstance().init(this).setRetryCount(1);
+//        OkGo.getInstance().init(this).setRetryCount(1);
         MultiDex.install(this);
         //需要在 Application 的 onCreate() 中调用一次 DaemonEnv.initialize()
         // 每一次创建进程的时候都需要对Daemon环境进行初始化，所以这里没有判断进程
