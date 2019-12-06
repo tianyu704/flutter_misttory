@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 ///
 /// Create by Hugo.Guo
 /// Date: 2019-10-11
@@ -18,8 +16,7 @@ class Constant {
       "N0IHDULNBN0ZFZKUSX1N2YKRSZBZK11UQ2KW4LFJ2S1KBURD";
 
   /// 高德web api key
-//  static final String aMapWebKey = "0004af0a0ee3b327d404eff0fb88a1b9";
-  static final String aMapWebKey = "b24df9f1354d51538d60d3e4410af79e";
+  static final String aMapWebKey = "4bfe29c6210e118aa3972ff159f26c4e";
 
   /// 腾讯 web api key
 ///
