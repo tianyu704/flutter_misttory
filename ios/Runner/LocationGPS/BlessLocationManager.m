@@ -6,6 +6,7 @@
     //
 
 #import "BlessLocationManager.h"
+#include "AppDelegate.h"
 
 @interface BlessLocationManager  () <CLLocationManagerDelegate>
 
@@ -42,10 +43,34 @@
     if (!self)  return nil;
     self.distanceFilter = kCLDistanceFilterNone;
     self.desiredAccuracy = kCLLocationAccuracyNearestTenMeters;
-    self.timeCycleNum = 30;//五秒一获取定位
+    self.timeCycleNum = 5;//五秒一获取定位
     [self commonInit];
     return self;
 }
+
+- (void)dealloc
+{
+     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)addKVO
+{
+    //app从后台进入前台
+    [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationWillEnterForegroundNotification
+        object:nil
+         queue:[NSOperationQueue mainQueue]
+    usingBlock:^(NSNotification * _Nonnull note) {
+        [self postBecomeActive];
+    }];
+    //app从前台进入后台
+    [[NSNotificationCenter defaultCenter] addObserverForName: UIApplicationDidEnterBackgroundNotification
+        object:nil
+         queue:[NSOperationQueue mainQueue]
+    usingBlock:^(NSNotification * _Nonnull note) {
+        [self postBecomeBackground];
+    }];
+}
+
 
 - (void)startTime {
     __weak typeof(self) weakSelf = self;
@@ -91,6 +116,7 @@
         [self.locationManager startMonitoringSignificantLocationChanges];
         [self startTime];
     }
+    [self addKVO];
 }
 
 
@@ -154,6 +180,19 @@
     }
 }
 
+#pragma mark - kvo func
+
+- (void)postBecomeActive
+{
+    //NSLog(@"后台进入了前台");
+}
+
+- (void)postBecomeBackground
+{
+    //NSLog(@"前台进入了后台");
+}
+
+#pragma mark - other
 //不论是创建还是写入只需调用此段代码即可 如果文件未创建 会进行创建操作
 - (void)writeToFileWithTxt:(NSString *)string{
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
