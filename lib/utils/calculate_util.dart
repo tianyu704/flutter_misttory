@@ -11,7 +11,7 @@ class CalculateUtil {
   static final num x_pi = 3.14159265358979324 * 3000.0 / 180.0;
 
   static double calculateLatlngDistance(
-      double lat1, double lng1, double lat2, double lng2) {
+      num lat1, num lng1, num lat2, num lng2) {
     if (lat1 == null || lng1 == null || lat2 == null || lng2 == null) {
       return double.infinity;
     }

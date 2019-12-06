@@ -6,6 +6,8 @@ import 'package:misstory/db/helper/location_db_helper.dart';
 import 'package:misstory/models/location.dart';
 import 'package:misstory/models/timeline.dart';
 import 'package:misstory/style/app_style.dart';
+import 'package:misstory/utils/calculate_util.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class LocationListPage extends StatefulWidget {
   final Timeline timeline;
@@ -21,6 +23,7 @@ class LocationListPage extends StatefulWidget {
 
 class _LocationListPageState extends LifecycleState<LocationListPage> {
   List<Location> _locations = List<Location>();
+  WebViewController _webViewController;
 
   @override
   void initState() {
@@ -42,6 +45,26 @@ class _LocationListPageState extends LifecycleState<LocationListPage> {
       setState(() {
         ///none
       });
+      Future.delayed(Duration(seconds: 1), () {
+        if (widget.timeline.uuid == null) {
+          _webViewController
+              ?.evaluateJavascript("setZoom(10)");
+          Location location = _locations.last;
+          var l = CalculateUtil.wgsToGcj(location.lat, location.lon);
+          _webViewController
+              ?.evaluateJavascript("setCenter(${l["lat"]},${l["lon"]})");
+        } else {
+          var l =
+              CalculateUtil.wgsToGcj(widget.timeline.lat, widget.timeline.lon);
+          _webViewController
+              ?.evaluateJavascript("setCenter(${l["lat"]},${l["lon"]})");
+        }
+        for (Location location in _locations) {
+          var l = CalculateUtil.wgsToGcj(location.lat, location.lon);
+          _webViewController
+              ?.evaluateJavascript("addMarker(${l["lat"]},${l["lon"]})");
+        }
+      });
     }
   }
 
@@ -60,6 +83,20 @@ class _LocationListPageState extends LifecycleState<LocationListPage> {
       ),
       body: Column(
         children: <Widget>[
+          SizedBox(
+            width: double.infinity,
+            height: 250,
+            child: WebView(
+              initialUrl: "assets/html/gaode_map.html",
+              javascriptMode: JavascriptMode.unrestricted,
+              onWebViewCreated: (webViewController) {
+                _webViewController = webViewController;
+              },
+              onPageFinished: (url) {
+                _webViewController?.evaluateJavascript("setTouch(true)");
+              },
+            ),
+          ),
           Flexible(
             child: ListView.separated(
               itemBuilder: _buildItem,

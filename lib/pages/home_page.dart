@@ -225,6 +225,8 @@ class _HomePageState extends LifecycleState<HomePage> {
   ///初始化并开始定位
   void _initLocation() async {
     print("===================_initLocation");
+    await LocationDBHelper().saveNewLocation(null);
+    await _refreshStory();
     LocationChannel().onLocationChanged.listen((location) async {
       PrintUtil.debugPrint("获取到原生定位信息-----${location.toJson()}");
       if (location != null) {
@@ -382,7 +384,7 @@ class _HomePageState extends LifecycleState<HomePage> {
     // TODO: implement onResume
     super.onResume();
     if (!_isFirstLoad) {
-        _onceLocate();
+      _onceLocate();
       refreshNewPictures().then((_) {
         _refreshStory();
       });

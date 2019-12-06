@@ -76,13 +76,15 @@ class LocationDBHelper {
 
   ///
   Future saveLocation(Location location) async {
-    int result = await createLocation(location);
-    if (result == 0) {
-      String timelineId =
-          await TimelineHelper().createOrUpdateTimeline(location);
-      if (StringUtil.isNotEmpty(timelineId)) {
-        location.timelineId = timelineId;
-        await updateLocationTimelineId(location);
+    if(location != null){
+      int result = await createLocation(location);
+      if (result == 0) {
+        String timelineId =
+        await TimelineHelper().createOrUpdateTimeline(location);
+        if (StringUtil.isNotEmpty(timelineId)) {
+          location.timelineId = timelineId;
+          await updateLocationTimelineId(location);
+        }
       }
     }
   }

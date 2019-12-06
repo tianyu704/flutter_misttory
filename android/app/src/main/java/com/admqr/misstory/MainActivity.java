@@ -11,12 +11,12 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.MainThread;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.admqr.misstory.db.LocationDataHelper;
 import com.admqr.misstory.db.LocationHelper;
+import com.admqr.misstory.db.SharedPreferencesUtil;
 import com.admqr.misstory.eventbus.EventUtil;
 import com.admqr.misstory.eventbus.LocationEvent;
 import com.admqr.misstory.model.LocationData;
@@ -25,13 +25,13 @@ import com.admqr.misstory.service.MainWorkService;
 import com.admqr.misstory.utils.JacksonUtil;
 import com.admqr.misstory.utils.LocationUtil;
 import com.admqr.misstory.utils.LogUtil;
-import com.shihoo.daemon.DaemonEnv;
+import com.tianyu704.daemon.DaemonEnv;
+import com.tianyu704.daemon.watch.WatchProcessPrefHelper;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
-import java.util.UUID;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
@@ -40,8 +40,8 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity implements MethodChannel.MethodCallHandler {
     static final String TAG = LogUtil.makeLogTag(MainActivity.class);
-    //是否 任务完成, 不再需要服务运行? 最好使用SharePreference，注意要在同一进程中访问该属性
-    public static boolean isCanStartWorkService;
+    //    //是否 任务完成, 不再需要服务运行? 最好使用SharePreference，注意要在同一进程中访问该属性
+//    public static boolean isCanStartWorkService;
     MethodChannel methodChannel;
     public static int PERMISSION_LOCATION = 100;
     public static int PERMISSION_STORAGE = 101;
@@ -65,7 +65,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
             int interval = methodCall.argument("interval");
             int distanceFilter = methodCall.argument("distanceFilter");
             if (interval != 0) {
-                LocationUtil.interval = interval;
+                SharedPreferencesUtil.getInstance(this).setLocationInterval(interval);
             }
             LocationUtil.distance = distanceFilter;
             LogUtil.d(TAG, interval + "-----" + distanceFilter);
@@ -99,14 +99,13 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     }
 
     public void startLive() {
-        DaemonEnv.sendStartWorkBroadcast(this);
-        isCanStartWorkService = true;
+        WatchProcessPrefHelper.setIsStartSDaemon(MainActivity.this, true);
         DaemonEnv.startServiceSafely(MainActivity.this, MainWorkService.class);
     }
 
     public void stopLive() {
         DaemonEnv.sendStopWorkBroadcast(this);
-        isCanStartWorkService = false;
+//        isCanStartWorkService = false;
     }
 
     public void onceLocation() {
@@ -161,8 +160,8 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
                     .setContentTitle("我是通知哦哦")//设置标题
                     .setContentText("我是通知内容..." + value)//设置内容
                     .setWhen(System.currentTimeMillis())//设置创建时间
-                    .setSmallIcon(com.shihoo.daemon.R.drawable.icon1)//设置状态栏图标
-                    .setLargeIcon(BitmapFactory.decodeResource(service.getResources(), com.shihoo.daemon.R.drawable.icon1))//设置通知栏图标
+                    .setSmallIcon(com.tianyu704.daemon.R.drawable.icon1)//设置状态栏图标
+                    .setLargeIcon(BitmapFactory.decodeResource(service.getResources(), com.tianyu704.daemon.R.drawable.icon1))//设置通知栏图标
                     .build();
             manager.notify(CHANNEL_POSITION, notification);
         } else {
@@ -170,8 +169,8 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
                     .setContentTitle("我是通知哦哦")//设置标题
                     .setContentText("我是通知内容..." + value)//设置内容
                     .setWhen(System.currentTimeMillis())//设置创建时间
-                    .setSmallIcon(com.shihoo.daemon.R.drawable.icon1)//设置状态栏图标
-                    .setLargeIcon(BitmapFactory.decodeResource(service.getResources(), com.shihoo.daemon.R.drawable.icon1))//设置通知栏图标
+                    .setSmallIcon(com.tianyu704.daemon.R.drawable.icon1)//设置状态栏图标
+                    .setLargeIcon(BitmapFactory.decodeResource(service.getResources(), com.tianyu704.daemon.R.drawable.icon1))//设置通知栏图标
                     .build();
             manager.notify(CHANNEL_POSITION, notification);
         }

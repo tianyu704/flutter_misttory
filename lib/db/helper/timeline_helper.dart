@@ -35,6 +35,9 @@ class TimelineHelper {
     if (location == null) {
       return "";
     }
+    if (location.time == 1575365386540) {
+      print("come");
+    }
     Timeline lastTimeline = await queryLastTimeline();
     if (lastTimeline != null) {
       /// 经纬度相等/在一个半径内认为是同一个地点
@@ -115,7 +118,7 @@ class TimelineHelper {
           "country": timeline.country,
           "province": timeline.province,
           "city": timeline.city,
-          "district":timeline.district,
+          "district": timeline.district,
         });
       }
       await mergeTimeline(timeline.sameId);
@@ -285,11 +288,10 @@ class TimelineHelper {
         }
 
         if (lastTimeline != null &&
-            ((timeline.lat == lastTimeline.lat &&
-                    timeline.lon == lastTimeline.lon) ||
-                (CalculateUtil.calculateLatlngDistance(lastTimeline.lat,
+            (lastTimeline.sameId == timeline.sameId ||
+                CalculateUtil.calculateLatlngDistance(lastTimeline.lat,
                         lastTimeline.lon, timeline.lat, timeline.lon) <
-                    lastTimeline.radius)) &&
+                    lastTimeline.radius) &&
             (timeline.startTime - lastTimeline.endTime) <
                 LocationConfig.intervalGap) {
           lastTimeline.endTime = timeline.endTime;
@@ -366,19 +368,28 @@ class TimelineHelper {
       Latlonpoint latlonpoint = Latlonpoint(timeline.lat, timeline.lon)
         ..radius = 400;
       LatlonRange latlonRange = CalculateUtil.getRange(latlonpoint);
-      List list = await Query(DBManager.tableTimeline).whereByColumFilters([
-//        WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
-//            LocationConfig.judgeUsefulLocation),
-        WhereCondiction(
-            "lat", WhereCondictionType.EQ_OR_MORE_THEN, latlonRange.minLat),
-        WhereCondiction(
-            "lat", WhereCondictionType.EQ_OR_LESS_THEN, latlonRange.maxLat),
-        WhereCondiction(
-            "lon", WhereCondictionType.EQ_OR_MORE_THEN, latlonRange.minLon),
-        WhereCondiction(
-            "lon", WhereCondictionType.EQ_OR_LESS_THEN, latlonRange.maxLon),
-        WhereCondiction("is_delete", WhereCondictionType.IN, [0]),
-      ]).all();
+//      List list = await Query(DBManager.tableTimeline).whereByColumFilters([
+////        WhereCondiction("interval_time", WhereCondictionType.EQ_OR_MORE_THEN,
+////            LocationConfig.judgeUsefulLocation),
+//        WhereCondiction(
+//            "lat", WhereCondictionType.EQ_OR_MORE_THEN, latlonRange.minLat),
+//        WhereCondiction(
+//            "lat", WhereCondictionType.EQ_OR_LESS_THEN, latlonRange.maxLat),
+//        WhereCondiction(
+//            "lon", WhereCondictionType.EQ_OR_MORE_THEN, latlonRange.minLon),
+//        WhereCondiction(
+//            "lon", WhereCondictionType.EQ_OR_LESS_THEN, latlonRange.maxLon),
+//        WhereCondiction("is_delete", WhereCondictionType.IN, [0]),
+//      ]).all();
+      List list = await Query(DBManager.tableTimeline).whereBySql(
+          "is_delete = 0 and lat >= ? and lat <= ? and lon >= ? and lon <= ? and (is_from_picture = 0 or interval_time >= ?)",
+          [
+            latlonRange.minLat,
+            latlonRange.maxLat,
+            latlonRange.minLon,
+            latlonRange.maxLon,
+            LocationConfig.judgeUsefulLocation
+          ]).all();
       if (list != null) {
         num distance = 1000;
         Timeline t;
@@ -407,10 +418,13 @@ class TimelineHelper {
       List<AmapPoi> list = [];
       if (CalculateUtil.isInChina(latLng['lat'], latLng['lon'])) {
         list = await getAMapPois(
-            lat: latLng['lat'], lon: latLng['lon'], radius: 300);
+            lat: latLng['lat'],
+            lon: latLng['lon'],
+            radius: LocationConfig.poiSearchInterval);
       } else {
         list = await getFoursquarePoi(
-            latlon: "${timeline.lat},${timeline.lon}", radius: 300);
+            latlon: "${timeline.lat},${timeline.lon}",
+            radius: LocationConfig.poiSearchInterval);
       }
       if (list != null && list.length > 0) {
         AmapPoi amapPoi = list[0];
