@@ -141,6 +141,7 @@
 
 - (void)restart {
     [self startTime];
+    [self.locationManager startUpdatingLocation];
     [self.locationManager startMonitoringSignificantLocationChanges];
 }
 - (void)stop
