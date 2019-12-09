@@ -672,7 +672,6 @@ class _EditPageState extends LifecycleState<EditPage> {
     String poiId = p.id;
     String subName =
         "${p.type}-->${StringUtil.isNotEmpty(p.address) ? p.address : ""}";
-    print(p.distance);
     return Padding(
       padding: EdgeInsets.only(bottom: index == poiList.length - 1 ? 37 : 0),
       child: InkWell(
