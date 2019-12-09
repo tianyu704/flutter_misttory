@@ -21,6 +21,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)restart;
 - (void)stop;
 
+
+- (void)writeToFileWithTxt:(NSString *)string;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -10,6 +10,7 @@ import 'package:misstory/models/timeline.dart';
 import 'package:misstory/utils/date_util.dart';
 
 import 'locationlist_page.dart';
+import 'ios_log.dart';
 
 class LogPage extends StatefulWidget {
   @override
@@ -93,6 +94,14 @@ class _LogPageState extends LifecycleState<LogPage> {
                 },
                 child: Text("调整参数")),
           ),
+          FlatButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(
+                    builder: (context) => iOSPage()))
+                    .then(_notifySCurrentPage);
+              },
+              child: Text("ioslog"))
         ],
       ),
       body: Column(

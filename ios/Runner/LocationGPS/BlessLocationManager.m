@@ -21,6 +21,7 @@
 @property (nonatomic, assign) BOOL isFristLoad;
 @property (nonatomic, assign) BOOL isOnce;
 @property (nonatomic, assign) BOOL isTimerExecute;
+@property (nonatomic, assign) BOOL isBackground;
 @property (nonatomic, weak) NSTimer *timer;
 
 @end
@@ -99,26 +100,22 @@
 
 - (void)commonInit
 {
+    self.isTimerExecute = true;
     self.isFristLoad = YES;
     self.locationManager=[[CLLocationManager alloc] init];
     [self auth];
     if ([self locationServicesEnabled]) {
-        self.locationManager.delegate = self;
-            //默认开启了授权
-        if (@available(iOS 9.0, *)) {
-            [self.locationManager setAllowsBackgroundLocationUpdates:YES];
-        } else {
-                // Fallback on earlier versions
-        }
+        //默认开启了授权
+        self.locationManager.allowsBackgroundLocationUpdates = YES;
         self.locationManager.pausesLocationUpdatesAutomatically = NO;
         self.locationManager.desiredAccuracy =  self.desiredAccuracy;
         self.locationManager.distanceFilter = kCLDistanceFilterNone;//self.distanceFilter;
+        self.locationManager.delegate = self;
         [self.locationManager startUpdatingLocation];
-        
         //支持被kill掉以后能够后台自动重启
         //后台自动唤醒
         [self.locationManager startMonitoringSignificantLocationChanges];
-        [self startTime];
+        
     }
     [self addKVO];
 }
@@ -167,6 +164,7 @@
             myLocation = l;
         }
     }
+    
     if (!self.lastLocation) {
         self.lastLocation = myLocation;
     }
@@ -178,14 +176,28 @@
         NSString *jsonStr = [self getJsonStringWithLocation:myLocation];
         self.onceSuccess(jsonStr);
         self.isOnce = false;
+       [self writeToFileWithTxt:@"========start==========\n"];
+        [self writeToFileWithTxt:[NSString stringWithFormat:@"我在持续定位 %@\n",myLocation]];
+        [self writeToFileWithTxt:@"========end==========\n"];
     }
+    //
+    if (!self.timer || !self.timer.isValid) {
+        [self writeToFileWithTxt:@"*************start==========\n"];
+               [self writeToFileWithTxt:@"定时器坏了或者第一次 要重启 ⚠️"];
+               [self writeToFileWithTxt:@"*************end==========\n"];
+        [self startTime];
+    }
+    //
     if (self.success && self.isTimerExecute) {
+        
+        [self writeToFileWithTxt:@"*************start==========\n"];
+          [self writeToFileWithTxt:[NSString stringWithFormat:@"====现在我在后台吗？？ ： %@\n",self.isBackground ? @"是" : @"否"]];
+        [self writeToFileWithTxt:[NSString stringWithFormat:@"定时间隔传送位置 %@\n",self.lastLocation]];
+        [self writeToFileWithTxt:@"*************end==========\n"];
+        
         self.isTimerExecute = false;
         NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation];
         self.success(jsonStr);
-    }
-    if (!self.timer || !self.timer.isValid) {
-        [self startTime];
     }
 }
 
@@ -193,12 +205,14 @@
 
 - (void)postBecomeActive
 {
-    //NSLog(@"后台进入了前台");
+    NSLog(@"后台进入了前台");
+    self.isBackground = false;
 }
 
 - (void)postBecomeBackground
 {
-    //NSLog(@"前台进入了后台");
+    NSLog(@"前台进入了后台");
+    self.isBackground = true;
 }
 
 #pragma mark - other
@@ -209,7 +223,7 @@
             //获取沙盒路径
             NSArray *paths  = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask,YES);
             //获取文件路径
-            NSString *theFilePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"testLogs.text"];
+            NSString *theFilePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"testiOSLogs.text"];
             //创建文件管理器
             NSFileManager *fileManager = [NSFileManager defaultManager];
             //如果文件不存在 创建文件
