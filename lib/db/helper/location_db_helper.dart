@@ -57,36 +57,60 @@ class LocationDBHelper {
     return null;
   }
 
-  ///每次获取到新定位时，先检查原生数据库中数据再处理本次的数据
+  ///处理新的定位点
   Future saveNewLocation(Location location) async {
+    ///每次获取到新定位时，Android先检查原生数据库中数据再处理本次的数据
     if (Platform.isAndroid) {
       String jsonString = await LocationChannel().queryLocationData();
       if (StringUtil.isNotEmpty(jsonString)) {
         List items = json.decode(jsonString);
-        debugPrint("---->${items.length}个位置信息");
+        debugPrint("---->${items.length}个原生位置信息");
         for (Map item in items) {
           Location l = Location.fromJson(Map<String, dynamic>.from(item));
-          await saveLocation(l);
+          await createLocation(l);
         }
       }
     }
-    await saveLocation(location);
+    await createLocation(location);
+    ///查出需要处理的location
+    List<Location> locations = await queryUnCreateLocation();
+    debugPrint("---->${locations?.length}个位置信息");
+    if (locations != null && locations.length > 0) {
+      for (Location l in locations) {
+        await saveLocation(l);
+      }
+    }
     return 0;
   }
 
-  ///
+  ///根据location创建timeline，处理成功后更新location的timelineId
   Future saveLocation(Location location) async {
-    if(location != null){
-      int result = await createLocation(location);
-      if (result == 0) {
-        String timelineId =
-        await TimelineHelper().createOrUpdateTimeline(location);
-        if (StringUtil.isNotEmpty(timelineId)) {
-          location.timelineId = timelineId;
-          await updateLocationTimelineId(location);
-        }
+    if (location != null) {
+//      int result = await createLocation(location);
+//      if (result == 0) {
+      String timelineId =
+          await TimelineHelper().createOrUpdateTimeline(location);
+      if (StringUtil.isNotEmpty(timelineId)) {
+        location.timelineId = timelineId;
+        await updateLocationTimelineId(location);
       }
+//      }
     }
+  }
+  ///查找没有创建timeline的location
+  Future<List<Location>> queryUnCreateLocation() async {
+    List result = await Query(DBManager.tableLocation)
+        .orderBy(["time"]).whereByColumFilters([
+      WhereCondiction("timeline_id", WhereCondictionType.IS_NULL, true)
+    ]).all();
+    if (result != null && result.length > 0) {
+      List<Location> list = [];
+      for (Map map in result) {
+        list.add(Location.fromJson(Map<String, dynamic>.from(map)));
+      }
+      return list;
+    }
+    return null;
   }
 
   ///更新timeline_id
