@@ -178,7 +178,6 @@
         self.isOnce = false;
        [self writeToFileWithTxt:@"========start==========\n"];
         [self writeToFileWithTxt:[NSString stringWithFormat:@"我在持续定位 %@\n",myLocation]];
-        [self writeToFileWithTxt:[NSString stringWithFormat:@"x现在我在后台吗？？ ： %@\n",self.isBackground ? @"是" : @"否"]];
         [self writeToFileWithTxt:@"========end==========\n"];
     }
     //
@@ -192,6 +191,7 @@
     if (self.success && self.isTimerExecute) {
         
         [self writeToFileWithTxt:@"*************start==========\n"];
+          [self writeToFileWithTxt:[NSString stringWithFormat:@"====现在我在后台吗？？ ： %@\n",self.isBackground ? @"是" : @"否"]];
         [self writeToFileWithTxt:[NSString stringWithFormat:@"定时间隔传送位置 %@\n",self.lastLocation]];
         [self writeToFileWithTxt:@"*************end==========\n"];
         

@@ -7,7 +7,7 @@
 */
 
 //app 名字
-CFBundleDisplayName = "点书-timer";
+CFBundleDisplayName = "点书";
 //定位权限
 NSLocationAlwaysAndWhenInUseUsageDescription = "请授权获取您的位置信息用于整理归纳你的生活轨迹";
 NSLocationAlwaysUsageDescription  = "请授权获取您的位置信息用于整理归纳你的生活轨迹";

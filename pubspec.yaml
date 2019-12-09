@@ -35,7 +35,7 @@ dependencies:
 #      url: https://github.com/FIRHQ/flutter_amap_location_plugin.git
 
   lifecycle_state: ^0.0.1
-  intl: ^0.16.0
+  intl: ^0.15.8
 #  permission_handler: ^3.2.2
   #  amap_base_map:
   #    git:
