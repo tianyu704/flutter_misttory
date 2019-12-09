@@ -229,8 +229,8 @@ class TimelineHelper {
               }
               num dis =
                   CalculateUtil.calculateLatlngDistance(lat1, lon1, lat2, lon2);
-              PrintUtil.debugPrint("======新中心点到poi的距离$dis,原始距离$distance+5");
-              if (dis > distance + 5) {
+              PrintUtil.debugPrint("======新中心点到poi的距离$dis,原始距离$distance+2");
+              if (dis > distance + 2) {
                 timeline = await requestPoiData(timeline);
                 PrintUtil.debugPrint("======2更新poi，poi->${timeline.poiName}");
               }

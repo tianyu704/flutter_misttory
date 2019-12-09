@@ -18,7 +18,7 @@ import 'generated/i18n.dart';
 import 'style/app_style.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+//  WidgetsFlutterBinding.ensureInitialized();
   /// 初始化数据库
   await DBManager.initDB();
 //  await StoryHelper().updateAllDefaultAddress();

@@ -27,7 +27,7 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - Flutter (from `.symlinks/flutter/ios`)
+  - Flutter (from `.symlinks/flutter/ios-release`)
   - flutter_bugly (from `.symlinks/plugins/flutter_bugly/ios`)
   - flutter_luakit_plugin (from `.symlinks/plugins/flutter_luakit_plugin/ios`)
   - flutter_orm_plugin (from `.symlinks/plugins/flutter_orm_plugin/ios`)
@@ -47,7 +47,7 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Flutter:
-    :path: ".symlinks/flutter/ios"
+    :path: ".symlinks/flutter/ios-release"
   flutter_bugly:
     :path: ".symlinks/plugins/flutter_bugly/ios"
   flutter_luakit_plugin:
@@ -81,4 +81,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: b9e260ae079029f5df10959a5ff3d367d8830cb0
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.8.1
