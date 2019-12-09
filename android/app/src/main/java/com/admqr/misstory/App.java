@@ -7,6 +7,7 @@ import androidx.multidex.MultiDex;
 import com.admqr.misstory.db.MyMigration;
 import com.admqr.misstory.service.MainWorkService;
 import com.admqr.misstory.utils.ApkHelper;
+import com.admqr.misstory.utils.CrashHandler;
 import com.tianyu704.daemon.ForegroundNotificationUtils;
 import com.tianyu704.daemon.watch.WatchProcessPrefHelper;
 
@@ -41,7 +42,7 @@ public class App extends FlutterApplication {
             ForegroundNotificationUtils.setPackgeName(BuildConfig.APPLICATION_ID);
             Log.d("wsh-daemon", "启动了看门狗进程");
         }
-//        CrashHandler.getInstance().init(this);
+        CrashHandler.getInstance().init(this);
     }
 
     public void createDataBase() {

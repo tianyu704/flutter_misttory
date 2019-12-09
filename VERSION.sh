@@ -1,4 +1,4 @@
-BUILD_NUMBER=15
+BUILD_NUMBER=16
 VERSION_NAME=1.0.0
 
 GIT_BRANCH=`git symbolic-ref HEAD 2>/dev/null | cut -d"/" -f 3`
