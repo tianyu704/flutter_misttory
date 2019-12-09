@@ -37,6 +37,7 @@
 	<string>Misstory 需要获取你的照片权限整理归纳为storys</string>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>fetch</string>
 		<string>location</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
