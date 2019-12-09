@@ -20,6 +20,7 @@
 @property (nonatomic, strong) CLLocation *lastLocation;
 @property (nonatomic, assign) BOOL isFristLoad;
 @property (nonatomic, assign) BOOL isOnce;
+@property (nonatomic, assign) BOOL isTimerExecute;
 @property (nonatomic, weak) NSTimer *timer;
 
 @end
@@ -73,10 +74,14 @@
 
 
 - (void)startTime {
+    [self.timer invalidate];
+    self.timer = nil;
+    self.isTimerExecute = true;
+    //
     __weak typeof(self) weakSelf = self;
     self.timer= [BlessLocationManager fir_scheduledTimerWithTimeInterval:self.timeCycleNum block:^(NSTimer * _Nonnull timer) {
+        weakSelf.isTimerExecute = true;
         [weakSelf.locationManager startUpdatingLocation];
-        NSLog(@"%@",[NSDate date]);
     } repeats:YES];
    // [self.timer fire];//立即执行
 }
@@ -100,7 +105,6 @@
     if ([self locationServicesEnabled]) {
         self.locationManager.delegate = self;
             //默认开启了授权
-            //NSLog(@"请开启定位:设置 > 隐私 > 位置 > 定位服务");
         if (@available(iOS 9.0, *)) {
             [self.locationManager setAllowsBackgroundLocationUpdates:YES];
         } else {
@@ -137,6 +141,7 @@
 
 - (void)restart {
     [self startTime];
+    [self.locationManager startUpdatingLocation];
     [self.locationManager startMonitoringSignificantLocationChanges];
 }
 - (void)stop
@@ -174,9 +179,13 @@
         self.onceSuccess(jsonStr);
         self.isOnce = false;
     }
-    if (self.success) {
+    if (self.success && self.isTimerExecute) {
+        self.isTimerExecute = false;
         NSString *jsonStr = [self getJsonStringWithLocation:self.lastLocation];
         self.success(jsonStr);
+    }
+    if (!self.timer || !self.timer.isValid) {
+        [self startTime];
     }
 }
 

@@ -1,0 +1,18 @@
+/* 
+  InfoPlist.strings
+  Runner
+
+  Created by HF on 2019/12/6.
+  Copyright © 2019 The Chromium Authors. All rights reserved.
+*/
+
+//app 名字
+CFBundleDisplayName = "点书";
+//定位权限
+NSLocationAlwaysAndWhenInUseUsageDescription = "请授权获取您的位置信息用于整理归纳你的生活轨迹";
+NSLocationAlwaysUsageDescription  = "请授权获取您的位置信息用于整理归纳你的生活轨迹";
+NSLocationWhenInUseUsageDescription = "请授权获取您的位置信息用于整理归纳你的生活轨迹";
+//照片权限
+NSPhotoLibraryUsageDescription = "需要获取你的照片权限整理归纳为storys";
+//网络授权
+

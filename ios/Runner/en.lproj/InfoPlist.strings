@@ -1,0 +1,15 @@
+/* 
+  InfoPlist.strings
+  Runner
+
+  Created by HF on 2019/12/6.
+  Copyright © 2019 The Chromium Authors. All rights reserved.
+*/
+
+CFBundleDisplayName = "misstory";
+//定位权限
+NSLocationAlwaysAndWhenInUseUsageDescription = "request auth";
+NSLocationAlwaysUsageDescription  = "request auth";
+NSLocationWhenInUseUsageDescription = "request auth";
+//照片权限
+NSPhotoLibraryUsageDescription = "request auth picture";
